@@ -1,0 +1,844 @@
+{
+  "brands": [
+    {
+      "id": 1,
+      "name": "Arturo Fuente",
+      "country": "Dominican Republic",
+      "description": "One of the most prestigious and respected brands in the cigar industry, known for exceptional quality and craftsmanship.",
+      "products": [
+        {
+          "id": 1,
+          "name": "Hemingway",
+          "vitola": "Short Story",
+          "length": 4,
+          "ringGauge": 49,
+          "strength": "Medium",
+          "wrapper": "Cameroon",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A classic figurado with a distinctive shape and balanced flavor profile."
+        },
+        {
+          "id": 2,
+          "name": "Don Carlos",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Cameroon",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "Created in honor of Carlos Fuente Sr., offering a rich and complex smoking experience."
+        },
+        {
+          "id": 3,
+          "name": "Opus X",
+          "vitola": "Perfecxion X",
+          "length": 6.25,
+          "ringGauge": 48,
+          "strength": "Full",
+          "wrapper": "Dominican",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "The first Dominican puro, a powerful and luxurious cigar with limited production."
+        },
+        {
+          "id": 4,
+          "name": "Chateau Fuente",
+          "vitola": "Queen B",
+          "length": 5.5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Connecticut",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A smooth and well-balanced cigar from the Gran Reserva line."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Padron",
+      "country": "Nicaragua",
+      "description": "Family-owned operation known for consistently excellent box-pressed cigars with aged tobaccos.",
+      "products": [
+        {
+          "id": 5,
+          "name": "1964 Anniversary Series",
+          "vitola": "Exclusivo",
+          "length": 5.5,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Box-pressed anniversary series with aged tobacco, available in natural or maduro."
+        },
+        {
+          "id": 6,
+          "name": "1926 Series",
+          "vitola": "No. 9",
+          "length": 5.25,
+          "ringGauge": 56,
+          "strength": "Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Commemorating José O. Padrón's birth year, a premium, full-bodied experience."
+        },
+        {
+          "id": 7,
+          "name": "Family Reserve",
+          "vitola": "No. 45",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Ultra-premium line with 10-year aged tobacco."
+        },
+        {
+          "id": 8,
+          "name": "Padrón Series",
+          "vitola": "6000",
+          "length": 5.5,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Box-pressed format with the classic Padrón flavor profile at a more affordable price."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Cohiba",
+      "country": "Dominican Republic",
+      "description": "Originally a Cuban brand, the Dominican Cohiba is produced by General Cigar and is known for its premium quality.",
+      "products": [
+        {
+          "id": 9,
+          "name": "Red Dot",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 49,
+          "strength": "Medium",
+          "wrapper": "Cameroon",
+          "binder": "Dominican",
+          "filler": "Dominican, Indonesian",
+          "description": "The flagship Dominican Cohiba with a distinctive red dot on the band."
+        },
+        {
+          "id": 10,
+          "name": "Black",
+          "vitola": "Gigante",
+          "length": 6,
+          "ringGauge": 60,
+          "strength": "Full",
+          "wrapper": "Connecticut Broadleaf",
+          "binder": "Dominican",
+          "filler": "Dominican, Mexican",
+          "description": "A dark, rich smoke with a Connecticut Broadleaf wrapper."
+        },
+        {
+          "id": 11,
+          "name": "Nicaragua",
+          "vitola": "N50",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Honduran",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan, Dominican",
+          "description": "Blended with Nicaraguan tobacco for a bolder Cohiba experience."
+        },
+        {
+          "id": 12,
+          "name": "Macassar",
+          "vitola": "Toro Grande",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Connecticut Habano",
+          "binder": "Connecticut Broadleaf",
+          "filler": "Dominican, Nicaraguan",
+          "description": "A premium offering with a complex blend of tobaccos."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Montecristo",
+      "country": "Dominican Republic",
+      "description": "One of the world's most recognized cigar brands with a reputation for consistency and quality.",
+      "products": [
+        {
+          "id": 13,
+          "name": "Classic",
+          "vitola": "No. 2",
+          "length": 6.13,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Connecticut Shade",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "The iconic torpedo shape, a benchmark for all others in this format."
+        },
+        {
+          "id": 14,
+          "name": "White Series",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 54,
+          "strength": "Mild-Medium",
+          "wrapper": "Ecuadorian Connecticut",
+          "binder": "Nicaraguan",
+          "filler": "Dominican, Nicaraguan, Peruvian",
+          "description": "A milder offering with a creamy, sophisticated profile."
+        },
+        {
+          "id": 15,
+          "name": "Platinum",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "San Andres Negro",
+          "binder": "Dominican",
+          "filler": "Dominican, Nicaraguan, Peruvian",
+          "description": "A more full-bodied offering with a Mexican wrapper."
+        },
+        {
+          "id": 16,
+          "name": "Espada",
+          "vitola": "Guard",
+          "length": 5.5,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "The first Montecristo made entirely of Nicaraguan tobacco."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Romeo y Julieta",
+      "country": "Dominican Republic",
+      "description": "A historic brand dating back to 1875, known for its consistency and wide range of offerings.",
+      "products": [
+        {
+          "id": 17,
+          "name": "1875",
+          "vitola": "Bully",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Indonesian",
+          "binder": "Dominican",
+          "filler": "Dominican, Brazilian, Honduran",
+          "description": "The classic blend that has been satisfying cigar smokers for generations."
+        },
+        {
+          "id": 18,
+          "name": "Reserva Real",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian",
+          "binder": "Nicaraguan",
+          "filler": "Dominican, Nicaraguan",
+          "description": "An upgrade to the classic 1875 with premium tobacco."
+        },
+        {
+          "id": 19,
+          "name": "Vintage",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 54,
+          "strength": "Medium-Full",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Nicaraguan",
+          "filler": "Dominican, Nicaraguan",
+          "description": "A more robust offering with vintage tobaccos."
+        },
+        {
+          "id": 20,
+          "name": "Romeo",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 54,
+          "strength": "Medium-Full",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Dominican",
+          "filler": "Dominican, Nicaraguan",
+          "description": "A bold, modern take on the classic Romeo y Julieta profile."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Davidoff",
+      "country": "Dominican Republic",
+      "description": "The epitome of luxury in the cigar world, known for its craftsmanship and refined taste.",
+      "products": [
+        {
+          "id": 21,
+          "name": "Signature",
+          "vitola": "No. 2",
+          "length": 6,
+          "ringGauge": 38,
+          "strength": "Mild-Medium",
+          "wrapper": "Connecticut",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "The classic Davidoff blend in an elegant panetela format."
+        },
+        {
+          "id": 22,
+          "name": "Nicaragua",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan Rosado",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Davidoff's first Nicaraguan puro, offering a bold departure from their traditional blends."
+        },
+        {
+          "id": 23,
+          "name": "Winston Churchill",
+          "vitola": "The Aristocrat",
+          "length": 6.88,
+          "ringGauge": 47,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian",
+          "binder": "Mexican",
+          "filler": "Dominican, Nicaraguan",
+          "description": "Named after the famous British statesman, a complex and refined smoke."
+        },
+        {
+          "id": 24,
+          "name": "Grand Cru",
+          "vitola": "No. 3",
+          "length": 5,
+          "ringGauge": 43,
+          "strength": "Mild-Medium",
+          "wrapper": "Connecticut",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A classic Davidoff blend with the refinement of a grand wine."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Oliva",
+      "country": "Nicaragua",
+      "description": "Family-owned company known for high-quality Nicaraguan cigars at reasonable prices.",
+      "products": [
+        {
+          "id": 25,
+          "name": "Serie V",
+          "vitola": "Double Robusto",
+          "length": 5,
+          "ringGauge": 54,
+          "strength": "Full",
+          "wrapper": "Habano",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Oliva's flagship blend, known for its power and complexity."
+        },
+        {
+          "id": 26,
+          "name": "Serie V Melanio",
+          "vitola": "Figurado",
+          "length": 6.5,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Ecuadorian Sumatra",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A premium extension of the Serie V line with an Ecuadorian wrapper."
+        },
+        {
+          "id": 27,
+          "name": "Serie G",
+          "vitola": "Belicoso",
+          "length": 5,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Cameroon",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Features a genuine African Cameroon wrapper for a nutty, sweet profile."
+        },
+        {
+          "id": 28,
+          "name": "Serie O",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Habano",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A Nicaraguan puro with a smooth, balanced character."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Perdomo",
+      "country": "Nicaragua",
+      "description": "Known for its commitment to quality and variety of wrapper options for many of its lines.",
+      "products": [
+        {
+          "id": 29,
+          "name": "10th Anniversary Champagne",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 54,
+          "strength": "Medium",
+          "wrapper": "Connecticut",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Features a creamy Connecticut wrapper aged and fermented for 6 years."
+        },
+        {
+          "id": 30,
+          "name": "20th Anniversary",
+          "vitola": "Epicure",
+          "length": 6,
+          "ringGauge": 56,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan (Sun Grown)",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Commemorating 20 years of Perdomo cigars, available in three wrapper varieties."
+        },
+        {
+          "id": 31,
+          "name": "Habano",
+          "vitola": "Torpedo",
+          "length": 6.5,
+          "ringGauge": 54,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan Corojo",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Triple-fermented wrapper aged in bourbon barrels, available in three wrapper types."
+        },
+        {
+          "id": 32,
+          "name": "Lot 23",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Made from tobacco grown on a single lot of land for consistency."
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "My Father",
+      "country": "Nicaragua",
+      "description": "Founded by Don Pepin Garcia, known for traditional Cuban-style cigars made in Nicaragua.",
+      "products": [
+        {
+          "id": 33,
+          "name": "Le Bijou 1922",
+          "vitola": "Torpedo Box Pressed",
+          "length": 6.13,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Nicaraguan Habano Oscuro",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A tribute to Jose Pepin Garcia's father, featuring a dark Habano wrapper."
+        },
+        {
+          "id": 34,
+          "name": "The Judge",
+          "vitola": "Grand Robusto",
+          "length": 5,
+          "ringGauge": 60,
+          "strength": "Full",
+          "wrapper": "Ecuadorian Sumatra",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A powerful blend with a combination of Nicaraguan tobaccos."
+        },
+        {
+          "id": 35,
+          "name": "Flor de Las Antillas",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan Sun Grown",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A medium to full-bodied smoke with a sun-grown wrapper."
+        },
+        {
+          "id": 36,
+          "name": "La Opulencia",
+          "vitola": "Robusto",
+          "length": 5.25,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Mexican San Andres",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Features a dark Mexican San Andres wrapper and Nicaraguan fillers."
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Rocky Patel",
+      "country": "Nicaragua",
+      "description": "Known for its wide range of blends and price points, with a reputation for consistency.",
+      "products": [
+        {
+          "id": 37,
+          "name": "Vintage 1990",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 48,
+          "strength": "Medium",
+          "wrapper": "Honduran Broadleaf",
+          "binder": "Nicaraguan",
+          "filler": "Dominican, Nicaraguan",
+          "description": "Features a 12-year-aged Honduran Broadleaf wrapper."
+        },
+        {
+          "id": 38,
+          "name": "The Edge",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Corojo",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan, Panamanian",
+          "description": "Full-bodied blend available in multiple wrapper types."
+        },
+        {
+          "id": 39,
+          "name": "Decade",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Ecuadorian Sumatra",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Created to celebrate Rocky Patel's 10th anniversary in the business."
+        },
+        {
+          "id": 40,
+          "name": "Sun Grown Maduro",
+          "vitola": "Robusto",
+          "length": 5.5,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Connecticut Broadleaf",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A maduro extension of the popular Sun Grown line."
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "La Flor Dominicana",
+      "country": "Dominican Republic",
+      "description": "Known for strong, full-bodied cigars and innovative shapes like the distinctive Chisel.",
+      "products": [
+        {
+          "id": 41,
+          "name": "Double Ligero",
+          "vitola": "Chisel",
+          "length": 6,
+          "ringGauge": 54,
+          "strength": "Full",
+          "wrapper": "Ecuadorian",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "Features a unique flat head and powerful ligero tobaccos."
+        },
+        {
+          "id": 42,
+          "name": "Andalusian Bull",
+          "vitola": "Gran Toro",
+          "length": 6.5,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Ecuadorian Corojo",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "Inspired by Spanish bullfighting, with a unique figurado shape."
+        },
+        {
+          "id": 43,
+          "name": "Air Bender",
+          "vitola": "Maestro",
+          "length": 5.5,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "Named after martial arts, a powerful, full-bodied smoke."
+        },
+        {
+          "id": 44,
+          "name": "Cameroon Cabinet",
+          "vitola": "No. 4",
+          "length": 5.25,
+          "ringGauge": 40,
+          "strength": "Medium",
+          "wrapper": "Cameroon",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A medium-bodied offering featuring a African Cameroon wrapper."
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Plasencia",
+      "country": "Nicaragua",
+      "description": "One of the largest tobacco growers in the world, now producing their own branded cigars.",
+      "products": [
+        {
+          "id": 45,
+          "name": "Alma Fuerte",
+          "vitola": "Generacion V",
+          "length": 7,
+          "ringGauge": 58,
+          "strength": "Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A premium Nicaraguan puro with a hexagonal pressing."
+        },
+        {
+          "id": 46,
+          "name": "Alma del Campo",
+          "vitola": "Travesia",
+          "length": 6.5,
+          "ringGauge": 54,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "The second release in the Alma series, representing countryside."
+        },
+        {
+          "id": 47,
+          "name": "Cosecha 146",
+          "vitola": "La Vega",
+          "length": 5.25,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Honduran",
+          "binder": "Honduran",
+          "filler": "Honduran, Nicaraguan",
+          "description": "Features tobacco from the 146th harvest of the Plasencia family."
+        },
+        {
+          "id": 48,
+          "name": "Reserva Original",
+          "vitola": "Cortez",
+          "length": 5,
+          "ringGauge": 52,
+          "strength": "Mild-Medium",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "An organic Nicaraguan puro with a smooth, balanced profile."
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "AJ Fernandez",
+      "country": "Nicaragua",
+      "description": "A rising star in the industry known for creating full-flavored blends and collaborations with other brands.",
+      "products": [
+        {
+          "id": 49,
+          "name": "New World",
+          "vitola": "Navegante",
+          "length": 5.5,
+          "ringGauge": 55,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan Dark",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan, Brazilian",
+          "description": "Commemorates Columbus' discovery of tobacco in the New World."
+        },
+        {
+          "id": 50,
+          "name": "Enclave",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Cameroon",
+          "filler": "Nicaraguan, AJF Piloto Cubano",
+          "description": "A collaboration between AJ and his father Ismael."
+        },
+        {
+          "id": 51,
+          "name": "Bellas Artes",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 54,
+          "strength": "Medium",
+          "wrapper": "Habano Hybrid",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan, Honduran, Brazilian",
+          "description": "Features a unique hybrid wrapper and artistic packaging."
+        },
+        {
+          "id": 52,
+          "name": "San Lotano",
+          "vitola": "The Bull",
+          "length": 5.5,
+          "ringGauge": 54,
+          "strength": "Full",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan, Dominican, Honduran",
+          "description": "A revival of a pre-Cuban Revolution brand with a powerful blend."
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Ashton",
+      "country": "Dominican Republic",
+      "description": "A premium brand made by the Fuente family, known for quality and consistency.",
+      "products": [
+        {
+          "id": 53,
+          "name": "VSG (Virgin Sun Grown)",
+          "vitola": "Spellbound",
+          "length": 7.5,
+          "ringGauge": 54,
+          "strength": "Full",
+          "wrapper": "Ecuadorian",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A full-bodied offering with an Ecuador Sumatra wrapper grown in direct sunlight."
+        },
+        {
+          "id": 54,
+          "name": "Cabinet Selection",
+          "vitola": "No. 6",
+          "length": 5.75,
+          "ringGauge": 46,
+          "strength": "Medium",
+          "wrapper": "Connecticut Shade",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A smooth, refined smoke with well-aged Dominican tobaccos."
+        },
+        {
+          "id": 55,
+          "name": "ESG (Estate Sun Grown)",
+          "vitola": "24 Year Salute",
+          "length": 6.25,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Dominican",
+          "binder": "Dominican",
+          "filler": "Dominican",
+          "description": "A limited edition with a sun-grown wrapper from the Fuente estate."
+        },
+        {
+          "id": 56,
+          "name": "Symmetry",
+          "vitola": "Prism",
+          "length": 5.63,
+          "ringGauge": 46,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian",
+          "binder": "Dominican",
+          "filler": "Dominican, Nicaraguan",
+          "description": "The first Ashton to include Nicaraguan tobacco in the blend."
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Macanudo",
+      "country": "Dominican Republic",
+      "description": "One of the best-selling premium cigar brands, known especially for mild, Connecticut-wrapped cigars.",
+      "products": [
+        {
+          "id": 57,
+          "name": "Café",
+          "vitola": "Hyde Park",
+          "length": 5.5,
+          "ringGauge": 49,
+          "strength": "Mild",
+          "wrapper": "Connecticut Shade",
+          "binder": "Mexican",
+          "filler": "Dominican, Mexican",
+          "description": "The classic mild Macanudo blend, known for its smooth character."
+        },
+        {
+          "id": 58,
+          "name": "Inspirado Orange",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Honduran",
+          "binder": "Honduran",
+          "filler": "Nicaraguan, Honduran, Dominican",
+          "description": "Part of the Inspirado line, offering a medium-bodied experience."
+        },
+        {
+          "id": 59,
+          "name": "Maduro",
+          "vitola": "Prince Philip",
+          "length": 7.13,
+          "ringGauge": 54,
+          "strength": "Mild-Medium",
+          "wrapper": "Connecticut Broadleaf",
+          "binder": "Mexican",
+          "filler": "Dominican, Mexican",
+          "description": "The maduro version of the classic Café, with a sweet character."
+        },
+        {
+          "id": 60,
+          "name": "Cru Royale",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Dominican La Vega",
+          "filler": "Dominican, Nicaraguan, Brazilian",
+          "description": "A more modern, fuller-bodied addition to the Macanudo line."
+        }
+      ]
+    }
+  ]
+} 
