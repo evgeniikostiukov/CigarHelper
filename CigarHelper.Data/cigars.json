@@ -839,6 +839,790 @@
           "description": "A more modern, fuller-bodied addition to the Macanudo line."
         }
       ]
+    },
+    {
+      "id": 16,
+      "name": "Bolivar",
+      "country": "Cuba",
+      "description": "A legendary Cuban brand known for its strong, full-bodied flavor profile and excellent construction.",
+      "products": [
+        {
+          "id": 61,
+          "name": "Royal Coronas",
+          "vitola": "Robusto",
+          "length": 4.9,
+          "ringGauge": 50,
+          "strength": "Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A robust smoke with earthy, leathery flavors and a touch of cocoa."
+        },
+        {
+          "id": 62,
+          "name": "Belicosos Finos",
+          "vitola": "Pyramid",
+          "length": 5.5,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A pyramid shape that concentrates the full-bodied flavors towards the tapered head."
+        },
+        {
+          "id": 63,
+          "name": "Coronas Junior",
+          "vitola": "Petit Corona",
+          "length": 4.3,
+          "ringGauge": 42,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A smaller format that delivers the classic Bolivar strength in a shorter smoke."
+        },
+        {
+          "id": 64,
+          "name": "Libertador",
+          "vitola": "Double Robusto",
+          "length": 6.5,
+          "ringGauge": 54,
+          "strength": "Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A La Casa del Habano exclusive with a powerful yet balanced profile."
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Cohiba",
+      "country": "Cuba",
+      "description": "The flagship Cuban brand, originally created for Fidel Castro before becoming commercially available in 1982.",
+      "products": [
+        {
+          "id": 65,
+          "name": "Behike 52",
+          "vitola": "Laguito No. 4",
+          "length": 4.7,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "Part of the ultra-premium Behike line featuring the rare medio tiempo tobacco leaf."
+        },
+        {
+          "id": 66,
+          "name": "Robusto",
+          "vitola": "Robusto",
+          "length": 4.9,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A classic format showcasing Cohiba's creamy, grassy flavor profile with notes of coffee and spice."
+        },
+        {
+          "id": 67,
+          "name": "Esplendidos",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 47,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A majestic Churchill offering complex flavors that develop throughout the long smoke."
+        },
+        {
+          "id": 68,
+          "name": "Siglo VI",
+          "vitola": "Cañonazo",
+          "length": 5.9,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "Part of the Siglo line with honey, coffee, and wood notes in perfect balance."
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "H. Upmann",
+      "country": "Cuba",
+      "description": "A historic Cuban brand dating back to 1844, known for its medium-bodied profile and refined character.",
+      "products": [
+        {
+          "id": 69,
+          "name": "Magnum 50",
+          "vitola": "Double Robusto",
+          "length": 6.3,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A modern classic with notes of cedar, toast, and a subtle sweetness."
+        },
+        {
+          "id": 70,
+          "name": "Half Corona",
+          "vitola": "Half Corona",
+          "length": 3.5,
+          "ringGauge": 44,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A short smoke that preserves the brand's elegant character with notes of nuts and cedar."
+        },
+        {
+          "id": 71,
+          "name": "Sir Winston",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 47,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A prestigious Churchill named after Sir Winston Churchill, with complex refinement and balance."
+        },
+        {
+          "id": 72,
+          "name": "Connoisseur No. 1",
+          "vitola": "Grand Corona",
+          "length": 5,
+          "ringGauge": 48,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A well-balanced cigar with a creamy profile and hints of spice and vanilla."
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Hoyo de Monterrey",
+      "country": "Cuba",
+      "description": "One of the milder Cuban brands, known for its delicate flavor profile and elegance.",
+      "products": [
+        {
+          "id": 73,
+          "name": "Epicure No. 2",
+          "vitola": "Robusto",
+          "length": 4.9,
+          "ringGauge": 50,
+          "strength": "Mild-Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A benchmark Cuban robusto with a delicate, aromatic character and notes of honey and grass."
+        },
+        {
+          "id": 74,
+          "name": "Double Coronas",
+          "vitola": "Double Corona",
+          "length": 7.6,
+          "ringGauge": 49,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A long, elegant smoke with subtle complexity that develops throughout."
+        },
+        {
+          "id": 75,
+          "name": "Petit Robustos",
+          "vitola": "Petit Robusto",
+          "length": 4,
+          "ringGauge": 50,
+          "strength": "Mild-Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A compact version of the Epicure series, perfect for a shorter smoke."
+        },
+        {
+          "id": 76,
+          "name": "Epicure Especial",
+          "vitola": "Gordito",
+          "length": 5.5,
+          "ringGauge": 50,
+          "strength": "Mild-Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A larger ring gauge offering with the characteristic honey and herb notes of the brand."
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Partagas",
+      "country": "Cuba",
+      "description": "One of Cuba's oldest and most respected brands, known for its rich, spicy character.",
+      "products": [
+        {
+          "id": 77,
+          "name": "Serie D No. 4",
+          "vitola": "Robusto",
+          "length": 4.9,
+          "ringGauge": 50,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "One of Cuba's most popular robustos, with a rich, spicy profile and excellent construction."
+        },
+        {
+          "id": 78,
+          "name": "Lusitanias",
+          "vitola": "Double Corona",
+          "length": 7.6,
+          "ringGauge": 49,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A majestic double corona with complex transitions of spice, wood, and earth."
+        },
+        {
+          "id": 79,
+          "name": "Serie P No. 2",
+          "vitola": "Pyramid",
+          "length": 6.1,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A torpedo shape that concentrates the brand's characteristic spicy profile."
+        },
+        {
+          "id": 80,
+          "name": "Shorts",
+          "vitola": "Half Corona",
+          "length": 4.3,
+          "ringGauge": 42,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A short format offering the classic Partagas flavor in a quick smoke."
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Punch",
+      "country": "Cuba",
+      "description": "A traditional Cuban brand dating back to 1840, known for its full-bodied, rich character.",
+      "products": [
+        {
+          "id": 81,
+          "name": "Punch Punch",
+          "vitola": "Corona Gorda",
+          "length": 5.6,
+          "ringGauge": 46,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "The signature vitola of the brand with a woody, leathery profile and subtle sweetness."
+        },
+        {
+          "id": 82,
+          "name": "Double Corona",
+          "vitola": "Double Corona",
+          "length": 7.6,
+          "ringGauge": 49,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A long, elegant smoke with rich tobacco flavors complemented by earthy notes."
+        },
+        {
+          "id": 83,
+          "name": "Short de Punch",
+          "vitola": "Petit Robusto",
+          "length": 4,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A more recent addition to the line, offering the brand's character in a shorter format."
+        },
+        {
+          "id": 84,
+          "name": "48",
+          "vitola": "Grand Corona",
+          "length": 5.5,
+          "ringGauge": 48,
+          "strength": "Medium-Full",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A well-balanced cigar with notes of cedar, coffee, and a touch of spice."
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Quai d'Orsay",
+      "country": "Cuba",
+      "description": "Originally created for the French market, known for its mild to medium body and elegant refinement.",
+      "products": [
+        {
+          "id": 85,
+          "name": "No. 50",
+          "vitola": "Petit Robusto",
+          "length": 4.3,
+          "ringGauge": 50,
+          "strength": "Mild-Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A honey-colored wrapper and delicate floral and citrus notes make this a refined smoke."
+        },
+        {
+          "id": 86,
+          "name": "No. 54",
+          "vitola": "Edmundo",
+          "length": 5.3,
+          "ringGauge": 54,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A larger format showcasing the brand's subtle complexity with notes of cream, vanilla, and light spice."
+        },
+        {
+          "id": 87,
+          "name": "Coronas Claro",
+          "vitola": "Corona",
+          "length": 5.6,
+          "ringGauge": 42,
+          "strength": "Mild",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A classic corona size with the brand's characteristic refinement and delicacy."
+        },
+        {
+          "id": 88,
+          "name": "No. 52",
+          "vitola": "Robusto Extra",
+          "length": 6.1,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A newer addition to the line with a perfect balance of cream, wood, and honey notes."
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Trinidad",
+      "country": "Cuba",
+      "description": "Originally only available as diplomatic gifts, this exclusive brand is known for its elegance and complexity.",
+      "products": [
+        {
+          "id": 89,
+          "name": "Vigia",
+          "vitola": "Petit Edmundo",
+          "length": 4.3,
+          "ringGauge": 54,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A short, stout format with complex notes of honey, spice, and a subtle citrus undertone."
+        },
+        {
+          "id": 90,
+          "name": "Fundadores",
+          "vitola": "Laguito No. 1",
+          "length": 7.6,
+          "ringGauge": 40,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "The original Trinidad size, an elegant and slender cigar with remarkable complexity."
+        },
+        {
+          "id": 91,
+          "name": "Reyes",
+          "vitola": "Petit Corona",
+          "length": 4.3,
+          "ringGauge": 40,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A small format that concentrates the brand's flavor profile into a shorter smoke."
+        },
+        {
+          "id": 92,
+          "name": "Coloniales",
+          "vitola": "Corona",
+          "length": 5.1,
+          "ringGauge": 44,
+          "strength": "Medium",
+          "wrapper": "Cuban",
+          "binder": "Cuban",
+          "filler": "Cuban",
+          "description": "A medium-sized format with perfectly balanced flavors of honey, cedar, and light spice."
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Alec Bradley",
+      "country": "Honduras",
+      "description": "Founded in 1996, Alec Bradley has become known for complex, well-constructed cigars with bold flavors.",
+      "products": [
+        {
+          "id": 93,
+          "name": "Prensado",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 48,
+          "strength": "Medium-Full",
+          "wrapper": "Honduran Corojo",
+          "binder": "Nicaraguan",
+          "filler": "Honduran, Nicaraguan",
+          "description": "A box-pressed offering with complex notes of leather, earth, and cocoa."
+        },
+        {
+          "id": 94,
+          "name": "Tempus",
+          "vitola": "Centuria",
+          "length": 7,
+          "ringGauge": 49,
+          "strength": "Medium-Full",
+          "wrapper": "Honduran",
+          "binder": "Indonesian",
+          "filler": "Honduran, Nicaraguan",
+          "description": "Features a rare Criollo 98 wrapper with a balance of spice, leather, and coffee notes."
+        },
+        {
+          "id": 95,
+          "name": "Black Market",
+          "vitola": "Robusto",
+          "length": 5.25,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Nicaraguan",
+          "binder": "Sumatran",
+          "filler": "Honduran, Panamanian",
+          "description": "A smooth, complex blend with notes of sweet spice, cocoa, and earth."
+        },
+        {
+          "id": 96,
+          "name": "Mundial",
+          "vitola": "PL5",
+          "length": 5,
+          "ringGauge": 52,
+          "strength": "Medium",
+          "wrapper": "Honduran Trojes",
+          "binder": "Honduran, Nicaraguan",
+          "filler": "Honduran, Nicaraguan",
+          "description": "A special project cigar with a rounded complexity and perfect construction."
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Caldwell",
+      "country": "Dominican Republic",
+      "description": "A boutique brand founded by Robert Caldwell, known for unique blends and creative branding.",
+      "products": [
+        {
+          "id": 97,
+          "name": "The King is Dead",
+          "vitola": "Premier",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Dominican Negrito",
+          "binder": "Dominican Corojo",
+          "filler": "Dominican",
+          "description": "A Dominican puro with a complex, balanced profile of cedar, cream, and gentle spice."
+        },
+        {
+          "id": 98,
+          "name": "Long Live the King",
+          "vitola": "Super Toro",
+          "length": 6,
+          "ringGauge": 58,
+          "strength": "Medium-Full",
+          "wrapper": "Dominican Corojo",
+          "binder": "Dominican",
+          "filler": "Dominican, Nicaraguan",
+          "description": "A bold, full-flavored cigar with notes of earth, cedar, and pepper."
+        },
+        {
+          "id": 99,
+          "name": "Eastern Standard",
+          "vitola": "Euro Express",
+          "length": 5.5,
+          "ringGauge": 44,
+          "strength": "Medium",
+          "wrapper": "Connecticut Hybrid",
+          "binder": "Dominican",
+          "filler": "Dominican, Nicaraguan",
+          "description": "Features a hybrid Connecticut wrapper with a creamy, balanced profile."
+        },
+        {
+          "id": 100,
+          "name": "Blind Man's Bluff",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Honduran",
+          "filler": "Dominican, Honduran",
+          "description": "A collaborative blend with notes of cedar, cream, and gentle spice."
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Camacho",
+      "country": "Honduras",
+      "description": "Known for bold, full-bodied cigars with a focus on authentic Corojo tobacco.",
+      "products": [
+        {
+          "id": 101,
+          "name": "Corojo",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Full",
+          "wrapper": "Honduran Corojo",
+          "binder": "Honduran",
+          "filler": "Honduran",
+          "description": "The flagship blend featuring authentic Corojo tobacco with bold pepper and leather notes."
+        },
+        {
+          "id": 102,
+          "name": "Connecticut",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian Connecticut",
+          "binder": "Honduran",
+          "filler": "Honduran, Dominican",
+          "description": "A more approachable Camacho with a Connecticut wrapper but still maintaining character."
+        },
+        {
+          "id": 103,
+          "name": "Triple Maduro",
+          "vitola": "Gordo",
+          "length": 6,
+          "ringGauge": 60,
+          "strength": "Full",
+          "wrapper": "Maduro",
+          "binder": "Maduro",
+          "filler": "Maduro",
+          "description": "The first cigar to use maduro tobacco for wrapper, binder, and filler, offering intense richness."
+        },
+        {
+          "id": 104,
+          "name": "Diploma",
+          "vitola": "Special Selection",
+          "length": 5,
+          "ringGauge": 54,
+          "strength": "Full",
+          "wrapper": "Honduran Original Corojo",
+          "binder": "Honduran",
+          "filler": "Honduran",
+          "description": "A special blend featuring rare original Corojo tobacco with intense, complex flavors."
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Drew Estate",
+      "country": "Nicaragua",
+      "description": "An innovative company known for breaking tradition with infused cigars and bold traditional blends.",
+      "products": [
+        {
+          "id": 105,
+          "name": "Liga Privada No. 9",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 52,
+          "strength": "Full",
+          "wrapper": "Connecticut Broadleaf",
+          "binder": "Brazilian",
+          "filler": "Honduran, Nicaraguan",
+          "description": "A full-bodied, complex smoke originally created for personal use by the company founder."
+        },
+        {
+          "id": 106,
+          "name": "Undercrown",
+          "vitola": "Gran Toro",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Mexican San Andres",
+          "binder": "Connecticut Habano",
+          "filler": "Nicaraguan, Brazilian",
+          "description": "Created by factory rollers as an alternative to the Liga Privada they were smoking too much of."
+        },
+        {
+          "id": 107,
+          "name": "ACID Blondie",
+          "vitola": "Petit Corona",
+          "length": 4,
+          "ringGauge": 38,
+          "strength": "Mild",
+          "wrapper": "Connecticut Shade",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "The most popular infused cigar, featuring a sweet-tipped wrapper and aromatic botanicals."
+        },
+        {
+          "id": 108,
+          "name": "Herrera Esteli",
+          "vitola": "Lonsdale",
+          "length": 6.5,
+          "ringGauge": 44,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian Habano",
+          "binder": "Honduran",
+          "filler": "Nicaraguan",
+          "description": "A Cuban-inspired blend created by master blender Willy Herrera."
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Joya de Nicaragua",
+      "country": "Nicaragua",
+      "description": "Nicaragua's oldest premium cigar manufacturer, known for strong, bold cigars that showcase Nicaraguan tobacco.",
+      "products": [
+        {
+          "id": 109,
+          "name": "Antaño 1970",
+          "vitola": "Gran Consul",
+          "length": 4.75,
+          "ringGauge": 60,
+          "strength": "Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A powerhouse Nicaraguan puro recalling the bold cigars of the 1970s."
+        },
+        {
+          "id": 110,
+          "name": "Celebracion",
+          "vitola": "Churchill",
+          "length": 6.75,
+          "ringGauge": 48,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan Criollo",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A more refined smoke than the Antaño but still showcasing Nicaraguan power."
+        },
+        {
+          "id": 111,
+          "name": "Cuatro Cinco",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "A limited edition created to celebrate the company's 45th anniversary."
+        },
+        {
+          "id": 112,
+          "name": "Cabinetta",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian Connecticut/Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan",
+          "description": "Features a dual wrapper design with Connecticut on the body and Nicaraguan at the head."
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Zino",
+      "country": "Dominican Republic",
+      "description": "A subsidiary of Davidoff, offering premium cigars with a contemporary approach and elegant profile.",
+      "products": [
+        {
+          "id": 113,
+          "name": "Platinum Crown",
+          "vitola": "Robusto",
+          "length": 5,
+          "ringGauge": 50,
+          "strength": "Medium",
+          "wrapper": "Ecuadorian Connecticut",
+          "binder": "Dominican",
+          "filler": "Dominican, Peruvian, Honduran",
+          "description": "A smooth, balanced cigar with a creamy character and notes of cedar and light spice."
+        },
+        {
+          "id": 114,
+          "name": "Z-Class",
+          "vitola": "Toro",
+          "length": 6,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Honduran Olancho",
+          "binder": "Dominican",
+          "filler": "Dominican, Nicaraguan, Peruvian",
+          "description": "A more robust offering with a complex blend of tobaccos and a leathery profile."
+        },
+        {
+          "id": 115,
+          "name": "Nicaragua",
+          "vitola": "Shorty",
+          "length": 4,
+          "ringGauge": 52,
+          "strength": "Medium-Full",
+          "wrapper": "Nicaraguan",
+          "binder": "Nicaraguan",
+          "filler": "Nicaraguan, Dominican",
+          "description": "A modern blend focusing on Nicaraguan tobaccos for a bolder Zino experience."
+        },
+        {
+          "id": 116,
+          "name": "Platinum Scepter",
+          "vitola": "Churchill",
+          "length": 7,
+          "ringGauge": 48,
+          "strength": "Medium",
+          "wrapper": "Connecticut",
+          "binder": "Dominican",
+          "filler": "Dominican, Central American",
+          "description": "An elegant, long format with the refined character that Zino is known for."
+        }
+      ]
     }
   ]
 } 

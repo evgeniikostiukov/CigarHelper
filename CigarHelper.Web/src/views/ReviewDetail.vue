@@ -133,15 +133,24 @@
                   </div>
                   <div v-if="review.construction" class="col-6 mb-2">
                     <div class="fw-bold">Конструкция:</div>
-                    <div>{{ review.construction }}</div>
+                    <div class="rating-stars">
+                      <i v-for="i in 5" :key="i" class="bi" :class="i <= review.construction ? 'bi-star-fill' : 'bi-star'"></i>
+                      <span class="ms-1">{{ review.construction }}/5</span>
+                    </div>
                   </div>
                   <div v-if="review.burnQuality" class="col-6 mb-2">
                     <div class="fw-bold">Качество горения:</div>
-                    <div>{{ review.burnQuality }}</div>
+                    <div class="rating-stars">
+                      <i v-for="i in 5" :key="i" class="bi" :class="i <= review.burnQuality ? 'bi-star-fill' : 'bi-star'"></i>
+                      <span class="ms-1">{{ review.burnQuality }}/5</span>
+                    </div>
                   </div>
                   <div v-if="review.draw" class="col-6 mb-2">
                     <div class="fw-bold">Тяга:</div>
-                    <div>{{ review.draw }}</div>
+                    <div class="rating-stars">
+                      <i v-for="i in 5" :key="i" class="bi" :class="i <= review.draw ? 'bi-star-fill' : 'bi-star'"></i>
+                      <span class="ms-1">{{ review.draw }}/5</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -323,5 +332,9 @@ export default {
   max-width: 100%;
   height: auto;
   margin: 1rem 0;
+}
+
+.rating-stars {
+  color: #ffc107;
 }
 </style> 

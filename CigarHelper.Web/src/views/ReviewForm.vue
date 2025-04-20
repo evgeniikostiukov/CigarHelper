@@ -165,37 +165,64 @@
                     <div class="col-md-4">
                       <div class="mb-3">
                         <label for="construction" class="form-label">Конструкция</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="construction"
-                          v-model="form.construction"
-                          maxlength="50"
-                        >
+                        <div class="d-flex align-items-center">
+                          <div class="rating-slider me-2 flex-grow-1">
+                            <input
+                              type="range"
+                              class="form-range"
+                              id="construction"
+                              v-model.number="form.construction"
+                              min="1"
+                              max="5"
+                              step="1"
+                            >
+                          </div>
+                          <div class="rating-value">
+                            <span class="badge bg-secondary">{{ form.construction || '?' }}/5</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="col-md-4">
                       <div class="mb-3">
                         <label for="burnQuality" class="form-label">Горение</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="burnQuality"
-                          v-model="form.burnQuality"
-                          maxlength="50"
-                        >
+                        <div class="d-flex align-items-center">
+                          <div class="rating-slider me-2 flex-grow-1">
+                            <input
+                              type="range"
+                              class="form-range"
+                              id="burnQuality"
+                              v-model.number="form.burnQuality"
+                              min="1"
+                              max="5"
+                              step="1"
+                            >
+                          </div>
+                          <div class="rating-value">
+                            <span class="badge bg-secondary">{{ form.burnQuality || '?' }}/5</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="col-md-4">
                       <div class="mb-3">
                         <label for="draw" class="form-label">Тяга</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="draw"
-                          v-model="form.draw"
-                          maxlength="50"
-                        >
+                        <div class="d-flex align-items-center">
+                          <div class="rating-slider me-2 flex-grow-1">
+                            <input
+                              type="range"
+                              class="form-range"
+                              id="draw"
+                              v-model.number="form.draw"
+                              min="1"
+                              max="5"
+                              step="1"
+                            >
+                          </div>
+                          <div class="rating-value">
+                            <span class="badge bg-secondary">{{ form.draw || '?' }}/5</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -272,9 +299,9 @@ export default {
         smokingExperience: '',
         aroma: '',
         taste: '',
-        construction: '',
-        burnQuality: '',
-        draw: '',
+        construction: 3,
+        burnQuality: 3,
+        draw: 3,
         venue: '',
         smokingDate: new Date().toISOString().split('T')[0],
         images: []
@@ -324,9 +351,9 @@ export default {
         this.form.smokingExperience = review.smokingExperience || ''
         this.form.aroma = review.aroma || ''
         this.form.taste = review.taste || ''
-        this.form.construction = review.construction || ''
-        this.form.burnQuality = review.burnQuality || ''
-        this.form.draw = review.draw || ''
+        this.form.construction = review.construction || 3
+        this.form.burnQuality = review.burnQuality || 3
+        this.form.draw = review.draw || 3
         this.form.venue = review.venue || ''
         
         // Форматируем дату
@@ -478,6 +505,11 @@ export default {
 
 .rating-badge {
   width: 80px;
+  text-align: center;
+}
+
+.rating-value {
+  width: 40px;
   text-align: center;
 }
 </style> 

@@ -1,6 +1,6 @@
 <template>
   <div class="editor-wrapper">
-    <div class="editor-toolbar">
+    <div v-if="editor" class="editor-toolbar">
       <button 
         @click="editor.chain().focus().toggleBold().run()"
         :class="{ 'is-active': editor.isActive('bold') }"
@@ -68,16 +68,44 @@
         <i class="bi bi-hr"></i>
       </button>
       <div class="toolbar-divider"></div>
-      <button 
-        @click="addImage"
-        class="toolbar-button"
-        title="Добавить изображение"
-      >
-        <i class="bi bi-image"></i>
-      </button>
+      <div class="image-toolbar-group">
+        <button 
+          @click="openImageMenu"
+          class="toolbar-button"
+          title="Добавить изображение"
+          ref="imageButton"
+        >
+          <i class="bi bi-image"></i>
+        </button>
+        <div v-if="showImageOptions" class="image-options-menu" ref="imageMenu">
+          <div class="image-options-header">
+            <h6 class="mb-2">Добавить изображение</h6>
+          </div>
+          <div class="image-option" @click="addImageByUrl">
+            <i class="bi bi-link me-2"></i> По URL
+          </div>
+          <div class="image-option" @click="triggerFileInput">
+            <i class="bi bi-upload me-2"></i> Загрузить файл
+          </div>
+        </div>
+        <input 
+          type="file" 
+          ref="fileInput" 
+          @change="handleFileChange" 
+          accept="image/*" 
+          class="d-none"
+        >
+      </div>
     </div>
     
-    <editor-content :editor="editor" class="editor-content" />
+    <editor-content v-if="editor" :editor="editor" class="editor-content" />
+    <div v-else class="editor-loading">
+      <div class="text-center p-4">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Загрузка...</span>
+        </div>
+      </div>
+    </div>
     
     <div class="editor-footer">
       <div class="char-count" :class="{ 'text-danger': isContentTooLong }">
@@ -113,7 +141,8 @@ export default {
   data() {
     return {
       editor: null,
-      contentLength: 0
+      contentLength: 0,
+      showImageOptions: false
     }
   },
   computed: {
@@ -124,9 +153,11 @@ export default {
   watch: {
     modelValue(newValue) {
       // Обновляем содержимое редактора, если modelValue изменился извне
-      const currentContent = this.editor.getHTML()
-      if (newValue !== currentContent) {
-        this.editor.commands.setContent(newValue, false)
+      if (this.editor) {
+        const currentContent = this.editor.getHTML()
+        if (newValue !== currentContent) {
+          this.editor.commands.setContent(newValue, false)
+        }
       }
     }
   },
@@ -152,17 +183,83 @@ export default {
         },
       },
     })
+    
+    // Обработчик клика вне меню для его закрытия
+    document.addEventListener('click', this.closeImageMenuOnClickOutside)
   },
   beforeUnmount() {
-    this.editor.destroy()
+    if (this.editor) {
+      this.editor.destroy()
+    }
+    // Удаляем обработчик перед размонтированием компонента
+    document.removeEventListener('click', this.closeImageMenuOnClickOutside)
   },
   methods: {
-    addImage() {
+    openImageMenu() {
+      if (!this.editor) return
+      this.showImageOptions = true
+    },
+    
+    closeImageMenuOnClickOutside(event) {
+      if (this.showImageOptions && 
+          this.$refs.imageMenu && 
+          !this.$refs.imageMenu.contains(event.target) &&
+          this.$refs.imageButton && 
+          !this.$refs.imageButton.contains(event.target)) {
+        this.showImageOptions = false
+      }
+    },
+    
+    addImageByUrl() {
+      if (!this.editor) return
+      
       const url = prompt('Введите URL изображения:')
       
       if (url) {
         this.editor.chain().focus().setImage({ src: url }).run()
       }
+      
+      this.showImageOptions = false
+    },
+    
+    triggerFileInput() {
+      if (!this.editor) return
+      this.$refs.fileInput.click()
+    },
+    
+    handleFileChange(event) {
+      if (!this.editor) return
+      
+      const file = event.target.files[0]
+      
+      if (!file) return
+      
+      // Проверка типа файла
+      if (!file.type.match('image.*')) {
+        alert('Выбранный файл не является изображением')
+        this.$refs.fileInput.value = null
+        return
+      }
+      
+      // Проверка размера (15MB)
+      if (file.size > 15 * 1024 * 1024) {
+        alert('Размер файла превышает 15 МБ')
+        this.$refs.fileInput.value = null
+        return
+      }
+      
+      // Конвертируем файл в base64
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        // Вставляем изображение в редактор
+        this.editor.chain().focus().setImage({ src: e.target.result }).run()
+        
+        // Сбрасываем input
+        this.$refs.fileInput.value = null
+      }
+      reader.readAsDataURL(file)
+      
+      this.showImageOptions = false
     }
   }
 }
@@ -208,6 +305,38 @@ export default {
   width: 1px;
   background-color: #e2e8f0;
   margin: 0 0.5rem;
+}
+
+.image-toolbar-group {
+  position: relative;
+}
+
+.image-options-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  margin: 0.5rem 0 0;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.image-options-header {
+  padding: 0.25rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.image-option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.image-option:hover {
+  background-color: #f8f9fa;
 }
 
 .editor-content {
