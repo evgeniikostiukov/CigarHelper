@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CigarHelper.Api", "CigarHelper.Api\CigarHelper.Api.csproj", "{29EA7C17-00F8-4AA8-9D33-E330ACA93A56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CigarHelper.Data", "CigarHelper.Data\CigarHelper.Data.csproj", "{26811D11-FE4C-40D8-B737-2B035A12C6D0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29EA7C17-00F8-4AA8-9D33-E330ACA93A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29EA7C17-00F8-4AA8-9D33-E330ACA93A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29EA7C17-00F8-4AA8-9D33-E330ACA93A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29EA7C17-00F8-4AA8-9D33-E330ACA93A56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
