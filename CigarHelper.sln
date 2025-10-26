@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CigarHelper.Api", "CigarHel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CigarHelper.Data", "CigarHelper.Data\CigarHelper.Data.csproj", "{26811D11-FE4C-40D8-B737-2B035A12C6D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CigarHelper.Import", "CigarHelper.Import\CigarHelper.Import.csproj", "{D65E7F2E-1DF6-41C0-89F1-1B194E3C6735}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26811D11-FE4C-40D8-B737-2B035A12C6D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D65E7F2E-1DF6-41C0-89F1-1B194E3C6735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D65E7F2E-1DF6-41C0-89F1-1B194E3C6735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D65E7F2E-1DF6-41C0-89F1-1B194E3C6735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D65E7F2E-1DF6-41C0-89F1-1B194E3C6735}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

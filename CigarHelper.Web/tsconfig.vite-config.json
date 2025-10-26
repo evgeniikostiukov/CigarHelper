@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+     "composite": true,
+     "skipLibCheck": true,
+     "types": [
+        "node",
+     ],
+     "allowSyntheticDefaultImports": true,
+     "module": "NodeNext",
+     "moduleResolution": "NodeNext",
+     "strict": true
+  },
+  "include": [
+     "vite.config.ts",
+     "eslint.config.js"
+  ],
+}

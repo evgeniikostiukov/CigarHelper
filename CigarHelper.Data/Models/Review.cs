@@ -27,7 +27,7 @@ public class Review
     public int CigarId { get; set; }
     
     [ForeignKey("CigarId")]
-    public Cigar Cigar { get; set; } = null!;
+    public UserCigar Cigar { get; set; } = null!;
     
     public ICollection<ReviewImage> Images { get; set; } = new List<ReviewImage>();
     
@@ -41,13 +41,13 @@ public class Review
     public string? Taste { get; set; }
     
     [MaxLength(50)]
-    public string? Construction { get; set; }
+    public int? Construction { get; set; }
     
     [MaxLength(50)]
-    public string? BurnQuality { get; set; }
+    public int? BurnQuality { get; set; }
     
     [MaxLength(50)]
-    public string? Draw { get; set; }
+    public int? Draw { get; set; }
     
     [MaxLength(100)]
     public string? Venue { get; set; }

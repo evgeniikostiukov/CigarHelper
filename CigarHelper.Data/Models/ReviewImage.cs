@@ -10,8 +10,7 @@ public class ReviewImage
     public int Id { get; set; }
     
     [Required]
-    [MaxLength(255)]
-    public string ImageUrl { get; set; } = string.Empty;
+    public byte[]? ImageBytes { get; set; } = [];
     
     [MaxLength(500)]
     public string? Caption { get; set; }

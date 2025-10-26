@@ -1,9 +1,11 @@
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
+using CigarHelper.Data.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using CigarHelper.Api.Helpers;
 
 namespace CigarHelper.Api.Controllers;
 
@@ -18,72 +20,463 @@ public class CigarsController : ControllerBase
     {
         _context = context;
     }
-    
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Cigar>>> GetCigars()
+    public async Task<ActionResult<IEnumerable<CigarResponseDto>>> GetCigars()
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var cigars = await _context.Cigars
-            .Where(c => c.UserId == userId)
+        var cigars = await _context.UserCigars
+            .Include(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
+            .Include(uc => uc.Humidor)
+            .Where(uc => uc.UserId == userId)
+            .Select(uc => new CigarResponseDto
+            {
+                Id = uc.Id,
+                Name = uc.CigarBase.Name,
+                Brand = new BrandDto()
+                {
+                    Id = uc.CigarBase.Brand.Id,
+                    Name = uc.CigarBase.Brand.Name,
+                    Description = uc.CigarBase.Brand.Description,
+                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
+                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
+                    Country = uc.CigarBase.Brand.Country,
+                    IsModerated = uc.CigarBase.Brand.IsModerated,
+                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
+                },
+                BrandName = uc.CigarBase.Brand.Name,
+                Size = uc.CigarBase.Size,
+                Strength = uc.CigarBase.Strength,
+                Price = uc.Price,
+                Rating = uc.Rating,
+                Country = uc.CigarBase.Country,
+                Description = uc.CigarBase.Description,
+                Wrapper = uc.CigarBase.Wrapper,
+                Binder = uc.CigarBase.Binder,
+                Filler = uc.CigarBase.Filler,
+                HumidorId = uc.HumidorId,
+                Humidor = uc.Humidor != null ? new HumidorDto
+                {
+                    Id = uc.Humidor.Id,
+                    Name = uc.Humidor.Name,
+                    Description = uc.Humidor.Description,
+                    Capacity = uc.Humidor.Capacity,
+                    CreatedAt = uc.Humidor.CreatedAt,
+                    UpdatedAt = uc.Humidor.UpdatedAt
+                } : null,
+                UserId = uc.UserId,
+                CreatedAt = uc.CreatedAt,
+                UpdatedAt = uc.UpdatedAt
+            })
             .ToListAsync();
-            
+
         return Ok(cigars);
     }
-    
+
+    [HttpGet("bases")]
+    public async Task<ActionResult<IEnumerable<CigarBaseDto>>> GetAllCigarBases([FromQuery] string? search = null)
+    {
+        var cigarBasesQuery = _context.CigarBases
+            .Include(cb => cb.Brand)
+            .Include(cb => cb.Images)
+            .Where(cb => cb.IsModerated); // Только проверенные сигары
+
+        // Применяем фильтры
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLower();
+            cigarBasesQuery = cigarBasesQuery.Where(cb =>
+                cb.Name.ToLower().Contains(searchLower) ||
+                cb.Brand.Name.ToLower().Contains(searchLower));
+        }
+
+        var cigarBases = await cigarBasesQuery
+            .Select(cb => new CigarBaseDto
+            {
+                Id = cb.Id,
+                Name = cb.Name,
+                Brand = new BrandDto
+                {
+                    Id = cb.BrandId,
+                    Name = cb.Brand.Name,
+                    Country = cb.Brand.Country,
+                    Description = cb.Brand.Description,
+                    LogoBytes = cb.Brand.LogoBytes,
+                    IsModerated = cb.Brand.IsModerated,
+                    CreatedAt = cb.Brand.CreatedAt,
+                    UpdatedAt = cb.Brand.UpdatedAt
+                },
+                Size = cb.Size,
+                Strength = cb.Strength,
+                Country = cb.Country,
+                Description = cb.Description,
+                Wrapper = cb.Wrapper,
+                Binder = cb.Binder,
+                Filler = cb.Filler,
+                Images = cb.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
+                CreatedAt = cb.CreatedAt,
+                UpdatedAt = cb.UpdatedAt
+            })
+            .OrderBy(cb => cb.Name)
+            .ToListAsync();
+
+        return Ok(cigarBases);
+    }
+
+    [HttpGet("bases/paginated")]
+    public async Task<ActionResult<PaginatedResult<CigarBaseDto>>> GetCigarBasesPaginated(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortField = "name",
+        [FromQuery] string? sortOrder = "asc",
+        [FromQuery] string? search = null,
+        [FromQuery] int? brandId = null,
+        [FromQuery] string? strength = null)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 100) pageSize = 20;
+
+        var query = _context.CigarBases
+            .Include(cb => cb.Brand)
+            .Include(cb => cb.Images)
+            .Where(cb => cb.IsModerated); // Только проверенные сигары
+
+        // Применяем фильтры
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLower();
+            query = query.Where(cb =>
+                cb.Name.ToLower().Contains(searchLower) ||
+                cb.Brand.Name.ToLower().Contains(searchLower));
+        }
+
+        if (brandId.HasValue)
+        {
+            query = query.Where(cb => cb.BrandId == brandId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(strength))
+        {
+            query = query.Where(cb => cb.Strength == strength);
+        }
+
+        // Получаем общее количество записей
+        var totalCount = await query.CountAsync();
+
+        // Применяем сортировку
+        query = sortField?.ToLower() switch
+        {
+            "name" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name),
+            "brandname" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Brand.Name) : query.OrderBy(cb => cb.Brand.Name),
+            "size" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Size) : query.OrderBy(cb => cb.Size),
+            "strength" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Strength) : query.OrderBy(cb => cb.Strength),
+            "country" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Country) : query.OrderBy(cb => cb.Country),
+            _ => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name)
+        };
+
+        // Применяем пагинацию
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(cb => new CigarBaseDto
+            {
+                Id = cb.Id,
+                Name = cb.Name,
+                Brand = new BrandDto
+                {
+                    Id = cb.BrandId,
+                    Name = cb.Brand.Name,
+                    Country = cb.Brand.Country,
+                    Description = cb.Brand.Description,
+                    LogoBytes = cb.Brand.LogoBytes,
+                    IsModerated = cb.Brand.IsModerated,
+                    CreatedAt = cb.Brand.CreatedAt,
+                    UpdatedAt = cb.Brand.UpdatedAt
+                },
+                Size = cb.Size,
+                Strength = cb.Strength,
+                Country = cb.Country,
+                Description = cb.Description,
+                Wrapper = cb.Wrapper,
+                Binder = cb.Binder,
+                Filler = cb.Filler,
+                Images = cb.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
+                CreatedAt = cb.CreatedAt,
+                UpdatedAt = cb.UpdatedAt
+            })
+            .ToListAsync();
+
+        var result = new PaginatedResult<CigarBaseDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+        };
+
+        return Ok(result);
+    }
+
     [HttpGet("{id}")]
-    public async Task<ActionResult<Cigar>> GetCigar(int id)
+    public async Task<ActionResult<CigarResponseDto>> GetCigar(int id)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var cigar = await _context.Cigars
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
-            
+        var cigar = await _context.UserCigars
+            .Include(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
+            .Include(uc => uc.Humidor)
+            .Where(uc => uc.Id == id && uc.UserId == userId)
+            .Select(uc => new CigarResponseDto
+            {
+                Id = uc.Id,
+                Name = uc.CigarBase.Name,
+                Brand = new BrandDto()
+                {
+                    Id = uc.CigarBase.Brand.Id,
+                    Name = uc.CigarBase.Brand.Name,
+                    Description = uc.CigarBase.Brand.Description,
+                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
+                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
+                    Country = uc.CigarBase.Brand.Country,
+                    IsModerated = uc.CigarBase.Brand.IsModerated,
+                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
+                },
+                BrandName = uc.CigarBase.Brand.Name,
+                Size = uc.CigarBase.Size,
+                Strength = uc.CigarBase.Strength,
+                Price = uc.Price,
+                Rating = uc.Rating,
+                Country = uc.CigarBase.Country,
+                Description = uc.CigarBase.Description,
+                Wrapper = uc.CigarBase.Wrapper,
+                Binder = uc.CigarBase.Binder,
+                Filler = uc.CigarBase.Filler,
+                HumidorId = uc.HumidorId,
+                Humidor = uc.Humidor != null ? new HumidorDto
+                {
+                    Id = uc.Humidor.Id,
+                    Name = uc.Humidor.Name,
+                    Description = uc.Humidor.Description,
+                    Capacity = uc.Humidor.Capacity,
+                    CreatedAt = uc.Humidor.CreatedAt,
+                    UpdatedAt = uc.Humidor.UpdatedAt
+                } : null,
+                UserId = uc.UserId,
+                CreatedAt = uc.CreatedAt,
+                UpdatedAt = uc.UpdatedAt
+            })
+            .FirstOrDefaultAsync();
+
         if (cigar == null)
             return NotFound();
-            
+
         return Ok(cigar);
     }
-    
+
+    [HttpGet("brands")]
+    public async Task<ActionResult<IEnumerable<BrandDto>>> GetBrands()
+    {
+        var brands = await _context.Brands
+            .Where(b => b.IsModerated)
+            .Select(b => new BrandDto
+            {
+                Id = b.Id,
+                Name = b.Name,
+                Country = b.Country,
+                Description = b.Description,
+                IsModerated = b.IsModerated,
+                CreatedAt = b.CreatedAt,
+                UpdatedAt = b.UpdatedAt
+            })
+            .OrderBy(b => b.Name)
+            .ToListAsync();
+
+        return Ok(brands);
+    }
+
     [HttpPost]
-    public async Task<ActionResult<Cigar>> CreateCigar(Cigar cigar)
+    public async Task<ActionResult<CigarResponseDto>> CreateCigar(CreateCigarRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-            
+
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        cigar.UserId = userId;
-        cigar.CreatedAt = DateTime.UtcNow;
-        
-        _context.Cigars.Add(cigar);
+
+        // Проверяем существование бренда
+        var brand = await _context.Brands.FindAsync(request.BrandId);
+        if (brand == null)
+        {
+            return BadRequest($"Бренд с ID {request.BrandId} не найден");
+        }
+
+        // Ищем существующую сигару в базе по названию и ID бренда
+        var existingCigarBase = await _context.CigarBases
+            .FirstOrDefaultAsync(cb => cb.Name.ToLower() == request.Name.ToLower() &&
+                                     cb.BrandId == request.BrandId);
+
+        int cigarBaseId;
+
+        if (existingCigarBase != null)
+        {
+            // Используем существующую сигару из базы
+            cigarBaseId = existingCigarBase.Id;
+        }
+        else
+        {
+            // Создаем новую сигару в базе с пометкой о том, что она не прошла модерацию
+            var newCigarBase = new CigarBase
+            {
+                Name = request.Name,
+                BrandId = request.BrandId,
+                Country = request.Country,
+                Description = request.Description,
+                Strength = request.Strength,
+                Size = request.Size,
+                Wrapper = request.Wrapper,
+                Binder = request.Binder,
+                Filler = request.Filler,
+                IsModerated = false, // Не прошла модерацию
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.CigarBases.Add(newCigarBase);
+            await _context.SaveChangesAsync();
+
+            cigarBaseId = newCigarBase.Id;
+        }
+
+        // Создаем сигару пользователя
+        var userCigar = new UserCigar
+        {
+            CigarBaseId = cigarBaseId,
+            Price = request.Price,
+            Rating = request.Rating,
+            HumidorId = request.HumidorId,
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.UserCigars.Add(userCigar);
         await _context.SaveChangesAsync();
-        
-        return CreatedAtAction(nameof(GetCigar), new { id = cigar.Id }, cigar);
+
+        // Возвращаем созданную сигару пользователя с данными из базы
+        var createdCigar = await _context.UserCigars
+            .Include(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
+            .Include(uc => uc.Humidor)
+            .Where(uc => uc.Id == userCigar.Id)
+            .Select(uc => new CigarResponseDto
+            {
+                Id = uc.Id,
+                Name = uc.CigarBase.Name,
+                Brand = new BrandDto()
+                {
+                    Id = uc.CigarBase.Brand.Id,
+                    Name = uc.CigarBase.Brand.Name,
+                    Description = uc.CigarBase.Brand.Description,
+                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
+                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
+                    Country = uc.CigarBase.Brand.Country,
+                    IsModerated = uc.CigarBase.Brand.IsModerated,
+                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
+                },
+                BrandName = uc.CigarBase.Brand.Name,
+                Size = uc.CigarBase.Size,
+                Strength = uc.CigarBase.Strength,
+                Price = uc.Price,
+                Rating = uc.Rating,
+                Country = uc.CigarBase.Country,
+                Description = uc.CigarBase.Description,
+                Wrapper = uc.CigarBase.Wrapper,
+                Binder = uc.CigarBase.Binder,
+                Filler = uc.CigarBase.Filler,
+                HumidorId = uc.HumidorId,
+                Humidor = uc.Humidor != null ? new HumidorDto
+                {
+                    Id = uc.Humidor.Id,
+                    Name = uc.Humidor.Name,
+                    Description = uc.Humidor.Description,
+                    Capacity = uc.Humidor.Capacity,
+                    CreatedAt = uc.Humidor.CreatedAt,
+                    UpdatedAt = uc.Humidor.UpdatedAt
+                } : null,
+                UserId = uc.UserId,
+                CreatedAt = uc.CreatedAt,
+                UpdatedAt = uc.UpdatedAt
+            })
+            .FirstOrDefaultAsync();
+
+        return CreatedAtAction(nameof(GetCigar), new { id = userCigar.Id }, createdCigar);
     }
-    
+
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCigar(int id, Cigar cigar)
+    public async Task<ActionResult<CigarResponseDto>> UpdateCigar(int id, UserCigarUpdateRequest request)
     {
-        if (id != cigar.Id)
-            return BadRequest();
-            
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
-        var existingCigar = await _context.Cigars
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
-            
-        if (existingCigar == null)
+
+        var existingUserCigar = await _context.UserCigars
+            .Include(uc => uc.CigarBase)
+            .FirstOrDefaultAsync(uc => uc.Id == id && uc.UserId == userId);
+
+        if (existingUserCigar == null)
             return NotFound();
-            
-        existingCigar.Name = cigar.Name;
-        existingCigar.Brand = cigar.Brand;
-        existingCigar.Country = cigar.Country;
-        existingCigar.Description = cigar.Description;
-        existingCigar.Strength = cigar.Strength;
-        existingCigar.Size = cigar.Size;
-        existingCigar.Price = cigar.Price;
-        existingCigar.Rating = cigar.Rating;
-        existingCigar.ImageUrl = cigar.ImageUrl;
-        existingCigar.UpdatedAt = DateTime.UtcNow;
-        
+
+        // Проверяем существование бренда
+        var brand = await _context.Brands.FindAsync(request.BrandId);
+        if (brand == null)
+        {
+            return BadRequest($"Бренд с ID {request.BrandId} не найден");
+        }
+
+        // Обновляем поля пользовательской сигары
+        existingUserCigar.Price = request.Price;
+        existingUserCigar.Rating = request.Rating;
+        existingUserCigar.HumidorId = request.HumidorId;
+        existingUserCigar.UpdatedAt = DateTime.UtcNow;
+
+        // Обновляем поля базовой сигары
+        existingUserCigar.CigarBase.Name = request.Name;
+        existingUserCigar.CigarBase.BrandId = request.BrandId;
+        existingUserCigar.CigarBase.Country = request.Country;
+        existingUserCigar.CigarBase.Description = request.Description;
+        existingUserCigar.CigarBase.Strength = request.Strength;
+        existingUserCigar.CigarBase.Size = request.Size;
+        existingUserCigar.CigarBase.Wrapper = request.Wrapper;
+        existingUserCigar.CigarBase.Binder = request.Binder;
+        existingUserCigar.CigarBase.Filler = request.Filler;
+        existingUserCigar.CigarBase.UpdatedAt = DateTime.UtcNow;
+
         try
         {
             await _context.SaveChangesAsync();
@@ -95,28 +488,432 @@ public class CigarsController : ControllerBase
             else
                 throw;
         }
-        
-        return NoContent();
+
+        // Возвращаем обновленную сигару
+        var updatedCigar = await _context.UserCigars
+            .Include(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
+            .Include(uc => uc.Humidor)
+            .Where(uc => uc.Id == id)
+            .Select(uc => new CigarResponseDto
+            {
+                Id = uc.Id,
+                Name = uc.CigarBase.Name,
+                Brand = new BrandDto()
+                {
+                    Id = uc.CigarBase.Brand.Id,
+                    Name = uc.CigarBase.Brand.Name,
+                    Description = uc.CigarBase.Brand.Description,
+                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
+                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
+                    Country = uc.CigarBase.Brand.Country,
+                    IsModerated = uc.CigarBase.Brand.IsModerated,
+                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
+                },
+                BrandName = uc.CigarBase.Brand.Name,
+                Size = uc.CigarBase.Size,
+                Strength = uc.CigarBase.Strength,
+                Price = uc.Price,
+                Rating = uc.Rating,
+                Country = uc.CigarBase.Country,
+                Description = uc.CigarBase.Description,
+                Wrapper = uc.CigarBase.Wrapper,
+                Binder = uc.CigarBase.Binder,
+                Filler = uc.CigarBase.Filler,
+                HumidorId = uc.HumidorId,
+                Humidor = uc.Humidor != null ? new HumidorDto
+                {
+                    Id = uc.Humidor.Id,
+                    Name = uc.Humidor.Name,
+                    Description = uc.Humidor.Description,
+                    Capacity = uc.Humidor.Capacity,
+                    CreatedAt = uc.Humidor.CreatedAt,
+                    UpdatedAt = uc.Humidor.UpdatedAt
+                } : null,
+                UserId = uc.UserId,
+                CreatedAt = uc.CreatedAt,
+                UpdatedAt = uc.UpdatedAt
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(updatedCigar);
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCigar(int id)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var cigar = await _context.Cigars
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
-            
+        var cigar = await _context.UserCigars
+            .FirstOrDefaultAsync(uc => uc.Id == id && uc.UserId == userId);
+
         if (cigar == null)
             return NotFound();
-            
-        _context.Cigars.Remove(cigar);
+
+        _context.UserCigars.Remove(cigar);
         await _context.SaveChangesAsync();
-        
+
         return NoContent();
     }
-    
+
     private bool CigarExists(int id)
     {
-        return _context.Cigars.Any(e => e.Id == id);
+        return _context.UserCigars.Any(e => e.Id == id);
     }
-} 
+
+    [HttpPost("bases")]
+    [Authorize]
+    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase(CreateCigarBaseRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        // Проверяем существование бренда
+        var brand = await _context.Brands.FindAsync(request.BrandId);
+        if (brand == null)
+        {
+            return BadRequest($"Бренд с ID {request.BrandId} не найден");
+        }
+
+        // Проверяем, не существует ли уже сигара с таким названием и брендом
+        var existingCigar = await _context.CigarBases
+            .FirstOrDefaultAsync(cb => cb.Name.ToLower() == request.Name.ToLower() &&
+                                     cb.BrandId == request.BrandId);
+        if (existingCigar != null)
+        {
+            return BadRequest($"Сигара с названием '{request.Name}' от бренда '{brand.Name}' уже существует");
+        }
+
+        // Создаем новую базовую сигару
+        var cigarBase = new CigarBase
+        {
+            Name = request.Name,
+            BrandId = request.BrandId,
+            Country = request.Country,
+            Description = request.Description,
+            Strength = request.Strength,
+            Size = request.Size,
+            Wrapper = request.Wrapper,
+            Binder = request.Binder,
+            Filler = request.Filler,
+            IsModerated = true, // Созданные через API считаются проверенными
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.CigarBases.Add(cigarBase);
+        await _context.SaveChangesAsync();
+
+        // Обрабатываем изображения по ссылкам
+        if (request.ImageUrls != null && request.ImageUrls.Any())
+        {
+            foreach (var imageUrl in request.ImageUrls)
+            {
+                if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    var imageBytes = await ImageDownloader.DownloadImageAsync(imageUrl);
+                    if (imageBytes != null)
+                    {
+                        var cigarImage = new CigarImage
+                        {
+                            CigarBaseId = cigarBase.Id,
+                            FileName = GetFileNameFromUrl(imageUrl),
+                            ContentType = GetContentTypeFromUrl(imageUrl),
+                            FileSize = imageBytes.Length,
+                            ImageData = imageBytes,
+                            IsMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain),
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.CigarImages.Add(cigarImage);
+                    }
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        // Возвращаем созданную сигару с данными
+        var createdCigar = await _context.CigarBases
+            .Include(cb => cb.Brand)
+            .Include(cb => cb.Images)
+            .Where(cb => cb.Id == cigarBase.Id)
+            .Select(cb => new CigarBaseDto
+            {
+                Id = cb.Id,
+                Name = cb.Name,
+                Brand = new BrandDto
+                {
+                    Id = cb.BrandId,
+                    Name = cb.Brand.Name,
+                    Country = cb.Brand.Country,
+                    Description = cb.Brand.Description,
+                    LogoBytes = cb.Brand.LogoBytes,
+                    IsModerated = cb.Brand.IsModerated,
+                    CreatedAt = cb.Brand.CreatedAt,
+                    UpdatedAt = cb.Brand.UpdatedAt
+                },
+                Size = cb.Size,
+                Strength = cb.Strength,
+                Country = cb.Country,
+                Description = cb.Description,
+                Wrapper = cb.Wrapper,
+                Binder = cb.Binder,
+                Filler = cb.Filler,
+                Images = cb.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
+                CreatedAt = cb.CreatedAt,
+                UpdatedAt = cb.UpdatedAt
+            })
+            .FirstOrDefaultAsync();
+
+        return CreatedAtAction(nameof(GetCigarBase), new { id = cigarBase.Id }, createdCigar);
+    }
+
+    [HttpGet("bases/{id}")]
+    public async Task<ActionResult<CigarBaseDto>> GetCigarBase(int id)
+    {
+        var cigarBase = await _context.CigarBases
+            .Include(cb => cb.Brand)
+            .Include(cb => cb.Images)
+            .Where(cb => cb.Id == id && cb.IsModerated)
+            .Select(cb => new CigarBaseDto
+            {
+                Id = cb.Id,
+                Name = cb.Name,
+                Brand = new BrandDto
+                {
+                    Id = cb.BrandId,
+                    Name = cb.Brand.Name,
+                    Country = cb.Brand.Country,
+                    Description = cb.Brand.Description,
+                    LogoBytes = cb.Brand.LogoBytes,
+                    IsModerated = cb.Brand.IsModerated,
+                    CreatedAt = cb.Brand.CreatedAt,
+                    UpdatedAt = cb.Brand.UpdatedAt
+                },
+                Size = cb.Size,
+                Strength = cb.Strength,
+                Country = cb.Country,
+                Description = cb.Description,
+                Wrapper = cb.Wrapper,
+                Binder = cb.Binder,
+                Filler = cb.Filler,
+                Images = cb.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
+                CreatedAt = cb.CreatedAt,
+                UpdatedAt = cb.UpdatedAt
+            })
+            .FirstOrDefaultAsync();
+
+        if (cigarBase == null)
+            return NotFound();
+
+        return Ok(cigarBase);
+    }
+
+    [HttpPut("bases/{id}")]
+    [Authorize]
+    public async Task<ActionResult<CigarBaseDto>> UpdateCigarBase(int id, [FromForm]UpdateCigarBaseRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var cigarBase = await _context.CigarBases
+            .Include(cb => cb.Images)
+            .FirstOrDefaultAsync(cb => cb.Id == id);
+
+        if (cigarBase == null)
+            return NotFound();
+
+        // Проверяем существование бренда
+        var brand = await _context.Brands.FindAsync(request.BrandId);
+        if (brand == null)
+        {
+            return BadRequest($"Бренд с ID {request.BrandId} не найден");
+        }
+
+        // Проверяем, не существует ли уже сигара с таким названием и брендом (кроме текущей)
+        var existingCigar = await _context.CigarBases
+            .FirstOrDefaultAsync(cb => cb.Name.ToLower() == request.Name.ToLower() &&
+                                     cb.BrandId == request.BrandId &&
+                                     cb.Id != id);
+        if (existingCigar != null)
+        {
+            return BadRequest($"Сигара с названием '{request.Name}' от бренда '{brand.Name}' уже существует");
+        }
+
+        // Обновляем поля сигары
+        cigarBase.Name = request.Name;
+        cigarBase.BrandId = request.BrandId;
+        cigarBase.Country = request.Country;
+        cigarBase.Description = request.Description;
+        cigarBase.Strength = request.Strength;
+        cigarBase.Size = request.Size;
+        cigarBase.Wrapper = request.Wrapper;
+        cigarBase.Binder = request.Binder;
+        cigarBase.Filler = request.Filler;
+        cigarBase.UpdatedAt = DateTime.UtcNow;
+
+        // Обрабатываем новые изображения по ссылкам
+        if (request.ImageUrlsToAdd != null && request.ImageUrlsToAdd.Any())
+        {
+            foreach (var imageUrl in request.ImageUrlsToAdd)
+            {
+                if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    var imageBytes = await ImageDownloader.DownloadImageAsync(imageUrl);
+                    if (imageBytes != null)
+                    {
+                        var cigarImage = new CigarImage
+                        {
+                            CigarBaseId = cigarBase.Id,
+                            FileName = GetFileNameFromUrl(imageUrl),
+                            ContentType = GetContentTypeFromUrl(imageUrl),
+                            FileSize = imageBytes.Length,
+                            ImageData = imageBytes,
+                            IsMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain),
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.CigarImages.Add(cigarImage);
+                    }
+                }
+            }
+        }
+
+        // Удаляем изображения, если указаны
+        if (request.ImageIdsToRemove != null && request.ImageIdsToRemove.Any())
+        {
+            var imagesToRemove = cigarBase.Images
+                .Where(img => request.ImageIdsToRemove.Contains(img.Id))
+                .ToList();
+
+            foreach (var image in imagesToRemove)
+            {
+                _context.CigarImages.Remove(image);
+            }
+        }
+
+        // Обновляем главное изображение, если указано
+        if (request.MainImageId.HasValue)
+        {
+            var mainImage = cigarBase.Images.FirstOrDefault(img => img.Id == request.MainImageId.Value);
+            if (mainImage != null)
+            {
+                // Сбрасываем флаг IsMain у всех изображений
+                foreach (var img in cigarBase.Images)
+                {
+                    img.IsMain = (img.Id == request.MainImageId.Value);
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Возвращаем обновленную сигару с данными
+        var updatedCigar = await _context.CigarBases
+            .Include(cb => cb.Brand)
+            .Include(cb => cb.Images)
+            .Where(cb => cb.Id == cigarBase.Id)
+            .Select(cb => new CigarBaseDto
+            {
+                Id = cb.Id,
+                Name = cb.Name,
+                Brand = new BrandDto
+                {
+                    Id = cb.BrandId,
+                    Name = cb.Brand.Name,
+                    Country = cb.Brand.Country,
+                    Description = cb.Brand.Description,
+                    LogoBytes = cb.Brand.LogoBytes,
+                    IsModerated = cb.Brand.IsModerated,
+                    CreatedAt = cb.Brand.CreatedAt,
+                    UpdatedAt = cb.Brand.UpdatedAt
+                },
+                Size = cb.Size,
+                Strength = cb.Strength,
+                Country = cb.Country,
+                Description = cb.Description,
+                Wrapper = cb.Wrapper,
+                Binder = cb.Binder,
+                Filler = cb.Filler,
+                Images = cb.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
+                CreatedAt = cb.CreatedAt,
+                UpdatedAt = cb.UpdatedAt
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(updatedCigar);
+    }
+
+    private string GetFileNameFromUrl(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+        {
+            var fileName = Path.GetFileName(uri.LocalPath);
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                return fileName;
+            }
+        }
+
+        return Guid.NewGuid().ToString().Substring(0, 8) + ".jpg";
+    }
+
+    private string GetContentTypeFromUrl(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+        {
+            var extension = Path.GetExtension(uri.LocalPath).ToLower();
+            switch (extension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                case ".webp":
+                    return "image/webp";
+            }
+        }
+
+        return "image/jpeg"; // По умолчанию
+    }
+}

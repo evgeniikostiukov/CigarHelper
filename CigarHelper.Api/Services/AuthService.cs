@@ -14,7 +14,7 @@ public class AuthService
         _context = context;
         _jwtService = jwtService;
     }
-    
+
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         // Check if email already exists
@@ -26,7 +26,7 @@ public class AuthService
                 Message = "Email already registered"
             };
         }
-        
+
         // Check if username already exists
         if (await _context.Users.AnyAsync(u => u.Username == request.Username))
         {
@@ -36,10 +36,10 @@ public class AuthService
                 Message = "Username already taken"
             };
         }
-        
+
         // Create password hash
         JwtService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-        
+
         // Create new user
         var user = new User
         {
@@ -49,29 +49,30 @@ public class AuthService
             PasswordSalt = passwordSalt,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         // Add user to database
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        
+
         // Generate JWT token
         var token = _jwtService.GenerateToken(user);
-        
+
         return new AuthResponse
         {
             Success = true,
             Message = "Registration successful",
             Token = token,
             Username = user.Username,
-            Expiration = DateTime.UtcNow.AddDays(7)
+            Role = user.Role,
+            Expiration = DateTime.UtcNow.AddYears(1)
         };
     }
-    
+
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
         // Find user by email
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-        
+
         // Check if user exists
         if (user == null)
         {
@@ -81,7 +82,7 @@ public class AuthService
                 Message = "User not found"
             };
         }
-        
+
         // Verify password
         if (!JwtService.VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
         {
@@ -91,21 +92,22 @@ public class AuthService
                 Message = "Invalid password"
             };
         }
-        
+
         // Update last login time
         user.LastLogin = DateTime.UtcNow;
         await _context.SaveChangesAsync();
-        
+
         // Generate JWT token
         var token = _jwtService.GenerateToken(user);
-        
+
         return new AuthResponse
         {
             Success = true,
             Message = "Login successful",
             Token = token,
             Username = user.Username,
-            Expiration = DateTime.UtcNow.AddDays(7)
+            Role = user.Role,
+            Expiration = DateTime.UtcNow.AddYears(1)
         };
     }
-} 
+}

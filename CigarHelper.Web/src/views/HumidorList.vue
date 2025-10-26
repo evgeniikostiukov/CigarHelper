@@ -1,145 +1,175 @@
 <template>
-  <div class="humidor-list">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1>My Humidors</h1>
-      <router-link to="/humidors/new" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Add New Humidor
-      </router-link>
-    </div>
-
-    <div v-if="loading" class="text-center my-5">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
+  <div class="p-4 sm:p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto">
+      <!-- Заголовок и кнопка -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Мои хьюмидоры</h1>
+        <Button
+          @click="$router.push('/humidors/new')"
+          icon="pi pi-plus"
+          label="Добавить хьюмидор" />
       </div>
-    </div>
 
-    <div v-else-if="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+      <!-- Состояния -->
+      <div
+        v-if="loading"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Skeleton
+          v-for="n in 3"
+          :key="n"
+          height="16rem" />
+      </div>
 
-    <div v-else-if="humidors.length === 0" class="text-center my-5">
-      <p class="lead">You don't have any humidors yet.</p>
-      <router-link to="/humidors/new" class="btn btn-primary">
-        Create Your First Humidor
-      </router-link>
-    </div>
+      <Message
+        v-else-if="error"
+        severity="error"
+        >{{ error }}</Message
+      >
 
-    <div v-else class="row">
-      <div v-for="humidor in humidors" :key="humidor.id" class="col-md-4 mb-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">{{ humidor.name }}</h5>
-            <p class="card-text text-truncate-2">{{ humidor.description || 'No description' }}</p>
-            <div class="d-flex justify-content-between mb-3">
-              <span class="badge bg-primary">Capacity: {{ humidor.cigarCount }}/{{ humidor.capacity }}</span>
-              <span class="badge" :class="humidityClass(humidor.currentHumidity)">
-                {{ humidor.currentHumidity || '?' }}% RH
-              </span>
+      <div
+        v-else-if="humidors.length === 0"
+        class="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h3 class="text-2xl font-bold mb-2">У вас пока нет хьюмидоров</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Начните с создания вашего первого хьюмидора.</p>
+      </div>
+
+      <!-- Список хьюмидоров -->
+      <div
+        v-else
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card
+          v-for="humidor in humidors"
+          :key="humidor.id"
+          class="flex flex-col">
+          <template #title>
+            <h3 class="text-xl font-bold tracking-tight truncate">
+              {{ humidor.name }}
+            </h3>
+          </template>
+          <template #subtitle>
+            <div class="flex flex-col">
+              <span>Вместимость: {{ humidor.currentCount ?? 0 }}/{{ humidor.capacity }}</span>
+              <span v-if="humidor.humidity"
+                >Влажность:
+                <Badge
+                  :value="humidor.humidity"
+                  :severity="humidorService.getHumiditySeverity(humidor.humidity)"></Badge
+              ></span>
             </div>
-            <div class="d-flex justify-content-between">
-              <router-link :to="`/humidors/${humidor.id}`" class="btn btn-sm btn-outline-primary">
-                View Details
-              </router-link>
-              <div>
-                <router-link :to="`/humidors/${humidor.id}/edit`" class="btn btn-sm btn-outline-secondary me-1">
-                  Edit
-                </router-link>
-                <button @click="confirmDelete(humidor)" class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
+          </template>
+          <template #content>
+            <p class="text-gray-600 dark:text-gray-400 flex-grow h-16 line-clamp-3">
+              {{ humidor.description || 'Нет описания.' }}
+            </p>
+          </template>
+          <template #footer>
+            <div class="flex justify-between items-center">
+              <Button
+                @click="$router.push(`/humidors/${humidor.id}`)"
+                label="Детали"
+                severity="secondary"
+                outlined
+                size="small" />
+              <div class="flex gap-2">
+                <Button
+                  @click="$router.push(`/humidors/${humidor.id}/edit`)"
+                  icon="pi pi-pencil"
+                  text
+                  rounded
+                  severity="secondary" />
+                <Button
+                  @click="confirmDelete(humidor)"
+                  icon="pi pi-trash"
+                  text
+                  rounded
+                  severity="danger" />
               </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </Card>
       </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="modal show d-block" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Delete Humidor</h5>
-            <button type="button" class="btn-close" @click="cancelDelete"></button>
-          </div>
-          <div class="modal-body">
-            <p>Are you sure you want to delete <strong>{{ humidorToDelete?.name }}</strong>?</p>
-            <p class="text-danger">This action cannot be undone.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="cancelDelete">Cancel</button>
-            <button type="button" class="btn btn-danger" @click="deleteHumidor">Delete</button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-backdrop show"></div>
     </div>
   </div>
 </template>
 
-<script>
-import humidorService from '../services/humidorService'
+<script setup lang="ts">
+  import { ref, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useConfirm } from 'primevue/useconfirm';
+  import { useToast } from 'primevue/usetoast';
+  import humidorService from '../services/humidorService';
+  import type { Humidor } from '../services/humidorService';
 
-export default {
-  data() {
-    return {
-      humidors: [],
-      loading: true,
-      error: null,
-      showDeleteModal: false,
-      humidorToDelete: null
-    }
-  },
-  async created() {
+  const router = useRouter();
+  const confirm = useConfirm();
+  const toast = useToast();
+
+  const humidors = ref<Humidor[]>([]);
+  const loading = ref(true);
+  const error = ref<string | null>(null);
+
+  const fetchHumidors = async (): Promise<void> => {
+    loading.value = true;
+    error.value = null;
     try {
-      const response = await humidorService.getHumidors()
-      this.humidors = response.data
-      this.loading = false
-    } catch (error) {
-      this.error = 'Failed to load humidors'
-      this.loading = false
-      console.error(error)
+      humidors.value = await humidorService.getHumidors();
+    } catch (err) {
+      console.error('Ошибка при загрузке хьюмидоров:', err);
+      error.value = 'Не удалось загрузить хьюмидоры. Попробуйте позже.';
+    } finally {
+      loading.value = false;
     }
-  },
-  methods: {
-    humidityClass(humidity) {
-      if (!humidity) return 'bg-secondary'
-      if (humidity < 62) return 'bg-danger'
-      if (humidity > 75) return 'bg-danger'
-      if (humidity < 65) return 'bg-warning'
-      if (humidity > 72) return 'bg-warning'
-      return 'bg-success'
-    },
-    confirmDelete(humidor) {
-      this.humidorToDelete = humidor
-      this.showDeleteModal = true
-    },
-    cancelDelete() {
-      this.humidorToDelete = null
-      this.showDeleteModal = false
-    },
-    async deleteHumidor() {
-      if (!this.humidorToDelete) return
-      
-      try {
-        await humidorService.deleteHumidor(this.humidorToDelete.id)
-        
-        // Remove from the list
-        this.humidors = this.humidors.filter(h => h.id !== this.humidorToDelete.id)
-        
-        // Close modal
-        this.cancelDelete()
-      } catch (error) {
-        this.error = 'Failed to delete humidor'
-        console.error(error)
-      }
-    }
-  }
-}
+  };
+
+  const confirmDelete = (humidor: Humidor): void => {
+    confirm.require({
+      message: `Вы уверены, что хотите удалить хьюмидор "${humidor.name}"? Это действие нельзя отменить.`,
+      header: 'Подтверждение удаления',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Отмена',
+      acceptLabel: 'Удалить',
+      accept: async () => {
+        if (!humidor.id) {
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось определить ID хьюмидора',
+            life: 3000,
+          });
+          return;
+        }
+        try {
+          await humidorService.deleteHumidor(humidor.id);
+          humidors.value = humidors.value.filter((h) => h.id !== humidor.id);
+          toast.add({
+            severity: 'success',
+            summary: 'Успешно',
+            detail: 'Хьюмидор удален',
+            life: 3000,
+          });
+        } catch (err) {
+          console.error('Ошибка при удалении хьюмидора:', err);
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось удалить хьюмидор',
+            life: 3000,
+          });
+        }
+      },
+    });
+  };
+
+  onMounted(fetchHumidors);
 </script>
 
 <style scoped>
-.modal-backdrop {
-  opacity: 0.5;
-}
-</style> 
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+</style>

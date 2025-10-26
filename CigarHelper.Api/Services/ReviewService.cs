@@ -1,3 +1,4 @@
+using CigarHelper.Api.Helpers;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
@@ -28,6 +29,7 @@ public class ReviewService : IReviewService
         var query = _context.Reviews
             .Include(r => r.User)
             .Include(r => r.Cigar)
+            .ThenInclude(uc => uc.CigarBase)
             .Include(r => r.Images)
             .AsQueryable();
             
@@ -53,11 +55,10 @@ public class ReviewService : IReviewService
                 Rating = r.Rating,
                 UserId = r.UserId,
                 Username = r.User.Username,
-                UserAvatarUrl = r.User.AvatarUrl,
-                CigarId = r.CigarId,
-                CigarName = r.Cigar.Name,
-                CigarBrand = r.Cigar.Brand,
-                MainImageUrl = r.Images.FirstOrDefault().ImageUrl,
+                // UserAvatarBytes = r.User.AvatarUrl,
+                CigarName = r.Cigar.CigarBase.Name,
+                CigarBrand = r.Cigar.CigarBase.Brand.Name,
+                MainImageBytes = r.Images.Count > 0 ? r.Images.First().ImageBytes : null,
                 ImageCount = r.Images.Count,
                 CreatedAt = r.CreatedAt
             })
@@ -66,9 +67,13 @@ public class ReviewService : IReviewService
     
     public async Task<ReviewDto?> GetReviewByIdAsync(int id)
     {
+        var test = _context.Reviews.ToList();
+        
         var review = await _context.Reviews
             .Include(r => r.User)
             .Include(r => r.Cigar)
+            .ThenInclude(uc => uc.CigarBase)
+            .ThenInclude(cigarBase => cigarBase.Brand)
             .Include(r => r.Images)
             .FirstOrDefaultAsync(r => r.Id == id);
             
@@ -85,12 +90,12 @@ public class ReviewService : IReviewService
             Username = review.User.Username,
             UserAvatarUrl = review.User.AvatarUrl,
             CigarId = review.CigarId,
-            CigarName = review.Cigar.Name,
-            CigarBrand = review.Cigar.Brand,
+            CigarName = review.Cigar.CigarBase.Name,
+            CigarBrand = review.Cigar.CigarBase.Brand.Name,
             Images = review.Images.Select(i => new ReviewImageDto
             {
                 Id = i.Id,
-                ImageUrl = i.ImageUrl,
+                ImageBytes = i.ImageBytes,
                 Caption = i.Caption
             }).ToList(),
             SmokingExperience = review.SmokingExperience,
@@ -108,11 +113,11 @@ public class ReviewService : IReviewService
     
     public async Task<ReviewDto> CreateReviewAsync(int currentUserId, CreateReviewRequest request)
     {
-        // Проверяем существование сигары
-        var cigar = await _context.Cigars.FindAsync(request.CigarId);
+        // Проверяем существование сигары пользователя
+        var cigar = await _context.UserCigars.FindAsync(request.CigarId);
         if (cigar == null)
         {
-            throw new ArgumentException($"Сигара с ID {request.CigarId} не найдена");
+            throw new ArgumentException($"Сигара пользователя с ID {request.CigarId} не найдена");
         }
         
         var review = new Review
@@ -138,9 +143,10 @@ public class ReviewService : IReviewService
         {
             foreach (var imageRequest in request.Images)
             {
+                var imageBytes = await ImageDownloader.DownloadImageAsync(imageRequest.ImageUrl);
                 review.Images.Add(new ReviewImage
                 {
-                    ImageUrl = imageRequest.ImageUrl,
+                    ImageBytes = imageBytes,
                     Caption = imageRequest.Caption,
                     CreatedAt = DateTime.UtcNow
                 });
@@ -202,9 +208,10 @@ public class ReviewService : IReviewService
         {
             foreach (var imageRequest in request.ImagesToAdd)
             {
+                var imageBytes = await ImageDownloader.DownloadImageAsync(imageRequest.ImageUrl);
                 review.Images.Add(new ReviewImage
                 {
-                    ImageUrl = imageRequest.ImageUrl,
+                    ImageBytes = imageBytes,
                     Caption = imageRequest.Caption,
                     CreatedAt = DateTime.UtcNow
                 });

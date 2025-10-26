@@ -17,11 +17,12 @@ public static class MigrationExtensions
     {
         using var scope = app.Services.CreateScope();
         var services = scope.ServiceProvider;
-        
+        using var context = services.GetRequiredService<T>();
+
         try
         {
-            var context = services.GetRequiredService<T>();
             logger?.LogInformation("Applying migrations for {DbContext}", typeof(T).Name);
+            logger?.LogInformation("Pending migrations: {Migrations}", string.Join(',', context.Database.GetPendingMigrations()));
             context.Database.Migrate();
             logger?.LogInformation("Migrations applied successfully for {DbContext}", typeof(T).Name);
         }

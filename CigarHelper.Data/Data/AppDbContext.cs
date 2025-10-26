@@ -11,22 +11,27 @@ public class AppDbContext : DbContext
     }
     
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<Cigar> Cigars { get; set; } = null!;
+    public DbSet<Brand> Brands { get; set; } = null!;
+    public DbSet<CigarBase> CigarBases { get; set; } = null!;
+    public DbSet<UserCigar> UserCigars { get; set; } = null!;
     public DbSet<Humidor> Humidors { get; set; } = null!;
     public DbSet<Review> Reviews { get; set; } = null!;
     public DbSet<ReviewImage> ReviewImages { get; set; } = null!;
+    public DbSet<CigarImage> CigarImages { get; set; } = null!;
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!optionsBuilder.IsConfigured)
-        {
+        // if (!optionsBuilder.IsConfigured)
+        // {
             // This is a fallback if the context is created without options
             var connectionString = GetConnectionStringFromConfig();
             if (!string.IsNullOrEmpty(connectionString))
             {
                 optionsBuilder.UseNpgsql(connectionString);
+                optionsBuilder.EnableSensitiveDataLogging(true);
+                optionsBuilder.EnableDetailedErrors(true);
             }
-        }
+        // }
     }
     
     private string GetConnectionStringFromConfig()
@@ -53,11 +58,33 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Username)
             .IsUnique();
             
-        // Configure Cigar entity
-        modelBuilder.Entity<Cigar>()
-            .HasOne(c => c.User)
+        // Configure Brand entity
+        modelBuilder.Entity<Brand>()
+            .HasIndex(b => b.Name)
+            .IsUnique();
+            
+        // Configure CigarBase entity
+        modelBuilder.Entity<CigarBase>()
+            .HasIndex(c => new { c.Name, c.BrandId })
+            .IsUnique();
+            
+        modelBuilder.Entity<CigarBase>()
+            .HasOne(cb => cb.Brand)
+            .WithMany(b => b.Cigars)
+            .HasForeignKey(cb => cb.BrandId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        // Configure UserCigar entity
+        modelBuilder.Entity<UserCigar>()
+            .HasOne(uc => uc.CigarBase)
+            .WithMany(cb => cb.UserCigars)
+            .HasForeignKey(uc => uc.CigarBaseId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<UserCigar>()
+            .HasOne(uc => uc.User)
             .WithMany()
-            .HasForeignKey(c => c.UserId)
+            .HasForeignKey(uc => uc.UserId)
             .OnDelete(DeleteBehavior.Cascade);
             
         // Configure Humidor entity
@@ -67,10 +94,10 @@ public class AppDbContext : DbContext
             .HasForeignKey(h => h.UserId)
             .OnDelete(DeleteBehavior.Cascade);
             
-        modelBuilder.Entity<Cigar>()
-            .HasOne(c => c.Humidor)
+        modelBuilder.Entity<UserCigar>()
+            .HasOne(uc => uc.Humidor)
             .WithMany(h => h.Cigars)
-            .HasForeignKey(c => c.HumidorId)
+            .HasForeignKey(uc => uc.HumidorId)
             .OnDelete(DeleteBehavior.SetNull);
             
         // Configure Review entity
@@ -91,6 +118,18 @@ public class AppDbContext : DbContext
             .HasOne(ri => ri.Review)
             .WithMany(r => r.Images)
             .HasForeignKey(ri => ri.ReviewId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CigarImage>()
+            .HasOne(ci => ci.CigarBase)
+            .WithMany(cb => cb.Images)
+            .HasForeignKey(ci => ci.CigarBaseId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<CigarImage>()
+            .HasOne(ci => ci.UserCigar)
+            .WithMany(uc => uc.Images)
+            .HasForeignKey(ci => ci.UserCigarId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 } 
