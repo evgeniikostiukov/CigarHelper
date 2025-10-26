@@ -37,14 +37,13 @@ public class HumidorService : IHumidorService
                 Name = h.Name,
                 Description = h.Description,
                 Capacity = h.Capacity,
-                CurrentHumidity = h.CurrentHumidity,
-                CurrentTemperature = h.CurrentTemperature,
-                CigarCount = h.Cigars.Count,
+                Humidity = h.Humidity,
+                CurrentCount = h.Cigars.Count,
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt
             })
             .ToListAsync();
-            
+
         return humidors;
     }
 
@@ -52,6 +51,7 @@ public class HumidorService : IHumidorService
     {
         var humidor = await _context.Humidors
             .Include(h => h.Cigars)
+            .ThenInclude(uc => uc.CigarBase)
             .Where(h => h.Id == humidorId && h.UserId == userId)
             .Select(h => new HumidorDetailResponseDto
             {
@@ -59,24 +59,33 @@ public class HumidorService : IHumidorService
                 Name = h.Name,
                 Description = h.Description,
                 Capacity = h.Capacity,
-                CurrentHumidity = h.CurrentHumidity,
-                CurrentTemperature = h.CurrentTemperature,
+                Humidity = h.Humidity,
                 Cigars = h.Cigars.Select(c => new CigarBriefDto
                 {
                     Id = c.Id,
-                    Name = c.Name,
-                    Brand = c.Brand,
-                    Size = c.Size,
-                    Strength = c.Strength,
+                    Name = c.CigarBase.Name,
+                    Brand = new BrandDto()
+                    {
+                        Id = c.CigarBase.Brand.Id,
+                        Name = c.CigarBase.Brand.Name,
+                        Description = c.CigarBase.Brand.Description,
+                        UpdatedAt = c.CigarBase.Brand.UpdatedAt,
+                        CreatedAt = c.CigarBase.Brand.CreatedAt,
+                        Country = c.CigarBase.Brand.Country,
+                        IsModerated = c.CigarBase.Brand.IsModerated,
+                        LogoBytes = c.CigarBase.Brand.LogoBytes,
+                    },
+                    BrandName = c.CigarBase.Brand.Name,
+                    Size = c.CigarBase.Size,
+                    Strength = c.CigarBase.Strength,
                     Price = c.Price,
                     Rating = c.Rating,
-                    ImageUrl = c.ImageUrl
                 }).ToList(),
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt
             })
             .FirstOrDefaultAsync();
-            
+
         return humidor;
     }
 
@@ -87,24 +96,21 @@ public class HumidorService : IHumidorService
             Name = dto.Name,
             Description = dto.Description,
             Capacity = dto.Capacity,
-            CurrentHumidity = dto.CurrentHumidity,
-            CurrentTemperature = dto.CurrentTemperature,
             UserId = userId,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         _context.Humidors.Add(humidor);
         await _context.SaveChangesAsync();
-        
+
         return new HumidorResponseDto
         {
             Id = humidor.Id,
             Name = humidor.Name,
             Description = humidor.Description,
             Capacity = humidor.Capacity,
-            CurrentHumidity = humidor.CurrentHumidity,
-            CurrentTemperature = humidor.CurrentTemperature,
-            CigarCount = 0,
+            Humidity = humidor.Humidity,
+            CurrentCount = 0,
             CreatedAt = humidor.CreatedAt,
             UpdatedAt = humidor.UpdatedAt
         };
@@ -114,17 +120,16 @@ public class HumidorService : IHumidorService
     {
         var humidor = await _context.Humidors
             .FirstOrDefaultAsync(h => h.Id == humidorId && h.UserId == userId);
-            
+
         if (humidor == null)
             return false;
-            
+
         humidor.Name = dto.Name;
         humidor.Description = dto.Description;
         humidor.Capacity = dto.Capacity;
-        humidor.CurrentHumidity = dto.CurrentHumidity;
-        humidor.CurrentTemperature = dto.CurrentTemperature;
+        humidor.Humidity = dto.Humidity;
         humidor.UpdatedAt = DateTime.UtcNow;
-        
+
         await _context.SaveChangesAsync();
         return true;
     }
@@ -133,10 +138,10 @@ public class HumidorService : IHumidorService
     {
         var humidor = await _context.Humidors
             .FirstOrDefaultAsync(h => h.Id == humidorId && h.UserId == userId);
-            
+
         if (humidor == null)
             return false;
-            
+
         _context.Humidors.Remove(humidor);
         await _context.SaveChangesAsync();
         return true;
@@ -147,40 +152,40 @@ public class HumidorService : IHumidorService
         var humidor = await _context.Humidors
             .Include(h => h.Cigars)
             .FirstOrDefaultAsync(h => h.Id == humidorId && h.UserId == userId);
-            
+
         if (humidor == null)
             return false;
-            
-        var cigar = await _context.Cigars
+
+        var cigar = await _context.UserCigars
             .FirstOrDefaultAsync(c => c.Id == cigarId && c.UserId == userId);
-            
+
         if (cigar == null)
             return false;
-            
+
         if (cigar.HumidorId == humidorId)
             return true; // Already in this humidor
-            
+
         if (humidor.Cigars.Count >= humidor.Capacity)
             return false; // Capacity exceeded
-            
+
         cigar.HumidorId = humidorId;
         cigar.UpdatedAt = DateTime.UtcNow;
-        
+
         await _context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> RemoveCigarFromHumidor(int humidorId, int cigarId, int userId)
     {
-        var cigar = await _context.Cigars
+        var cigar = await _context.UserCigars
             .FirstOrDefaultAsync(c => c.Id == cigarId && c.UserId == userId && c.HumidorId == humidorId);
-            
+
         if (cigar == null)
             return false;
-            
+
         cigar.HumidorId = null;
         cigar.UpdatedAt = DateTime.UtcNow;
-        
+
         await _context.SaveChangesAsync();
         return true;
     }
@@ -190,26 +195,37 @@ public class HumidorService : IHumidorService
         // First verify the humidor exists and belongs to the user
         var humidorExists = await _context.Humidors
             .AnyAsync(h => h.Id == humidorId && h.UserId == userId);
-            
+
         if (!humidorExists)
             return new List<CigarBriefDto>();
-            
+
         // Get cigars in the humidor
-        var cigars = await _context.Cigars
+        var cigars = await _context.UserCigars
+            .Include(c => c.CigarBase)
             .Where(c => c.HumidorId == humidorId && c.UserId == userId)
             .Select(c => new CigarBriefDto
             {
                 Id = c.Id,
-                Name = c.Name,
-                Brand = c.Brand,
-                Size = c.Size,
-                Strength = c.Strength,
+                Name = c.CigarBase.Name,
+                Brand = new BrandDto()
+                {
+                    Id = c.CigarBase.Brand.Id,
+                    Name = c.CigarBase.Brand.Name,
+                    Description = c.CigarBase.Brand.Description,
+                    UpdatedAt = c.CigarBase.Brand.UpdatedAt,
+                    CreatedAt = c.CigarBase.Brand.CreatedAt,
+                    Country = c.CigarBase.Brand.Country,
+                    IsModerated = c.CigarBase.Brand.IsModerated,
+                    LogoBytes = c.CigarBase.Brand.LogoBytes,
+                },
+                BrandName = c.CigarBase.Brand.Name,
+                Size = c.CigarBase.Size,
+                Strength = c.CigarBase.Strength,
                 Price = c.Price,
                 Rating = c.Rating,
-                ImageUrl = c.ImageUrl
             })
             .ToListAsync();
-            
+
         return cigars;
     }
-} 
+}

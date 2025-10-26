@@ -1,0 +1,43 @@
+/*Для генерации файлов typescript библиотекой TypeGen*/
+{
+  "assemblies": [
+    "../JTI.Mos.SmartContract.Models/bin/Debug/net8.0/JTI.Mos.SmartContract.Models.dll",
+    "../JTI.Mos.SmartContract.Models.Extensions/bin/Debug/net8.0/JTI.Mos.SmartContract.Models.Extensions.dll"
+  ],
+  "clearOutputDirectory": true,
+  "outputPath": "..\\JTI.Mos.SmartContract.WebClient\\clientapp\\src\\dotnet",
+  "csNullableTranslation": "optional",
+  "singleQuotes": true,
+  "buildProject": false,
+  "useDefaultExport": true,
+  "tabLength": 2,
+  "explicitPublicAccessor": true,
+  "defaultValuesForTypes": {
+    "number": "0",
+    "Date | null": "null",
+    "string": "''",
+    "boolean": false,
+    "Array": "[]",
+    "number[]": "[]",
+    "SmartDateTime": "new SmartDateTime()",
+    "SmartDateTimeOption": "SmartDateTimeOption.Date",
+    "UserPermissionKeyValuePair": "new UserPermissionKeyValuePair()",
+    "Blob": "new Blob()"
+  },
+  "csAllowNullsForAllTypes": false,
+  "csDefaultValuesForConstantsOnly": false,
+  "customTypeMappings": {
+    //"System.DateTime": "string",
+    "System.Guid": "string",
+    "System.Collections.Generic.Enumerable": "string",
+    "System.Collections.Generic.Enumerable<T>": "string",
+    "Microsoft.AspNetCore.Http.IFormFile": "Blob",
+    "System.DateOnly": "Date"
+    //"System.Enum": 
+  }
+  //"enumStringInitializers": true,
+  //"typeUnionsForTypes": {
+  //  "string": [ "null", "undefined" ],
+  //  "Date": [ "string" ]
+  //}
+}

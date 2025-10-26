@@ -1,73 +1,92 @@
 <template>
-  <div class="home">
-    <div class="jumbotron bg-light p-5 rounded-3 mb-4">
-      <h1 class="display-4">Welcome to Cigar Helper</h1>
-      <p class="lead">
-        Your one-stop solution for managing your cigar collection and humidors.
+  <div class="home-tailwind container mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Hero Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-12 text-center">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
+        Добро пожаловать в Cigar Helper
+      </h1>
+      <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-6">
+        Ваше комплексное решение для управления коллекцией сигар и хьюмидорами.
       </p>
-      <hr class="my-4">
-      <p>
-        Keep track of your cigars, monitor humidor conditions, and never lose sight of your collection.
+      <Divider class="my-8" />
+      <p class="text-gray-700 dark:text-gray-400 max-w-3xl mx-auto mb-8">
+        Отслеживайте ваши сигары, контролируйте условия в хьюмидорах и никогда не теряйте из виду свою коллекцию.
       </p>
-      <div class="mt-4">
-        <router-link v-if="isAuthenticated" to="/humidors" class="btn btn-primary btn-lg me-2">
-          View My Humidors
-        </router-link>
-        <router-link v-if="isAuthenticated" to="/cigars" class="btn btn-secondary btn-lg">
-          Browse My Cigars
-        </router-link>
-        <router-link v-else to="/login" class="btn btn-primary btn-lg">
-          Get Started
-        </router-link>
+      <div class="flex justify-center items-center flex-wrap gap-4 mt-8">
+        <Button
+          v-if="isAuthenticated"
+          @click="$router.push('/humidors')"
+          severity="primary"
+          size="large"
+          label="Мои хьюмидоры"
+          icon="pi pi-box" />
+        <Button
+          v-if="isAuthenticated"
+          @click="$router.push('/cigars')"
+          severity="secondary"
+          size="large"
+          label="Мои сигары"
+          icon="pi pi-star" />
+        <Button
+          v-else
+          @click="$router.push('/login')"
+          severity="primary"
+          size="large"
+          label="Начать"
+          icon="pi pi-sign-in" />
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Track Your Humidors</h5>
-            <p class="card-text">
-              Create multiple humidors, monitor humidity and temperature, and track capacity.
-            </p>
-          </div>
+    <!-- Features Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center h-full transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2">
+        <div class="mb-4 text-blue-500 dark:text-blue-400">
+          <i class="pi pi-box text-5xl"></i>
         </div>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Отслеживайте хьюмидоры</h3>
+        <p class="text-gray-600 dark:text-gray-300">
+          Создавайте несколько хьюмидоров, контролируйте влажность и температуру, отслеживайте вместимость.
+        </p>
       </div>
-      <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Manage Your Cigars</h5>
-            <p class="card-text">
-              Keep details about your cigars, including brand, size, strength, and rating.
-            </p>
-          </div>
+
+      <!-- Feature 2 -->
+      <div
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center h-full transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2">
+        <div class="mb-4 text-blue-500 dark:text-blue-400">
+          <i class="pi pi-star text-5xl"></i>
         </div>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Управляйте сигарами</h3>
+        <p class="text-gray-600 dark:text-gray-300">
+          Храните информацию о ваших сигарах, включая бренд, размер, крепость и оценку.
+        </p>
       </div>
-      <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Stay Organized</h5>
-            <p class="card-text">
-              Easily add or remove cigars from humidors and know exactly where everything is stored.
-            </p>
-          </div>
+
+      <!-- Feature 3 -->
+      <div
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 flex flex-col items-center text-center h-full transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2">
+        <div class="mb-4 text-blue-500 dark:text-blue-400">
+          <i class="pi pi-check-circle text-5xl"></i>
         </div>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Будьте организованы</h3>
+        <p class="text-gray-600 dark:text-gray-300">
+          Легко добавляйте или удаляйте сигары из хьюмидоров и точно знайте, где что хранится.
+        </p>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import authService from '../services/authService'
+<script setup lang="ts">
+  import { useAuth } from '@/services/useAuth';
 
-export default {
-  data() {
-    return {
-      isAuthenticated: false
-    }
-  },
-  created() {
-    this.isAuthenticated = authService.isAuthenticated()
+  const { isAuthenticated } = useAuth();
+</script>
+
+<style scoped lang="postcss">
+  /* Стили для кнопок PrimeVue, если они не полностью подхватывают Tailwind */
+  :deep(.p-button) {
+    @apply font-semibold;
   }
-}
-</script> 
+</style>

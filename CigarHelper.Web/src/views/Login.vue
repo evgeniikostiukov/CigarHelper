@@ -1,322 +1,314 @@
 <template>
-  <div class="login-page">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-title text-center mb-4">{{ isRegister ? 'Регистрация' : 'Вход' }}</h3>
-            
-            <!-- Общая ошибка -->
-            <div v-if="error" class="alert alert-danger">{{ error }}</div>
-            
-            <form @submit.prevent="submitForm">
-              <!-- Username field - only for register -->
-              <div class="mb-3" v-if="isRegister">
-                <label for="username" class="form-label">Имя пользователя</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.username}"
-                  id="username"
-                  v-model="form.username"
-                  required
-                >
-                <div v-if="fieldErrors.username" class="invalid-feedback">
-                  {{ fieldErrors.username }}
-                </div>
-                <small class="form-text text-muted">
-                  Используйте только буквы, цифры, подчеркивания и дефисы (3-50 символов)
-                </small>
-              </div>
-              
-              <!-- Email field -->
-              <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.email}"
-                  id="email"
-                  v-model="form.email"
-                  required
-                >
-                <div v-if="fieldErrors.email" class="invalid-feedback">
-                  {{ fieldErrors.email }}
-                </div>
-              </div>
-              
-              <!-- Password field -->
-              <div class="mb-3">
-                <label for="password" class="form-label">Пароль</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.password}"
-                  id="password"
-                  v-model="form.password"
-                  required
-                >
-                <div v-if="fieldErrors.password" class="invalid-feedback">
-                  {{ fieldErrors.password }}
-                </div>
-                <small v-if="isRegister" class="form-text text-muted">
-                  Минимум 6 символов, включая минимум одну строчную букву и одну заглавную букву или цифру
-                </small>
-              </div>
-              
-              <!-- Confirm Password field - only for register -->
-              <div class="mb-3" v-if="isRegister">
-                <label for="confirmPassword" class="form-label">Подтверждение пароля</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.confirmPassword}"
-                  id="confirmPassword"
-                  v-model="form.confirmPassword"
-                  required
-                >
-                <div v-if="fieldErrors.confirmPassword" class="invalid-feedback">
-                  {{ fieldErrors.confirmPassword }}
-                </div>
-              </div>
-              
-              <div class="d-grid">
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                  <span v-if="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                  {{ isRegister ? 'Зарегистрироваться' : 'Войти' }}
-                </button>
-              </div>
-            </form>
-            
-            <div class="text-center mt-3">
-              <a href="#" @click.prevent="toggleForm">
-                {{ isRegister ? 'Уже есть аккаунт? Войти' : 'Нужен аккаунт? Зарегистрироваться' }}
-              </a>
+  <div class="flex items-center justify-center h-full px-4">
+    <div class="w-full max-w-md">
+      <Card class="shadow-2xl">
+        <template #title>
+          <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white">
+            {{ isRegister ? 'Регистрация' : 'Вход' }}
+          </h2>
+        </template>
+
+        <template #content>
+          <!-- Общая ошибка -->
+          <Message
+            v-if="error"
+            severity="error"
+            :closable="false"
+            class="mb-4"
+            >{{ error }}</Message
+          >
+
+          <form
+            @submit.prevent="submitForm"
+            class="flex flex-col gap-6">
+            <!-- Поля формы -->
+            <div
+              class="flex flex-col gap-2"
+              v-if="isRegister">
+              <label
+                for="username"
+                class="font-semibold text-gray-700 dark:text-gray-300"
+                >Имя пользователя</label
+              >
+              <InputText
+                id="username"
+                v-model="form.username"
+                :invalid="!!fieldErrors.username"
+                aria-describedby="username-help"
+                placeholder="Например, john_doe" />
+              <small
+                id="username-help"
+                class="text-gray-500 dark:text-gray-400">
+                Только буквы, цифры, _ и - (3-50 симв.)
+              </small>
+              <small
+                v-if="fieldErrors.username"
+                class="text-red-500"
+                >{{ fieldErrors.username }}</small
+              >
             </div>
+
+            <div class="flex flex-col gap-2">
+              <label
+                for="email"
+                class="font-semibold text-gray-700 dark:text-gray-300"
+                >Email</label
+              >
+              <InputText
+                id="email"
+                v-model="form.email"
+                type="email"
+                :invalid="!!fieldErrors.email"
+                placeholder="email@example.com" />
+              <small
+                v-if="fieldErrors.email"
+                class="text-red-500"
+                >{{ fieldErrors.email }}</small
+              >
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label
+                for="password"
+                class="font-semibold text-gray-700 dark:text-gray-300"
+                >Пароль</label
+              >
+              <Password
+                id="password"
+                v-model="form.password"
+                :invalid="!!fieldErrors.password"
+                :feedback="isRegister"
+                toggleMask
+                placeholder="******" />
+              <small
+                v-if="fieldErrors.password"
+                class="text-red-500"
+                >{{ fieldErrors.password }}</small
+              >
+            </div>
+
+            <div
+              class="flex flex-col gap-2"
+              v-if="isRegister">
+              <label
+                for="confirmPassword"
+                class="font-semibold text-gray-700 dark:text-gray-300"
+                >Подтверждение пароля</label
+              >
+              <Password
+                id="confirmPassword"
+                v-model="form.confirmPassword"
+                :invalid="!!fieldErrors.confirmPassword"
+                :feedback="false"
+                toggleMask
+                placeholder="******" />
+              <small
+                v-if="fieldErrors.confirmPassword"
+                class="text-red-500"
+                >{{ fieldErrors.confirmPassword }}</small
+              >
+            </div>
+
+            <Button
+              type="submit"
+              :label="isRegister ? 'Зарегистрироваться' : 'Войти'"
+              :loading="loading"
+              class="w-full mt-4" />
+          </form>
+        </template>
+
+        <template #footer>
+          <div class="text-center">
+            <a
+              href="#"
+              @click.prevent="toggleForm"
+              class="text-blue-500 hover:underline">
+              {{ isRegister ? 'Уже есть аккаунт? Войти' : 'Нужен аккаунт? Зарегистрироваться' }}
+            </a>
           </div>
-        </div>
-      </div>
+        </template>
+      </Card>
     </div>
   </div>
 </template>
 
-<script>
-import authService from '../services/authService'
+<script setup lang="ts">
+  import { ref, reactive, watch } from 'vue';
+  import { useRouter, useRoute } from 'vue-router';
+  import authService from '../services/authService';
+  import type { AuthCredentials, RegisterData } from '../services/authService';
 
-export default {
-  data() {
-    return {
-      isRegister: false,
-      loading: false,
-      error: null,
-      validationErrors: {},
-      fieldErrors: {
-        username: null,
-        email: null,
-        password: null,
-        confirmPassword: null
-      },
-      form: {
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      }
-    }
-  },
-  watch: {
-    // Валидация при вводе данных
-    'form.username': function(value) {
-      if (!value && this.isRegister) {
-        this.fieldErrors.username = 'Имя пользователя обязательно'
-      } else if (this.isRegister && value.length < 3) {
-        this.fieldErrors.username = 'Минимум 3 символа'
-      } else if (this.isRegister && !/^[a-zA-Z0-9_-]+$/.test(value)) {
-        this.fieldErrors.username = 'Допустимы только буквы, цифры, подчеркивания и дефисы'
-      } else {
-        this.fieldErrors.username = null
-      }
-    },
-    'form.email': function(value) {
-      if (!value) {
-        this.fieldErrors.email = 'Email обязателен'
-      } else if (!/\S+@\S+\.\S+/.test(value)) {
-        this.fieldErrors.email = 'Некорректный формат email'
-      } else {
-        this.fieldErrors.email = null
-      }
-    },
-    'form.password': function(value) {
-      if (!value) {
-        this.fieldErrors.password = 'Пароль обязателен'
-      } else if (value.length < 6) {
-        this.fieldErrors.password = 'Минимум 6 символов'
-      } else if (this.isRegister && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(value)) {
-        this.fieldErrors.password = 'Должен содержать строчную букву и заглавную букву или цифру'
-      } else {
-        this.fieldErrors.password = null
-      }
-      
-      // Проверка подтверждения пароля при изменении самого пароля
-      if (this.isRegister && this.form.confirmPassword && value !== this.form.confirmPassword) {
-        this.fieldErrors.confirmPassword = 'Пароли не совпадают'
-      } else if (this.isRegister && this.form.confirmPassword) {
-        this.fieldErrors.confirmPassword = null
-      }
-    },
-    'form.confirmPassword': function(value) {
-      if (!value && this.isRegister) {
-        this.fieldErrors.confirmPassword = 'Подтверждение пароля обязательно'
-      } else if (this.isRegister && value !== this.form.password) {
-        this.fieldErrors.confirmPassword = 'Пароли не совпадают'
-      } else {
-        this.fieldErrors.confirmPassword = null
-      }
-    }
-  },
-  methods: {
-    toggleForm() {
-      this.isRegister = !this.isRegister
-      this.clearErrors()
-      
-      // Сбросить форму
-      this.form = {
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      }
-    },
-    clearErrors() {
-      this.error = null
-      this.validationErrors = {}
-      this.fieldErrors = {
-        username: null,
-        email: null,
-        password: null,
-        confirmPassword: null
-      }
-    },
-    async submitForm() {
-      this.clearErrors()
-      
-      // Проверить форму перед отправкой
-      if (!this.validateForm()) {
-        return
-      }
-      
-      this.loading = true
-      
-      try {
-        if (this.isRegister) {
-          // Registration
-          const response = await authService.register({
-            username: this.form.username,
-            email: this.form.email,
-            password: this.form.password,
-            confirmPassword: this.form.confirmPassword
-          })
-          
-          const userData = authService.formatUserData(response.data)
-          authService.setAuth(userData.token, userData)
-          this.redirectAfterAuth()
-        } else {
-          // Login
-          const response = await authService.login({
-            email: this.form.email,
-            password: this.form.password
-          })
-          
-          const userData = authService.formatUserData(response.data)
-          authService.setAuth(userData.token, userData)
-          this.redirectAfterAuth()
-        }
-      } catch (error) {
-        this.handleError(error)
-      } finally {
-        this.loading = false
-      }
-    },
-    validateForm() {
-      let isValid = true
-      
-      // Проверяем email для всех форм
-      if (!this.form.email) {
-        this.fieldErrors.email = 'Email обязателен'
-        isValid = false
-      } else if (!/\S+@\S+\.\S+/.test(this.form.email)) {
-        this.fieldErrors.email = 'Некорректный формат email'
-        isValid = false
-      }
-      
-      // Проверяем пароль для всех форм
-      if (!this.form.password) {
-        this.fieldErrors.password = 'Пароль обязателен'
-        isValid = false
-      } else if (this.isRegister && this.form.password.length < 6) {
-        this.fieldErrors.password = 'Минимум 6 символов'
-        isValid = false
-      } else if (this.isRegister && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(this.form.password)) {
-        this.fieldErrors.password = 'Должен содержать строчную букву и заглавную букву или цифру'
-        isValid = false
-      }
-      
-      // Дополнительные проверки только для формы регистрации
-      if (this.isRegister) {
-        // Проверка имени пользователя
-        if (!this.form.username) {
-          this.fieldErrors.username = 'Имя пользователя обязательно'
-          isValid = false
-        } else if (this.form.username.length < 3) {
-          this.fieldErrors.username = 'Минимум 3 символа'
-          isValid = false
-        } else if (!/^[a-zA-Z0-9_-]+$/.test(this.form.username)) {
-          this.fieldErrors.username = 'Допустимы только буквы, цифры, подчеркивания и дефисы'
-          isValid = false
-        }
-        
-        // Проверка подтверждения пароля
-        if (!this.form.confirmPassword) {
-          this.fieldErrors.confirmPassword = 'Подтверждение пароля обязательно'
-          isValid = false
-        } else if (this.form.confirmPassword !== this.form.password) {
-          this.fieldErrors.confirmPassword = 'Пароли не совпадают'
-          isValid = false
-        }
-      }
-      
-      return isValid
-    },
-    handleError(error) {
-      if (error.response) {
-        const { data } = error.response
-        
-        // Обработка ошибок валидации
-        if (data.errors && typeof data.errors === 'object') {
-          this.validationErrors = data.errors
-          this.error = data.message || 'Ошибка валидации данных формы'
-        } 
-        // Обработка других ошибок с помощью сервиса аутентификации
-        else {
-          this.error = authService.getErrorMessage(error)
-        }
-      } else {
-        this.error = authService.getErrorMessage(error)
-      }
-    },
-    redirectAfterAuth() {
-      const redirectUrl = this.$route.query.redirect || '/humidors'
-      this.$router.push(redirectUrl)
-    }
+  // --- Interfaces ---
+  interface LoginForm {
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
   }
-}
+
+  interface FieldErrors {
+    username: string | null;
+    email: string | null;
+    password: string | null;
+    confirmPassword: string | null;
+  }
+
+  // --- Component State ---
+  const router = useRouter();
+  const route = useRoute();
+
+  const isRegister = ref(false);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
+  const form = reactive<LoginForm>({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const fieldErrors = reactive<FieldErrors>({
+    username: null,
+    email: null,
+    password: null,
+    confirmPassword: null,
+  });
+
+  // --- Methods ---
+  const validateField = (field: keyof LoginForm, value: string): string | null => {
+    switch (field) {
+      case 'username':
+        if (isRegister.value) {
+          if (!value) return 'Имя пользователя обязательно';
+          if (value.length < 3) return 'Минимум 3 символа';
+          if (!/^[a-zA-Z0-9_-]+$/.test(value)) return 'Недопустимые символы';
+        }
+        break;
+      case 'email':
+        if (!value) return 'Email обязателен';
+        if (!/\S+@\S+\.\S+/.test(value)) return 'Некорректный формат email';
+        break;
+      case 'password':
+        if (!value) return 'Пароль обязателен';
+        if (value.length < 6) return 'Минимум 6 символов';
+        if (isRegister.value && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(value)) {
+          return 'Нужна строчная буква и заглавная/цифра';
+        }
+        break;
+      case 'confirmPassword':
+        if (isRegister.value) {
+          if (!value) return 'Подтверждение пароля обязательно';
+          if (value !== form.password) return 'Пароли не совпадают';
+        }
+        break;
+    }
+    return null;
+  };
+
+  watch(
+    form,
+    (newForm) => {
+      for (const field in newForm) {
+        const key = field as keyof LoginForm;
+        fieldErrors[key] = validateField(key, newForm[key]);
+      }
+    },
+    { deep: true },
+  );
+
+  const clearForm = (): void => {
+    Object.assign(form, {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    });
+    clearErrors();
+  };
+
+  const toggleForm = (): void => {
+    isRegister.value = !isRegister.value;
+    clearForm();
+  };
+
+  const clearErrors = (): void => {
+    error.value = null;
+    Object.assign(fieldErrors, {
+      username: null,
+      email: null,
+      password: null,
+      confirmPassword: null,
+    });
+  };
+
+  const redirectAfterAuth = (): void => {
+    const redirectUrl = (route.query.redirect as string) || '/humidors';
+    router.push(redirectUrl);
+    // Full page reload to ensure all states are reset correctly
+    // setTimeout(() => window.location.reload(), 100);
+  };
+
+  const submitForm = async (): Promise<void> => {
+    clearErrors();
+
+    let hasError = false;
+    for (const field in form) {
+      const key = field as keyof LoginForm;
+      // Skip validation for fields that are not part of the current form (login vs register)
+      if (!isRegister.value && (key === 'username' || key === 'confirmPassword')) {
+        continue;
+      }
+      const validationError = validateField(key, form[key]);
+      if (validationError) {
+        fieldErrors[key] = validationError;
+        hasError = true;
+      }
+    }
+
+    if (hasError) return;
+
+    loading.value = true;
+    try {
+      if (isRegister.value) {
+        const payload: RegisterData = {
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          confirmPassword: form.confirmPassword,
+        };
+        const response = await authService.register(payload);
+        if (!response.success) {
+          throw new Error(response.message || 'Ошибка регистрации');
+        }
+      } else {
+        const payload: AuthCredentials = {
+          email: form.email,
+          password: form.password,
+        };
+        const response = await authService.login(payload);
+        if (!response.success) {
+          throw new Error(response.message || 'Ошибка входа');
+        }
+      }
+
+      // redirectAfterAuth();
+      const redirectUrl = (route.query.redirect as string) || '/';
+      router.push(redirectUrl);
+    } catch (err: any) {
+      error.value =
+        err.response?.data?.message || err.message || (isRegister.value ? 'Ошибка регистрации' : 'Ошибка входа');
+    } finally {
+      loading.value = false;
+    }
+  };
 </script>
 
 <style scoped>
-.login-page {
-  padding-top: 2rem;
-}
-.card {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-</style> 
+  .login-page {
+    padding-top: 2rem;
+  }
+  .card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+</style>

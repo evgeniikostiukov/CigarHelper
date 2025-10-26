@@ -1,340 +1,342 @@
 <template>
-  <div class="review-detail-page">
-    <div class="container">
+  <div class="p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
       <!-- Загрузка -->
-      <div v-if="loading" class="text-center my-5">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Загрузка...</span>
+      <div v-if="loading">
+        <Skeleton
+          height="2rem"
+          width="50%"
+          class="mb-4" />
+        <Skeleton
+          height="3rem"
+          class="mb-6" />
+        <Skeleton
+          height="25rem"
+          class="mb-6" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton height="15rem" />
+          <Skeleton height="15rem" />
         </div>
-        <p class="mt-2">Загрузка обзора...</p>
       </div>
-      
+
       <!-- Ошибка -->
-      <div v-else-if="error" class="alert alert-danger">
-        {{ error }}
-        <div class="mt-3">
-          <router-link to="/reviews" class="btn btn-outline-primary">
-            Вернуться к списку обзоров
-          </router-link>
-        </div>
+      <div v-else-if="error">
+        <Message
+          severity="error"
+          :closable="false"
+          class="mb-4"
+          >{{ error }}</Message
+        >
+        <Button
+          @click="$router.push('/reviews')"
+          label="Вернуться к списку"
+          icon="pi pi-arrow-left" />
       </div>
-      
+
       <!-- Содержимое обзора -->
-      <div v-else class="review-content">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-              <li class="breadcrumb-item"><router-link to="/reviews">Обзоры</router-link></li>
-              <li class="breadcrumb-item active" aria-current="page">{{ review.title }}</li>
-            </ol>
-          </nav>
-          
-          <div v-if="isCurrentUserReview" class="review-actions">
-            <router-link :to="`/reviews/${review.id}/edit`" class="btn btn-sm btn-outline-primary me-2">
-              <i class="bi bi-pencil"></i> Редактировать
-            </router-link>
-            <button @click="confirmDelete" class="btn btn-sm btn-outline-danger">
-              <i class="bi bi-trash"></i> Удалить
-            </button>
+      <div
+        v-else-if="review"
+        class="space-y-8">
+        <!-- Хлебные крошки и действия -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <Breadcrumb
+            :home="home"
+            :model="breadcrumbItems" />
+          <div
+            v-if="isCurrentUserReview"
+            class="flex items-center gap-2">
+            <Button
+              @click="$router.push(`/reviews/${review.id}/edit`)"
+              label="Редактировать"
+              icon="pi pi-pencil"
+              severity="secondary"
+              outlined />
+            <Button
+              @click="confirmDelete"
+              label="Удалить"
+              icon="pi pi-trash"
+              severity="danger" />
           </div>
         </div>
-        
-        <div class="review-header">
-          <h1 class="mb-3">{{ review.title }}</h1>
-          
-          <div class="review-meta d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center">
-              <div class="avatar me-3">
-                <img 
-                  :src="review.userAvatarUrl || '/img/default-avatar.png'" 
-                  :alt="review.username"
-                  class="rounded-circle"
-                >
-              </div>
+
+        <!-- Заголовок и мета-информация -->
+        <header class="space-y-4">
+          <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter">
+            {{ review.title }}
+          </h1>
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <div class="flex items-center gap-3">
+              <Avatar
+                :image="review.userAvatarUrl || '/img/default-avatar.png'"
+                size="large"
+                shape="circle" />
               <div>
-                <div class="fw-bold">{{ review.username }}</div>
-                <div class="text-muted">{{ formatDate(review.createdAt) }}</div>
+                <p class="font-bold text-lg">{{ review.username }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ formatDate(review.createdAt) }}
+                </p>
               </div>
             </div>
-            
-            <div class="rating d-flex align-items-center">
-              <span class="me-2">Оценка:</span>
-              <span class="badge bg-warning text-dark fs-5">
-                <i class="bi bi-star-fill"></i> {{ review.rating }}/10
-              </span>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-lg">Оценка:</span>
+              <Tag
+                :value="review.rating + '/10'"
+                icon="pi pi-star-fill"
+                severity="warning"
+                class="text-lg px-3 py-2" />
             </div>
           </div>
-          
-          <div class="alert alert-light d-flex align-items-center">
-            <i class="bi bi-info-circle-fill me-2"></i>
-            <div>Обзор на сигару <strong>{{ review.cigarBrand }} {{ review.cigarName }}</strong></div>
-          </div>
+          <Message
+            severity="info"
+            :closable="false"
+            >Обзор на сигару:
+            <strong class="font-semibold">{{ review.cigarBrand }} {{ review.cigarName }}</strong></Message
+          >
+        </header>
+
+        <!-- Галерея изображений -->
+        <Galleria
+          v-if="review.images && review.images.length"
+          :value="review.images"
+          :numVisible="5"
+          containerClass="w-full"
+          :showThumbnails="review.images.length > 1"
+          :showItemNavigators="review.images.length > 1">
+          <template #item="slotProps">
+            <img
+              :src="`data:image/jpeg;base64,${slotProps.item.imageData}`"
+              :alt="slotProps.item.caption || review.title"
+              class="w-full h-auto max-h-[70vh] object-contain block" />
+          </template>
+          <template #thumbnail="slotProps">
+            <img
+              :src="`data:image/jpeg;base64,${slotProps.item.imageData}`"
+              :alt="slotProps.item.caption || review.title"
+              class="w-24 h-16 object-cover" />
+          </template>
+          <template #caption="slotProps">
+            <p
+              v-if="slotProps.item.caption"
+              class="text-white">
+              {{ slotProps.item.caption }}
+            </p>
+          </template>
+        </Galleria>
+
+        <!-- Характеристики -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <template #title>Характеристики</template>
+            <template #content>
+              <ul class="space-y-4">
+                <li v-if="review.smokingExperience">
+                  <strong class="font-semibold">Опыт курения:</strong>
+                  {{ review.smokingExperience }}
+                </li>
+                <li v-if="review.aroma">
+                  <strong class="font-semibold">Аромат:</strong>
+                  {{ review.aroma }}
+                </li>
+                <li v-if="review.taste">
+                  <strong class="font-semibold">Вкус:</strong>
+                  {{ review.taste }}
+                </li>
+                <li
+                  v-if="review.construction"
+                  class="flex items-center gap-2">
+                  <strong class="font-semibold">Конструкция:</strong>
+                  <Rating
+                    :modelValue="review.construction"
+                    readonly
+                    :cancel="false" />
+                </li>
+                <li
+                  v-if="review.burnQuality"
+                  class="flex items-center gap-2">
+                  <strong class="font-semibold">Качество горения:</strong>
+                  <Rating
+                    :modelValue="review.burnQuality"
+                    readonly
+                    :cancel="false" />
+                </li>
+                <li
+                  v-if="review.draw"
+                  class="flex items-center gap-2">
+                  <strong class="font-semibold">Тяга:</strong>
+                  <Rating
+                    :modelValue="review.draw"
+                    readonly
+                    :cancel="false" />
+                </li>
+              </ul>
+            </template>
+          </Card>
+          <Card>
+            <template #title>Детали дегустации</template>
+            <template #content>
+              <ul class="space-y-4">
+                <li v-if="review.venue">
+                  <strong class="font-semibold">Место:</strong>
+                  {{ review.venue }}
+                </li>
+                <li>
+                  <strong class="font-semibold">Дата дегустации:</strong>
+                  {{ formatDate(review.smokingDate) }}
+                </li>
+              </ul>
+            </template>
+          </Card>
         </div>
-        
-        <!-- Карусель изображений -->
-        <div v-if="review.images && review.images.length > 0" class="review-images mb-4">
-          <div id="reviewImagesCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-indicators">
-              <button 
-                v-for="(image, index) in review.images" 
-                :key="`indicator-${image.id}`"
-                type="button" 
-                data-bs-target="#reviewImagesCarousel" 
-                :data-bs-slide-to="index" 
-                :class="{ active: index === 0 }"
-                :aria-current="index === 0 ? 'true' : 'false'"
-                :aria-label="`Слайд ${index + 1}`"
-              ></button>
-            </div>
-            <div class="carousel-inner">
-              <div 
-                v-for="(image, index) in review.images" 
-                :key="`slide-${image.id}`"
-                class="carousel-item" 
-                :class="{ active: index === 0 }"
-              >
-                <img :src="image.imageUrl" class="d-block w-100" :alt="image.caption || review.title">
-                <div v-if="image.caption" class="carousel-caption d-none d-md-block">
-                  <p>{{ image.caption }}</p>
-                </div>
-              </div>
-            </div>
-            <button v-if="review.images.length > 1" class="carousel-control-prev" type="button" data-bs-target="#reviewImagesCarousel" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Предыдущий</span>
-            </button>
-            <button v-if="review.images.length > 1" class="carousel-control-next" type="button" data-bs-target="#reviewImagesCarousel" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Следующий</span>
-            </button>
-          </div>
-        </div>
-        
-        <!-- Характеристики обзора -->
-        <div class="row mb-4">
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="mb-0">Характеристики</h5>
-              </div>
-              <div class="card-body">
-                <div class="row">
-                  <div v-if="review.smokingExperience" class="col-6 mb-2">
-                    <div class="fw-bold">Опыт курения:</div>
-                    <div>{{ review.smokingExperience }}</div>
-                  </div>
-                  <div v-if="review.aroma" class="col-6 mb-2">
-                    <div class="fw-bold">Аромат:</div>
-                    <div>{{ review.aroma }}</div>
-                  </div>
-                  <div v-if="review.taste" class="col-6 mb-2">
-                    <div class="fw-bold">Вкус:</div>
-                    <div>{{ review.taste }}</div>
-                  </div>
-                  <div v-if="review.construction" class="col-6 mb-2">
-                    <div class="fw-bold">Конструкция:</div>
-                    <div class="rating-stars">
-                      <i v-for="i in 5" :key="i" class="bi" :class="i <= review.construction ? 'bi-star-fill' : 'bi-star'"></i>
-                      <span class="ms-1">{{ review.construction }}/5</span>
-                    </div>
-                  </div>
-                  <div v-if="review.burnQuality" class="col-6 mb-2">
-                    <div class="fw-bold">Качество горения:</div>
-                    <div class="rating-stars">
-                      <i v-for="i in 5" :key="i" class="bi" :class="i <= review.burnQuality ? 'bi-star-fill' : 'bi-star'"></i>
-                      <span class="ms-1">{{ review.burnQuality }}/5</span>
-                    </div>
-                  </div>
-                  <div v-if="review.draw" class="col-6 mb-2">
-                    <div class="fw-bold">Тяга:</div>
-                    <div class="rating-stars">
-                      <i v-for="i in 5" :key="i" class="bi" :class="i <= review.draw ? 'bi-star-fill' : 'bi-star'"></i>
-                      <span class="ms-1">{{ review.draw }}/5</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card mb-3">
-              <div class="card-header">
-                <h5 class="mb-0">Детали дегустации</h5>
-              </div>
-              <div class="card-body">
-                <div v-if="review.venue" class="mb-2">
-                  <div class="fw-bold">Место:</div>
-                  <div>{{ review.venue }}</div>
-                </div>
-                <div class="mb-2">
-                  <div class="fw-bold">Дата дегустации:</div>
-                  <div>{{ formatDate(review.smokingDate) }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Содержание обзора -->
-        <div class="review-body card mb-4">
-          <div class="card-header">
-            <h3 class="mb-0">Обзор</h3>
-          </div>
-          <div class="card-body">
-            <div class="content" v-html="formattedContent"></div>
-          </div>
-        </div>
-        
-        <div class="d-flex justify-content-between">
-          <router-link to="/reviews" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Назад к списку
-          </router-link>
-          
-          <router-link :to="`/cigars/${review.cigarId}`" class="btn btn-primary">
-            Перейти к сигаре <i class="bi bi-arrow-right"></i>
-          </router-link>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Модальное окно подтверждения удаления -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="deleteConfirmModalLabel">Подтвердите удаление</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-          </div>
-          <div class="modal-body">
-            Вы уверены, что хотите удалить этот обзор? Это действие нельзя отменить.
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button type="button" class="btn btn-danger" @click="deleteReview" :disabled="deleting">
-              <span v-if="deleting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-              Удалить
-            </button>
-          </div>
+
+        <!-- Содержание -->
+        <Card>
+          <template #title>Обзор</template>
+          <template #content>
+            <div
+              class="prose dark:prose-invert max-w-none"
+              v-html="formattedContent"></div>
+          </template>
+        </Card>
+
+        <!-- Навигация -->
+        <div class="flex justify-between items-center">
+          <Button
+            @click="$router.push('/reviews')"
+            label="Назад к списку"
+            icon="pi pi-arrow-left"
+            severity="secondary" />
+          <Button
+            @click="$router.push(`/cigars/${review.cigarId}`)"
+            label="Перейти к сигаре"
+            icon="pi pi-arrow-right"
+            iconPos="right" />
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import api from '../services/api'
-import authService from '../services/authService'
-import { Modal } from 'bootstrap'
+<script setup lang="ts">
+  import { ref, computed, onMounted } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+  import { useConfirm } from 'primevue/useconfirm';
+  import { useToast } from 'primevue/usetoast';
+  import reviewService from '../services/reviewService';
+  import type { Review } from '../services/reviewService';
+  import authService from '../services/authService';
+  import DOMPurify from 'dompurify';
 
-export default {
-  data() {
-    return {
-      review: null,
-      loading: true,
-      error: null,
-      deleteModal: null,
-      deleting: false
-    }
-  },
-  computed: {
-    isCurrentUserReview() {
-      if (!this.review) return false
-      
-      const currentUser = authService.getCurrentUser()
-      return currentUser && currentUser.id === this.review.userId
-    },
-    formattedContent() {
-      if (!this.review) return ''
-      
-      // Преобразуем текст в HTML с абзацами
-      return this.review.content
-        .split('\n')
-        .filter(paragraph => paragraph.trim().length > 0)
-        .map(paragraph => `<p>${paragraph}</p>`)
-        .join('')
-    }
-  },
-  async mounted() {
-    await this.fetchReview()
-    
-    // Инициализируем модальное окно Bootstrap
-    this.deleteModal = new Modal(document.getElementById('deleteConfirmModal'))
-  },
-  methods: {
-    async fetchReview() {
-      this.loading = true
-      this.error = null
-      
-      try {
-        const reviewId = this.$route.params.id
-        const response = await api.get(`/reviews/${reviewId}`)
-        this.review = response.data
-      } catch (error) {
-        console.error('Ошибка при загрузке обзора:', error)
-        this.error = 'Не удалось загрузить обзор. Возможно, он был удален или у вас нет к нему доступа.'
-      } finally {
-        this.loading = false
-      }
-    },
-    formatDate(dateString) {
-      const options = { year: 'numeric', month: 'long', day: 'numeric' }
-      return new Date(dateString).toLocaleDateString('ru-RU', options)
-    },
-    confirmDelete() {
-      this.deleteModal.show()
-    },
-    async deleteReview() {
-      this.deleting = true
-      
-      try {
-        await api.delete(`/reviews/${this.review.id}`)
-        this.deleteModal.hide()
-        this.$router.push('/reviews')
-      } catch (error) {
-        console.error('Ошибка при удалении обзора:', error)
-        alert('Не удалось удалить обзор. Пожалуйста, попробуйте позже.')
-      } finally {
-        this.deleting = false
-      }
-    }
+  // --- Interfaces ---
+  interface ReviewImage {
+    imageUrl: string;
+    caption?: string;
   }
-}
+
+  // --- Component State ---
+  const route = useRoute();
+  const router = useRouter();
+  const confirm = useConfirm();
+  const toast = useToast();
+
+  const review = ref<Review | null>(null);
+  const loading = ref(true);
+  const error = ref<string | null>(null);
+
+  const home = ref({ icon: 'pi pi-home', to: '/' });
+
+  // --- Computed Properties ---
+  const breadcrumbItems = computed(() => [
+    { label: 'Обзоры', to: '/reviews' },
+    { label: review.value?.title || '...' },
+  ]);
+
+  const isCurrentUserReview = computed(() => {
+    if (!review.value) return false;
+    const currentUser = authService.state.user;
+    return currentUser && currentUser.id === review.value.userId;
+  });
+
+  const formattedContent = computed(() => {
+    if (!review.value?.content) return '';
+    // A more robust HTML sanitization library like DOMPurify is recommended for production
+    return review.value.content
+      .split('\n')
+      .filter((p) => p.trim().length > 0)
+      .map((p) => `<p>${p}</p>`)
+      .join('');
+  });
+
+  // --- Methods ---
+  const loadReview = async (): Promise<void> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const reviewId = route.params.id as string;
+      review.value = await reviewService.getReview(reviewId);
+    } catch (err) {
+      console.error('Ошибка загрузки обзора:', err);
+      error.value = 'Не удалось загрузить обзор. Возможно, он был удален или ссылка неверна.';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Дата не указана';
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const confirmDelete = () => {
+    confirm.require({
+      message: 'Вы уверены, что хотите удалить этот обзор? Это действие нельзя отменить.',
+      header: 'Подтверждение удаления',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Отмена',
+      acceptLabel: 'Удалить',
+      accept: async () => {
+        if (!review.value) return;
+        try {
+          await reviewService.deleteReview(review.value.id);
+          toast.add({
+            severity: 'success',
+            summary: 'Успешно',
+            detail: 'Обзор удален',
+            life: 3000,
+          });
+          router.push('/reviews');
+        } catch (err) {
+          console.error('Ошибка при удалении обзора:', err);
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось удалить обзор',
+            life: 3000,
+          });
+        }
+      },
+    });
+  };
+
+  // --- Lifecycle Hooks ---
+  onMounted(loadReview);
 </script>
 
-<style scoped>
-.review-detail-page {
-  padding: 2rem 0;
-}
-
-.avatar img {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-}
-
-.carousel-inner {
-  max-height: 500px;
-  background-color: #f8f9fa;
-}
-
-.carousel-inner img {
-  object-fit: contain;
-  max-height: 500px;
-  margin: 0 auto;
-}
-
-.content p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.content img {
-  max-width: 100%;
-  height: auto;
-  margin: 1rem 0;
-}
-
-.rating-stars {
-  color: #ffc107;
-}
-</style> 
+<style>
+  /* Стили для контента из v-html, Tailwind's Typography plugin - лучшая альтернатива */
+  .prose p {
+    margin-bottom: 1rem;
+  }
+  .prose h1,
+  .prose h2,
+  .prose h3 {
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
+  }
+</style>

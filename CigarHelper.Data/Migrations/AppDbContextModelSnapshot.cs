@@ -17,23 +17,18 @@ namespace CigarHelper.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.16")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CigarHelper.Data.Models.Cigar", b =>
+            modelBuilder.Entity("CigarHelper.Data.Models.Brand", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Country")
                         .HasMaxLength(100)
@@ -46,23 +41,69 @@ namespace CigarHelper.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int?>("HumidorId")
-                        .HasColumnType("integer");
+                    b.Property<bool>("IsModerated")
+                        .HasColumnType("boolean");
 
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<byte[]>("LogoBytes")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(10,2)");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("Rating")
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Brands");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.CigarBase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Binder")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Filler")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsModerated")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Size")
                         .HasMaxLength(50)
@@ -75,16 +116,68 @@ namespace CigarHelper.Data.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("UserId")
+                    b.Property<string>("Wrapper")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("Name", "BrandId")
+                        .IsUnique();
+
+                    b.ToTable("CigarBases");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.CigarImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CigarBaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<long?>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("ImageData")
+                        .HasColumnType("bytea");
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UserCigarId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HumidorId");
+                    b.HasIndex("CigarBaseId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserCigarId");
 
-                    b.ToTable("Cigars");
+                    b.ToTable("CigarImages");
                 });
 
             modelBuilder.Entity("CigarHelper.Data.Models.Humidor", b =>
@@ -101,15 +194,12 @@ namespace CigarHelper.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("CurrentHumidity")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("CurrentTemperature")
-                        .HasColumnType("numeric");
-
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<int?>("Humidity")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -141,16 +231,16 @@ namespace CigarHelper.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<string>("BurnQuality")
+                    b.Property<int?>("BurnQuality")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CigarId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Construction")
+                    b.Property<int?>("Construction")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -159,9 +249,9 @@ namespace CigarHelper.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Draw")
+                    b.Property<int?>("Draw")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
@@ -216,10 +306,9 @@ namespace CigarHelper.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<byte[]>("ImageBytes")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("bytea");
 
                     b.Property<int>("ReviewId")
                         .HasColumnType("integer");
@@ -262,6 +351,9 @@ namespace CigarHelper.Data.Migrations
                         .IsRequired()
                         .HasColumnType("bytea");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -278,22 +370,72 @@ namespace CigarHelper.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CigarHelper.Data.Models.Cigar", b =>
+            modelBuilder.Entity("CigarHelper.Data.Models.UserCigar", b =>
                 {
-                    b.HasOne("CigarHelper.Data.Models.Humidor", "Humidor")
-                        .WithMany("Cigars")
-                        .HasForeignKey("HumidorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.HasOne("CigarHelper.Data.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CigarBaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("HumidorId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CigarBaseId");
+
+                    b.HasIndex("HumidorId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserCigars");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.CigarBase", b =>
+                {
+                    b.HasOne("CigarHelper.Data.Models.Brand", "Brand")
+                        .WithMany("Cigars")
+                        .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Humidor");
+                    b.Navigation("Brand");
+                });
 
-                    b.Navigation("User");
+            modelBuilder.Entity("CigarHelper.Data.Models.CigarImage", b =>
+                {
+                    b.HasOne("CigarHelper.Data.Models.CigarBase", "CigarBase")
+                        .WithMany("Images")
+                        .HasForeignKey("CigarBaseId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CigarHelper.Data.Models.UserCigar", "UserCigar")
+                        .WithMany("Images")
+                        .HasForeignKey("UserCigarId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("CigarBase");
+
+                    b.Navigation("UserCigar");
                 });
 
             modelBuilder.Entity("CigarHelper.Data.Models.Humidor", b =>
@@ -309,7 +451,7 @@ namespace CigarHelper.Data.Migrations
 
             modelBuilder.Entity("CigarHelper.Data.Models.Review", b =>
                 {
-                    b.HasOne("CigarHelper.Data.Models.Cigar", "Cigar")
+                    b.HasOne("CigarHelper.Data.Models.UserCigar", "Cigar")
                         .WithMany("Reviews")
                         .HasForeignKey("CigarId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -337,9 +479,42 @@ namespace CigarHelper.Data.Migrations
                     b.Navigation("Review");
                 });
 
-            modelBuilder.Entity("CigarHelper.Data.Models.Cigar", b =>
+            modelBuilder.Entity("CigarHelper.Data.Models.UserCigar", b =>
                 {
-                    b.Navigation("Reviews");
+                    b.HasOne("CigarHelper.Data.Models.CigarBase", "CigarBase")
+                        .WithMany("UserCigars")
+                        .HasForeignKey("CigarBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CigarHelper.Data.Models.Humidor", "Humidor")
+                        .WithMany("Cigars")
+                        .HasForeignKey("HumidorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CigarHelper.Data.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CigarBase");
+
+                    b.Navigation("Humidor");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.Brand", b =>
+                {
+                    b.Navigation("Cigars");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.CigarBase", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("UserCigars");
                 });
 
             modelBuilder.Entity("CigarHelper.Data.Models.Humidor", b =>
@@ -355,6 +530,13 @@ namespace CigarHelper.Data.Migrations
             modelBuilder.Entity("CigarHelper.Data.Models.User", b =>
                 {
                     b.Navigation("Humidors");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.UserCigar", b =>
+                {
+                    b.Navigation("Images");
 
                     b.Navigation("Reviews");
                 });
