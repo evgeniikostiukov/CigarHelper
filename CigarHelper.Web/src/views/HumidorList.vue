@@ -42,12 +42,16 @@
           :key="humidor.id"
           class="flex flex-col">
           <template #title>
-            <h3 class="text-xl font-bold tracking-tight truncate">
+            <h3
+              class="text-xl font-bold tracking-tight truncate"
+              @click="$router.push(`/humidors/${humidor.id}`)">
               {{ humidor.name }}
             </h3>
           </template>
           <template #subtitle>
-            <div class="flex flex-col">
+            <div
+              class="flex flex-col"
+              @click="$router.push(`/humidors/${humidor.id}`)">
               <span>Вместимость: {{ humidor.currentCount ?? 0 }}/{{ humidor.capacity }}</span>
               <span v-if="humidor.humidity"
                 >Влажность:
@@ -58,18 +62,14 @@
             </div>
           </template>
           <template #content>
-            <p class="text-gray-600 dark:text-gray-400 flex-grow h-16 line-clamp-3">
+            <p
+              class="text-gray-600 dark:text-gray-400 flex-grow h-16 line-clamp-3"
+              @click="$router.push(`/humidors/${humidor.id}`)">
               {{ humidor.description || 'Нет описания.' }}
             </p>
           </template>
           <template #footer>
-            <div class="flex justify-between items-center">
-              <Button
-                @click="$router.push(`/humidors/${humidor.id}`)"
-                label="Детали"
-                severity="secondary"
-                outlined
-                size="small" />
+            <div class="flex justify-end items-center">
               <div class="flex gap-2">
                 <Button
                   @click="$router.push(`/humidors/${humidor.id}/edit`)"
