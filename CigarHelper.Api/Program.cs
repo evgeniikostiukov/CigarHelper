@@ -6,7 +6,7 @@ using CigarHelper.Api.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,26 +44,36 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Scheme = "bearer"
     });
     
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
+    options.AddSecurityRequirement(document => new() { [new OpenApiSecuritySchemeReference("Bearer", document)] = [] });
+
+    // options.AddSecurityRequirement(document =>
+
+        // new OpenApiSecurityRequirement()
+    // {
+    //     [new OpenApiSecuritySchemeReference("oauth2", document)] = []
+    // }
+    // );
+    //     new OpenApiSecurityRequirement
+    // {
+    //     {
+    //         new OpenApiSecurityScheme
+    //         {
+    //             Reference = new OpenApiSecuritySchemeReference("Bearer"),
+    //             // new OpenApiReference
+    //             // {
+    //             //     Type = ReferenceType.SecurityScheme,
+    //             //     Id = "Bearer"
+    //             // },
+    //             Scheme = "oauth2",
+    //             Name = "Bearer",
+    //             In = ParameterLocation.Header
+    //         },
+    //         new List<string>()
+    //     }
+    // });
 });
 
 // Configure DbContext with PostgreSQL
@@ -97,7 +107,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder
+        policy => policy
             .WithOrigins("http://localhost:3000") // Конкретный origin для frontend
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -122,7 +132,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowSpecificOrigin");
 
 // Conditional HTTPS redirection only if we're not using HTTP explicitly
-if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue<bool>("UseHttp", false))
+if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue("UseHttp", false))
 {
     app.UseHttpsRedirection();
 }
