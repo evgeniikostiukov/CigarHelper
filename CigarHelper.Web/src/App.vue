@@ -71,6 +71,7 @@
   import Menubar from 'primevue/menubar';
   import Button from 'primevue/button';
   import { useAuth } from '@/services/useAuth';
+  import { hasRole } from '@/utils/roles';
 
   interface MenuItem {
     label: string;
@@ -99,19 +100,19 @@
       label: 'База сигар',
       icon: 'pi pi-database',
       command: () => router.push('/cigar-bases'),
-      visible: () => {
-        const roles = Array.isArray(user.value?.role) ? user.value.role : [user.value?.role];
-        return isAuthenticated.value && roles.includes('Admin');
-      },
+      visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
     },
     {
       label: 'Бренды',
       icon: 'pi pi-tag',
       command: () => router.push('/brands'),
-      visible: () => {
-        const roles = Array.isArray(user.value?.role) ? user.value.role : [user.value?.role];
-        return isAuthenticated.value && roles.includes('Admin');
-      },
+      visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
+    },
+    {
+      label: 'Пользователи',
+      icon: 'pi pi-users',
+      command: () => router.push('/admin/users'),
+      visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
     },
     {
       label: 'Обзоры',

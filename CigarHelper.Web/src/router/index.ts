@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import { useAuth } from '@/services/useAuth';
+import { hasAnyRole, hasRole } from '@/utils/roles';
 
 const routes = [
   {
@@ -75,6 +76,12 @@ const routes = [
     component: () => import('../views/Brands.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
   },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import('../views/AdminUsers.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
   // Маршруты для обзоров
   {
     path: '/reviews',
@@ -110,6 +117,9 @@ router.beforeEach((to, from, next) => {
   const { isAuthenticated, user } = useAuth();
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
+  const requiresAnyRole = to.matched
+    .map((record) => record.meta.requiresAnyRole as string[] | undefined)
+    .find((r) => r !== undefined);
   const isPublic = to.matched.some((record) => record.meta.public);
 
   if (!isAuthenticated.value && requiresAuth) {
@@ -121,14 +131,10 @@ router.beforeEach((to, from, next) => {
   } else if (isAuthenticated.value && isPublic) {
     // Аутентифицированный пользователь пытается получить доступ к публичной странице (например, /login)
     next('/'); // Перенаправляем на главную
-  } else if (isAuthenticated.value && requiresAdmin) {
-    // Пользователь аутентифицирован, но маршрут требует прав администратора
-    const roles = Array.isArray(user.value?.role) ? user.value.role : [user.value?.role];
-    if (roles.includes('Admin')) {
-      next(); // У пользователя есть права
-    } else {
-      next('/'); // У пользователя нет прав, перенаправляем на главную
-    }
+  } else if (isAuthenticated.value && requiresAdmin && !hasRole(user.value, 'Admin')) {
+    next('/');
+  } else if (isAuthenticated.value && requiresAnyRole && !hasAnyRole(user.value, requiresAnyRole)) {
+    next('/');
   } else {
     // Во всех остальных случаях разрешаем переход
     next();

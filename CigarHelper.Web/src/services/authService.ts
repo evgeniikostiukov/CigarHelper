@@ -108,6 +108,12 @@ const authService = {
     const token = localStorage.getItem(TOKEN_KEY);
     updateUserFromToken(token);
   },
+
+  /** После смены своей роли сервер может вернуть новый JWT. */
+  setToken(token: string): void {
+    localStorage.setItem(TOKEN_KEY, token);
+    updateUserFromToken(token);
+  },
 };
 
 authService.initialize();

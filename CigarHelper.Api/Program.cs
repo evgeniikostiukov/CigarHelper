@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using System.Text;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using CigarHelper.Data.Data;
 using CigarHelper.Api.Services;
 using CigarHelper.Api.Extensions;
@@ -13,6 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers(options => {
     options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 })
 .ConfigureApiBehaviorOptions(options => {
     options.SuppressModelStateInvalidFilter = true; // Отключаем автоматическую валидацию модели
@@ -93,13 +99,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured")))
+                Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured"))),
+            // После чтения JWT inbound-маппинг превращает claim "role" в ClaimTypes.Role; иначе [Authorize(Roles)] не видит роль → 403
+            RoleClaimType = ClaimTypes.Role,
         };
     });
+
+builder.Services.AddAuthorization();
 
 // Register Services
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IHumidorService, HumidorService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
