@@ -19,7 +19,16 @@
           <div
             v-if="isAuthenticated"
             class="flex items-center gap-2">
-            <span class="font-semibold hidden sm:inline">{{ user?.unique_name }}</span>
+            <router-link
+              :to="{ name: 'Profile' }"
+              class="inline-flex items-center gap-2 rounded-md px-2 py-1.5 -mr-1 min-h-[44px] max-w-[min(100%,14rem)] sm:max-w-[20rem] font-semibold text-inherit no-underline transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :aria-label="`Профиль: ${user?.unique_name ?? ''}`"
+              title="Перейти в профиль">
+              <i
+                class="pi pi-user text-primary shrink-0 text-base"
+                aria-hidden="true" />
+              <span class="truncate">{{ user?.unique_name }}</span>
+            </router-link>
             <Button
               @click="handleLogout"
               icon="pi pi-sign-out"
@@ -29,22 +38,22 @@
               aria-label="Выйти" />
           </div>
 
-          <Button
-            v-else
-            @click="router.push('/login')"
-            label="Войти"
-            icon="pi pi-sign-in"
-            text
-            class="hidden sm:inline-flex" />
-          <Button
-            v-else
-            @click="router.push('/login')"
-            icon="pi pi-sign-in"
-            text
-            rounded
-            severity="secondary"
-            aria-label="Войти"
-            class="sm:hidden" />
+          <template v-else>
+            <Button
+              @click="router.push('/login')"
+              label="Войти"
+              icon="pi pi-sign-in"
+              text
+              class="hidden sm:inline-flex" />
+            <Button
+              @click="router.push('/login')"
+              icon="pi pi-sign-in"
+              text
+              rounded
+              severity="secondary"
+              aria-label="Войти"
+              class="sm:hidden" />
+          </template>
         </div>
       </template>
     </Menubar>

@@ -16,6 +16,23 @@ const routes = [
     meta: { public: true },
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../views/Profile.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/u/:username',
+    name: 'PublicUserProfile',
+    component: () => import('../views/PublicUserProfile.vue'),
+  },
+  {
+    path: '/u/:username/humidors/:humidorId',
+    name: 'PublicHumidorDetail',
+    component: () => import('../views/PublicHumidorDetail.vue'),
+    props: true,
+  },
+  {
     path: '/humidors',
     name: 'HumidorList',
     component: () => import('../views/HumidorList.vue'),

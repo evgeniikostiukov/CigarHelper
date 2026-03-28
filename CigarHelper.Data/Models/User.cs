@@ -32,6 +32,11 @@ public class User
     [MaxLength(255)]
     public string? AvatarUrl { get; set; }
 
+    /// <summary>
+    /// Если false — публичная страница профиля и чужие просмотры хьюмидоров недоступны.
+    /// </summary>
+    public bool IsProfilePublic { get; set; }
+
     public ICollection<Humidor> Humidors { get; set; } = new List<Humidor>();
 
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
