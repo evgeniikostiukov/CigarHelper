@@ -21,17 +21,16 @@ public class AppDbContext : DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // if (!optionsBuilder.IsConfigured)
-        // {
-            // This is a fallback if the context is created without options
-            var connectionString = GetConnectionStringFromConfig();
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                optionsBuilder.UseNpgsql(connectionString);
-                optionsBuilder.EnableSensitiveDataLogging(true);
-                optionsBuilder.EnableDetailedErrors(true);
-            }
-        // }
+        if (optionsBuilder.IsConfigured)
+            return;
+
+        var connectionString = GetConnectionStringFromConfig();
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            optionsBuilder.UseNpgsql(connectionString);
+            optionsBuilder.EnableSensitiveDataLogging(true);
+            optionsBuilder.EnableDetailedErrors(true);
+        }
     }
     
     private string GetConnectionStringFromConfig()

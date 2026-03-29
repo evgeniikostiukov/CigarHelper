@@ -13,13 +13,13 @@ public class ProfileService : IProfileService
     private static readonly TimeSpan PasswordChangeMinInterval = TimeSpan.FromHours(1);
 
     private readonly AppDbContext _db;
-    private readonly JwtService _jwtService;
+    private readonly IJwtService _jwtService;
     private readonly IHumidorService _humidorService;
     private readonly IMemoryCache _cache;
 
     public ProfileService(
         AppDbContext db,
-        JwtService jwtService,
+        IJwtService jwtService,
         IHumidorService humidorService,
         IMemoryCache cache)
     {

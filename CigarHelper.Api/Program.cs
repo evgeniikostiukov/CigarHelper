@@ -110,7 +110,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddMemoryCache();
 
 // Register Services
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IHumidorService, HumidorService>();

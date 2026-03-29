@@ -10,9 +10,9 @@ public class AdminUserService : IAdminUserService
     private const int MaxPageSize = 100;
 
     private readonly AppDbContext _db;
-    private readonly JwtService _jwtService;
+    private readonly IJwtService _jwtService;
 
-    public AdminUserService(AppDbContext db, JwtService jwtService)
+    public AdminUserService(AppDbContext db, IJwtService jwtService)
     {
         _db = db;
         _jwtService = jwtService;

@@ -7,9 +7,9 @@ namespace CigarHelper.Api.Services;
 public class AuthService
 {
     private readonly AppDbContext _context;
-    private readonly JwtService _jwtService;
+    private readonly IJwtService _jwtService;
 
-    public AuthService(AppDbContext context, JwtService jwtService)
+    public AuthService(AppDbContext context, IJwtService jwtService)
     {
         _context = context;
         _jwtService = jwtService;
