@@ -8,6 +8,7 @@ using CigarHelper.Api.Services;
 using CigarHelper.Api.Extensions;
 using CigarHelper.Api.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,12 @@ static string GetRateLimitPartitionKey(HttpContext httpContext)
 }
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Лимит тела запроса: JSON с base64 изображениями и крупный HTML в обзорах (см. ImageUpload:MaxBytes).
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 12 * 1024 * 1024;
+});
 
 // Add services to the container.
 builder.Services.AddControllers(options => {
@@ -162,6 +169,9 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddMemoryCache();
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("database", tags: ["ready"]);
+
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
 
 // Register Services
@@ -233,6 +243,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseRateLimiter();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = static reg => reg.Tags.Contains("ready"),
+});
 
 app.MapControllers();
 
