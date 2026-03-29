@@ -57,8 +57,7 @@ public class AuthService
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
-        // Generate JWT token
-        var token = _jwtService.GenerateToken(user);
+        var (token, expiresAtUtc) = _jwtService.GenerateToken(user);
 
         return new AuthResponse
         {
@@ -67,7 +66,7 @@ public class AuthService
             Token = token,
             Username = user.Username,
             Role = user.Role,
-            Expiration = DateTime.UtcNow.AddYears(1)
+            Expiration = expiresAtUtc
         };
     }
 
@@ -108,8 +107,7 @@ public class AuthService
         user.LastLogin = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        // Generate JWT token
-        var token = _jwtService.GenerateToken(user);
+        var (token, expiresAtUtc) = _jwtService.GenerateToken(user);
 
         return new AuthResponse
         {
@@ -118,7 +116,7 @@ public class AuthService
             Token = token,
             Username = user.Username,
             Role = user.Role,
-            Expiration = DateTime.UtcNow.AddYears(1)
+            Expiration = expiresAtUtc
         };
     }
 }

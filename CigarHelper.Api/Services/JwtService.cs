@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using CigarHelper.Data.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CigarHelper.Api.Services;
@@ -16,9 +17,12 @@ public class JwtService : IJwtService
         _configuration = configuration;
     }
 
-    public string GenerateToken(User user)
+    public (string Token, DateTime ExpiresAtUtc) GenerateToken(User user)
     {
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured"));
+
+        var accessDays = _configuration.GetValue("Jwt:AccessTokenDays", 7);
+        var expiresAtUtc = DateTime.UtcNow.AddDays(accessDays);
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -31,14 +35,14 @@ public class JwtService : IJwtService
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             ]),
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = expiresAtUtc,
             Issuer = _configuration["Jwt:Issuer"],
             Audience = _configuration["Jwt:Audience"],
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var jwt = (JwtSecurityToken)tokenHandler.CreateToken(tokenDescriptor);
+        return (tokenHandler.WriteToken(jwt), jwt.ValidTo);
     }
 
     /// <summary>

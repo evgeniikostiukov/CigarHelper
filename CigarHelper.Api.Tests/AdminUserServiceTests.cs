@@ -197,7 +197,7 @@ public class AdminUserServiceTests
         await using var db = CreateContext();
         var u = await SeedUserAsync(db, "me", Role.User);
         var jwt = new Mock<IJwtService>();
-        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("jwt-for-me");
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("jwt-for-me", DateTime.UtcNow));
         var sut = Sut(db, jwt);
 
         var res = await sut.UpdateUserRoleAsync(u.Id, u.Id, Role.Moderator, confirmSelfChange: true);

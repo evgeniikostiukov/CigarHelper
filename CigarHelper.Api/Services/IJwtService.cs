@@ -4,5 +4,6 @@ namespace CigarHelper.Api.Services;
 
 public interface IJwtService
 {
-    string GenerateToken(User user);
+    /// <summary>Выдаёт JWT и тот же момент истечения, что записан в токен (UTC).</summary>
+    (string Token, DateTime ExpiresAtUtc) GenerateToken(User user);
 }

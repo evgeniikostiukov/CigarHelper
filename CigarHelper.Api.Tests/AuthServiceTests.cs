@@ -34,13 +34,15 @@ public class AuthServiceTests
     {
         await using var context = CreateContext();
         var jwt = new Mock<IJwtService>(MockBehavior.Strict);
-        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("mock-token");
+        var exp = new DateTime(2026, 6, 1, 12, 0, 0, DateTimeKind.Utc);
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("mock-token", exp));
         var sut = new AuthService(context, jwt.Object);
 
         var res = await sut.RegisterAsync(NewRegisterRequest("newuser", "new@example.com"));
 
         Assert.True(res.Success);
         Assert.Equal("mock-token", res.Token);
+        Assert.Equal(exp, res.Expiration);
         Assert.Equal("newuser", res.Username);
         Assert.Equal(Role.User, res.Role);
         Assert.Single(context.Users);
@@ -115,13 +117,15 @@ public class AuthServiceTests
         await context.SaveChangesAsync();
 
         var jwt = new Mock<IJwtService>();
-        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("login-token");
+        var exp = DateTime.UtcNow.AddDays(1);
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("login-token", exp));
         var sut = new AuthService(context, jwt.Object);
 
         var res = await sut.LoginAsync(new LoginRequest { Email = "log@example.com", Password = ValidPassword });
 
         Assert.True(res.Success);
         Assert.Equal("login-token", res.Token);
+        Assert.Equal(exp, res.Expiration);
         Assert.Equal("loguser", res.Username);
         var reloaded = await context.Users.SingleAsync();
         Assert.NotNull(reloaded.LastLogin);
@@ -163,7 +167,7 @@ public class AuthServiceTests
         await context.SaveChangesAsync();
 
         var jwt = new Mock<IJwtService>();
-        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("t");
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("t", DateTime.UtcNow.AddHours(1)));
         var sut = new AuthService(context, jwt.Object);
 
         var res = await sut.LoginAsync(new LoginRequest { Email = "leg@example.com", Password = ValidPassword });

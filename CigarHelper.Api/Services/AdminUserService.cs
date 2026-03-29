@@ -102,7 +102,8 @@ public class AdminUserService : IAdminUserService
         if (isSelf)
         {
             var refreshed = await _db.Users.AsNoTracking().FirstAsync(u => u.Id == actorUserId, cancellationToken);
-            newToken = _jwtService.GenerateToken(refreshed);
+            var (token, _) = _jwtService.GenerateToken(refreshed);
+            newToken = token;
         }
 
         return new UpdateUserRoleResponse

@@ -82,7 +82,7 @@ public class JwtServiceTests
             Role = Role.Moderator
         };
 
-        var token = jwtService.GenerateToken(user);
+        var (token, _) = jwtService.GenerateToken(user);
         var handler = new JwtSecurityTokenHandler();
         var validationParameters = new TokenValidationParameters
         {
@@ -107,6 +107,40 @@ public class JwtServiceTests
         Assert.Equal("t@example.com", email);
         Assert.Equal(Role.Moderator.ToString(), role);
         Assert.Equal("42", principal.FindFirst("id")?.Value);
+    }
+
+    [Fact]
+    public void GenerateToken_ValidTo_AlignsWithIssueTimeAndSevenDayLifetime()
+    {
+        var config = CreateJwtConfiguration();
+        var jwtService = new JwtService(config);
+        var user = new User { Id = 1, Username = "u", Email = "u@e.com", Role = Role.User };
+        var before = DateTime.UtcNow;
+        var (token, expiresAtUtc) = jwtService.GenerateToken(user);
+        var validTo = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo;
+        var after = DateTime.UtcNow;
+        Assert.Equal(expiresAtUtc, validTo);
+        Assert.InRange(expiresAtUtc, before.AddDays(7).AddMinutes(-1), after.AddDays(7).AddMinutes(1));
+    }
+
+    [Fact]
+    public void GenerateToken_UsesAccessTokenDays_FromConfiguration()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jwt:Key"] = new string('k', 32),
+                ["Jwt:Issuer"] = "i",
+                ["Jwt:Audience"] = "a",
+                ["Jwt:AccessTokenDays"] = "2"
+            })
+            .Build();
+        var jwtService = new JwtService(config);
+        var user = new User { Id = 1, Username = "u", Email = "u@e.com", Role = Role.User };
+        var before = DateTime.UtcNow;
+        var (_, expiresAtUtc) = jwtService.GenerateToken(user);
+        var after = DateTime.UtcNow;
+        Assert.InRange(expiresAtUtc, before.AddDays(2).AddMinutes(-1), after.AddDays(2).AddMinutes(1));
     }
 
     [Fact]

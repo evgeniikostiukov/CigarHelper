@@ -1,5 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -11,6 +14,13 @@ namespace CigarHelper.Api.Tests;
 /// <summary>Шаг 4: единый ответ логина и rate limiting (интеграционно).</summary>
 public class AuthStep4IntegrationTests
 {
+    /// <summary>Совпадает с AddJsonOptions в Program (строковые enum, camelCase свойств).</summary>
+    private static readonly JsonSerializerOptions AuthResponseJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     [Fact]
     public async Task Login_Returns429_On21stRequest_InSameWindow()
     {
@@ -76,7 +86,7 @@ public class AuthStep4IntegrationTests
         });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var body = await response.Content.ReadFromJsonAsync<AuthResponse>(AuthResponseJsonOptions);
         Assert.NotNull(body);
         Assert.False(body.Success);
         Assert.Equal(AuthService.LoginFailedMessage, body.Message);
@@ -109,8 +119,29 @@ public class AuthStep4IntegrationTests
         });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var body = await response.Content.ReadFromJsonAsync<AuthResponse>(AuthResponseJsonOptions);
         Assert.NotNull(body);
         Assert.Equal(AuthService.LoginFailedMessage, body.Message);
+    }
+
+    [Fact]
+    public async Task Register_Response_ExpirationMatchesJwt_ValidTo()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        using var res = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = "expchk",
+            Email = "expchk@example.com",
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+
+        res.EnsureSuccessStatusCode();
+        var body = await res.Content.ReadFromJsonAsync<AuthResponse>(AuthResponseJsonOptions);
+        Assert.NotNull(body?.Token);
+        var validTo = new JwtSecurityTokenHandler().ReadJwtToken(body.Token).ValidTo;
+        Assert.Equal(validTo, body!.Expiration);
     }
 }

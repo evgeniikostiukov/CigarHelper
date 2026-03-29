@@ -178,7 +178,7 @@ public class ProfileServiceTests
         await using var db = CreateContext();
         var user = await SeedUserAsync(db, "u1", "old@example.com");
         var jwt = new Mock<IJwtService>();
-        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("fresh-jwt");
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("fresh-jwt", DateTime.UtcNow));
         var sut = CreateSut(db, jwt);
 
         var res = await sut.UpdateProfileAsync(user.Id, new UpdateProfileRequest
@@ -199,7 +199,7 @@ public class ProfileServiceTests
         await using var db = CreateContext();
         var user = await SeedUserAsync(db, "oldname", "mail@example.com");
         var jwt = new Mock<IJwtService>();
-        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("tok");
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("tok", DateTime.UtcNow));
         var sut = CreateSut(db, jwt);
 
         var res = await sut.UpdateProfileAsync(user.Id, new UpdateProfileRequest

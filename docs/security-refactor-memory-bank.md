@@ -1,0 +1,103 @@
+# Memory bank: security refactor (CigarHelper)
+
+Документ для продолжения работы в новом чате. Якорь: аудит безопасности с начала диалога, пошаговые исправления с подтверждением пользователя.
+
+---
+
+## План (из аудита, изначальный порядок)
+
+| Шаг | Тема | Статус |
+|-----|------|--------|
+| 1 | Секреты из репозитория → placeholders, User Secrets, `.gitignore` для `**/appsettings.*.local.json` | Сделано и закоммичено |
+| 2 | IDOR в `CigarImagesController` (владение, роли Admin/Moderator для каталога) | Сделано и закоммичено |
+| 3 | Пароли: PBKDF2-SHA256 (310k iter), legacy HMAC-SHA512 + апгрейд при логине | Сделано и закоммичено |
+| 4 | Логин: единое сообщение, rate limit login/register | Сделано и закоммичено |
+| 5 | `AuthResponse.Expiration` = реальный срок JWT (не парсинг мок-токена; срок из эмиттера JWT) | Сделано, не закоммичено |
+| 6 | Убрать чувствительный debug из `AuthController` (Console + длина пароля) | Не делали |
+| 7 | `AllowedHosts`, CORS из конфига, валидация загрузок изображений, `Include Error Detail` в строках БД | Не делали |
+
+---
+
+## Репозиторий / ветка
+
+- Ветка: `feature/work` (на момент записи **ahead** от `origin`).
+- Последние релевантные коммиты (хронология снизу вверх по времени разработки):
+  - `chore(security): externalize secrets…`
+  - `chore(cursor): extend common workspace rule`
+  - `fix(api): enforce ownership on cigar image endpoints`
+  - `feat(auth): store passwords with PBKDF2-SHA256`
+  - `feat(auth): unify login failures and rate-limit auth`
+  - `test(api): add auth integration tests for step 4` — `WebApplicationFactory`, `ProgramPartial`, Testing + InMemory в `Program.cs`
+
+---
+
+## Ключевые технические решения (кратко)
+
+### Секреты
+
+- В коммите только плейсхолдеры в `appsettings*.json`; реальные значения — User Secrets / env (`ConnectionStrings__DefaultConnection`, `Jwt:Key`).
+- **Data / Import / API** имеют свои `UserSecretsId` где настроено.
+
+### Шаг 2 — изображения
+
+- Контроллер: `[Authorize]` классом; список без фильтров → `400`; `UserCigar` — владелец или staff; `CigarBase` — mutate только Admin/Moderator.
+- **Breaking:** анонимный доступ к `GET` списку всех изображений убран.
+
+### Шаг 3 — пароли
+
+- Новый формат: соль 16 байт, хеш 32 байта PBKDF2; legacy: 64-байтовый HMAC-SHA512 + любая длина ключа.
+- `AuthService.LoginAsync` при `rehashWithModernAlgorithm` перезаписывает хеш перед `SaveChanges`.
+
+### Шаг 4 — auth
+
+- Одно сообщение: `AuthService.LoginFailedMessage` = «Неверный email или пароль.»
+- Rate limiting (`Program.cs`): политика `auth-login` **20/мин/IP**, `auth-register` **10/мин/IP**; партиция по `RemoteIpAddress`; `UseRateLimiter` после `UseAuthorization`.
+- `[EnableRateLimiting]` на `AuthController` для `login` / `register`.
+
+### Интеграционные тесты (шаг 4)
+
+- `CigarHelper.Api/ProgramPartial.cs` — `public partial class Program` для `WebApplicationFactory<Program>`.
+- `ASPNETCORE_ENVIRONMENT=Testing`: в `Program.cs` **только EF InMemory** (отдельное имя БД на запуск), **без** `ApplyMigrations`; иначе — Npgsql как раньше.
+- Фабрика: `AuthIntegrationWebAppFactory` — `UseEnvironment("Testing")` + `UseSetting` для JWT/connection.
+- Тесты: `AuthStep4IntegrationTests` — 429 после лимитов, единое сообщение логина, и т.д.
+
+### Шаг 5 — сделано
+
+- `IJwtService.GenerateToken` возвращает `(string Token, DateTime ExpiresAtUtc)`.
+- `JwtService`: `SecurityTokenDescriptor.Expires` задаётся из `DateTime.UtcNow.AddDays(Jwt:AccessTokenDays)` (по умолчанию **7**); в ответе клиенту используется **`JwtSecurityToken.ValidTo`** того же созданного токена (совпадает с `ReadJwtToken(...).ValidTo`, без расхождения по субсекундам).
+- `AuthService` не парсит строку JWT; `ProfileService` / `AdminUserService` берут только `Token` из кортежа.
+- Интеграционные тесты читают `AuthResponse` с `JsonStringEnumConverter`, как в API.
+
+---
+
+## Файлы «рядом с темой»
+
+| Область | Пути |
+|--------|------|
+| JWT / auth | `CigarHelper.API/Services/JwtService.cs`, `IJwtService.cs`, `AuthService.cs`, `Controllers/AuthController.cs` |
+| Rate limit | `CigarHelper.API/Program.cs` |
+| Изображения | `CigarHelper.API/Controllers/CigarImagesController.cs` |
+| Тесты unit | `CigarHelper.Api.Tests/AuthServiceTests.cs`, `JwtServiceTests.cs`, … |
+| Тесты integration | `CigarHelper.Api.Tests/AuthIntegrationWebAppFactory.cs`, `AuthStep4IntegrationTests.cs` |
+| Program / Testing | `CigarHelper.API/Program.cs`, `ProgramPartial.cs` |
+
+---
+
+## Команды проверки
+
+```bash
+dotnet test CigarHelper.sln
+```
+
+Ожидаемо после фикса шага 5: все тесты зелёные (сейчас без коммита шага 5 unit-теты auth падают из-за mock JWT).
+
+---
+
+## Язык и правила проекта
+
+- Ответы пользователю на русском; коммиты в репозитории в стиле conventional commits (англ. summary), по желанию body на русском.
+- В `.cursor/rules/common.mdc` добавлена строка про прямую обратную связь без лишних похвал.
+
+---
+
+*Обновляйте этот файл после завершения шага 5 и дальнейших шагов, чтобы следующий чат не расходился с репозиторием.*

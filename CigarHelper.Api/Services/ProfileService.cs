@@ -73,7 +73,12 @@ public class ProfileService : IProfileService
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        string? newToken = needNewToken ? _jwtService.GenerateToken(user) : null;
+        string? newToken = null;
+        if (needNewToken)
+        {
+            var (token, _) = _jwtService.GenerateToken(user);
+            newToken = token;
+        }
 
         return new UpdateProfileResponse
         {
