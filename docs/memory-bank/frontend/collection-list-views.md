@@ -88,13 +88,13 @@
 
 ## PublicUserProfile.vue
 
-Публичная страница `/u/:username` (`name: 'PublicUserProfile'`): каркас как у **HumidorList** — `public-profile-root`, тот же grain, контент **`max-w-5xl`**. Данные: `profileService.getPublicProfile(username)`; при смене `params.username` — перезагрузка через `watch`. Загрузка: сетка скелетонов (`public-profile-loading`, `public-profile-skeleton`); ошибка — `Message` + «Повторить загрузку» и «На главную» (`public-profile-retry`, `public-profile-home`); лог в `console` только в `DEV`. Заголовок: подпись **«Публичный профиль»**, `h1` с `id="public-profile-heading"` (= username), даты регистрации / активности. Блок **Хьюмидоры**: пусто — dashed-плашка (`public-profile-empty`); иначе сетка `article` как у `HumidorList`: оверлей `router-link` на **`PublicHumidorDetail`** (`username`, `humidorId` строка), контент `pointer-events-none`, `Badge` влажности через `humidorService.getHumiditySeverity`, `v-memo`, анимация `public-humidor-card-enter`, футер-подсказка «Смотреть состав».
+Публичная страница `/u/:username` (`name: 'PublicUserProfile'`): каркас как у **HumidorList** — `public-profile-root`, тот же grain, контент **`max-w-5xl`**. Данные: `profileService.getPublicProfile(username)`; при смене `params.username` — перезагрузка через `watch`. Загрузка: сетка скелетонов (`public-profile-loading`, `public-profile-skeleton`); ошибка — `Message` + «Повторить загрузку» и «На главную» (`public-profile-retry`, `public-profile-home`); лог в `console` только в `DEV`. Заголовок: подпись **«Публичный профиль»**, `h1` с `id="public-profile-heading"` (= username), даты регистрации / активности. Блок **Хьюмидоры**: пусто — dashed-плашка (`public-profile-empty`); иначе сетка `article` как у `HumidorList`: верх карточки — **`router-link`** на **`PublicHumidorDetail`** (`username`, `humidorId` строка, `flex-1` с контентом), `Badge` влажности через `humidorService.getHumiditySeverity`, `v-memo`, анимация `public-humidor-card-enter`. В футере второй **`router-link`** «Смотреть состав» (те же `params`, `data-testid="public-profile-humidor-open-{id}"`) — **не** вкладывать ссылки друг в друга (валидный HTML, без вложенных `<a>`).
 
 | Пункт | Значение |
 |-------|----------|
 | Файл | `src/views/PublicUserProfile.vue` |
 | Маршруты | Страница: `PublicUserProfile`; деталь публичного хьюмидора: `PublicHumidorDetail`; домой: `Home` |
-| `data-testid` | `public-profile`, `public-profile-loading`, `public-profile-skeleton`, `public-profile-error`, `public-profile-retry`, `public-profile-home`, `public-profile-content`, `public-profile-empty`, `public-profile-humidors`, `public-profile-humidor-{id}` |
+| `data-testid` | `public-profile`, `public-profile-loading`, `public-profile-skeleton`, `public-profile-error`, `public-profile-retry`, `public-profile-home`, `public-profile-content`, `public-profile-empty`, `public-profile-humidors`, `public-profile-humidor-{id}`, `public-profile-humidor-open-{id}` |
 | Scoped классы | `public-profile-root`, `public-profile-grain`, `public-profile-enter`, `public-humidor-card-enter`, `line-clamp-2/3` |
 
 ## PublicHumidorDetail.vue

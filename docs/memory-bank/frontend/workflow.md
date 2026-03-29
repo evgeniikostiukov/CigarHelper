@@ -26,9 +26,22 @@ npm run preview
 
 Для production обычно настраивают обратный прокси или static host так, чтобы префикс `/api` уходил на тот же backend; `baseURL: '/api'` в axios остаётся относительным от origin фронта.
 
+## Проверки качества (локально и CI)
+
+Скрипты в **`package.json`**:
+
+```bash
+npm run typecheck   # vue-tsc
+npm run lint        # ESLint (flat config)
+npm run test        # Vitest, unit-тесты (*.test.ts)
+npm run ci          # typecheck + lint + test + build
+```
+
+В корне репозитория workflow **GitHub Actions** (`.github/workflows/ci.yml`): `dotnet test CigarHelper.sln` и шаги фронта выше.
+
 ## Линтинг
 
-В проекте есть **ESLint 9** (`eslint.config.js`) и **Prettier**. Команды в `package.json` не добавлены — при необходимости: `npx eslint src` / интеграция в IDE.
+**ESLint 9** (`eslint.config.js`) и **Prettier** (через `eslint-plugin-prettier` + `eslint-config-prettier`). Игнорируются сгенерированные файлы (`components.d.ts`, `vitest.config.ts` и т.д.).
 
 ## Согласование с backend
 
