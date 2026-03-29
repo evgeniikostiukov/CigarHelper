@@ -192,9 +192,14 @@ builder.Services.AddHsts(options =>
     options.MaxAge = TimeSpan.FromDays(365);
 });
 
+builder.Services.AddCigarForwardedHeaders(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Первым: иначе схема/Host/клиентский IP из запроса к Kestrel без учёта X-Forwarded-*.
+app.UseForwardedHeaders();
+
 app.UseSecurityHeaders();
 
 if (app.Environment.IsProduction())

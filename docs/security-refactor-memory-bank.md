@@ -18,6 +18,7 @@
 | 6 | Убрать чувствительный debug из `AuthController` (Console + длина пароля) | Сделано и закоммичено |
 | 7 | `AllowedHosts без *`, CORS из конфига, валидация бинарных изображений, `Include Error Detail` для Npgsql | Сделано и закоммичено |
 | 8 | HSTS (только Production), базовые security-заголовки ответа (`nosniff`, `X-Frame-Options`, `Referrer-Policy`) | Сделано и закоммичено |
+| 9 | Forwarded Headers за доверенным reverse proxy (`X-Forwarded-For` / `Proto` / `Host`, доверенные IP, первый в пайплайне) | Сделано и закоммичено |
 
 ---
 
@@ -35,6 +36,7 @@
   - `fix(api): remove sensitive register debug logging` — шаг 6
   - `chore(security): harden hosts, CORS, image uploads, npgsql error detail` — шаг 7
   - `chore(security): add HSTS and baseline response security headers` — шаг 8
+  - `chore(security): configure forwarded headers for reverse proxy` — шаг 9
 
 ---
 
@@ -92,6 +94,14 @@
 - **Заголовки:** `UseSecurityHeaders()` в начале пайплайна — `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` (см. `Extensions/SecurityHeadersMiddlewareExtensions.cs`). Если для части эндпоинтов нужен iframe (редко для API), политику придётся ослабить точечно.
 - **Порядок:** security-заголовки и HSTS стоят до `UseHttpsRedirection`, как рекомендует шаблон ASP.NET Core.
 
+### Шаг 9 — сделано
+
+- **`UseForwardedHeaders`** вызывается **первым** в пайплайне (до security-заголовков и HSTS), чтобы `RemoteIpAddress`, схема (`https`), `Host` совпадали с запросом клиента к прокси, а не с внутренним запросом к Kestrel.
+- Конфигурация: секция `ForwardedHeaders` (`Options/ReverseProxyForwardedHeadersOptions`, настройка в `Extensions/ForwardedHeadersConfigurationExtensions.cs`, `KnownIPNetworks` для .NET 10 вместо устаревшего `KnownNetworks`).
+- **`Enabled`:** в базовом `appsettings.json` — `false`; в шаблоне `appsettings.Production.json` — `true`. Обрабатываются `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Forwarded-Host`; `ForwardLimit` по умолчанию 1.
+- **Доверие:** в `KnownProxyAddresses` задаются IPv4/IPv6 **внутренних** адресов ingress/reverse proxy. Пустой список при `Enabled: true` означает только **loopback** (`127.0.0.1`, `::1`) — для реального прокси за пределами loopback адреса **нужно** перечислить (иначе заголовки игнорируются, это безопасно, но схема/host для редиректов и rate limit по IP могут быть неверными).
+- **Не включайте** `ForwardedHeaders` на хосте, доступном из интернета без сетевой изоляции прокси: иначе клиент мог бы подделать `X-Forwarded-*`, если бы они принимались от недоверенных узлов — поэтому список доверенных прокси обязателен для боевой схемы.
+
 ### Продакшен (выкат)
 
 - Шаблон: `CigarHelper.Api/appsettings.Production.json` — плейсхолдеры `yourdomain.example` (RFC 2606), строка БД `REQUIRED`, JWT key с пометкой задать через env / secret store. Перед выкатом заменить на реальные хосты и **не** коммитить секреты.
@@ -101,7 +111,8 @@
   - `Jwt__Key`, при необходимости `Jwt__Issuer`, `Jwt__Audience`, `Jwt__AccessTokenDays`
   - `AllowedHosts` — один список через `;`, как в JSON
   - CORS: `Cors__Origins__0`, `Cors__Origins__1`, … для каждого HTTPS origin фронта (с `AllowCredentials` wildcard нельзя).
-- За обратным прокси убедиться, что фактический **Host** запроса к Kestrel совпадает с перечислением в `AllowedHosts` (или настроить `ForwardedHeaders` и доверенные прокси — иначе возможны 400 Bad Request от host filtering).
+  - Forwarded headers: `ForwardedHeaders__Enabled`, `ForwardedHeaders__ForwardLimit`, `ForwardedHeaders__KnownProxyAddresses__0`, …
+- За обратным прокси: при `ForwardedHeaders:Enabled` задать **внутренние IP** ingress в `KnownProxyAddresses`, если прокси не на loopback; иначе заголовки не применяются (безопасно, но схема/host и rate limit по IP могут не совпасть с реальностью).
 
 ---
 
@@ -116,6 +127,7 @@
 | Тесты integration | `CigarHelper.Api.Tests/AuthIntegrationWebAppFactory.cs`, `AuthStep4IntegrationTests.cs` |
 | Program / Testing | `CigarHelper.API/Program.cs`, `ProgramPartial.cs` |
 | Security headers / HSTS | `CigarHelper.API/Extensions/SecurityHeadersMiddlewareExtensions.cs`, `Program.cs` (пайплайн) |
+| Forwarded headers | `CigarHelper.API/Extensions/ForwardedHeadersConfigurationExtensions.cs`, `Options/ReverseProxyForwardedHeadersOptions.cs`, `Program.cs` |
 | Прод конфиг API | `CigarHelper.Api/appsettings.Production.json` |
 
 ---
