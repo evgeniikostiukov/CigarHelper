@@ -28,8 +28,12 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-console': 'off',
       'no-debugger': 'warn',
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-useless-escape': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       'no-unused-labels': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       // '@typescript-eslint/no-implicit-any': 'warn',

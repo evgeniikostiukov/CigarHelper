@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
 import { useAuth } from '@/services/useAuth';
 import { hasAnyRole, hasRole } from '@/utils/roles';
 
@@ -7,7 +6,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home,
+    component: () => import('../views/Home.vue'),
   },
   {
     path: '/login',
