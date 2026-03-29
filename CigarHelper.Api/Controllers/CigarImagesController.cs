@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using CigarHelper.Api.Helpers;
+using CigarHelper.Api.Options;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
@@ -6,6 +8,7 @@ using CigarHelper.Data.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CigarHelper.Api.Controllers;
 
@@ -15,10 +18,12 @@ namespace CigarHelper.Api.Controllers;
 public class CigarImagesController : ControllerBase
 {
     private readonly AppDbContext _context;
-    
-    public CigarImagesController(AppDbContext context)
+    private readonly ImageUploadOptions _uploadOptions;
+
+    public CigarImagesController(AppDbContext context, IOptions<ImageUploadOptions> uploadOptions)
     {
         _context = context;
+        _uploadOptions = uploadOptions.Value;
     }
 
     private int GetCurrentUserId()
@@ -136,7 +141,19 @@ public class CigarImagesController : ControllerBase
             if (!staff && userCigar.UserId != userId)
                 return NotFound();
         }
-        
+
+        if (!ImageBinaryValidator.TryValidate(
+                request.ImageData,
+                request.ContentType,
+                request.FileSize,
+                _uploadOptions.MaxBytes,
+                out var createError))
+            return BadRequest(createError);
+
+        var contentType = request.ContentType;
+        if (request.ImageData is { Length: > 0 } data && string.IsNullOrWhiteSpace(contentType))
+            contentType = ImageBinaryValidator.SuggestContentType(data);
+
         // Если это главное изображение, отменяем флаг IsMain у других изображений
         if (request.IsMain)
         {
@@ -169,8 +186,9 @@ public class CigarImagesController : ControllerBase
         var cigarImage = new CigarImage
         {
             FileName = request.FileName,
-            ContentType = request.ContentType,
-            FileSize = request.FileSize,
+            ContentType = contentType,
+            FileSize = request.ImageData?.Length ?? request.FileSize,
+            ImageData = request.ImageData,
             Description = request.Description,
             IsMain = request.IsMain,
             CigarBaseId = request.CigarBaseId,
@@ -211,14 +229,33 @@ public class CigarImagesController : ControllerBase
         if (!access.CanMutate)
             return access.FailResult!;
 
+        if (request.ImageData != null)
+        {
+            var declaredType = request.ContentType ?? cigarImage.ContentType;
+            if (!ImageBinaryValidator.TryValidate(
+                    request.ImageData,
+                    declaredType,
+                    request.FileSize,
+                    _uploadOptions.MaxBytes,
+                    out var updateErr))
+                return BadRequest(updateErr);
+
+            cigarImage.ImageData = request.ImageData;
+            cigarImage.FileSize = request.ImageData.Length;
+            if (request.ContentType != null)
+                cigarImage.ContentType = request.ContentType;
+            else if (ImageBinaryValidator.SuggestContentType(request.ImageData) is { } inferred)
+                cigarImage.ContentType = inferred;
+        }
+
         // Обновляем поля
         if (request.FileName != null)
             cigarImage.FileName = request.FileName;
         
         if (request.ContentType != null)
             cigarImage.ContentType = request.ContentType;
-        
-        if (request.FileSize.HasValue)
+
+        if (request.FileSize.HasValue && request.ImageData == null)
             cigarImage.FileSize = request.FileSize;
         
         if (request.Description != null)

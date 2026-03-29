@@ -23,50 +23,17 @@ public static class ImageDownloader
             {
                 var imageBytes = await response.Content.ReadAsByteArrayAsync();
                 
-                // Проверяем, что это действительно изображение
-                if (IsValidImage(imageBytes))
+                if (ImageBinaryValidator.IsRecognizedImage(imageBytes))
                 {
                     return imageBytes;
                 }
             }
         }
-        catch (Exception ex)
+        catch
         {
-            // Логируем ошибку, но не прерываем выполнение
-            Console.WriteLine($"Ошибка при загрузке изображения {imageUrl}: {ex.Message}");
+            // Не раскрываем URL/детали наружу; вызывающий код получает null.
         }
-        
+
         return null;
-    }
-    
-    private static bool IsValidImage(byte[] imageBytes)
-    {
-        if (imageBytes.Length == 0)
-            return false;
-            
-        // Проверяем сигнатуры популярных форматов изображений
-        var jpegSignature = new byte[] { 0xFF, 0xD8, 0xFF };
-        var pngSignature = new byte[] { 0x89, 0x50, 0x4E, 0x47 };
-        var gifSignature = new byte[] { 0x47, 0x49, 0x46 };
-        var webpSignature = new byte[] { 0x52, 0x49, 0x46, 0x46 };
-        
-        return StartsWith(imageBytes, jpegSignature) ||
-               StartsWith(imageBytes, pngSignature) ||
-               StartsWith(imageBytes, gifSignature) ||
-               StartsWith(imageBytes, webpSignature);
-    }
-    
-    private static bool StartsWith(byte[] array, byte[] pattern)
-    {
-        if (array.Length < pattern.Length)
-            return false;
-            
-        for (int i = 0; i < pattern.Length; i++)
-        {
-            if (array[i] != pattern[i])
-                return false;
-        }
-        
-        return true;
     }
 } 

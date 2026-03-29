@@ -14,7 +14,7 @@
 | 4 | Логин: единое сообщение, rate limit login/register | Сделано и закоммичено |
 | 5 | `AuthResponse.Expiration` = реальный срок JWT (не парсинг мок-токена; срок из эмиттера JWT) | Сделано и закоммичено |
 | 6 | Убрать чувствительный debug из `AuthController` (Console + длина пароля) | Сделано и закоммичено |
-| 7 | `AllowedHosts`, CORS из конфига, валидация загрузок изображений, `Include Error Detail` в строках БД | Не делали |
+| 7 | `AllowedHosts без *`, CORS из конфига, валидация бинарных изображений, `Include Error Detail` для Npgsql | Сделано |
 
 ---
 
@@ -30,6 +30,7 @@
   - `test(api): add auth integration tests for step 4` — `WebApplicationFactory`, `ProgramPartial`, Testing + InMemory в `Program.cs`
   - `fix(auth): align JWT expiration with token and IJwtService tuple` — шаг 5
   - `fix(api): remove sensitive register debug logging` — шаг 6
+  - `chore(security): harden hosts, CORS, image uploads, npgsql error detail` — шаг 7
 
 ---
 
@@ -73,6 +74,13 @@
 ### Шаг 6 — сделано
 
 - Из `AuthController.Register` убраны `Console.WriteLine`: учётные данные, длины паролей, детали валидации и сообщения об ошибке регистрации не пишутся в stdout (утечки в лог-хосты / контейнеры).
+
+### Шаг 7 — сделано
+
+- **AllowedHosts:** в `appsettings.json` не `*`, а `localhost;127.0.0.1;[::1]`; в проде задать реальные хосты (env / переопределение конфига).
+- **CORS:** секция `Cors` — `Origins[]`, опционально `PolicyName` (по умолчанию `DefaultCors`); `WithOrigins` + `AllowCredentials` как раньше.
+- **Загрузки изображений:** `ImageUpload:MaxBytes` (по умолчанию 5 MiB), `ImageBinaryValidator` — magic JPEG/PNG/GIF/WebP, согласованность MIME и размера; `CreateCigarImage` сохраняет `ImageData` после проверки; `Update` при новом `ImageData` — те же проверки. Общая логика скачивания URL — через `ImageBinaryValidator` в `ImageDownloader`; `Console.WriteLine` при ошибке скачивания убран.
+- **Npgsql:** перед `UseNpgsql` строка собирается через `NpgsqlConnectionStringBuilder` с `IncludeErrorDetail = IsDevelopment()` (в prod меньше деталей в исключениях).
 
 ---
 

@@ -6,10 +6,12 @@ using System.Threading.RateLimiting;
 using CigarHelper.Data.Data;
 using CigarHelper.Api.Services;
 using CigarHelper.Api.Extensions;
+using CigarHelper.Api.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using Microsoft.OpenApi;
 
 static string GetRateLimitPartitionKey(HttpContext httpContext)
@@ -98,8 +100,15 @@ if (builder.Environment.IsEnvironment("Testing"))
 }
 else
 {
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection")
+               ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
+    var csb = new NpgsqlConnectionStringBuilder(conn)
+    {
+        // Подробности ошибок БД — только в Development (меньше утечек в prod).
+        IncludeErrorDetail = builder.Environment.IsDevelopment(),
+    };
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(csb.ConnectionString));
 }
 
 // Configure JWT Authentication
@@ -150,6 +159,8 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddMemoryCache();
 
+builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
+
 // Register Services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<AuthService>();
@@ -158,12 +169,17 @@ builder.Services.AddScoped<IHumidorService, HumidorService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 
-// Add CORS policy
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:3000"];
+if (corsOrigins.Length == 0)
+    corsOrigins = ["http://localhost:3000"];
+
+var corsPolicyName = builder.Configuration["Cors:PolicyName"] ?? "DefaultCors";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
+    options.AddPolicy(corsPolicyName,
         policy => policy
-            .WithOrigins("http://localhost:3000") // Конкретный origin для frontend
+            .WithOrigins(corsOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
@@ -184,7 +200,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Use CORS middleware before routing and endpoint execution
-app.UseCors("AllowSpecificOrigin");
+app.UseCors(corsPolicyName);
 
 // Conditional HTTPS redirection only if we're not using HTTP explicitly
 if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue("UseHttp", false))
