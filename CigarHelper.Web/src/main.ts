@@ -2,6 +2,8 @@ import { createApp } from 'vue';
 import { definePreset } from '@primeuix/styled';
 import App from './App.vue';
 import router from './router';
+/* PrimeIcons: импорт из TS, чтобы Vite переписал url(./fonts/*) в собранные ассеты (не через @import в main.css + Tailwind). */
+import 'primeicons/primeicons.css';
 import './assets/main.css';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
