@@ -2,7 +2,7 @@
 
 ## Установка
 
-**Node.js:** ветка **22.x** (как в CI и в `engines` в `package.json`). Из каталога **`CigarHelper.Web`**:
+**Node.js:** ветка **24.x**, эталон **24.14.1** — см. **`CigarHelper.Web/.nvmrc`**, `engines` в `package.json` и CI. Из каталога **`CigarHelper.Web`**:
 
 ```bash
 cd CigarHelper.Web

@@ -6,6 +6,11 @@
 - Проекты **Api**, **Data**, **Import** имеют свои `UserSecretsId` где это настроено.
 - Локальные переопределения JSON: игнорировать коммитами файлы вида `**/appsettings.*.local.json` (см. историю security-рефакторинга).
 
+## Node.js (фронт, e2e, CI)
+
+- Целевая ветка **24.x**; эталонная версия среды: **24.14.1** (файл **`CigarHelper.Web/.nvmrc`**, поле **`engines.node`** в `CigarHelper.Web/package.json`, GitHub Actions **`setup-node`** с `node-version-file` на этот путь).
+- Для локалки: `nvm use` / `fnm use` в каталоге фронта или указать ту же версию вручную.
+
 ## Запуск API
 
 Из корня репозитория:

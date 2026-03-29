@@ -56,7 +56,7 @@
 - [ ] Когда **typescript-eslint** поддерживает TypeScript 6 — поднять TS и снять потолок **5.9.x** во фронте.
 - [ ] Рассмотреть **Dependabot / Renovate** (или регламент) для автоматических PR по зависимостям с лимитами на major.
 - [x] **`index.html`:** выставить `lang="ru"` (или иной язык интерфейса), если контент не на английском.
-- [ ] В `docs/memory-bank/workflow.md` (и при желании `engines` в `CigarHelper.Web/package.json`) зафиксировать **целевую ветку Node** (например 22.x), совпадающую с CI/локальной средой.
+- [x] В `docs/memory-bank/workflow.md` (и при желании `engines` в `CigarHelper.Web/package.json`) зафиксировать **целевую ветку Node**, совпадающую с CI/локальной средой (**24.x**, эталон **24.14.1** в `.nvmrc`).
 
 ---
 
@@ -94,3 +94,4 @@
 - [x] **2026-03-30** — Tailwind v4: в `CigarBaseEditDialog.vue` заменены `bg-opacity-*` на синтаксис `/opacity`; в `docs/memory-bank/frontend/workflow.md` — заметка по v4 и `@reference` для будущих `@apply` в SFC.
 - [x] **2026-03-30** — Lightning CSS / шел: стили из `App.vue` перенесены в `src/assets/app-shell.css` + импорт из `main.css`; `App.vue` без `<style>`. Предупреждений по сборке для шела нет; workflow обновлён.
 - [x] **2026-03-30** — PrimeIcons: импорт `primeicons.css` перенесён из `main.css` в `main.ts`, шрифты попадают в `dist/assets` с хешами, предупреждения Vite при `vite build` убраны; `docs/memory-bank/frontend/workflow.md` обновлён.
+- [x] **2026-03-30** — Node **24.x**: эталон **24.14.1** из окружения — `CigarHelper.Web/.nvmrc`, `engines` во фронте и `e2e/`, CI `node-version-file`, разделы в `docs/memory-bank/workflow.md`, `frontend/workflow.md`, `e2e/README.md`.

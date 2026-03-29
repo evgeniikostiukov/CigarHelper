@@ -2,11 +2,12 @@
 
 ## Предусловия
 
-1. **PostgreSQL** (или `docker compose up -d postgres` из корня репозитория).
-2. **API:** из корня репозитория  
+1. **Node.js** **24.x** (эталон **24.14.1** — `CigarHelper.Web/.nvmrc` и `engines` во фронте).
+2. **PostgreSQL** (или `docker compose up -d postgres` из корня репозитория).
+3. **API:** из корня репозитория  
    `dotnet run --project CigarHelper.API/CigarHelper.Api.csproj`  
    Убедиться, что Kestrel слушает порт **5184** (или измените `CigarHelper.Web/vite.config.js` → `server.proxy['/api'].target`).
-3. **Фронт:** из `CigarHelper.Web`  
+4. **Фронт:** из `CigarHelper.Web`  
    `npm run dev` → **http://localhost:3000**
 
 ## Установка
