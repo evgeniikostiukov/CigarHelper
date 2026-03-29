@@ -6,7 +6,7 @@ import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import VitePluginVueDevTools from 'vite-plugin-vue-devtools';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     vue({
       script: {
@@ -23,7 +23,8 @@ export default defineConfig({
       resolvers: [PrimeVueResolver()],
       dts: true,
     }),
-    VitePluginVueDevTools(),
+    // Только dev (`vite` / `vite serve`): Vue DevTools не нужны в production-сборке.
+    ...(command === 'serve' ? [VitePluginVueDevTools()] : []),
   ],
   resolve: {
     alias: {
@@ -41,4 +42,15 @@ export default defineConfig({
       },
     },
   },
-});
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/@tiptap/')) {
+            return 'tiptap';
+          }
+        },
+      },
+    },
+  },
+}));

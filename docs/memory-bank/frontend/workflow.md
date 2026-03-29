@@ -31,7 +31,7 @@ npm run preview
 - **Tailwind CSS v4:** не использовать устаревшие утилиты вида `bg-opacity-*` — прозрачность задаётся через слэш (`bg-red-500/70`, `bg-black/0`, `group-hover:bg-black/50`). Иначе при `vite build` возможны предупреждения про неизвестные классы. В `<style>` с `@apply` к кастомной теме из `main.css` может понадобиться `@reference` на этот файл (см. документацию Tailwind v4).
 - **Lightning CSS / корневой шел:** глобальные стили лейаута и Menubar вынесены в **`src/assets/app-shell.css`** (подключается из `main.css`), без `scoped` и без `:deep`/`:global` в `App.vue` — так проще избежать предупреждений при минификации. В остальных SFC `:deep`/`:global` для PrimeVue — осознанный компромисс.
 - **PrimeIcons:** подключать **`import 'primeicons/primeicons.css'`** из **`main.ts`** (до `main.css`), а не через `@import` внутри `main.css` / цепочки Tailwind — иначе Vite не переписывает `url(./fonts/*)` и сыпятся предупреждения при сборке; в `dist/assets/` появляются хешированные woff2/ttf и т.д.
-- **Vue DevTools** подключаются в Vite только в режиме `serve`, чтобы не тянуть цепочку зависимостей с peer Vite 7 в production-сборку.
+- **Vue DevTools:** **`vite-plugin-vue-devtools` 8.x** объявляет peer **Vite ^6–8**. У плагина транзитивно был **`vite-plugin-inspect` 11.x** с peer только Vite 6–7 (ложные `invalid` в `npm ls`). В **`package.json`** задан **`overrides`**: у поддерева devtools поднят **`vite-plugin-inspect@12.0.0-beta.1`**, у которого peer **Vite ^8** — после `npm install` дерево чистое. В **`vite.config.js`** DevTools подключаются **только при `command === 'serve'`** (`npm run dev`), не в `vite build` / CI.
 
 ## Проверки качества (локально и CI)
 

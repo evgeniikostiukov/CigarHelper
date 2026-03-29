@@ -22,6 +22,11 @@
   "engines": {
     "node": ">=24.14.1 <25"
   },
+  "overrides": {
+    "vite-plugin-vue-devtools": {
+      "vite-plugin-inspect": "12.0.0-beta.1"
+    }
+  },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
     "@tiptap/extension-image": "^3.21.0",
