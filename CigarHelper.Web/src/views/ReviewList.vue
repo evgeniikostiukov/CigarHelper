@@ -1,6 +1,6 @@
 <template>
   <section
-    class="review-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="review-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="review-list"
     aria-labelledby="review-list-heading">
     <div
@@ -10,12 +10,12 @@
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
         <div class="min-w-0">
           <p
-            class="text-[0.65rem] uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55 font-semibold mb-1.5">
+            class="text-[0.65rem] uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55 font-semibold mb-1.5">
             Обзоры
           </p>
           <h1
             id="review-list-heading"
-            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-amber-50/95 tracking-tight text-balance">
+            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-rose-50/95 tracking-tight text-balance">
             Сигары в глазах сообщества
           </h1>
           <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
@@ -25,7 +25,7 @@
         <Button
           v-if="isAuthenticated"
           data-testid="review-list-create"
-          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
           icon="pi pi-plus"
           label="Написать обзор"
           @click="$router.push({ name: 'ReviewCreate' })" />
@@ -63,14 +63,14 @@
 
       <div
         v-else-if="reviews.length === 0"
-        class="text-center rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 dark:border-amber-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
+        class="text-center rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 dark:border-rose-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
         data-testid="review-list-empty">
         <span
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
           aria-hidden="true">
           <i class="pi pi-comments text-2xl" />
         </span>
-        <h2 class="text-2xl font-semibold text-stone-900 dark:text-amber-50/95 mb-2">Пока нет обзоров</h2>
+        <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Пока нет обзоров</h2>
         <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
           Станьте первым, кто поделится впечатлением о сигаре, или зайдите позже.
         </p>
@@ -143,14 +143,14 @@
 
         <div
           v-if="filteredReviews.length === 0"
-          class="text-center rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 dark:border-amber-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
+          class="text-center rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 dark:border-rose-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
           data-testid="review-list-filter-empty">
           <span
-            class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+            class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
             aria-hidden="true">
             <i class="pi pi-filter-slash text-2xl" />
           </span>
-          <h2 class="text-2xl font-semibold text-stone-900 dark:text-amber-50/95 mb-2">Ничего не нашлось</h2>
+          <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Ничего не нашлось</h2>
           <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
             Попробуйте смягчить фильтры — список обновится сразу.
           </p>
@@ -184,11 +184,11 @@
               review.images?.[0]?.id,
             ]"
             :data-testid="`review-card-${review.id}`"
-            class="review-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-amber-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-amber-900/30 motion-reduce:transition-none motion-reduce:animate-none"
+            class="review-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 motion-reduce:transition-none motion-reduce:animate-none"
             :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
             <router-link
               :to="{ name: 'ReviewDetail', params: { id: review.id } }"
-              class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
+              class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
               :aria-label="`Открыть обзор: ${review.title}`" />
 
             <div class="relative z-10 pointer-events-none shrink-0">
@@ -214,7 +214,7 @@
               </div>
               <div
                 v-else
-                class="flex h-40 items-center justify-center border-b border-stone-100 bg-gradient-to-br from-stone-100 to-amber-50/60 dark:border-stone-700/80 dark:from-stone-800/80 dark:to-amber-950/30"
+                class="flex h-40 items-center justify-center border-b border-stone-100 bg-gradient-to-br from-stone-50 to-rose-50/60 dark:border-stone-700/80 dark:from-stone-800/80 dark:to-rose-950/30"
                 aria-hidden="true">
                 <i class="pi pi-image text-4xl text-stone-400 dark:text-stone-500" />
               </div>
@@ -222,7 +222,7 @@
 
             <div class="relative z-10 flex flex-1 flex-col gap-2 p-5 pointer-events-none min-h-0">
               <div class="flex items-start justify-between gap-3">
-                <h2 class="text-lg font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 line-clamp-2 pr-2">
+                <h2 class="text-lg font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 line-clamp-2 pr-2">
                   {{ review.title }}
                 </h2>
                 <Tag

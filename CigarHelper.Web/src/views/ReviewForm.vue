@@ -1,6 +1,6 @@
 <template>
   <section
-    class="review-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="review-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="review-form"
     aria-labelledby="review-form-heading">
     <Toast />
@@ -11,12 +11,12 @@
       <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
         <div class="min-w-0">
           <p
-            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
             Обзоры
           </p>
           <h1
             id="review-form-heading"
-            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
             {{ isEditing ? 'Редактирование обзора' : 'Новый обзор' }}
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -106,9 +106,9 @@
           @submit.prevent="submitForm">
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
-                class="pi pi-info-circle text-amber-700 dark:text-amber-400"
+                class="pi pi-info-circle text-rose-700 dark:text-rose-400"
                 aria-hidden="true" />
               Общая информация
             </h2>
@@ -166,7 +166,7 @@
                         v-if="slotProps.option.isUserCigar"
                         class="ml-2 shrink-0">
                         <span
-                          class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900 dark:bg-amber-900/50 dark:text-amber-100">
+                          class="rounded-full bg-rose-100 px-2 py-1 text-xs font-medium text-rose-900 dark:bg-rose-900/50 dark:text-rose-100">
                           Моя
                         </span>
                       </div>
@@ -239,9 +239,9 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
-                class="pi pi-sparkles text-amber-700 dark:text-amber-400"
+                class="pi pi-sparkles text-rose-700 dark:text-rose-400"
                 aria-hidden="true" />
               Детали дегустации
             </h2>
@@ -368,9 +368,9 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
-                class="pi pi-file-edit text-amber-700 dark:text-amber-400"
+                class="pi pi-file-edit text-rose-700 dark:text-rose-400"
                 aria-hidden="true" />
               Содержание обзора
               <span class="text-red-600 dark:text-red-400">*</span>
@@ -390,9 +390,9 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
-                class="pi pi-images text-amber-700 dark:text-amber-400"
+                class="pi pi-images text-rose-700 dark:text-rose-400"
                 aria-hidden="true" />
               Изображения
             </h2>
@@ -417,7 +417,7 @@
               @click="router.push({ name: 'ReviewList' })" />
             <Button
               data-testid="review-form-submit"
-              class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
               :label="isEditing ? 'Сохранить изменения' : 'Опубликовать обзор'"
               :icon="isEditing ? 'pi pi-check' : 'pi pi-send'"
               :loading="saving"

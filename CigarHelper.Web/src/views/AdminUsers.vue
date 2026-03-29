@@ -1,6 +1,6 @@
 <template>
   <section
-    class="admin-users-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="admin-users-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="admin-users-page"
     aria-labelledby="admin-users-heading">
     <div
@@ -9,12 +9,12 @@
     <div class="relative z-[1] mx-auto max-w-7xl">
       <header class="pb-6 sm:pb-8">
         <p
-          class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+          class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
           Администрирование
         </p>
         <h1
           id="admin-users-heading"
-          class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+          class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
           Пользователи
         </h1>
         <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -87,14 +87,14 @@
 
         <div
           v-if="!loading && hasEverLoaded && totalCount === 0"
-          class="rounded-xl border border-dashed border-amber-800/25 bg-white/60 px-5 py-12 text-center dark:border-amber-200/15 dark:bg-stone-900/40"
+          class="rounded-xl border border-dashed border-rose-800/25 bg-white/60 px-5 py-12 text-center dark:border-rose-200/15 dark:bg-stone-900/40"
           data-testid="admin-users-empty">
           <span
-            class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+            class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
             aria-hidden="true">
             <i class="pi pi-users text-2xl" />
           </span>
-          <p class="mb-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+          <p class="mb-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
             {{ searchApplied.trim() ? 'Ничего не найдено' : 'Пользователей нет' }}
           </p>
           <p class="mb-6 text-pretty text-sm text-stone-600 dark:text-stone-400">

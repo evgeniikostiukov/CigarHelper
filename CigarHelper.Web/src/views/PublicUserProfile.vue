@@ -1,6 +1,6 @@
 <template>
   <section
-    class="public-profile-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="public-profile-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="public-profile"
     :aria-labelledby="data ? 'public-profile-heading' : undefined"
     :aria-busy="loading">
@@ -56,12 +56,12 @@
         <header class="pb-6 sm:pb-8">
           <div class="min-w-0">
             <p
-              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
               Публичный профиль
             </p>
             <h1
               id="public-profile-heading"
-              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
               {{ data.username }}
             </h1>
             <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -74,14 +74,14 @@
         <div
           class="public-profile-enter space-y-5 sm:space-y-6"
           data-testid="public-profile-content">
-          <h2 class="text-lg font-semibold text-stone-900 dark:text-amber-50/95 sm:text-xl">Хьюмидоры</h2>
+          <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95 sm:text-xl">Хьюмидоры</h2>
 
           <div
             v-if="!data.humidors.length"
-            class="mx-auto max-w-xl rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 text-center dark:border-amber-200/15 dark:bg-stone-900/60"
+            class="mx-auto max-w-xl rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 text-center dark:border-rose-200/15 dark:bg-stone-900/60"
             data-testid="public-profile-empty">
             <span
-              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
               aria-hidden="true">
               <i class="pi pi-box text-2xl" />
             </span>
@@ -99,16 +99,16 @@
               :key="h.id"
               v-memo="[h.id, h.name, h.currentCount, h.capacity, h.description, h.humidity]"
               :data-testid="`public-profile-humidor-${h.id}`"
-              class="public-humidor-card-enter group relative flex min-h-[13rem] flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-amber-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-amber-900/30 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:animate-none"
+              class="public-humidor-card-enter group relative flex min-h-[13rem] flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-rose-900/30 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:animate-none"
               :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
               <router-link
                 :to="{
                   name: 'PublicHumidorDetail',
                   params: { username: route.params.username, humidorId: String(h.id) },
                 }"
-                class="relative z-10 flex min-h-0 flex-1 cursor-pointer flex-col gap-3 p-5 text-inherit no-underline outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
+                class="relative z-10 flex min-h-0 flex-1 cursor-pointer flex-col gap-3 p-5 text-inherit no-underline outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
                 :aria-label="`Открыть хьюмидор ${h.name}`">
-                <h3 class="pr-2 text-lg font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 line-clamp-2">
+                <h3 class="pr-2 text-lg font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 line-clamp-2">
                   {{ h.name }}
                 </h3>
                 <div class="flex flex-col gap-1.5 text-sm text-stone-600 dark:text-stone-400">
@@ -140,7 +140,7 @@
                     name: 'PublicHumidorDetail',
                     params: { username: route.params.username, humidorId: String(h.id) },
                   }"
-                  class="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium text-amber-900 touch-manipulation outline-offset-2 transition-colors hover:text-amber-950 hover:underline dark:text-amber-200/90 dark:hover:text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
+                  class="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium text-rose-900 touch-manipulation outline-offset-2 transition-colors hover:text-rose-950 hover:underline dark:text-rose-200/90 dark:hover:text-rose-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
                   :data-testid="`public-profile-humidor-open-${h.id}`"
                   :aria-label="`Смотреть состав хьюмидора ${h.name}`">
                   Смотреть состав

@@ -9,12 +9,19 @@
 - **Vue 3** (Composition API, `<script setup>`, TypeScript).
 - **Vue Router 4** — история `createWebHistory`, guards по `meta.requiresAuth`, `requiresAdmin`, опционально `requiresAnyRole`.
 - **Vite 7** — алиас `@` → `src/`, auto-import PrimeVue через `unplugin-vue-components` + `PrimeVueResolver`, Vue DevTools в dev.
-- **PrimeVue 4** + **@primeuix/themes** (preset Aura), иконки PrimeIcons.
+- **PrimeVue 4** + **@primeuix/themes** (база Aura, кастомный пресет в `main.ts` — см. ниже), иконки PrimeIcons.
 - **Tailwind CSS 4** + **tailwindcss-primeui**, PostCSS.
 - **Axios** — единый клиент `src/services/api.ts`, `baseURL: '/api'`.
 - **jwt-decode** — разбор JWT в `authService.ts`; зависимость объявлена в `CigarHelper.Web/package.json`.
 - **TipTap** (+ Vue 3) — **TextEditor.vue**; **DOMPurify** — санитизация HTML где нужно.
 - **@vueuse/core** — утилиты.
+
+## Тема и палитра (UI)
+
+- **`src/main.ts`**: `definePreset` из `@primeuix/styled` на базе `Aura` — пресет **CigarAura**. Акцент **primary** = палитра **rose** (вместо emerald по умолчанию). **Surface** в светлой и тёмной схеме = **stone** (теплее прежнего slate в Aura).
+- **Tailwind**: на экранах акцентные классы **`rose-*`** (раньше единообразно использовался amber); корневые фоны страниц осветлены (**`from-stone-50` / `to-stone-50`** вместо `stone-100` там, где был общий градиент).
+- **`src/assets/main.css`**: в `@theme` задан **`--color-app-body`** для цвета текста `body` вне компонентов PrimeVue (тёплый нейтраль).
+- **`src/App.vue`**: градиент оболочки (`stone-50` + лёгкий **`rose-50`** / в dark **`rose-950`**), hover и focus пунктов Menubar под розовую гамму.
 
 ## Точка входа
 

@@ -1,6 +1,6 @@
 <template>
   <section
-    class="profile-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="profile-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="profile"
     aria-labelledby="profile-heading">
     <div class="profile-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
@@ -9,12 +9,12 @@
       <header class="pb-6 sm:pb-8">
         <div class="min-w-0">
           <p
-            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
             Аккаунт
           </p>
           <h1
             id="profile-heading"
-            class="text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 text-balance sm:text-4xl">
+            class="text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 text-balance sm:text-4xl">
             Профиль
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -66,7 +66,7 @@
           class="profile-panel-enter rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6"
           data-testid="profile-section-personal"
           :style="{ animationDelay: '0ms' }">
-          <h2 class="mb-1 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Личные данные</h2>
+          <h2 class="mb-1 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Личные данные</h2>
           <p class="mb-5 text-sm text-stone-600 dark:text-stone-400">
             Эти поля видны только вам; публичная страница показывает то, что вы разрешили ниже.
           </p>
@@ -117,7 +117,7 @@
                 for="profile-public"
                 class="cursor-pointer text-sm text-stone-700 dark:text-stone-300">
                 Публичный профиль (страница
-                <span class="font-mono text-amber-900/90 dark:text-amber-200/90"
+                <span class="font-mono text-rose-900/90 dark:text-rose-200/90"
                   >/u/{{ form.username.trim() || '…' }}</span
                 >)
               </label>
@@ -133,7 +133,7 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Button
                 data-testid="profile-save"
-                class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:w-auto"
+                class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:w-auto"
                 label="Сохранить"
                 icon="pi pi-check"
                 :loading="saving"
@@ -155,7 +155,7 @@
           class="profile-panel-enter rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6"
           data-testid="profile-section-password"
           :style="{ animationDelay: '48ms' }">
-          <h2 class="mb-1 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Смена пароля</h2>
+          <h2 class="mb-1 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Смена пароля</h2>
           <p class="mb-5 text-sm text-stone-600 dark:text-stone-400">
             Минимальная длина и сложность могут проверяться на сервере; после смены войдите на других устройствах
             заново.

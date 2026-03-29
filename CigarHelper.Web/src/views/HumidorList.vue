@@ -1,6 +1,6 @@
 <template>
   <section
-    class="humidor-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="humidor-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="humidor-list"
     aria-labelledby="humidor-list-heading">
     <div
@@ -10,12 +10,12 @@
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
         <div class="min-w-0">
           <p
-            class="text-[0.65rem] uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55 font-semibold mb-1.5">
+            class="text-[0.65rem] uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55 font-semibold mb-1.5">
             Коллекция
           </p>
           <h1
             id="humidor-list-heading"
-            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-amber-50/95 tracking-tight text-balance">
+            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-rose-50/95 tracking-tight text-balance">
             Мои хьюмидоры
           </h1>
           <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
@@ -24,7 +24,7 @@
         </div>
         <Button
           data-testid="humidor-list-add"
-          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
           @click="$router.push({ name: 'HumidorForm' })"
           icon="pi pi-plus"
           label="Добавить хьюмидор" />
@@ -62,14 +62,14 @@
 
       <div
         v-else-if="humidors.length === 0"
-        class="text-center rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 dark:border-amber-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
+        class="text-center rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 dark:border-rose-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
         data-testid="humidor-list-empty">
         <span
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
           aria-hidden="true">
           <i class="pi pi-box text-2xl" />
         </span>
-        <h2 class="text-2xl font-semibold text-stone-900 dark:text-amber-50/95 mb-2">Пока пусто</h2>
+        <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Пока пусто</h2>
         <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
           Создайте первый хьюмидор — с него начнётся учёт сигар и влажности.
         </p>
@@ -97,16 +97,16 @@
             humidor.description,
           ]"
           :data-testid="`humidor-card-${humidor.id}`"
-          class="humidor-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-amber-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-amber-900/30 min-h-[16rem] motion-reduce:transition-none motion-reduce:animate-none"
+          class="humidor-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 min-h-[16rem] motion-reduce:transition-none motion-reduce:animate-none"
           :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
           <router-link
             :to="{ name: 'HumidorDetail', params: { id: humidor.id } }"
-            class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
+            class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
             :aria-label="`Открыть хьюмидор ${humidor.name}`" />
 
           <div class="relative z-10 flex flex-1 flex-col gap-3 p-5 pointer-events-none min-h-0">
             <h2
-              class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 pr-2 line-clamp-2">
+              class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 pr-2 line-clamp-2">
               {{ humidor.name }}
             </h2>
             <div class="flex flex-col gap-1.5 text-sm text-stone-600 dark:text-stone-400">

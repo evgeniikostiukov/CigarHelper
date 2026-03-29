@@ -1,6 +1,6 @@
 <template>
   <section
-    class="humidor-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="humidor-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="humidor-detail"
     aria-labelledby="humidor-detail-heading">
     <div
@@ -66,12 +66,12 @@
         <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
           <div class="min-w-0">
             <p
-              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
               Коллекция
             </p>
             <h1
               id="humidor-detail-heading"
-              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
               {{ humidor.name }}
             </h1>
             <p
@@ -88,7 +88,7 @@
           <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
             <Button
               data-testid="humidor-detail-edit"
-              class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
               label="Редактировать"
               icon="pi pi-pencil"
               @click="router.push({ name: 'HumidorEdit', params: { id: humidor.id } })" />
@@ -114,7 +114,7 @@
               <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                 Вместимость
               </h2>
-              <p class="text-2xl font-semibold text-stone-900 dark:text-amber-50/95">
+              <p class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95">
                 {{ humidor.cigars.length }} / {{ humidor.capacity }}
               </p>
               <ProgressBar
@@ -153,7 +153,7 @@
             aria-labelledby="humidor-detail-cigars-heading">
             <h2
               id="humidor-detail-cigars-heading"
-              class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+              class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               Сигары в этом хьюмидоре
             </h2>
             <DataTable
@@ -171,7 +171,7 @@
                 <template #body="slotProps">
                   <router-link
                     :to="{ name: 'CigarDetail', params: { id: String(slotProps.data.id) } }"
-                    class="font-medium text-amber-900 underline-offset-2 hover:underline dark:text-amber-200/95"
+                    class="font-medium text-rose-900 underline-offset-2 hover:underline dark:text-rose-200/95"
                     @click.stop>
                     {{ slotProps.data.name }}
                   </router-link>
@@ -223,7 +223,7 @@
               </Column>
               <template #empty>
                 <div
-                  class="rounded-xl border border-dashed border-amber-800/25 bg-stone-50/80 px-5 py-10 text-center text-stone-600 dark:border-amber-200/15 dark:bg-stone-950/40 dark:text-stone-400"
+                  class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-10 text-center text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
                   data-testid="humidor-detail-table-empty">
                   В этом хьюмидоре пока нет сигар.
                 </div>
@@ -237,7 +237,7 @@
             data-testid="humidor-detail-available">
             <h2
               id="humidor-detail-add-heading"
-              class="mb-1 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+              class="mb-1 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               Добавить сигары
             </h2>
             <p class="mb-5 text-sm text-stone-600 dark:text-stone-400">
@@ -250,7 +250,7 @@
               data-testid="humidor-detail-available-loading"
               aria-busy="true">
               <i
-                class="pi pi-spin pi-spinner text-2xl text-amber-800 dark:text-amber-400"
+                class="pi pi-spin pi-spinner text-2xl text-rose-800 dark:text-rose-400"
                 aria-hidden="true" />
               <span class="text-sm text-stone-600 dark:text-stone-400">Загрузка списка…</span>
             </div>
@@ -277,7 +277,7 @@
 
             <div
               v-else-if="availableCigars.length === 0"
-              class="rounded-xl border border-dashed border-amber-800/25 bg-stone-50/80 px-5 py-10 text-center dark:border-amber-200/15 dark:bg-stone-950/40"
+              class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-10 text-center dark:border-rose-200/15 dark:bg-stone-950/40"
               data-testid="humidor-detail-available-empty">
               <p class="text-stone-600 dark:text-stone-400">Нет сигар для добавления в этот хьюмидор.</p>
             </div>
@@ -302,7 +302,7 @@
                 class="available-card-enter flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
                 :style="{ animationDelay: `${Math.min(index, 8) * 40}ms` }">
                 <div class="flex flex-1 flex-col gap-2 border-b border-stone-100 p-4 dark:border-stone-700/80">
-                  <h3 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-amber-50/95">
+                  <h3 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-rose-50/95">
                     {{ cigar.name }}
                   </h3>
                   <p class="text-sm text-stone-600 dark:text-stone-400">

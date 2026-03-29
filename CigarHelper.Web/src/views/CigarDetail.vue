@@ -1,6 +1,6 @@
 <template>
   <section
-    class="cigar-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="cigar-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-detail"
     aria-labelledby="cigar-detail-heading">
     <div
@@ -51,12 +51,12 @@
         <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
           <div class="min-w-0">
             <p
-              class="text-[0.65rem] uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55 font-semibold mb-1.5">
+              class="text-[0.65rem] uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55 font-semibold mb-1.5">
               Коллекция
             </p>
             <h1
               id="cigar-detail-heading"
-              class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-amber-50/95 tracking-tight text-balance">
+              class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-rose-50/95 tracking-tight text-balance">
               {{ cigar.name }}
             </h1>
             <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
@@ -74,7 +74,7 @@
               @click="router.push({ name: 'CigarList' })" />
             <Button
               data-testid="cigar-detail-edit"
-              class="w-full sm:w-auto min-h-12 sm:min-h-11 px-5 touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+              class="w-full sm:w-auto min-h-12 sm:min-h-11 px-5 touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
               label="Редактировать"
               icon="pi pi-pencil"
               @click="editCigar" />
@@ -114,7 +114,7 @@
                 data-testid="cigar-detail-no-image"
                 aria-hidden="true">
                 <span
-                  class="flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
+                  class="flex h-20 w-20 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100">
                   <i class="pi pi-image text-4xl" />
                 </span>
               </div>
@@ -127,9 +127,9 @@
               aria-labelledby="cigar-detail-info-heading">
               <h2
                 id="cigar-detail-info-heading"
-                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95 mb-4">
                 <i
-                  class="pi pi-info-circle text-amber-800/80 dark:text-amber-400/90"
+                  class="pi pi-info-circle text-rose-800/80 dark:text-rose-400/90"
                   aria-hidden="true" />
                 Основная информация
               </h2>
@@ -191,9 +191,9 @@
               aria-labelledby="cigar-detail-rating-heading">
               <h2
                 id="cigar-detail-rating-heading"
-                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95 mb-4">
                 <i
-                  class="pi pi-star text-amber-700 dark:text-amber-400"
+                  class="pi pi-star text-rose-700 dark:text-rose-400"
                   aria-hidden="true" />
                 Оценка
               </h2>
@@ -213,9 +213,9 @@
               aria-labelledby="cigar-detail-blend-heading">
               <h2
                 id="cigar-detail-blend-heading"
-                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95 mb-4">
                 <i
-                  class="pi pi-layer-group text-amber-800/80 dark:text-amber-400/90"
+                  class="pi pi-layer-group text-rose-800/80 dark:text-rose-400/90"
                   aria-hidden="true" />
                 Структура сигары
               </h2>
@@ -253,9 +253,9 @@
               aria-labelledby="cigar-detail-storage-heading">
               <h2
                 id="cigar-detail-storage-heading"
-                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95 mb-4">
                 <i
-                  class="pi pi-box text-amber-800/80 dark:text-amber-400/90"
+                  class="pi pi-box text-rose-800/80 dark:text-rose-400/90"
                   aria-hidden="true" />
                 Хранение
               </h2>
@@ -264,7 +264,7 @@
                 v-if="cigar.humidorId && humidor"
                 class="space-y-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <h3 class="text-base font-semibold text-stone-900 dark:text-amber-50/95">
+                  <h3 class="text-base font-semibold text-stone-900 dark:text-rose-50/95">
                     {{ humidor.name }}
                   </h3>
                   <Button
@@ -308,7 +308,7 @@
 
               <div
                 v-else-if="cigar.humidorId && !humidor"
-                class="rounded-xl border border-amber-800/20 bg-amber-50/50 px-4 py-3 dark:border-amber-200/15 dark:bg-amber-950/20"
+                class="rounded-xl border border-rose-800/20 bg-rose-50/50 px-4 py-3 dark:border-rose-200/15 dark:bg-rose-950/20"
                 role="status">
                 <p class="text-sm text-stone-700 dark:text-stone-300 mb-3 text-pretty">
                   Данные хьюмидора не загрузились, но сигара привязана к нему.
@@ -325,10 +325,10 @@
 
               <div
                 v-else
-                class="text-center rounded-xl border border-dashed border-amber-800/25 bg-white/60 px-4 py-8 dark:border-amber-200/15 dark:bg-stone-900/40"
+                class="text-center rounded-xl border border-dashed border-rose-800/25 bg-white/60 px-4 py-8 dark:border-rose-200/15 dark:bg-stone-900/40"
                 data-testid="cigar-detail-no-humidor">
                 <span
-                  class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+                  class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
                   aria-hidden="true">
                   <i class="pi pi-box text-2xl" />
                 </span>
@@ -350,9 +350,9 @@
               aria-labelledby="cigar-detail-desc-heading">
               <h2
                 id="cigar-detail-desc-heading"
-                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95 mb-4">
                 <i
-                  class="pi pi-file-edit text-amber-800/80 dark:text-amber-400/90"
+                  class="pi pi-file-edit text-rose-800/80 dark:text-rose-400/90"
                   aria-hidden="true" />
                 Описание
               </h2>

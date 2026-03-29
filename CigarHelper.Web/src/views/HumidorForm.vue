@@ -1,6 +1,6 @@
 <template>
   <section
-    class="humidor-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="humidor-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="humidor-form"
     aria-labelledby="humidor-form-heading">
     <div
@@ -10,12 +10,12 @@
       <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
         <div class="min-w-0">
           <p
-            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
             Коллекция
           </p>
           <h1
             id="humidor-form-heading"
-            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
             {{ isEdit ? 'Редактировать хьюмидор' : 'Новый хьюмидор' }}
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -192,7 +192,7 @@
               id="humidor-form-submit"
               data-testid="humidor-form-submit"
               type="submit"
-              class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
               :label="isEdit ? 'Сохранить' : 'Создать'"
               icon="pi pi-check"
               :loading="saving" />

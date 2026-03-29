@@ -1,6 +1,6 @@
 <template>
   <section
-    class="public-humidor-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="public-humidor-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="public-humidor-detail"
     :aria-labelledby="humidor ? 'public-humidor-detail-heading' : undefined"
     :aria-busy="loading">
@@ -64,12 +64,12 @@
         <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
           <div class="min-w-0">
             <p
-              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
               Публичный просмотр · {{ ownerUsername }}
             </p>
             <h1
               id="public-humidor-detail-heading"
-              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
               {{ humidor.name }}
             </h1>
             <p
@@ -104,7 +104,7 @@
               <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
                 Вместимость
               </h2>
-              <p class="text-2xl font-semibold text-stone-900 dark:text-amber-50/95">
+              <p class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95">
                 {{ cigarCount }} / {{ humidor.capacity ?? '—' }}
               </p>
               <ProgressBar
@@ -144,7 +144,7 @@
             aria-labelledby="public-humidor-cigars-heading">
             <h2
               id="public-humidor-cigars-heading"
-              class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+              class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               Сигары в хьюмидоре
             </h2>
             <DataTable
@@ -188,7 +188,7 @@
               </Column>
               <template #empty>
                 <div
-                  class="rounded-xl border border-dashed border-amber-800/25 bg-stone-50/80 px-5 py-10 text-center text-stone-600 dark:border-amber-200/15 dark:bg-stone-950/40 dark:text-stone-400"
+                  class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-10 text-center text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
                   data-testid="public-humidor-detail-table-empty">
                   В этом хьюмидоре пока нет сигар.
                 </div>

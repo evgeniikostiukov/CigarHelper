@@ -1,6 +1,6 @@
 <template>
   <section
-    class="cigar-bases-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="cigar-bases-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-bases"
     aria-labelledby="cigar-bases-heading">
     <div
@@ -10,12 +10,12 @@
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
         <div class="min-w-0">
           <p
-            class="text-[0.65rem] uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55 font-semibold mb-1.5">
+            class="text-[0.65rem] uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55 font-semibold mb-1.5">
             Справочник
           </p>
           <h1
             id="cigar-bases-heading"
-            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-amber-50/95 tracking-tight text-balance">
+            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-rose-50/95 tracking-tight text-balance">
             База сигар
           </h1>
           <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
@@ -24,7 +24,7 @@
         </div>
         <Button
           data-testid="cigar-bases-add"
-          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
           label="Добавить в коллекцию (новая сигара)"
           icon="pi pi-plus"
           @click="createNewCigar" />
@@ -37,14 +37,14 @@
         <div class="flex flex-col gap-6 sm:gap-8">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
             <span
-              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100 sm:h-14 sm:w-14"
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100 sm:h-14 sm:w-14"
               aria-hidden="true">
               <i class="pi pi-filter-slash text-2xl" />
             </span>
             <div class="min-w-0 flex-1">
               <h2
                 id="cigar-bases-filters-heading"
-                class="text-lg font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-xl">
+                class="text-lg font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-xl">
                 Поиск и фильтры
               </h2>
               <p
@@ -170,14 +170,14 @@
 
       <div
         v-if="!loading && !error && pagination.totalRecords === 0"
-        class="mx-auto max-w-xl rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 text-center dark:border-amber-200/15 dark:bg-stone-900/60"
+        class="mx-auto max-w-xl rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 text-center dark:border-rose-200/15 dark:bg-stone-900/60"
         data-testid="cigar-bases-empty">
         <span
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
           aria-hidden="true">
           <i class="pi pi-search text-2xl" />
         </span>
-        <h2 class="mb-2 text-2xl font-semibold text-stone-900 dark:text-amber-50/95">Ничего не найдено</h2>
+        <h2 class="mb-2 text-2xl font-semibold text-stone-900 dark:text-rose-50/95">Ничего не найдено</h2>
         <p class="mb-6 text-pretty text-stone-600 dark:text-stone-400">
           Сбросьте фильтры или измените запрос — в базе пока нет подходящих записей.
         </p>
@@ -241,7 +241,7 @@
             header="Название"
             sortable>
             <template #body="{ data }">
-              <div class="font-semibold text-stone-900 dark:text-amber-50/90">
+              <div class="font-semibold text-stone-900 dark:text-rose-50/90">
                 {{ data.name }}
               </div>
             </template>
@@ -423,7 +423,7 @@
                 </div>
               </div>
               <div class="min-w-0 flex-1">
-                <h2 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-amber-50/95">
+                <h2 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-rose-50/95">
                   {{ cigar.name }}
                 </h2>
                 <div class="mt-1 flex flex-wrap items-center gap-2">
@@ -795,7 +795,7 @@
     const classes: Record<string, string> = {
       very_mild: 'bg-emerald-100/90 text-emerald-900 dark:bg-emerald-900/35 dark:text-emerald-200',
       mild: 'bg-sky-100/90 text-sky-900 dark:bg-sky-900/35 dark:text-sky-200',
-      medium: 'bg-amber-100/90 text-amber-950 dark:bg-amber-900/40 dark:text-amber-100',
+      medium: 'bg-rose-100/90 text-rose-950 dark:bg-rose-900/40 dark:text-rose-100',
       full: 'bg-orange-100/90 text-orange-950 dark:bg-orange-900/40 dark:text-orange-100',
       very_full: 'bg-red-100/90 text-red-950 dark:bg-red-900/40 dark:text-red-100',
     };

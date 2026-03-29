@@ -1,7 +1,7 @@
 <template>
   <div
     data-testid="app"
-    class="app-container app-shell min-h-screen min-w-full flex flex-col bg-gradient-to-b from-stone-100 via-amber-50/30 to-stone-100 text-stone-800 dark:from-stone-950 dark:via-amber-950/15 dark:to-stone-950 dark:text-stone-200">
+    class="app-container app-shell min-h-screen min-w-full flex flex-col bg-gradient-to-b from-stone-50 via-rose-50/45 to-stone-50 text-stone-800 dark:from-stone-950 dark:via-rose-950/18 dark:to-stone-950 dark:text-stone-200">
     <Toast />
     <ConfirmDialog />
 
@@ -16,9 +16,9 @@
           <router-link
             :to="{ name: 'Home' }"
             data-testid="app-nav-brand"
-            class="no-underline touch-manipulation rounded-lg py-1.5 pl-1 pr-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400">
+            class="no-underline touch-manipulation rounded-lg py-1.5 pl-1 pr-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400">
             <span
-              class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-amber-900/70 dark:text-amber-200/55">
+              class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-rose-900/65 dark:text-rose-200/55">
               Cigar Helper
             </span>
             <span class="sr-only"> — на главную</span>
@@ -36,7 +36,7 @@
                 :aria-label="`Профиль: ${user?.unique_name ?? ''}`"
                 title="Перейти в профиль">
                 <i
-                  class="pi pi-user shrink-0 text-base text-amber-800 dark:text-amber-400/90"
+                  class="pi pi-user shrink-0 text-base text-rose-800 dark:text-rose-400/90"
                   aria-hidden="true" />
                 <span class="truncate text-sm sm:text-base">{{ user?.unique_name }}</span>
               </router-link>
@@ -89,7 +89,7 @@
               aria-busy="true"
               aria-live="polite">
               <i
-                class="pi pi-spinner animate-spin text-3xl text-amber-800/80 dark:text-amber-400/80"
+                class="pi pi-spinner animate-spin text-3xl text-rose-800/80 dark:text-rose-400/80"
                 aria-hidden="true" />
               <p class="text-sm text-stone-600 dark:text-stone-400">Загрузка экрана…</p>
             </div>
@@ -210,20 +210,20 @@
   }
 
   :deep(.app-menubar-bar .p-menuitem-link:hover) {
-    background-color: rgb(253 230 138 / 0.35);
+    background-color: rgb(255 228 230 / 0.55);
   }
 
   :global(.dark) :deep(.app-menubar-bar .p-menuitem-link:hover) {
-    background-color: rgb(39 39 42 / 0.85);
+    background-color: rgb(68 64 60 / 0.85);
   }
 
   :deep(.app-menubar-bar .p-menuitem-link:focus-visible) {
-    outline: 2px solid rgb(180 83 9);
+    outline: 2px solid rgb(190 18 60);
     outline-offset: 2px;
   }
 
   :global(.dark) :deep(.app-menubar-bar .p-menuitem-link:focus-visible) {
-    outline-color: rgb(251 191 36);
+    outline-color: rgb(251 113 133);
   }
 
   /* xs breakpoint для скрытия текста на кнопках на мобильных */

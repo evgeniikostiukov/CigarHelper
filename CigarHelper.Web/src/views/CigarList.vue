@@ -1,6 +1,6 @@
 <template>
   <section
-    class="cigar-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="cigar-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-list"
     aria-labelledby="cigar-list-heading">
     <div
@@ -10,12 +10,12 @@
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
         <div class="min-w-0">
           <p
-            class="text-[0.65rem] uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55 font-semibold mb-1.5">
+            class="text-[0.65rem] uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55 font-semibold mb-1.5">
             Коллекция
           </p>
           <h1
             id="cigar-list-heading"
-            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-amber-50/95 tracking-tight text-balance">
+            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-rose-50/95 tracking-tight text-balance">
             Мои сигары
           </h1>
           <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
@@ -24,7 +24,7 @@
         </div>
         <Button
           data-testid="cigar-list-add"
-          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+          class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
           @click="$router.push({ name: 'CigarNew' })"
           icon="pi pi-plus"
           label="Добавить сигару" />
@@ -62,14 +62,14 @@
 
       <div
         v-else-if="cigars.length === 0"
-        class="text-center rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 dark:border-amber-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
+        class="text-center rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 dark:border-rose-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
         data-testid="cigar-list-empty">
         <span
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
           aria-hidden="true">
           <i class="pi pi-bookmark text-2xl" />
         </span>
-        <h2 class="text-2xl font-semibold text-stone-900 dark:text-amber-50/95 mb-2">Пока пусто</h2>
+        <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Пока пусто</h2>
         <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
           Добавьте первую сигару — бренд, формат и ваши заметки останутся под рукой.
         </p>
@@ -90,7 +90,7 @@
           :key="cigar.id"
           v-memo="memoKey(cigar)"
           :data-testid="`cigar-card-${cigar.id}`"
-          class="cigar-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-amber-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-amber-900/30 min-h-[20rem] motion-reduce:transition-none motion-reduce:animate-none"
+          class="cigar-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 min-h-[20rem] motion-reduce:transition-none motion-reduce:animate-none"
           :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
           <div
             class="relative z-20 shrink-0 h-48 rounded-t-2xl overflow-hidden border-b border-stone-100 dark:border-stone-700/80 bg-stone-100 dark:bg-stone-800/80">
@@ -141,9 +141,9 @@
 
           <router-link
             :to="{ name: 'CigarDetail', params: { id: String(cigar.id) } }"
-            class="relative z-10 flex flex-1 flex-col gap-2.5 p-5 min-h-0 no-underline text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400 rounded-none">
+            class="relative z-10 flex flex-1 flex-col gap-2.5 p-5 min-h-0 no-underline text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400 rounded-none">
             <h2
-              class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 pr-1 line-clamp-2">
+              class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 pr-1 line-clamp-2">
               {{ cigar.name }}
             </h2>
             <p class="text-sm font-medium text-stone-700 dark:text-stone-300 line-clamp-1">
@@ -159,7 +159,7 @@
                 v-if="cigar.rating != null"
                 class="flex items-center gap-1">
                 <div
-                  class="flex text-amber-500 dark:text-amber-400"
+                  class="flex text-rose-500 dark:text-rose-400"
                   aria-hidden="true">
                   <svg
                     v-for="i in 5"
@@ -189,7 +189,7 @@
               v-if="cigar.humidorId"
               class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 pt-1">
               <i
-                class="pi pi-box text-amber-700 dark:text-amber-400 shrink-0"
+                class="pi pi-box text-rose-700 dark:text-rose-400 shrink-0"
                 aria-hidden="true" />
               <span>В хьюмидоре</span>
             </div>

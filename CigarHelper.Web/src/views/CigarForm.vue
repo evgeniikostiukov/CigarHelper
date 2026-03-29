@@ -1,6 +1,6 @@
 <template>
   <section
-    class="cigar-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="cigar-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-form"
     aria-labelledby="cigar-form-heading">
     <div
@@ -10,12 +10,12 @@
       <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
         <div class="min-w-0">
           <p
-            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
             Коллекция
           </p>
           <h1
             id="cigar-form-heading"
-            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
             {{ isEditing ? 'Редактировать сигару' : 'Новая сигара' }}
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -102,7 +102,7 @@
           @submit.prevent="handleSubmit">
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Основная информация</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Основная информация</h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div class="flex flex-col gap-2">
                 <label
@@ -237,7 +237,7 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Структура сигары</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Структура сигары</h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div class="flex flex-col gap-2">
                 <label
@@ -288,7 +288,7 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Характеристики</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Характеристики</h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div class="flex flex-col gap-2">
                 <label
@@ -342,7 +342,7 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Описание и изображение</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Описание и изображение</h2>
             <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,14rem)_1fr] lg:items-start lg:gap-8">
               <div class="flex flex-col gap-2 lg:sticky lg:top-4">
                 <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Предпросмотр</span>
@@ -405,7 +405,7 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Хранение</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Хранение</h2>
             <div class="flex flex-col gap-4">
               <div
                 v-if="!isEditing"
@@ -450,10 +450,10 @@
                 <small class="text-stone-500 dark:text-stone-400">Оставьте пустым, если сигара не в хьюмидоре</small>
                 <p
                   v-if="(isEditing || form.addToCollection) && !humidorsLoading && humidors.length === 0"
-                  class="text-sm text-amber-900/90 dark:text-amber-200/80">
+                  class="text-sm text-rose-900/90 dark:text-rose-200/80">
                   Хьюмидоров пока нет.
                   <router-link
-                    class="font-medium text-amber-800 underline underline-offset-2 dark:text-amber-300"
+                    class="font-medium text-rose-800 underline underline-offset-2 dark:text-rose-300"
                     :to="{ name: 'HumidorList' }">
                     Создайте хьюмидор
                   </router-link>
@@ -469,8 +469,8 @@
 
               <div
                 v-if="selectedHumidor"
-                class="mt-1 rounded-xl border border-amber-800/15 bg-amber-50/60 p-4 dark:border-amber-200/15 dark:bg-amber-950/25">
-                <h3 class="mb-2 font-semibold text-stone-900 dark:text-amber-50/95">
+                class="mt-1 rounded-xl border border-rose-800/15 bg-rose-50/60 p-4 dark:border-rose-200/15 dark:bg-rose-950/25">
+                <h3 class="mb-2 font-semibold text-stone-900 dark:text-rose-50/95">
                   {{ selectedHumidor.name }}
                 </h3>
                 <div class="grid grid-cols-2 gap-3 text-sm text-stone-700 dark:text-stone-300">
@@ -500,7 +500,7 @@
             <Button
               data-testid="cigar-form-submit"
               type="submit"
-              class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
               :label="isEditing ? 'Сохранить изменения' : 'Добавить сигару'"
               icon="pi pi-check"
               :loading="saving" />

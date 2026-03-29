@@ -1,6 +1,6 @@
 <template>
   <section
-    class="review-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="review-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="review-detail"
     :aria-labelledby="review ? 'review-detail-heading' : undefined"
     :aria-busy="loading">
@@ -73,7 +73,7 @@
           aria-label="Хлебные крошки">
           <router-link
             :to="{ name: 'Home' }"
-            class="rounded font-medium text-amber-900 underline-offset-2 hover:text-amber-700 hover:underline dark:text-amber-200/90 dark:hover:text-amber-100">
+            class="rounded font-medium text-rose-900 underline-offset-2 hover:text-rose-700 hover:underline dark:text-rose-200/90 dark:hover:text-rose-100">
             Главная
           </router-link>
           <span
@@ -83,7 +83,7 @@
           >
           <router-link
             :to="{ name: 'ReviewList' }"
-            class="rounded font-medium text-amber-900 underline-offset-2 hover:text-amber-700 hover:underline dark:text-amber-200/90 dark:hover:text-amber-100">
+            class="rounded font-medium text-rose-900 underline-offset-2 hover:text-rose-700 hover:underline dark:text-rose-200/90 dark:hover:text-rose-100">
             Обзоры
           </router-link>
           <span
@@ -99,7 +99,7 @@
           class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
           <Button
             data-testid="review-detail-edit"
-            class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
+            class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
             label="Редактировать"
             icon="pi pi-pencil"
             @click="router.push({ name: 'ReviewEdit', params: { id: String(review.id) } })" />
@@ -116,12 +116,12 @@
         <header class="space-y-4">
           <div class="min-w-0">
             <p
-              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
               Обзоры
             </p>
             <h1
               id="review-detail-heading"
-              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl md:text-[2.5rem]">
+              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl md:text-[2.5rem]">
               {{ review.title }}
             </h1>
           </div>
@@ -134,7 +134,7 @@
                 shape="circle"
                 :aria-label="`Автор: ${review.username}`" />
               <div class="min-w-0">
-                <p class="truncate text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+                <p class="truncate text-lg font-semibold text-stone-900 dark:text-rose-50/95">
                   {{ review.username }}
                 </p>
                 <p class="text-sm text-stone-600 dark:text-stone-400">
@@ -152,10 +152,10 @@
             </div>
           </div>
           <div
-            class="rounded-xl border border-amber-900/15 bg-amber-50/50 px-4 py-3 text-sm text-stone-800 dark:border-amber-400/20 dark:bg-amber-950/25 dark:text-stone-200"
+            class="rounded-xl border border-rose-900/15 bg-rose-50/50 px-4 py-3 text-sm text-stone-800 dark:border-rose-400/20 dark:bg-rose-950/25 dark:text-stone-200"
             data-testid="review-detail-cigar-banner">
             Обзор на сигару:
-            <strong class="font-semibold text-stone-900 dark:text-amber-50/95"
+            <strong class="font-semibold text-stone-900 dark:text-rose-50/95"
               >{{ review.cigarBrand }} · {{ review.cigarName }}</strong
             >
           </div>
@@ -204,9 +204,9 @@
         <div class="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <section
             class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6">
-            <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
-                class="pi pi-sliders-h text-amber-800/80 dark:text-amber-400/90"
+                class="pi pi-sliders-h text-rose-800/80 dark:text-rose-400/90"
                 aria-hidden="true" />
               Характеристики
             </h2>
@@ -254,9 +254,9 @@
           </section>
           <section
             class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6">
-            <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
-                class="pi pi-calendar text-amber-800/80 dark:text-amber-400/90"
+                class="pi pi-calendar text-rose-800/80 dark:text-rose-400/90"
                 aria-hidden="true" />
               Детали дегустации
             </h2>
@@ -279,7 +279,7 @@
           aria-labelledby="review-detail-body-heading">
           <h2
             id="review-detail-body-heading"
-            class="mb-4 text-lg font-semibold text-stone-900 dark:text-amber-50/95">
+            class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
             Текст обзора
           </h2>
           <div
@@ -299,7 +299,7 @@
             @click="router.push({ name: 'ReviewList' })" />
           <Button
             data-testid="review-detail-cigar"
-            class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
+            class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
             label="Открыть сигару в коллекции"
             icon="pi pi-arrow-right"
             icon-pos="right"

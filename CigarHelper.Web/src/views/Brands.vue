@@ -1,6 +1,6 @@
 <template>
   <section
-    class="brands-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    class="brands-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="brands-page"
     aria-labelledby="brands-heading">
     <div class="brands-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
@@ -9,12 +9,12 @@
       <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
         <div class="min-w-0">
           <p
-            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+            class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
             Администрирование
           </p>
           <h1
             id="brands-heading"
-            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+            class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
             Бренды сигар
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -23,7 +23,7 @@
         </div>
         <Button
           data-testid="brands-add"
-          class="w-full shrink-0 px-5 shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:w-auto sm:min-h-11 min-h-12 touch-manipulation"
+          class="w-full shrink-0 px-5 shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:w-auto sm:min-h-11 min-h-12 touch-manipulation"
           icon="pi pi-plus"
           label="Добавить бренд"
           @click="openCreateDialog" />
@@ -64,14 +64,14 @@
 
       <div
         v-else-if="brands.length === 0"
-        class="mx-auto max-w-xl rounded-2xl border border-dashed border-amber-800/25 bg-white/80 px-5 py-12 text-center dark:border-amber-200/15 dark:bg-stone-900/60"
+        class="mx-auto max-w-xl rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 text-center dark:border-rose-200/15 dark:bg-stone-900/60"
         data-testid="brands-empty">
         <span
-          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100"
           aria-hidden="true">
           <i class="pi pi-tag text-2xl" />
         </span>
-        <h2 class="mb-2 text-2xl font-semibold text-stone-900 dark:text-amber-50/95">Брендов пока нет</h2>
+        <h2 class="mb-2 text-2xl font-semibold text-stone-900 dark:text-rose-50/95">Брендов пока нет</h2>
         <p class="mb-6 text-pretty text-stone-600 dark:text-stone-400">
           Добавьте первый бренд — он появится в базе и в фильтрах каталога.
         </p>
@@ -394,7 +394,7 @@
             @click="closeBrandDialog" />
           <Button
             data-testid="brands-dialog-submit"
-            class="min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
+            class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
             :label="isEditing ? 'Сохранить' : 'Добавить'"
             icon="pi pi-check"
             :loading="submitting"
@@ -430,7 +430,7 @@
             <i class="pi pi-image text-xl text-stone-500" />
           </div>
           <div class="min-w-0">
-            <h3 class="text-lg font-semibold text-stone-900 dark:text-amber-50/95">{{ selectedBrand.name }}</h3>
+            <h3 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">{{ selectedBrand.name }}</h3>
             <p
               v-if="selectedBrand.country"
               class="text-sm text-stone-600 dark:text-stone-400">

@@ -1,6 +1,6 @@
 <template>
   <section
-    class="login-root -mx-2 flex min-h-[min(28rem,75dvh)] flex-col justify-center rounded-2xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-10 ring-1 ring-stone-900/5 sm:mx-0 sm:min-h-[min(32rem,70dvh)] sm:rounded-3xl dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-12"
+    class="login-root -mx-2 flex min-h-[min(28rem,75dvh)] flex-col justify-center rounded-2xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-10 ring-1 ring-stone-900/5 sm:mx-0 sm:min-h-[min(32rem,70dvh)] sm:rounded-3xl dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-12"
     data-testid="login"
     aria-labelledby="login-heading">
     <div class="login-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
@@ -8,12 +8,12 @@
     <div class="relative z-[1] mx-auto w-full max-w-md">
       <header class="mb-6 text-center sm:mb-8">
         <p
-          class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55">
+          class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
           Cigar Helper
         </p>
         <h1
           id="login-heading"
-          class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-4xl">
+          class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
           {{ isRegister ? 'Регистрация' : 'Вход' }}
         </h1>
         <p class="mx-auto mt-1.5 max-w-sm text-pretty text-sm text-stone-600 dark:text-stone-400">
@@ -143,7 +143,7 @@
           <Button
             data-testid="login-submit"
             type="submit"
-            class="mt-1 min-h-12 w-full touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+            class="mt-1 min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
             :label="isRegister ? 'Зарегистрироваться' : 'Войти'"
             :loading="loading"
             :icon="isRegister ? 'pi pi-user-plus' : 'pi pi-sign-in'" />
