@@ -21,8 +21,8 @@
 
 ## Этап 1 — Бэкенд (расширение текущего покрытия)
 
-- [ ] Просмотреть критичные контроллеры без интеграционных тестов; добавить тесты там, где риск выше (авторизация, границы владения, публичные vs приватные эндпоинты).
-- [ ] Добавить/уточнить интеграционные тесты для сценариев, от которых сильно зависит SPA (пагинация списков, ошибки 401/403/404, типичные DTO).
+- [x] Просмотреть критичные контроллеры без интеграционных тестов; добавить тесты там, где риск выше (авторизация, границы владения, публичные vs приватные эндпоинты).
+- [x] Добавить/уточнить интеграционные тесты для сценариев, от которых сильно зависит SPA (пагинация списков, ошибки 401/403/404, типичные DTO).
 - [ ] При изменении контрактов API — обновлять или добавлять тесты в `CigarHelper.Api.Tests` до или вместе с правкой фронта.
 
 ## Этап 2 — Фронт: юнит-тесты (Vitest)
@@ -53,6 +53,9 @@
 
 ## Сделано
 
+- [x] **2026-03-30** — Зависимости: `npx npm-check-updates -u` в `CigarHelper.Web`, корне репо и `cigar-scraper` + `npm install`; TypeScript зафиксирован на **^5.9.3** (peer `typescript-eslint@8` требует TS ниже 6); TipTap 3 в `TextEditor.vue` (`Extensions`, `setContent(..., { emitUpdate: false })`, стили тулбара без `@apply` под Tailwind 4.2); удалён `@types/dompurify`.
+- [x] **2026-03-30** — Фронт: палитра светлее и с розово-красным акцентом — пресет PrimeVue Aura (`rose` primary, `surface` на stone), градиенты/акценты Tailwind `amber`→`rose`, фоны `stone-100`→`stone-50` на корневых экранах, тёплый цвет `body` в `main.css`, hover/focus меню в `App.vue`.
+- [x] **2026-03-30** — Этап 1 бэкенд-тестов: `ApiAuthorizationAndContractsIntegrationTests` (401/403/404, публичный профиль, пагинация `PaginatedResult`), исправление InMemory в `Program.cs` (одно имя БД на запуск хоста — сиды видны HTTP).
 - [x] **2026-03-30** — CI GitHub Actions: `dotnet test` + фронт (`typecheck`, `lint`, `test`, `build`). Скрипты в `CigarHelper.Web/package.json`, `eslint-config-prettier`, удалён устаревший `.eslintignore`.
 - [x] **2026-03-30** — Исправления под `vue-tsc`: тип `User.role` (readonly из JWT), `getRoleClaims`, `getAuthUserId`; автоформат ESLint/Prettier по проекту; мелкие правки линта (emit tuple, кнопка «Создать похожую» в `CigarDetailDialog`, вызов `addCigarToHumidor` без лишнего аргумента).
 - [x] **2026-03-30** — Vitest + `happy-dom`: `vitest.config.ts`, тесты `imageUtils.test.ts`, `roles.test.ts`.
