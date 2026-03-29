@@ -90,9 +90,17 @@ builder.Services.AddSwaggerGen(options =>
     // });
 });
 
-// Configure DbContext with PostgreSQL
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configure DbContext: один провайдер на процесс (интеграционные тесты — InMemory)
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseInMemoryDatabase($"Integration_{Guid.NewGuid():N}"));
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -192,7 +200,8 @@ app.UseRateLimiter();
 
 app.MapControllers();
 
-// Apply database migrations
-app.ApplyMigrations<AppDbContext>(app.Services.GetRequiredService<ILogger<Program>>());
+// В интеграционных тестах БД — InMemory, миграции не применяем
+if (!app.Environment.IsEnvironment("Testing"))
+    app.ApplyMigrations<AppDbContext>(app.Services.GetRequiredService<ILogger<Program>>());
 
 app.Run();
