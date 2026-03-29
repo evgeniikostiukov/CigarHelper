@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Models;
@@ -29,7 +30,10 @@ public class JwtServiceTests
     {
         JwtService.CreatePasswordHash("secret", out var hash, out var salt);
 
-        Assert.True(JwtService.VerifyPasswordHash("secret", hash, salt));
+        Assert.Equal(16, salt.Length);
+        Assert.Equal(32, hash.Length);
+        Assert.True(JwtService.VerifyPasswordHash("secret", hash, salt, out var rehash));
+        Assert.False(rehash);
     }
 
     [Fact]
@@ -38,6 +42,31 @@ public class JwtServiceTests
         JwtService.CreatePasswordHash("secret", out var hash, out var salt);
 
         Assert.False(JwtService.VerifyPasswordHash("other", hash, salt));
+    }
+
+    /// <summary>Старый алгоритм до PBKDF2 — для проверки миграции при логине.</summary>
+    private static void CreateLegacyHmac512Hash(string password, out byte[] hash, out byte[] salt)
+    {
+        using var hmac = new HMACSHA512();
+        salt = hmac.Key;
+        hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+    }
+
+    [Fact]
+    public void VerifyPasswordHash_LegacyHmac512_Matches_AndRequestsRehash()
+    {
+        CreateLegacyHmac512Hash("legacy-pw", out var hash, out var salt);
+
+        Assert.True(JwtService.VerifyPasswordHash("legacy-pw", hash, salt, out var rehash));
+        Assert.True(rehash);
+    }
+
+    [Fact]
+    public void VerifyPasswordHash_ModernFormat_DoesNotRequestRehash()
+    {
+        JwtService.CreatePasswordHash("x", out var hash, out var salt);
+        Assert.True(JwtService.VerifyPasswordHash("x", hash, salt, out var rehash));
+        Assert.False(rehash);
     }
 
     [Fact]

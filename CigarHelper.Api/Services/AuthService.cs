@@ -83,8 +83,11 @@ public class AuthService
             };
         }
 
-        // Verify password
-        if (!JwtService.VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+        if (!JwtService.VerifyPasswordHash(
+                request.Password,
+                user.PasswordHash,
+                user.PasswordSalt,
+                out var rehashWithModernAlgorithm))
         {
             return new AuthResponse
             {
@@ -93,7 +96,13 @@ public class AuthService
             };
         }
 
-        // Update last login time
+        if (rehashWithModernAlgorithm)
+        {
+            JwtService.CreatePasswordHash(request.Password, out var newHash, out var newSalt);
+            user.PasswordHash = newHash;
+            user.PasswordSalt = newSalt;
+        }
+
         user.LastLogin = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 

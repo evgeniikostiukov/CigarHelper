@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -138,6 +140,40 @@ public class AuthServiceTests
         Assert.False(res.Success);
         Assert.Equal("User not found", res.Message);
         jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task LoginAsync_LegacyPasswordHash_UpgradesToPbkdf2_OnSuccess()
+    {
+        await using var context = CreateContext();
+        using (var hmac = new HMACSHA512())
+        {
+            var salt = hmac.Key;
+            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(ValidPassword));
+            context.Users.Add(new User
+            {
+                Username = "legacy",
+                Email = "leg@example.com",
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        await context.SaveChangesAsync();
+
+        var jwt = new Mock<IJwtService>();
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns("t");
+        var sut = new AuthService(context, jwt.Object);
+
+        var res = await sut.LoginAsync(new LoginRequest { Email = "leg@example.com", Password = ValidPassword });
+
+        Assert.True(res.Success);
+        var user = await context.Users.SingleAsync();
+        Assert.Equal(16, user.PasswordSalt.Length);
+        Assert.Equal(32, user.PasswordHash.Length);
+        Assert.True(JwtService.VerifyPasswordHash(ValidPassword, user.PasswordHash, user.PasswordSalt, out var rehash));
+        Assert.False(rehash);
     }
 
     [Fact]
