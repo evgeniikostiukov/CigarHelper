@@ -100,13 +100,15 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { computed } from 'vue';
+  import { computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
+  import { useToast } from 'primevue/usetoast';
   import Toast from 'primevue/toast';
   import ConfirmDialog from 'primevue/confirmdialog';
   import Menubar from 'primevue/menubar';
   import Button from 'primevue/button';
   import { useAuth } from '@/services/useAuth';
+  import { registerApiErrorNotifier } from '@/services/apiErrorNotifier';
   import { hasRole } from '@/utils/roles';
 
   interface MenuItem {
@@ -117,7 +119,19 @@
   }
 
   const router = useRouter();
+  const toast = useToast();
   const { isAuthenticated, user, logout } = useAuth();
+
+  onMounted(() => {
+    registerApiErrorNotifier(({ summary, detail, severity }) => {
+      toast.add({
+        summary,
+        detail,
+        severity: severity ?? 'error',
+        life: 6000,
+      });
+    });
+  });
 
   const menuItems = computed<MenuItem[]>(() => [
     {
@@ -164,81 +178,3 @@
     router.push({ name: 'Login' });
   };
 </script>
-<style>
-  .app-container {
-    min-height: 100vh;
-    min-width: 100vw;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  @media (max-width: 640px) {
-    .app-container .app-main {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-    }
-  }
-
-  :deep(.app-menubar-bar.p-menubar) {
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-    padding: 0.375rem 0;
-  }
-
-  :deep(.app-menubar-bar .p-menubar-root-list) {
-    gap: 0.125rem;
-  }
-
-  :deep(.app-menubar-bar .p-menuitem-link) {
-    padding: 0.5rem 0.75rem;
-    min-height: 2.75rem;
-    border-radius: 0.75rem;
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
-    font-size: 0.875rem;
-    font-weight: 500;
-    touch-action: manipulation;
-  }
-
-  :deep(.app-menubar-bar .p-menuitem-link:hover) {
-    background-color: rgb(255 228 230 / 0.55);
-  }
-
-  :global(.dark) :deep(.app-menubar-bar .p-menuitem-link:hover) {
-    background-color: rgb(68 64 60 / 0.85);
-  }
-
-  :deep(.app-menubar-bar .p-menuitem-link:focus-visible) {
-    outline: 2px solid rgb(190 18 60);
-    outline-offset: 2px;
-  }
-
-  :global(.dark) :deep(.app-menubar-bar .p-menuitem-link:focus-visible) {
-    outline-color: rgb(251 113 133);
-  }
-
-  /* xs breakpoint для скрытия текста на кнопках на мобильных */
-  @media (max-width: 480px) {
-    .xs\:hidden {
-      display: none !important;
-    }
-    .xs\:inline-flex {
-      display: inline-flex !important;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    :deep(.app-menubar-bar .p-menuitem-link) {
-      transition: none;
-    }
-  }
-</style>

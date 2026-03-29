@@ -29,6 +29,7 @@ npm run preview
 ### Замечания к сборке
 
 - **Tailwind CSS v4:** не использовать устаревшие утилиты вида `bg-opacity-*` — прозрачность задаётся через слэш (`bg-red-500/70`, `bg-black/0`, `group-hover:bg-black/50`). Иначе при `vite build` возможны предупреждения про неизвестные классы. В `<style>` с `@apply` к кастомной теме из `main.css` может понадобиться `@reference` на этот файл (см. документацию Tailwind v4).
+- **Lightning CSS / корневой шел:** глобальные стили лейаута и Menubar вынесены в **`src/assets/app-shell.css`** (подключается из `main.css`), без `scoped` и без `:deep`/`:global` в `App.vue` — так проще избежать предупреждений при минификации. В остальных SFC `:deep`/`:global` для PrimeVue — осознанный компромисс.
 - Сообщения Vite о шрифтах **PrimeIcons** (`./fonts/primeicons.*` «не резолвятся до runtime») для текущего импорта `primeicons.css` обычно **безвредны**: браузер подгружает шрифты с того же origin после выкладки.
 - **Vue DevTools** подключаются в Vite только в режиме `serve`, чтобы не тянуть цепочку зависимостей с peer Vite 7 в production-сборку.
 

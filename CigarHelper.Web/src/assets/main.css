@@ -2,6 +2,7 @@
 @import "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
 @import "/fonts/onest/onest.css";
+@import "./app-shell.css";
 
 @theme {
   --font-sans:

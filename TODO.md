@@ -50,7 +50,7 @@
 - [x] **NuGet `NU1510` / `Microsoft.Extensions.Configuration.Json`:** убраны избыточные прямые ссылки в `CigarHelper.Data` и `CigarHelper.Import` (пакет транзитивен; в `CigarHelper.Api` отдельной ссылки не было).
 - [ ] По мере роста бандла — точечный code-splitting тяжёлых экранов (например формы с редактором).
 - [ ] Актуализировать `docs/memory-bank/` после крупных изменений API, маршрутов или обязательных секретов.
-- [ ] Убрать или сузить предупреждения Lightning CSS при `vite build` про `:deep` / `:global` в `App.vue`.
+- [x] Убрать или сузить предупреждения Lightning CSS при `vite build` про `:deep` / `:global` в `App.vue`.
 - [ ] Согласовать **Vite 8** и **vite-plugin-vue-devtools** (обновить плагин или зафиксировать версии и описать в workflow).
 - [ ] Разобраться с предупреждениями сборки про шрифты **PrimeIcons** (пути в Vite/CSS или задокументировать как ожидаемое).
 - [ ] Когда **typescript-eslint** поддерживает TypeScript 6 — поднять TS и снять потолок **5.9.x** во фронте.
@@ -92,3 +92,4 @@
 - [x] **2026-03-30** — Фронт: `@vue/test-utils` + `@vitejs/plugin-vue` в `vitest.config.ts`, smoke `src/vue-test-utils.smoke.test.ts`; закрыт пункт `index.html` `lang="ru"` (уже было); E2E CI в бэклоге помечен как временно пропущенный; `docs/memory-bank/frontend/workflow.md` обновлён.
 - [x] **2026-03-30** — NuGet NU1510: удалены прямые ссылки `Microsoft.Extensions.Configuration.Json` из `CigarHelper.Data` и `CigarHelper.Import` (остаётся транзитивно); в API прямой ссылки не было. `dotnet build` / `dotnet test` по solution — ок.
 - [x] **2026-03-30** — Tailwind v4: в `CigarBaseEditDialog.vue` заменены `bg-opacity-*` на синтаксис `/opacity`; в `docs/memory-bank/frontend/workflow.md` — заметка по v4 и `@reference` для будущих `@apply` в SFC.
+- [x] **2026-03-30** — Lightning CSS / шел: стили из `App.vue` перенесены в `src/assets/app-shell.css` + импорт из `main.css`; `App.vue` без `<style>`. Предупреждений по сборке для шела нет; workflow обновлён.
