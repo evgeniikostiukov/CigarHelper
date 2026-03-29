@@ -16,7 +16,8 @@
 | 4 | Логин: единое сообщение, rate limit login/register | Сделано и закоммичено |
 | 5 | `AuthResponse.Expiration` = реальный срок JWT (не парсинг мок-токена; срок из эмиттера JWT) | Сделано и закоммичено |
 | 6 | Убрать чувствительный debug из `AuthController` (Console + длина пароля) | Сделано и закоммичено |
-| 7 | `AllowedHosts без *`, CORS из конфига, валидация бинарных изображений, `Include Error Detail` для Npgsql | Сделано |
+| 7 | `AllowedHosts без *`, CORS из конфига, валидация бинарных изображений, `Include Error Detail` для Npgsql | Сделано и закоммичено |
+| 8 | HSTS (только Production), базовые security-заголовки ответа (`nosniff`, `X-Frame-Options`, `Referrer-Policy`) | Сделано и закоммичено |
 
 ---
 
@@ -33,6 +34,7 @@
   - `fix(auth): align JWT expiration with token and IJwtService tuple` — шаг 5
   - `fix(api): remove sensitive register debug logging` — шаг 6
   - `chore(security): harden hosts, CORS, image uploads, npgsql error detail` — шаг 7
+  - `chore(security): add HSTS and baseline response security headers` — шаг 8
 
 ---
 
@@ -84,6 +86,12 @@
 - **Загрузки изображений:** `ImageUpload:MaxBytes` (по умолчанию 5 MiB), `ImageBinaryValidator` — magic JPEG/PNG/GIF/WebP, согласованность MIME и размера; `CreateCigarImage` сохраняет `ImageData` после проверки; `Update` при новом `ImageData` — те же проверки. Общая логика скачивания URL — через `ImageBinaryValidator` в `ImageDownloader`; `Console.WriteLine` при ошибке скачивания убран.
 - **Npgsql:** перед `UseNpgsql` строка собирается через `NpgsqlConnectionStringBuilder` с `IncludeErrorDetail = IsDevelopment()` (в prod меньше деталей в исключениях).
 
+### Шаг 8 — сделано
+
+- **`AddHsts`:** `Preload = false`, `IncludeSubDomains = true`, `MaxAge` 365 дней; **`UseHsts`** только при `IsProduction()` (в dev/testing без HSTS, чтобы не ломать localhost и интеграционные тесты).
+- **Заголовки:** `UseSecurityHeaders()` в начале пайплайна — `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` (см. `Extensions/SecurityHeadersMiddlewareExtensions.cs`). Если для части эндпоинтов нужен iframe (редко для API), политику придётся ослабить точечно.
+- **Порядок:** security-заголовки и HSTS стоят до `UseHttpsRedirection`, как рекомендует шаблон ASP.NET Core.
+
 ### Продакшен (выкат)
 
 - Шаблон: `CigarHelper.Api/appsettings.Production.json` — плейсхолдеры `yourdomain.example` (RFC 2606), строка БД `REQUIRED`, JWT key с пометкой задать через env / secret store. Перед выкатом заменить на реальные хосты и **не** коммитить секреты.
@@ -107,6 +115,7 @@
 | Тесты unit | `CigarHelper.Api.Tests/AuthServiceTests.cs`, `JwtServiceTests.cs`, … |
 | Тесты integration | `CigarHelper.Api.Tests/AuthIntegrationWebAppFactory.cs`, `AuthStep4IntegrationTests.cs` |
 | Program / Testing | `CigarHelper.API/Program.cs`, `ProgramPartial.cs` |
+| Security headers / HSTS | `CigarHelper.API/Extensions/SecurityHeadersMiddlewareExtensions.cs`, `Program.cs` (пайплайн) |
 | Прод конфиг API | `CigarHelper.Api/appsettings.Production.json` |
 
 ---

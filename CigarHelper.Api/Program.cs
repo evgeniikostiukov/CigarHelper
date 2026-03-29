@@ -185,9 +185,21 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
+builder.Services.AddHsts(options =>
+{
+    options.Preload = false;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseSecurityHeaders();
+
+if (app.Environment.IsProduction())
+    app.UseHsts();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
