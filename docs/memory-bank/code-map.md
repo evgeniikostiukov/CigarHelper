@@ -44,7 +44,7 @@
 ## Тесты (`CigarHelper.Api.Tests/`)
 
 - Фабрика: `AuthIntegrationWebAppFactory.cs`.
-- Интеграция: `AuthStep4IntegrationTests.cs` и др.
+- Интеграция: `AuthStep4IntegrationTests.cs`, `CigarsBasesPaginatedIntegrationTests.cs`, `ApiAuthorizationAndContractsIntegrationTests.cs` (границы доступа и контракт пагинации).
 - Unit: `AuthServiceTests`, `JwtServiceTests`, `ImageBinaryValidatorTests`, сервисные тесты для профиля, админа, хьюмидора, отзывов.
 
 ## Конфигурация API

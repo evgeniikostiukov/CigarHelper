@@ -93,10 +93,13 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Configure DbContext: один провайдер на процесс (интеграционные тесты — InMemory)
+// Имя БД фиксируем один раз на запуск хоста: лямбда AddDbContext может вызываться повторно,
+// иначе каждый DbContext получал бы свой InMemory store — сиды из тестового scope не видны HTTP-запросам.
 if (builder.Environment.IsEnvironment("Testing"))
 {
+    var integrationInMemoryName = $"Integration_{Guid.NewGuid():N}";
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseInMemoryDatabase($"Integration_{Guid.NewGuid():N}"));
+        options.UseInMemoryDatabase(integrationInMemoryName));
 }
 else
 {
