@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
+  import type { Extensions } from '@tiptap/core';
   import { Editor, EditorContent } from '@tiptap/vue-3';
   import StarterKit from '@tiptap/starter-kit';
   import Image from '@tiptap/extension-image';
@@ -46,7 +47,7 @@
         CharacterCount.configure({
           limit: props.maxLength,
         }),
-      ],
+      ] as Extensions,
       content: props.modelValue,
       onUpdate: ({ editor: updatedEditor }) => {
         emit('update:modelValue', updatedEditor.getHTML());
@@ -62,7 +63,7 @@
     () => props.modelValue,
     (newValue) => {
       if (editor.value && editor.value.getHTML() !== newValue) {
-        editor.value.commands.setContent(newValue, false);
+        editor.value.commands.setContent(newValue, { emitUpdate: false });
       }
     },
   );
@@ -231,10 +232,15 @@
   }
 
   .toolbar-button {
-    @apply px-2 py-1 rounded hover:bg-gray-200;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .toolbar-button:hover {
+    background-color: rgb(229 231 235);
   }
 
   .toolbar-button.is-active {
-    @apply bg-gray-300;
+    background-color: rgb(209 213 219);
   }
 </style>
