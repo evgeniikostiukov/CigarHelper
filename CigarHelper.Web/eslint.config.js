@@ -19,6 +19,9 @@ export default tseslint.config(
       'eslint.config.js',
       'src/vite-env.d.ts',
       'src/dotnet/**',
+      'components.d.ts',
+      'postcss.config.js',
+      'vitest.config.ts',
     ],
   },
   {

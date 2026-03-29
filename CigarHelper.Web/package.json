@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "ci": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -39,8 +45,10 @@
     "@vue/tsconfig": "^0.7.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.1",
     "eslint-plugin-vue": "^10.3.0",
+    "happy-dom": "^20.8.9",
     "postcss": "^8.5.6",
     "prettier": "3.6.2",
     "tailwindcss": "^4.1.11",
@@ -49,6 +57,7 @@
     "unplugin-vue-components": "^28.8.0",
     "vite": "^7.0.4",
     "vite-plugin-vue-devtools": "^7.7.7",
+    "vitest": "^4.1.2",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.0.1"
   }

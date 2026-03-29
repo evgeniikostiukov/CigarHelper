@@ -1,6 +1,0 @@
-node_modules/
-dist/
-.prettierrc
-eslint.config.json
-/src/vite-env.d.ts
-/src/dotnet/**/*.ts
