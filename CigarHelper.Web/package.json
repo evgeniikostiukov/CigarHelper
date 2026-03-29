@@ -19,6 +19,9 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "engines": {
+    "node": ">=22.13.0 <23"
+  },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
     "@tiptap/extension-image": "^3.21.0",
@@ -41,6 +44,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.0",
     "@vitejs/plugin-vue": "^6.0.5",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.9.1",
     "autoprefixer": "^10.4.27",
     "eslint": "^10.1.0",

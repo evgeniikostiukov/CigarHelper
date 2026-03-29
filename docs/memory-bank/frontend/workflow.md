@@ -38,7 +38,7 @@ npm run preview
 ```bash
 npm run typecheck   # vue-tsc
 npm run lint        # ESLint (flat config)
-npm run test        # Vitest, unit-тесты (*.test.ts)
+npm run test        # Vitest + happy-dom; unit (*.test.ts), компоненты через @vue/test-utils
 npm run ci          # typecheck + lint + test + build
 ```
 
