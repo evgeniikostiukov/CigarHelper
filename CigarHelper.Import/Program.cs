@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -82,6 +82,7 @@ public class Program
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .UseContentRoot(AppContext.BaseDirectory)
             .ConfigureLogging((context, logging) =>
             {
                 logging.ClearProviders();
@@ -90,14 +91,13 @@ public class Program
             })
             .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: false)
-                    .AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: true)
-                    .Build();
-                
+                var configuration = hostContext.Configuration;
+
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+                    options.UseNpgsql(
+                        configuration.GetConnectionString("DefaultConnection")
+                        ?? throw new InvalidOperationException(
+                            "Задайте ConnectionStrings:DefaultConnection (appsettings, user-secrets или переменная ConnectionStrings__DefaultConnection).")));
                 
                 services.AddHttpClient();
             });
