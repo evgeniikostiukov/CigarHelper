@@ -49,4 +49,7 @@ __pycache__/
 
 # Misc
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Playwright / e2e (иногда создаётся в корне при запуске не из e2e/)
+test-results/
