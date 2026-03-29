@@ -1,6 +1,5 @@
 import type { AxiosInstance } from 'axios';
 import api from './api';
-import type { PaginatedResult } from './cigarService';
 
 export interface ReviewImage {
   id: number;

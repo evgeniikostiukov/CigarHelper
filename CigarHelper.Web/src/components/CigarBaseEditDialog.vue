@@ -573,7 +573,7 @@
 
     addingImageByUrl.value = true;
     try {
-      const response = await cigarService.uploadImageByUrl(newImageUrl.value);
+      const response = await cigarService.uploadImageByUrl(newImageUrl.value, form.id);
       const newImage: CigarImage = {
         id: response.id,
         preview: `/api/cigarimages/${response.id}`,

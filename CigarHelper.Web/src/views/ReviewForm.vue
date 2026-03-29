@@ -4,7 +4,8 @@
     data-testid="review-form"
     aria-labelledby="review-form-heading">
     <Toast />
-    <div class="review-form-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="review-form-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] mx-auto max-w-4xl">
       <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
@@ -153,14 +154,19 @@
                         <div class="text-xs text-stone-500 dark:text-stone-400">
                           <span
                             v-if="slotProps.option.size"
-                            class="mr-2">{{ slotProps.option.size }}</span>
-                          <span v-if="slotProps.option.strength">{{ getStrengthLabel(slotProps.option.strength) }}</span>
+                            class="mr-2"
+                            >{{ slotProps.option.size }}</span
+                          >
+                          <span v-if="slotProps.option.strength">{{
+                            getStrengthLabel(slotProps.option.strength)
+                          }}</span>
                         </div>
                       </div>
                       <div
                         v-if="slotProps.option.isUserCigar"
                         class="ml-2 shrink-0">
-                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900 dark:bg-amber-900/50 dark:text-amber-100">
+                        <span
+                          class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900 dark:bg-amber-900/50 dark:text-amber-100">
                           Моя
                         </span>
                       </div>
@@ -343,7 +349,9 @@
                         class="w-full" />
                     </div>
                     <div>
-                      <label class="mb-1 block text-xs text-stone-600 dark:text-stone-400">Тяга: {{ form.draw ?? '?' }}/5</label>
+                      <label class="mb-1 block text-xs text-stone-600 dark:text-stone-400"
+                        >Тяга: {{ form.draw ?? '?' }}/5</label
+                      >
                       <Slider
                         v-model="form.draw"
                         data-testid="review-form-draw"
@@ -367,7 +375,9 @@
               Содержание обзора
               <span class="text-red-600 dark:text-red-400">*</span>
             </h2>
-            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Основной текст: впечатления, нюансы, с чем сочетали.</p>
+            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">
+              Основной текст: впечатления, нюансы, с чем сочетали.
+            </p>
             <div data-testid="review-form-content">
               <TextEditor v-model="form.content" />
             </div>
@@ -386,7 +396,9 @@
                 aria-hidden="true" />
               Изображения
             </h2>
-            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">До нескольких кадров — читателям проще представить формат и цвет золы.</p>
+            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">
+              До нескольких кадров — читателям проще представить формат и цвет золы.
+            </p>
             <div data-testid="review-form-images">
               <ImageUploader v-model="form.images" />
             </div>

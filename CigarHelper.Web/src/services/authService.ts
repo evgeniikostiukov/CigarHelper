@@ -9,8 +9,8 @@ export interface User {
   nameid: string;
   email: string;
   unique_name: string;
-  role: string | string[];
-  // Добавьте другие поля, если они есть в токене
+  /** jwt-decode даёт readonly-массив для claim `role` — совместимость с шаблонным JwtPayload */
+  role: string | readonly string[];
 }
 
 export interface AuthCredentials {
@@ -118,4 +118,4 @@ const authService = {
 
 authService.initialize();
 
-export default authService; 
+export default authService;

@@ -117,7 +117,9 @@
                 for="profile-public"
                 class="cursor-pointer text-sm text-stone-700 dark:text-stone-300">
                 Публичный профиль (страница
-                <span class="font-mono text-amber-900/90 dark:text-amber-200/90">/u/{{ form.username.trim() || '…' }}</span>)
+                <span class="font-mono text-amber-900/90 dark:text-amber-200/90"
+                  >/u/{{ form.username.trim() || '…' }}</span
+                >)
               </label>
             </div>
             <p
@@ -155,7 +157,8 @@
           :style="{ animationDelay: '48ms' }">
           <h2 class="mb-1 text-lg font-semibold text-stone-900 dark:text-amber-50/95">Смена пароля</h2>
           <p class="mb-5 text-sm text-stone-600 dark:text-stone-400">
-            Минимальная длина и сложность могут проверяться на сервере; после смены войдите на других устройствах заново.
+            Минимальная длина и сложность могут проверяться на сервере; после смены войдите на других устройствах
+            заново.
           </p>
           <div class="flex flex-col gap-5">
             <div class="flex flex-col gap-2">

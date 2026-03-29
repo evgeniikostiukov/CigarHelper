@@ -4,4 +4,4 @@ declare module 'vue' {
   interface ComponentCustomProps {
     vTooltip?: any;
   }
-} 
+}

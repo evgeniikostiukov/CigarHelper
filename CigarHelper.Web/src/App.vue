@@ -17,7 +17,8 @@
             :to="{ name: 'Home' }"
             data-testid="app-nav-brand"
             class="no-underline touch-manipulation rounded-lg py-1.5 pl-1 pr-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400">
-            <span class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-amber-900/70 dark:text-amber-200/55">
+            <span
+              class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-amber-900/70 dark:text-amber-200/55">
               Cigar Helper
             </span>
             <span class="sr-only"> — на главную</span>
@@ -156,9 +157,7 @@
     },
   ]);
 
-  const menuItemsVisible = computed(() =>
-    menuItems.value.filter((item) => (item.visible ? item.visible() : true)),
-  );
+  const menuItemsVisible = computed(() => menuItems.value.filter((item) => (item.visible ? item.visible() : true)));
 
   const handleLogout = (): void => {
     logout();

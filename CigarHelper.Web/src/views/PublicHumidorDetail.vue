@@ -4,7 +4,8 @@
     data-testid="public-humidor-detail"
     :aria-labelledby="humidor ? 'public-humidor-detail-heading' : undefined"
     :aria-busy="loading">
-    <div class="public-humidor-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="public-humidor-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] mx-auto max-w-7xl">
       <div

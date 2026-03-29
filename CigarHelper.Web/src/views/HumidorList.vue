@@ -3,7 +3,8 @@
     class="humidor-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="humidor-list"
     aria-labelledby="humidor-list-heading">
-    <div class="humidor-list-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="humidor-list-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] max-w-7xl mx-auto">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
@@ -103,8 +104,7 @@
             class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
             :aria-label="`Открыть хьюмидор ${humidor.name}`" />
 
-          <div
-            class="relative z-10 flex flex-1 flex-col gap-3 p-5 pointer-events-none min-h-0">
+          <div class="relative z-10 flex flex-1 flex-col gap-3 p-5 pointer-events-none min-h-0">
             <h2
               class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 pr-2 line-clamp-2">
               {{ humidor.name }}

@@ -3,7 +3,8 @@
     class="humidor-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="humidor-detail"
     aria-labelledby="humidor-detail-heading">
-    <div class="humidor-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="humidor-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] mx-auto max-w-7xl">
       <div
@@ -248,7 +249,9 @@
               class="flex min-h-[8rem] flex-col items-center justify-center gap-3 rounded-xl border border-stone-200/70 bg-stone-50/50 dark:border-stone-700/60 dark:bg-stone-950/35"
               data-testid="humidor-detail-available-loading"
               aria-busy="true">
-              <i class="pi pi-spin pi-spinner text-2xl text-amber-800 dark:text-amber-400" aria-hidden="true" />
+              <i
+                class="pi pi-spin pi-spinner text-2xl text-amber-800 dark:text-amber-400"
+                aria-hidden="true" />
               <span class="text-sm text-stone-600 dark:text-stone-400">Загрузка списка…</span>
             </div>
 
@@ -286,7 +289,15 @@
               <article
                 v-for="(cigar, index) in availableCigars"
                 :key="cigar.id"
-                v-memo="[cigar.id, cigar.name, cigar.strength, cigar.size, cigar.brand?.name, addingCigar === cigar.id, isHumidorFull]"
+                v-memo="[
+                  cigar.id,
+                  cigar.name,
+                  cigar.strength,
+                  cigar.size,
+                  cigar.brand?.name,
+                  addingCigar === cigar.id,
+                  isHumidorFull,
+                ]"
                 :data-testid="`humidor-detail-add-card-${cigar.id}`"
                 class="available-card-enter flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
                 :style="{ animationDelay: `${Math.min(index, 8) * 40}ms` }">
@@ -422,7 +433,7 @@
     if (!humidor.value?.id) return;
     addingCigar.value = cigarId;
     try {
-      await humidorService.addCigarToHumidor(humidor.value.id, cigarId, 1);
+      await humidorService.addCigarToHumidor(humidor.value.id, cigarId);
       toast.add({
         severity: 'success',
         summary: 'Успех',

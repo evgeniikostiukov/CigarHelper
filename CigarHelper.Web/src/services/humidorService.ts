@@ -1,5 +1,4 @@
 import api from './api';
-import type { PaginatedResult } from './cigarService'; // Импортируем общий тип
 import type { Cigar } from './cigarService';
 
 export interface Humidor {
@@ -58,10 +57,9 @@ const humidorService = {
     return response.data;
   },
 
-  // Add a cigar to a humidor
-  async addCigarToHumidor(humidorId: number, cigarId: number, quantity: number): Promise<HumidorCigar> {
-    const response = await api.post<HumidorCigar>(`/humidors/${humidorId}/cigars`, { cigarId, quantity });
-    return response.data;
+  // Add a cigar to a humidor (backend: POST .../humidors/{id}/cigars/{cigarId})
+  async addCigarToHumidor(humidorId: number, cigarId: number): Promise<void> {
+    await api.post(`/humidors/${humidorId}/cigars/${cigarId}`);
   },
 
   // Remove a cigar from a humidor

@@ -3,7 +3,8 @@
     class="review-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="review-list"
     aria-labelledby="review-list-heading">
-    <div class="review-list-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="review-list-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] max-w-7xl mx-auto">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
@@ -205,7 +206,9 @@
                 <div
                   v-if="review.images.length > 1"
                   class="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-xs text-white">
-                  <i class="pi pi-images" aria-hidden="true" />
+                  <i
+                    class="pi pi-images"
+                    aria-hidden="true" />
                   <span>{{ review.images.length }}</span>
                 </div>
               </div>
@@ -228,19 +231,20 @@
                   icon="pi pi-star-fill"
                   severity="warning" />
               </div>
-              <p class="text-sm text-stone-600 dark:text-stone-400">
-                {{ review.cigarBrand }} · {{ review.cigarName }}
-              </p>
+              <p class="text-sm text-stone-600 dark:text-stone-400">{{ review.cigarBrand }} · {{ review.cigarName }}</p>
               <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
                 <Avatar
                   :image="review.userAvatarUrl || '/img/default-avatar.png'"
                   size="small"
                   shape="circle"
                   :aria-label="`Автор: ${review.username}`" />
-                <span class="min-w-0 font-medium text-stone-800 dark:text-stone-200 truncate">{{ review.username }}</span>
+                <span class="min-w-0 font-medium text-stone-800 dark:text-stone-200 truncate">{{
+                  review.username
+                }}</span>
                 <span class="shrink-0 text-stone-500 dark:text-stone-500">· {{ formatDate(review.createdAt) }}</span>
               </div>
-              <p class="line-clamp-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
+              <p
+                class="line-clamp-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
                 {{ review.content }}
               </p>
             </div>

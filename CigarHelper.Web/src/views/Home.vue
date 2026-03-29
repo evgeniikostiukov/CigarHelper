@@ -17,15 +17,18 @@
           Добро пожаловать
         </h1>
         <p class="mt-1.5 max-w-2xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-          Коллекция сигар и хьюмидоров под рукой: влажность, вместимость и карточки — в одном стиле с остальным приложением.
+          Коллекция сигар и хьюмидоров под рукой: влажность, вместимость и карточки — в одном стиле с остальным
+          приложением.
         </p>
       </header>
 
       <div
         class="mb-8 rounded-2xl border border-stone-200/90 bg-white/95 p-6 shadow-md shadow-stone-900/5 sm:mb-10 sm:p-8 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
         data-testid="home-hero">
-        <p class="mx-auto max-w-2xl text-center text-base leading-relaxed text-stone-700 dark:text-stone-300 sm:text-lg">
-          Отслеживайте сигары и условия в хьюмидорах. Крупные кнопки и читаемые отступы рассчитаны на телефон и тёмную тему.
+        <p
+          class="mx-auto max-w-2xl text-center text-base leading-relaxed text-stone-700 dark:text-stone-300 sm:text-lg">
+          Отслеживайте сигары и условия в хьюмидорах. Крупные кнопки и читаемые отступы рассчитаны на телефон и тёмную
+          тему.
         </p>
 
         <div

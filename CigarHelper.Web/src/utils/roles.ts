@@ -3,7 +3,9 @@ import type { User } from '@/services/authService';
 /** Нормализованный список значений роли из JWT (claim role / ClaimTypes.Role). */
 export function getRoleClaims(user: User | null | undefined): string[] {
   if (!user?.role) return [];
-  return Array.isArray(user.role) ? user.role : [user.role];
+  const r = user.role;
+  if (typeof r === 'string') return [r];
+  return [...r];
 }
 
 export function hasRole(user: User | null | undefined, role: string): boolean {
@@ -19,7 +21,7 @@ export function hasAnyRole(user: User | null | undefined, roles: readonly string
 /** Идентификатор пользователя из payload JWT (поля id / nameid / sub). */
 export function getAuthUserId(user: User | null | undefined): number | null {
   if (!user) return null;
-  const u = user as Record<string, unknown>;
+  const u = user as unknown as Record<string, unknown>;
   const raw = u.id ?? u.nameid ?? u.sub;
   if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
   if (typeof raw === 'string') {

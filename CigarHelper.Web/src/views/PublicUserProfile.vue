@@ -4,7 +4,8 @@
     data-testid="public-profile"
     :aria-labelledby="data ? 'public-profile-heading' : undefined"
     :aria-busy="loading">
-    <div class="public-profile-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="public-profile-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] mx-auto max-w-5xl">
       <div
@@ -73,9 +74,7 @@
         <div
           class="public-profile-enter space-y-5 sm:space-y-6"
           data-testid="public-profile-content">
-          <h2 class="text-lg font-semibold text-stone-900 dark:text-amber-50/95 sm:text-xl">
-            Хьюмидоры
-          </h2>
+          <h2 class="text-lg font-semibold text-stone-900 dark:text-amber-50/95 sm:text-xl">Хьюмидоры</h2>
 
           <div
             v-if="!data.humidors.length"
@@ -107,10 +106,8 @@
                   name: 'PublicHumidorDetail',
                   params: { username: route.params.username, humidorId: String(h.id) },
                 }"
-                class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
-                :aria-label="`Открыть хьюмидор ${h.name}`" />
-
-              <div class="relative z-10 flex flex-1 flex-col gap-3 p-5 pointer-events-none min-h-0">
+                class="relative z-10 flex min-h-0 flex-1 cursor-pointer flex-col gap-3 p-5 text-inherit no-underline outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
+                :aria-label="`Открыть хьюмидор ${h.name}`">
                 <h3 class="pr-2 text-lg font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 line-clamp-2">
                   {{ h.name }}
                 </h3>
@@ -134,14 +131,23 @@
                   class="line-clamp-3 mt-auto flex-1 border-t border-stone-100 pt-2 text-sm leading-relaxed text-stone-600 dark:border-stone-700/80 dark:text-stone-400">
                   {{ h.description || 'Нет описания.' }}
                 </p>
-              </div>
+              </router-link>
 
-              <footer class="relative z-20 mt-auto border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
-                <span
-                  class="flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-200/90">
+              <footer
+                class="relative z-20 mt-auto border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+                <router-link
+                  :to="{
+                    name: 'PublicHumidorDetail',
+                    params: { username: route.params.username, humidorId: String(h.id) },
+                  }"
+                  class="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium text-amber-900 touch-manipulation outline-offset-2 transition-colors hover:text-amber-950 hover:underline dark:text-amber-200/90 dark:hover:text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400"
+                  :data-testid="`public-profile-humidor-open-${h.id}`"
+                  :aria-label="`Смотреть состав хьюмидора ${h.name}`">
                   Смотреть состав
-                  <i class="pi pi-arrow-right text-xs" aria-hidden="true" />
-                </span>
+                  <i
+                    class="pi pi-arrow-right text-xs"
+                    aria-hidden="true" />
+                </router-link>
               </footer>
             </article>
           </div>
@@ -184,8 +190,7 @@
       if (import.meta.env.DEV) {
         console.error('Ошибка загрузки публичного профиля:', err);
       }
-      error.value =
-        'Профиль не найден или скрыт. Пользователь мог сделать профиль приватным.';
+      error.value = 'Профиль не найден или скрыт. Пользователь мог сделать профиль приватным.';
     } finally {
       loading.value = false;
     }

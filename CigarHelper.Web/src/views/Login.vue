@@ -326,9 +326,7 @@
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } }; message?: string };
       error.value =
-        ax.response?.data?.message ||
-        ax.message ||
-        (isRegister.value ? 'Ошибка регистрации' : 'Ошибка входа');
+        ax.response?.data?.message || ax.message || (isRegister.value ? 'Ошибка регистрации' : 'Ошибка входа');
       if (import.meta.env.DEV && err instanceof Error) {
         console.error(err);
       }

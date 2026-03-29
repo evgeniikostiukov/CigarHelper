@@ -4,7 +4,8 @@
     data-testid="review-detail"
     :aria-labelledby="review ? 'review-detail-heading' : undefined"
     :aria-busy="loading">
-    <div class="review-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="review-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] mx-auto max-w-4xl">
       <div
@@ -77,7 +78,9 @@
           </router-link>
           <span
             class="text-stone-400"
-            aria-hidden="true">/</span>
+            aria-hidden="true"
+            >/</span
+          >
           <router-link
             :to="{ name: 'ReviewList' }"
             class="rounded font-medium text-amber-900 underline-offset-2 hover:text-amber-700 hover:underline dark:text-amber-200/90 dark:hover:text-amber-100">
@@ -85,7 +88,9 @@
           </router-link>
           <span
             class="text-stone-400"
-            aria-hidden="true">/</span>
+            aria-hidden="true"
+            >/</span
+          >
           <span class="line-clamp-2 min-w-0 font-medium text-stone-800 dark:text-stone-200">{{ review.title }}</span>
         </nav>
 
@@ -150,7 +155,9 @@
             class="rounded-xl border border-amber-900/15 bg-amber-50/50 px-4 py-3 text-sm text-stone-800 dark:border-amber-400/20 dark:bg-amber-950/25 dark:text-stone-200"
             data-testid="review-detail-cigar-banner">
             Обзор на сигару:
-            <strong class="font-semibold text-stone-900 dark:text-amber-50/95">{{ review.cigarBrand }} · {{ review.cigarName }}</strong>
+            <strong class="font-semibold text-stone-900 dark:text-amber-50/95"
+              >{{ review.cigarBrand }} · {{ review.cigarName }}</strong
+            >
           </div>
         </header>
 
@@ -280,7 +287,8 @@
             v-html="sanitizedContent" />
         </section>
 
-        <footer class="flex flex-col gap-3 border-t border-stone-200/80 pt-6 dark:border-stone-700/80 sm:flex-row sm:items-center sm:justify-between">
+        <footer
+          class="flex flex-col gap-3 border-t border-stone-200/80 pt-6 dark:border-stone-700/80 sm:flex-row sm:items-center sm:justify-between">
           <Button
             data-testid="review-detail-back"
             class="min-h-12 w-full touch-manipulation sm:order-1 sm:w-auto"

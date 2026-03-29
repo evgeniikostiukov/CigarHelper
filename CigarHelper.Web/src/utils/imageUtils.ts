@@ -19,4 +19,4 @@ export function arrayBufferToBase64(buffer: Array<number> | string | undefined |
     console.error('Ошибка при преобразовании ArrayBuffer в Base64:', error);
     return '';
   }
-} 
+}

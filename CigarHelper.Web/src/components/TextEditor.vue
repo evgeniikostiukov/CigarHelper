@@ -21,7 +21,7 @@
   });
 
   const emit = defineEmits<{
-    (e: 'update:modelValue', value: string): void;
+    'update:modelValue': [string];
   }>();
 
   // --- Refs ---
@@ -75,8 +75,6 @@
     if (!editor.value || !props.maxLength) return false;
     return characterCount.value > props.maxLength;
   });
-
-  const tiptapEditor = computed(() => editor.value || undefined);
 
   function addImageByUrl() {
     if (!editor.value) return;

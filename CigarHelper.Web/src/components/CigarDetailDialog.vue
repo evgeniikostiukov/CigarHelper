@@ -3,8 +3,9 @@
   import Dialog from 'primevue/dialog';
   import Carousel from 'primevue/carousel';
   import Button from 'primevue/button';
-  import type { CigarBase } from '@/services/cigarService';
+  import type { CigarBase, CigarImage } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { arrayBufferToBase64 } from '@/utils/imageUtils';
 
   // --- Props ---
 
@@ -21,11 +22,11 @@
   // --- Emits ---
 
   const emit = defineEmits<{
-    (e: 'update:visible', value: boolean): void;
-    (e: 'writeReview', cigar: CigarBase): void;
-    (e: 'addToCollection', cigar: CigarBase): void;
-    (e: 'createSimilarCigar', cigar: CigarBase): void;
-    (e: 'editBaseCigar', cigar: CigarBase): void;
+    'update:visible': [boolean];
+    writeReview: [CigarBase];
+    addToCollection: [CigarBase];
+    createSimilarCigar: [CigarBase];
+    editBaseCigar: [CigarBase];
   }>();
 
   // --- Computed ---
@@ -35,12 +36,39 @@
     set: (value) => emit('update:visible', value),
   });
 
+  /** Как на CigarBases: API отдаёт байты в `data`, не URL; GET /api/cigarimages/{id} — JSON, не картинка. */
+  function cigarImageBytes(img: CigarImage): string | number[] | undefined {
+    return img.imageData ?? img.data;
+  }
+
+  function cigarImagePreviewSrc(img: CigarImage): string {
+    const raw = cigarImageBytes(img);
+    if (raw == null) {
+      return '';
+    }
+    const empty = typeof raw === 'string' ? raw.length === 0 : raw.length === 0;
+    if (empty) {
+      return '';
+    }
+    const b64 = arrayBufferToBase64(raw);
+    if (!b64) {
+      return '';
+    }
+    const mime = (img.contentType ?? '').trim();
+    const safeMime = mime.startsWith('image/') ? mime : 'image/jpeg';
+    return `data:${safeMime};base64,${b64}`;
+  }
+
   const cigarImages = computed(() => {
-    if (!props.cigar?.images) return [];
-    return props.cigar.images.map((img) => ({
-      ...img,
-      preview: `/api/cigarimages/${img.id}`,
-    }));
+    if (!props.cigar?.images) {
+      return [];
+    }
+    return props.cigar.images
+      .map((img) => ({
+        ...img,
+        preview: cigarImagePreviewSrc(img),
+      }))
+      .filter((item) => item.preview.length > 0);
   });
 
   // --- Methods ---
@@ -256,6 +284,12 @@
           class="p-button-success"
           @click="addToCollection"
           v-tooltip.top="'Добавить экземпляр в свою коллекцию'" />
+        <Button
+          label="Создать похожую"
+          icon="pi pi-copy"
+          class="p-button-secondary"
+          @click="createSimilarCigar"
+          v-tooltip.top="'Новая сигара с теми же характеристиками'" />
         <Button
           label="Закрыть"
           icon="pi pi-times"

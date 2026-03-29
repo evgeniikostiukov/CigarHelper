@@ -64,8 +64,6 @@ export async function getPublicProfile(username: string): Promise<PublicProfile>
 }
 
 export async function getPublicHumidor(username: string, humidorId: number): Promise<Humidor> {
-  const { data } = await api.get<Humidor>(
-    `/public/users/${encodeURIComponent(username)}/humidors/${humidorId}`,
-  );
+  const { data } = await api.get<Humidor>(`/public/users/${encodeURIComponent(username)}/humidors/${humidorId}`);
   return data;
 }

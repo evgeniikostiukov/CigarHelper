@@ -3,7 +3,8 @@
     class="cigar-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-detail"
     aria-labelledby="cigar-detail-heading">
-    <div class="cigar-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="cigar-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] max-w-7xl mx-auto">
       <div
@@ -96,13 +97,16 @@
               class="rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 overflow-hidden dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50">
               <div
                 v-if="primaryImageSrc"
-                class="aspect-square overflow-hidden bg-stone-100 dark:bg-stone-800/80">
-                <img
-                  :src="primaryImageSrc"
-                  :alt="cigar.name"
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async" />
+                class="cigar-detail-image-frame relative aspect-square w-full min-h-0 overflow-hidden bg-stone-100 dark:bg-stone-800/80"
+                data-testid="cigar-detail-image">
+                <div
+                  class="cigar-detail-image-frame-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-3 sm:p-4">
+                  <img
+                    :src="primaryImageSrc"
+                    :alt="cigar.name"
+                    loading="lazy"
+                    decoding="async" />
+                </div>
               </div>
               <div
                 v-else
@@ -199,9 +203,7 @@
                   :readonly="true"
                   :cancel="false"
                   :stars="10" />
-                <span class="text-lg font-medium text-stone-900 dark:text-stone-100">
-                  {{ cigar.rating }}/10
-                </span>
+                <span class="text-lg font-medium text-stone-900 dark:text-stone-100"> {{ cigar.rating }}/10 </span>
               </div>
             </section>
 
@@ -354,7 +356,8 @@
                   aria-hidden="true" />
                 Описание
               </h2>
-              <p class="text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300 whitespace-pre-wrap text-pretty">
+              <p
+                class="text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300 whitespace-pre-wrap text-pretty">
                 {{ cigar.description }}
               </p>
             </section>
@@ -495,6 +498,23 @@
   .cigar-detail-root {
     position: relative;
     isolation: isolate;
+  }
+
+  .cigar-detail-image-frame {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .cigar-detail-image-frame img {
+    display: block;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
   }
 
   .cigar-detail-grain {

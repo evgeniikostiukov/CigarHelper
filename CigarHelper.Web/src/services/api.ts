@@ -1,36 +1,36 @@
 import axios, { type AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
-  baseURL: '/api'
+  baseURL: '/api',
 });
 
 // Add a request interceptor to include the auth token in every request
 api.interceptors.request.use(
-  config => {
+  (config) => {
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
-  error => {
+  (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Handle unauthorized responses
 api.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      if(window.location.pathname !== '/login') {
+      if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
-export default api; 
+export default api;

@@ -10,4 +10,4 @@ export function useAuth() {
     user,
     logout: authService.logout,
   };
-} 
+}

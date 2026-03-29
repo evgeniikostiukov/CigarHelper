@@ -27,7 +27,7 @@ export interface UpdateUserRoleResponse {
 export async function fetchAdminUsers(
   page: number,
   pageSize: number,
-  search?: string
+  search?: string,
 ): Promise<PagedAdminUsersResponse> {
   const { data } = await api.get<PagedAdminUsersResponse>('/admin/users', {
     params: { page, pageSize, search: search?.trim() || undefined },
@@ -38,7 +38,7 @@ export async function fetchAdminUsers(
 export async function updateUserRole(
   userId: number,
   role: AdminRole,
-  confirmSelfChange: boolean
+  confirmSelfChange: boolean,
 ): Promise<UpdateUserRoleResponse> {
   const { data } = await api.put<UpdateUserRoleResponse>(`/admin/users/${userId}/role`, {
     role,

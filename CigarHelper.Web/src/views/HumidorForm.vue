@@ -3,7 +3,8 @@
     class="humidor-form-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="humidor-form"
     aria-labelledby="humidor-form-heading">
-    <div class="humidor-form-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="humidor-form-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] mx-auto max-w-2xl">
       <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
@@ -172,7 +173,9 @@
               :max="3000"
               fluid
               show-buttons />
-            <small class="text-stone-500 dark:text-stone-400">Необязательно: целевой уровень или заметка для себя.</small>
+            <small class="text-stone-500 dark:text-stone-400"
+              >Необязательно: целевой уровень или заметка для себя.</small
+            >
           </div>
 
           <div class="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

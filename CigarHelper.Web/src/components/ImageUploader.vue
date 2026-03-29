@@ -1,12 +1,5 @@
 <script lang="ts" setup>
   import { ref, computed } from 'vue';
-  import Button from 'primevue/button';
-
-  // --- Interfaces ---
-  interface ImageObject {
-    file: File;
-    preview: string;
-  }
 
   // --- Props & Emits ---
   interface Props {
@@ -20,12 +13,11 @@
   });
 
   const emit = defineEmits<{
-    (e: 'files-selected', files: File[]): void;
+    'files-selected': [File[]];
   }>();
 
   // --- Refs ---
   const fileInput = ref<HTMLInputElement | null>(null);
-  const selectedFiles = ref<ImageObject[]>([]);
 
   // --- Computed ---
   const remainingSlots = computed(() => {

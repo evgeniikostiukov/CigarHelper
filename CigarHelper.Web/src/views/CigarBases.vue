@@ -3,7 +3,8 @@
     class="cigar-bases-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-bases"
     aria-labelledby="cigar-bases-heading">
-    <div class="cigar-bases-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="cigar-bases-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] max-w-7xl mx-auto">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
@@ -29,55 +30,109 @@
           @click="createNewCigar" />
       </header>
 
-      <!-- Фильтры -->
+      <!-- Поиск и фильтры — тот же каркас, что hero на главной (Home.vue) -->
       <div
-        class="mb-6 rounded-2xl border border-stone-200/90 bg-white/95 p-4 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/40 sm:p-5"
+        class="mb-8 rounded-2xl border border-stone-200/90 bg-white/95 p-6 shadow-md shadow-stone-900/5 sm:mb-10 sm:p-8 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
         data-testid="cigar-bases-filters">
-        <div class="flex flex-col gap-4 md:flex-row md:items-end">
-          <div class="min-w-0 flex-1">
-            <label
-              for="cigar-bases-search"
-              class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
-              Поиск
-            </label>
-            <span class="p-input-icon-left flex w-full [&_input]:w-full [&_input]:min-h-11">
-              <i class="pi pi-search text-stone-400" aria-hidden="true" />
-              <InputText
-                id="cigar-bases-search"
-                v-model="filters.search"
-                placeholder="Название или бренд..."
-                class="w-full"
-                data-testid="cigar-bases-search"
-                @input="onSearch" />
+        <div class="flex flex-col gap-6 sm:gap-8">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+            <span
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100 sm:h-14 sm:w-14"
+              aria-hidden="true">
+              <i class="pi pi-filter-slash text-2xl" />
             </span>
+            <div class="min-w-0 flex-1">
+              <h2
+                id="cigar-bases-filters-heading"
+                class="text-lg font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 sm:text-xl">
+                Поиск и фильтры
+              </h2>
+              <p
+                class="mt-1.5 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 dark:text-stone-300 sm:text-base">
+                Уточните выдачу по названию, бренду или крепости — на большом экране удобна таблица, на телефоне те же
+                данные в карточках.
+              </p>
+            </div>
           </div>
-          <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <div class="min-w-[min(100%,12rem)] sm:min-w-[11rem]">
-              <label class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">Бренд</label>
-              <Dropdown
-                v-model="filters.brand"
-                data-testid="cigar-bases-filter-brand"
-                :options="brandOptions"
-                option-label="label"
-                option-value="value"
-                placeholder="Все бренды"
-                class="w-full md:w-52"
-                :show-clear="true"
-                @change="onFilterChange" />
+
+          <form
+            role="search"
+            class="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-end"
+            aria-labelledby="cigar-bases-filters-heading"
+            @submit.prevent>
+            <div class="min-w-0 lg:col-span-5">
+              <label
+                for="cigar-bases-search"
+                class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                Поиск
+              </label>
+              <span class="p-input-icon-left flex w-full [&_input]:w-full [&_input]:min-h-12 sm:[&_input]:min-h-11">
+                <i
+                  class="pi pi-search text-stone-400"
+                  aria-hidden="true" />
+                <InputText
+                  id="cigar-bases-search"
+                  v-model="filters.search"
+                  placeholder="Название или бренд..."
+                  class="w-full"
+                  data-testid="cigar-bases-search"
+                  autocomplete="off"
+                  @input="onSearch" />
+              </span>
             </div>
-            <div class="min-w-[min(100%,12rem)] sm:min-w-[11rem]">
-              <label class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">Крепость</label>
-              <Dropdown
-                v-model="filters.strength"
-                data-testid="cigar-bases-filter-strength"
-                :options="strengthOptions"
-                option-label="label"
-                option-value="value"
-                placeholder="Все"
-                class="w-full md:w-52"
-                :show-clear="true"
-                @change="onFilterChange" />
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-2 lg:gap-6">
+              <div class="min-w-0">
+                <label
+                  for="cigar-bases-filter-brand-input"
+                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Бренд
+                </label>
+                <Dropdown
+                  v-model="filters.brand"
+                  data-testid="cigar-bases-filter-brand"
+                  :options="brandOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Все бренды"
+                  class="w-full [&_.p-dropdown]:min-h-12 sm:[&_.p-dropdown]:min-h-11"
+                  input-id="cigar-bases-filter-brand-input"
+                  :show-clear="true"
+                  @change="onFilterChange" />
+              </div>
+              <div class="min-w-0">
+                <label
+                  for="cigar-bases-filter-strength-input"
+                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Крепость
+                </label>
+                <Dropdown
+                  v-model="filters.strength"
+                  data-testid="cigar-bases-filter-strength"
+                  :options="strengthOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Все"
+                  class="w-full [&_.p-dropdown]:min-h-12 sm:[&_.p-dropdown]:min-h-11"
+                  input-id="cigar-bases-filter-strength-input"
+                  :show-clear="true"
+                  @change="onFilterChange" />
+              </div>
             </div>
+          </form>
+
+          <div
+            v-if="filtersActive"
+            class="flex flex-col items-stretch gap-3 border-t border-stone-100 pt-6 dark:border-stone-700/80 sm:flex-row sm:flex-wrap sm:items-center"
+            data-testid="cigar-bases-filter-actions">
+            <Button
+              data-testid="cigar-bases-filter-reset"
+              class="min-h-12 w-full touch-manipulation sm:w-auto sm:min-h-11"
+              label="Сбросить фильтры"
+              icon="pi pi-filter-slash"
+              severity="secondary"
+              outlined
+              type="button"
+              @click="resetFilters" />
           </div>
         </div>
       </div>
@@ -214,7 +269,9 @@
               <span v-if="data.size">{{ data.size }}</span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
           <Column
@@ -230,7 +287,9 @@
               </span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
           <Column
@@ -240,7 +299,9 @@
               <span v-if="data.wrapper">{{ data.wrapper }}</span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
           <Column
@@ -250,7 +311,9 @@
               <span v-if="data.binder">{{ data.binder }}</span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
           <Column
@@ -260,7 +323,9 @@
               <span v-if="data.filler">{{ data.filler }}</span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
           <Column
@@ -318,7 +383,10 @@
           v-if="!loading && pagination.totalRecords > 0"
           class="mb-4 text-sm text-stone-600 dark:text-stone-400"
           data-testid="cigar-bases-mobile-summary">
-          Показано {{ pagination.first + 1 }}-{{ Math.min(pagination.first + pagination.rows, pagination.totalRecords) }} из
+          Показано {{ pagination.first + 1 }}-{{
+            Math.min(pagination.first + pagination.rows, pagination.totalRecords)
+          }}
+          из
           {{ pagination.totalRecords }}
         </p>
 
@@ -370,7 +438,9 @@
                   <span class="text-sm font-medium text-stone-700 dark:text-stone-300">{{ cigar.brand.name }}</span>
                   <span
                     v-if="cigar.country"
-                    class="text-xs text-stone-500">({{ cigar.country }})</span>
+                    class="text-xs text-stone-500"
+                    >({{ cigar.country }})</span
+                  >
                 </div>
                 <div class="mt-2 flex flex-wrap gap-2">
                   <span
@@ -389,42 +459,42 @@
             </div>
             <footer
               class="mt-auto flex flex-wrap justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-2 py-2 dark:border-stone-700/80 dark:bg-stone-950/50">
-                <Button
-                  :data-testid="`cigar-base-view-${cigar.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-eye"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Подробнее"
-                  @click="viewCigar(cigar)" />
-                <Button
-                  :data-testid="`cigar-base-review-${cigar.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-pencil"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Отзыв"
-                  @click="writeReview(cigar)" />
-                <Button
-                  :data-testid="`cigar-base-add-${cigar.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-plus"
-                  text
-                  rounded
-                  aria-label="В коллекцию"
-                  @click="addToCollection(cigar)" />
-                <Button
-                  :data-testid="`cigar-base-copy-${cigar.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-copy"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Похожая"
-                  @click="createSimilarCigar(cigar)" />
-              </footer>
+              <Button
+                :data-testid="`cigar-base-view-${cigar.id}`"
+                class="min-h-11 min-w-11 touch-manipulation"
+                icon="pi pi-eye"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Подробнее"
+                @click="viewCigar(cigar)" />
+              <Button
+                :data-testid="`cigar-base-review-${cigar.id}`"
+                class="min-h-11 min-w-11 touch-manipulation"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Отзыв"
+                @click="writeReview(cigar)" />
+              <Button
+                :data-testid="`cigar-base-add-${cigar.id}`"
+                class="min-h-11 min-w-11 touch-manipulation"
+                icon="pi pi-plus"
+                text
+                rounded
+                aria-label="В коллекцию"
+                @click="addToCollection(cigar)" />
+              <Button
+                :data-testid="`cigar-base-copy-${cigar.id}`"
+                class="min-h-11 min-w-11 touch-manipulation"
+                icon="pi pi-copy"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Похожая"
+                @click="createSimilarCigar(cigar)" />
+            </footer>
           </article>
         </div>
 
@@ -459,7 +529,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
@@ -517,6 +587,11 @@
   let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   const brandOptions = ref<SelectOption[]>([]);
+
+  const filtersActive = computed(() => {
+    const f = filters.value;
+    return Boolean(f.search?.trim()) || f.brand != null || f.strength != null;
+  });
 
   /** Пиксели: API отдаёт `CigarImageDto.Data` как `data`, а не `imageData`. */
   function cigarImageBytes(img: CigarImage | undefined): string | number[] | undefined {

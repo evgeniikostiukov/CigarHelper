@@ -208,7 +208,9 @@
               <span v-if="data.country">{{ data.country }}</span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
 
@@ -224,7 +226,9 @@
               </span>
               <span
                 v-else
-                class="text-stone-400">—</span>
+                class="text-stone-400"
+                >—</span
+              >
             </template>
           </Column>
 
@@ -323,7 +327,9 @@
               required />
             <small
               v-if="errors.name"
-              class="text-sm text-red-600 dark:text-red-400">{{ errors.name }}</small>
+              class="text-sm text-red-600 dark:text-red-400"
+              >{{ errors.name }}</small
+            >
           </div>
           <div class="flex flex-col gap-2">
             <label

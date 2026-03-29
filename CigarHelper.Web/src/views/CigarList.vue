@@ -3,7 +3,8 @@
     class="cigar-list-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
     data-testid="cigar-list"
     aria-labelledby="cigar-list-heading">
-    <div class="cigar-list-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+    <div
+      class="cigar-list-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
     <div class="relative z-[1] max-w-7xl mx-auto">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
@@ -103,33 +104,36 @@
               <template #item="slotProps">
                 <button
                   type="button"
-                  class="relative h-48 w-full flex items-center justify-center cursor-pointer touch-manipulation border-0 p-0 bg-transparent"
+                  class="cigar-list-card-image-frame relative h-48 w-full min-h-0 cursor-pointer touch-manipulation border-0 bg-transparent p-0 text-left"
                   :aria-label="`Открыть сигару ${cigar.name}`"
                   @click="viewCigar(cigar)">
-                  <img
-                    v-if="slotProps.data?.imageData"
-                    :src="imageSrc(slotProps.data.imageData)"
-                    :alt="cigar.name"
-                    width="400"
-                    height="192"
-                    class="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async" />
-                  <i
-                    v-else
-                    class="pi pi-image text-5xl text-stone-400 dark:text-stone-500"
-                    aria-hidden="true" />
+                  <div
+                    class="cigar-list-card-image-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-2">
+                    <img
+                      v-if="carouselItemImageSrc(slotProps.data)"
+                      :src="carouselItemImageSrc(slotProps.data)"
+                      :alt="cigar.name"
+                      loading="lazy"
+                      decoding="async" />
+                    <i
+                      v-else
+                      class="pi pi-image text-5xl text-stone-400 dark:text-stone-500"
+                      aria-hidden="true" />
+                  </div>
                 </button>
               </template>
               <template #empty>
                 <button
                   type="button"
-                  class="relative h-48 w-full flex items-center justify-center cursor-pointer touch-manipulation border-0 p-0 bg-transparent"
+                  class="cigar-list-card-image-frame relative h-48 w-full min-h-0 cursor-pointer touch-manipulation border-0 bg-transparent p-0 text-left"
                   :aria-label="`Открыть сигару ${cigar.name}`"
                   @click="viewCigar(cigar)">
-                  <i
-                    class="pi pi-image text-5xl text-stone-400 dark:text-stone-500"
-                    aria-hidden="true" />
+                  <div
+                    class="cigar-list-card-image-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-2">
+                    <i
+                      class="pi pi-image text-5xl text-stone-400 dark:text-stone-500"
+                      aria-hidden="true" />
+                  </div>
                 </button>
               </template>
             </Carousel>
@@ -138,7 +142,8 @@
           <router-link
             :to="{ name: 'CigarDetail', params: { id: String(cigar.id) } }"
             class="relative z-10 flex flex-1 flex-col gap-2.5 p-5 min-h-0 no-underline text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700 dark:focus-visible:outline-amber-400 rounded-none">
-            <h2 class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 pr-1 line-clamp-2">
+            <h2
+              class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-amber-50/95 pr-1 line-clamp-2">
               {{ cigar.name }}
             </h2>
             <p class="text-sm font-medium text-stone-700 dark:text-stone-300 line-clamp-1">
@@ -148,11 +153,14 @@
               <span v-if="cigar.size">{{ cigar.size }}</span>
               <span v-if="cigar.strength">{{ cigar.strength }}</span>
             </div>
-            <div class="flex flex-wrap items-center justify-between gap-2 mt-auto pt-2 border-t border-stone-100 dark:border-stone-700/80">
+            <div
+              class="flex flex-wrap items-center justify-between gap-2 mt-auto pt-2 border-t border-stone-100 dark:border-stone-700/80">
               <div
                 v-if="cigar.rating != null"
                 class="flex items-center gap-1">
-                <div class="flex text-amber-500 dark:text-amber-400" aria-hidden="true">
+                <div
+                  class="flex text-amber-500 dark:text-amber-400"
+                  aria-hidden="true">
                   <svg
                     v-for="i in 5"
                     :key="i"
@@ -168,7 +176,9 @@
               </div>
               <span
                 v-else
-                class="text-sm text-stone-500 dark:text-stone-500">Без оценки</span>
+                class="text-sm text-stone-500 dark:text-stone-500"
+                >Без оценки</span
+              >
               <span
                 v-if="cigar.price != null"
                 class="text-sm font-semibold text-stone-900 dark:text-stone-100 whitespace-nowrap">
@@ -218,7 +228,7 @@
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '../services/cigarService';
-  import type { Cigar } from '../services/cigarService';
+  import type { Cigar, CigarImage } from '../services/cigarService';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
 
   const router = useRouter();
@@ -234,14 +244,20 @@
     return b64 ? `data:image/jpeg;base64,${b64}` : '';
   }
 
+  /** Список с /api/cigars отдаёт байты в `data`; часть ответов — в `imageData` */
+  function cigarImageRawBytes(img: CigarImage | undefined): string | number[] | undefined {
+    if (!img) return undefined;
+    return img.imageData ?? img.data;
+  }
+
+  function carouselItemImageSrc(img: CigarImage | undefined): string {
+    return imageSrc(cigarImageRawBytes(img) ?? null);
+  }
+
   function memoKey(cigar: Cigar): (string | number | null | undefined)[] {
     const first = cigar.images?.[0];
-    const imgRef =
-      first?.imageData == null
-        ? 0
-        : typeof first.imageData === 'string'
-          ? first.imageData.length
-          : (first.imageData as Array<number>).length;
+    const raw = cigarImageRawBytes(first);
+    const imgRef = raw == null ? 0 : typeof raw === 'string' ? raw.length : (raw as Array<number>).length;
     return [
       cigar.id,
       cigar.name,
@@ -342,6 +358,24 @@
     mix-blend-mode: soft-light;
   }
 
+  .cigar-list-card-image-frame {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .cigar-list-card-image-frame img {
+    display: block;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
   .line-clamp-1 {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -353,6 +387,11 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* PrimeVue: .p-carousel-content-container { overflow: auto } — убираем скролл в карточке */
+  .cigar-carousel :deep(.p-carousel-content-container) {
     overflow: hidden;
   }
 

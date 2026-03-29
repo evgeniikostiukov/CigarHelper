@@ -3,6 +3,8 @@ import api from './api';
 export interface CigarImage {
   id: number;
   isMain: boolean;
+  /** С бэкенда CigarImageDto.ContentType */
+  contentType?: string | null;
   /** Личные сигары / часть ответов */
   imageData?: string;
   /** CigarImageDto с бэкенда: `Data` → в JSON `data` (base64 или массив байт после десериализации) */
@@ -58,6 +60,81 @@ export interface PaginatedResult<T> {
   totalCount: number;
 }
 
+/** Тело POST/PUT /cigars: API ждёт brandId, а не вложенный brand. */
+export interface CigarWriteApiPayload {
+  name: string;
+  brandId: number;
+  country?: string | null;
+  description?: string | null;
+  strength?: string | null;
+  size?: string | null;
+  wrapper?: string | null;
+  binder?: string | null;
+  filler?: string | null;
+  price?: number | null;
+  rating?: number | null;
+  humidorId?: number | null;
+  /** Скачивается на API и сохраняется как CigarImage (UserCigar). */
+  imageUrl?: string | null;
+}
+
+function resolveBrandId(brand: Brand | undefined): number {
+  const id = brand?.id;
+  return typeof id === 'number' && !Number.isNaN(id) ? id : 0;
+}
+
+function toCreateCigarPayload(
+  data: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>,
+  imageUrl?: string | null,
+): CigarWriteApiPayload {
+  const brandId = resolveBrandId(data.brand);
+  if (brandId <= 0) {
+    throw new Error('BRAND_REQUIRED');
+  }
+  const trimmedUrl = imageUrl?.trim();
+  return {
+    name: data.name,
+    brandId,
+    country: data.country,
+    description: data.description,
+    strength: data.strength,
+    size: data.size,
+    wrapper: data.wrapper,
+    binder: data.binder,
+    filler: data.filler,
+    price: data.price,
+    rating: data.rating,
+    humidorId: data.humidorId ?? null,
+    ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
+  };
+}
+
+function toUpdateCigarPayload(data: Partial<Cigar>, imageUrl?: string | null): CigarWriteApiPayload {
+  const brandId = resolveBrandId(data.brand);
+  if (brandId <= 0) {
+    throw new Error('BRAND_REQUIRED');
+  }
+  if (!data.name?.trim()) {
+    throw new Error('NAME_REQUIRED');
+  }
+  const trimmedUrl = imageUrl?.trim();
+  return {
+    name: data.name,
+    brandId,
+    country: data.country,
+    description: data.description,
+    strength: data.strength,
+    size: data.size,
+    wrapper: data.wrapper,
+    binder: data.binder,
+    filler: data.filler,
+    price: data.price,
+    rating: data.rating,
+    humidorId: data.humidorId ?? null,
+    ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
+  };
+}
+
 const cigarService = {
   async getCigars(params: any = {}) {
     const response = await api.get<Cigar[]>('/cigars', { params });
@@ -69,13 +146,15 @@ const cigarService = {
     return response.data;
   },
 
-  async createCigar(cigarData: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>): Promise<Cigar> {
-    const response = await api.post('/cigars', cigarData);
+  async createCigar(cigarData: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>, imageUrl?: string | null): Promise<Cigar> {
+    const payload = toCreateCigarPayload(cigarData, imageUrl);
+    const response = await api.post<Cigar>('/cigars', payload);
     return response.data;
   },
 
-  async updateCigar(id: number, cigarData: Partial<Cigar>): Promise<void> {
-    await api.put(`/cigars/${id}`, cigarData);
+  async updateCigar(id: number, cigarData: Partial<Cigar>, imageUrl?: string | null): Promise<void> {
+    const payload = toUpdateCigarPayload(cigarData, imageUrl);
+    await api.put(`/cigars/${id}`, payload);
   },
 
   async deleteCigar(id: number): Promise<void> {
@@ -128,8 +207,10 @@ const cigarService = {
     return response.data;
   },
 
-  async uploadImageByUrl(url: string): Promise<{ id: number }> {
-    const response = await api.post('/cigarimages/upload-by-url', { url });
+  async uploadImageByUrl(url: string, cigarBaseId?: number | null): Promise<{ id: number }> {
+    const payload: { url: string; cigarBaseId?: number } = { url };
+    if (cigarBaseId != null) payload.cigarBaseId = cigarBaseId;
+    const response = await api.post('/cigarimages/upload-by-url', payload);
     return response.data;
   },
 };
