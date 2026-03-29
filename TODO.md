@@ -46,7 +46,7 @@
 - [x] Подключить **Vue Test Utils** совместно с Vitest (если ещё не на этапе unit-тестов).
 - [ ] Компонентные тесты для 1–2 переиспользуемых или сложных компонентов (диалоги, нестандартная логика).
 - [ ] Периодически обновлять зависимости (`npm audit`, Browserslist) и устранять критичные уязвимости без ломки сборки.
-- [ ] Разобраться с предупреждением Tailwind при `vite build` (`unknown utility class`, при необходимости `@reference` / конфиг v4).
+- [x] Разобраться с предупреждением Tailwind при `vite build` (`unknown utility class`, при необходимости `@reference` / конфиг v4).
 - [x] **NuGet `NU1510` / `Microsoft.Extensions.Configuration.Json`:** убраны избыточные прямые ссылки в `CigarHelper.Data` и `CigarHelper.Import` (пакет транзитивен; в `CigarHelper.Api` отдельной ссылки не было).
 - [ ] По мере роста бандла — точечный code-splitting тяжёлых экранов (например формы с редактором).
 - [ ] Актуализировать `docs/memory-bank/` после крупных изменений API, маршрутов или обязательных секретов.
@@ -91,3 +91,4 @@
 - [x] **2026-03-30** — E2E: `e2e/tests/smoke-journey.spec.ts` — регистрация через UI или вход по `E2E_EMAIL`/`E2E_PASSWORD`, хьюмидоры/форма, сигары, обзоры, `/cigar-bases`; описание в `e2e/README.md`.
 - [x] **2026-03-30** — Фронт: `@vue/test-utils` + `@vitejs/plugin-vue` в `vitest.config.ts`, smoke `src/vue-test-utils.smoke.test.ts`; закрыт пункт `index.html` `lang="ru"` (уже было); E2E CI в бэклоге помечен как временно пропущенный; `docs/memory-bank/frontend/workflow.md` обновлён.
 - [x] **2026-03-30** — NuGet NU1510: удалены прямые ссылки `Microsoft.Extensions.Configuration.Json` из `CigarHelper.Data` и `CigarHelper.Import` (остаётся транзитивно); в API прямой ссылки не было. `dotnet build` / `dotnet test` по solution — ок.
+- [x] **2026-03-30** — Tailwind v4: в `CigarBaseEditDialog.vue` заменены `bg-opacity-*` на синтаксис `/opacity`; в `docs/memory-bank/frontend/workflow.md` — заметка по v4 и `@reference` для будущих `@apply` в SFC.

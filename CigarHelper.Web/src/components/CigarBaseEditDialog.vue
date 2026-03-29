@@ -209,7 +209,7 @@
             class="relative group aspect-square">
             <div
               v-if="image.markedForDeletion"
-              class="absolute inset-0 bg-red-500 bg-opacity-70 flex flex-col items-center justify-center rounded-lg z-10">
+              class="absolute inset-0 flex flex-col items-center justify-center rounded-lg z-10 bg-red-500/70">
               <i class="pi pi-trash text-white text-3xl mb-2"></i>
               <p class="text-white font-semibold">Будет удалено</p>
               <Button
@@ -225,7 +225,7 @@
               :class="{ 'opacity-30': image.markedForDeletion }" />
             <div
               v-if="!image.markedForDeletion"
-              class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center rounded-lg">
+              class="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-all duration-300 group-hover:bg-black/50">
               <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Button
                   v-if="image.isExisting || image.id"
