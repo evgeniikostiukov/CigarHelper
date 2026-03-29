@@ -6,6 +6,9 @@ namespace CigarHelper.Api.Services;
 
 public class AuthService
 {
+    /// <summary>Сообщение при любой неудачной попытке входа (без раскрытия, существует ли email).</summary>
+    public const string LoginFailedMessage = "Неверный email или пароль.";
+
     private readonly AppDbContext _context;
     private readonly IJwtService _jwtService;
 
@@ -73,13 +76,12 @@ public class AuthService
         // Find user by email
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        // Check if user exists
         if (user == null)
         {
             return new AuthResponse
             {
                 Success = false,
-                Message = "User not found"
+                Message = LoginFailedMessage
             };
         }
 
@@ -92,7 +94,7 @@ public class AuthService
             return new AuthResponse
             {
                 Success = false,
-                Message = "Invalid password"
+                Message = LoginFailedMessage
             };
         }
 

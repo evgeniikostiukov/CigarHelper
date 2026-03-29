@@ -1,6 +1,7 @@
 using CigarHelper.Data.Models;
 using CigarHelper.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CigarHelper.Api.Controllers;
 
@@ -24,8 +25,10 @@ public class AuthController : ControllerBase
     /// <response code="200">Регистрация успешна</response>
     /// <response code="400">Ошибка валидации или пользователь уже существует</response>
     [HttpPost("register")]
+    [EnableRateLimiting("auth-register")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
     {
         // Debug - вывод данных запроса
@@ -64,8 +67,10 @@ public class AuthController : ControllerBase
     /// <response code="200">Авторизация успешна</response>
     /// <response code="401">Некорректные учетные данные</response>
     [HttpPost("login")]
+    [EnableRateLimiting("auth-login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
     {
         if (!ModelState.IsValid)

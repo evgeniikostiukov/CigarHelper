@@ -138,7 +138,7 @@ public class AuthServiceTests
         var res = await sut.LoginAsync(new LoginRequest { Email = "none@example.com", Password = ValidPassword });
 
         Assert.False(res.Success);
-        Assert.Equal("User not found", res.Message);
+        Assert.Equal(AuthService.LoginFailedMessage, res.Message);
         jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
     }
 
@@ -197,7 +197,7 @@ public class AuthServiceTests
         var res = await sut.LoginAsync(new LoginRequest { Email = "e@example.com", Password = "wrongPw1" });
 
         Assert.False(res.Success);
-        Assert.Equal("Invalid password", res.Message);
+        Assert.Equal(AuthService.LoginFailedMessage, res.Message);
         jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
     }
 }
