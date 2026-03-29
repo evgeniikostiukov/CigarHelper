@@ -17,10 +17,21 @@ npm ci
 npx playwright install chromium
 ```
 
+## Сценарии
+
+- **`tests/smoke.spec.ts`** — главная без логина (`data-testid="app"`).
+- **`tests/smoke-journey.spec.ts`** — регистрация через UI (уникальный email/username) **или** вход по переменным **`E2E_EMAIL`** и **`E2E_PASSWORD`** (обе заданы — регистрация не выполняется). Далее: хьюмидоры → форма создания → назад, «Мои сигары», «Обзоры», прямой переход на `/cigar-bases` (таблица / пусто / ошибка API).
+
 ## Запуск
 
 ```bash
 npm test
+```
+
+Только journey-smoke:
+
+```bash
+npx playwright test tests/smoke-journey.spec.ts
 ```
 
 Отчёт: `npx playwright show-report`

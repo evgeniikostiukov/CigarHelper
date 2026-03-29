@@ -34,7 +34,7 @@
 - [x] **Docker Compose** для локалки: Postgres + API (опционально фронт) одной командой; кратко в memory bank / README.
 - [x] **E2E (Playwright):** добавить в репозиторий (`e2e/` или внутри `CigarHelper.Web` — по решению команды).
 - [x] **E2E:** описать в README/memory bank, как поднимать API + фронт (порты, тестовый пользователь, env).
-- [ ] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/таблицей (например база сигар).
+- [x] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/таблицей (например база сигар).
 - [ ] **E2E:** подключить прогон в CI (Testing/staging по возможности).
 
 ---
@@ -88,3 +88,4 @@
 - [x] **2026-03-30** — P0 security: по `security-refactor-memory-bank.md` шаги 1–9 уже в коде; добавлен операционный чеклист `docs/memory-bank/security-deploy-checklist.md`, пункт бэклога закрыт, открыт явный follow-up на первый прод-выкат.
 - [x] **2026-03-30** — E2E: каталог `e2e/` с `@playwright/test`, `playwright.config.ts`, smoke `tests/smoke.spec.ts` (главная + `data-testid`), `README.md` с портами и порядком запуска API/фронта.
 - [x] **2026-03-30** — E2E: разделы в `docs/memory-bank/workflow.md` и `docs/memory-bank/frontend/workflow.md` (порты 3000/5184, Docker Postgres, порядок запуска, тестовый пользователь через env `E2E_*`, `PLAYWRIGHT_BASE_URL`); оглавления memory bank обновлены.
+- [x] **2026-03-30** — E2E: `e2e/tests/smoke-journey.spec.ts` — регистрация через UI или вход по `E2E_EMAIL`/`E2E_PASSWORD`, хьюмидоры/форма, сигары, обзоры, `/cigar-bases`; описание в `e2e/README.md`.
