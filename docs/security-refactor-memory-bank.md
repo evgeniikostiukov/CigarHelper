@@ -82,6 +82,17 @@
 - **Загрузки изображений:** `ImageUpload:MaxBytes` (по умолчанию 5 MiB), `ImageBinaryValidator` — magic JPEG/PNG/GIF/WebP, согласованность MIME и размера; `CreateCigarImage` сохраняет `ImageData` после проверки; `Update` при новом `ImageData` — те же проверки. Общая логика скачивания URL — через `ImageBinaryValidator` в `ImageDownloader`; `Console.WriteLine` при ошибке скачивания убран.
 - **Npgsql:** перед `UseNpgsql` строка собирается через `NpgsqlConnectionStringBuilder` с `IncludeErrorDetail = IsDevelopment()` (в prod меньше деталей в исключениях).
 
+### Продакшен (выкат)
+
+- Шаблон: `CigarHelper.Api/appsettings.Production.json` — плейсхолдеры `yourdomain.example` (RFC 2606), строка БД `REQUIRED`, JWT key с пометкой задать через env / secret store. Перед выкатом заменить на реальные хосты и **не** коммитить секреты.
+- Окружение: `ASPNETCORE_ENVIRONMENT=Production`.
+- Типичные переопределения через переменные (имеют приоритет над JSON):
+  - `ConnectionStrings__DefaultConnection`
+  - `Jwt__Key`, при необходимости `Jwt__Issuer`, `Jwt__Audience`, `Jwt__AccessTokenDays`
+  - `AllowedHosts` — один список через `;`, как в JSON
+  - CORS: `Cors__Origins__0`, `Cors__Origins__1`, … для каждого HTTPS origin фронта (с `AllowCredentials` wildcard нельзя).
+- За обратным прокси убедиться, что фактический **Host** запроса к Kestrel совпадает с перечислением в `AllowedHosts` (или настроить `ForwardedHeaders` и доверенные прокси — иначе возможны 400 Bad Request от host filtering).
+
 ---
 
 ## Файлы «рядом с темой»
@@ -94,6 +105,7 @@
 | Тесты unit | `CigarHelper.Api.Tests/AuthServiceTests.cs`, `JwtServiceTests.cs`, … |
 | Тесты integration | `CigarHelper.Api.Tests/AuthIntegrationWebAppFactory.cs`, `AuthStep4IntegrationTests.cs` |
 | Program / Testing | `CigarHelper.API/Program.cs`, `ProgramPartial.cs` |
+| Прод конфиг API | `CigarHelper.Api/appsettings.Production.json` |
 
 ---
 
