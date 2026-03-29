@@ -1,362 +1,459 @@
 <template>
-  <div class="p-4 max-w-6xl mx-auto">
-    <!-- Loading State -->
-    <div
-      v-if="loading"
-      class="space-y-6">
-      <Skeleton
-        height="3rem"
-        class="mb-4" />
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Skeleton height="20rem" />
-        <div class="lg:col-span-2 space-y-4">
-          <Skeleton height="2rem" />
-          <Skeleton height="1rem" />
-          <Skeleton height="1rem" />
-          <Skeleton height="1rem" />
-        </div>
-      </div>
-    </div>
+  <section
+    class="cigar-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-100 via-amber-50/40 to-stone-100 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-amber-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    data-testid="cigar-detail"
+    aria-labelledby="cigar-detail-heading">
+    <div class="cigar-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
-    <!-- Error State -->
-    <div
-      v-else-if="error"
-      class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <i class="pi pi-exclamation-triangle text-red-400"></i>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Ошибка</h3>
-          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
-            {{ error }}
+    <div class="relative z-[1] max-w-7xl mx-auto">
+      <div
+        v-if="loading"
+        data-testid="cigar-detail-loading"
+        class="space-y-6 min-h-[20rem]"
+        aria-busy="true"
+        aria-live="polite">
+        <Skeleton
+          class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 max-w-md"
+          height="3rem" />
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          <Skeleton
+            class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+            height="20rem" />
+          <div class="lg:col-span-2 space-y-5">
+            <Skeleton
+              class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+              height="12rem" />
+            <Skeleton
+              class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+              height="8rem" />
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Cigar Details -->
-    <div
-      v-else-if="cigar"
-      class="space-y-6">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            {{ cigar.name }}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-2">
-            {{ cigar.brand.name }}
-          </p>
-        </div>
-        <div class="flex gap-2">
-          <Button
-            label="Редактировать"
-            icon="pi pi-pencil"
-            class="p-button-outlined"
-            @click="editCigar" />
-          <Button
-            label="Удалить"
-            icon="pi pi-trash"
-            class="p-button-outlined p-button-danger"
-            @click="confirmDelete" />
-        </div>
+      <div
+        v-else-if="error"
+        class="rounded-2xl border border-red-200/80 bg-white/90 p-5 dark:border-red-900/50 dark:bg-stone-900/80 max-w-2xl"
+        data-testid="cigar-detail-error"
+        role="alert">
+        <Message severity="error">{{ error }}</Message>
+        <Button
+          data-testid="cigar-detail-retry"
+          class="mt-4 min-h-12 w-full sm:w-auto touch-manipulation"
+          label="Повторить загрузку"
+          icon="pi pi-refresh"
+          severity="secondary"
+          outlined
+          @click="loadCigar(route.params.id as string)" />
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Image Section -->
-        <div class="lg:col-span-1">
-          <Card class="h-fit">
-            <template #content>
+      <template v-else-if="cigar">
+        <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 sm:pb-8">
+          <div class="min-w-0">
+            <p
+              class="text-[0.65rem] uppercase tracking-[0.22em] text-amber-900/65 dark:text-amber-200/55 font-semibold mb-1.5">
+              Коллекция
+            </p>
+            <h1
+              id="cigar-detail-heading"
+              class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-amber-50/95 tracking-tight text-balance">
+              {{ cigar.name }}
+            </h1>
+            <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
+              {{ cigar.brand.name }} · карточка сигары и хранение в одном месте.
+            </p>
+          </div>
+          <div class="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end shrink-0">
+            <Button
+              data-testid="cigar-detail-back"
+              class="w-full sm:w-auto min-h-12 sm:min-h-11 px-5 touch-manipulation"
+              label="К списку"
+              icon="pi pi-arrow-left"
+              severity="secondary"
+              outlined
+              @click="router.push({ name: 'CigarList' })" />
+            <Button
+              data-testid="cigar-detail-edit"
+              class="w-full sm:w-auto min-h-12 sm:min-h-11 px-5 touch-manipulation shadow-md shadow-amber-900/10 dark:shadow-black/40"
+              label="Редактировать"
+              icon="pi pi-pencil"
+              @click="editCigar" />
+            <Button
+              data-testid="cigar-detail-delete"
+              class="w-full sm:w-auto min-h-12 sm:min-h-11 px-5 touch-manipulation"
+              label="Удалить"
+              icon="pi pi-trash"
+              severity="danger"
+              outlined
+              @click="confirmDelete" />
+          </div>
+        </header>
+
+        <div
+          class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 cigar-detail-enter"
+          data-testid="cigar-detail-content">
+          <div class="lg:col-span-1">
+            <div
+              class="rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 overflow-hidden dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50">
               <div
-                v-if="cigar.images && cigar.images.length > 0"
-                class="aspect-square overflow-hidden rounded-lg">
+                v-if="primaryImageSrc"
+                class="aspect-square overflow-hidden bg-stone-100 dark:bg-stone-800/80">
                 <img
-                  :src="`data:image/jpeg;base64,${cigar.images[0].imageData}`"
+                  :src="primaryImageSrc"
                   :alt="cigar.name"
-                  class="w-full h-full object-cover" />
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async" />
               </div>
               <div
                 v-else
-                class="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <i class="pi pi-image text-6xl text-gray-400"></i>
-              </div>
-            </template>
-          </Card>
-        </div>
-
-        <!-- Details Section -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Basic Information -->
-          <Card>
-            <template #title>
-              <div class="flex items-center gap-2">
-                <i class="pi pi-info-circle text-blue-500"></i>
-                <span>Основная информация</span>
-              </div>
-            </template>
-            <template #content>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Название</label>
-                  <p class="text-gray-900 dark:text-white font-medium">
-                    {{ cigar.name }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Бренд</label>
-                  <p class="text-gray-900 dark:text-white font-medium">
-                    {{ cigar.brand.name }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Страна</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ cigar.country || '-' }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Размер</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ cigar.size || '-' }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Крепость</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ getStrengthLabel(cigar.strength) || '-' }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Цена</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ cigar.price ? `${cigar.price} ₽` : '-' }}
-                  </p>
-                </div>
-              </div>
-            </template>
-          </Card>
-
-          <!-- Rating -->
-          <Card v-if="cigar.rating">
-            <template #title>
-              <div class="flex items-center gap-2">
-                <i class="pi pi-star text-yellow-500"></i>
-                <span>Оценка</span>
-              </div>
-            </template>
-            <template #content>
-              <div class="flex items-center gap-4">
-                <Rating
-                  :modelValue="cigar.rating"
-                  :readonly="true"
-                  :cancel="false"
-                  :stars="10" />
-                <span class="text-lg font-medium text-gray-900 dark:text-white"> {{ cigar.rating }}/10 </span>
-              </div>
-            </template>
-          </Card>
-
-          <!-- Cigar Structure -->
-          <Card v-if="cigar.wrapper || cigar.binder || cigar.filler">
-            <template #title>
-              <div class="flex items-center gap-2">
-                <i class="pi pi-layer-group text-green-500"></i>
-                <span>Структура сигары</span>
-              </div>
-            </template>
-            <template #content>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Покровный лист</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ cigar.wrapper || '-' }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Связующий лист</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ cigar.binder || '-' }}
-                  </p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Наполнитель</label>
-                  <p class="text-gray-900 dark:text-white">
-                    {{ cigar.filler || '-' }}
-                  </p>
-                </div>
-              </div>
-            </template>
-          </Card>
-
-          <!-- Хранение -->
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <i class="pi pi-box text-blue-500 mr-2"></i>
-              Хранение
-            </h3>
-
-            <div
-              v-if="humidor"
-              class="space-y-4">
-              <div class="flex items-center justify-between">
-                <h4 class="text-lg font-medium text-gray-900 dark:text-white">
-                  {{ humidor.name }}
-                </h4>
-                <Button
-                  :label="'Перейти к хьюмидору'"
-                  icon="pi pi-external-link"
-                  class="p-button-sm p-button-outlined"
-                  @click="goToHumidor(humidor.id!)" />
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <div class="text-sm text-gray-600 dark:text-gray-400">Вместимость</div>
-                  <div class="text-lg font-semibold text-gray-900 dark:text-white">{{ humidor.capacity }} сигар</div>
-                </div>
-
-                <div
-                  v-if="humidor.humidity"
-                  class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <div class="text-sm text-gray-600 dark:text-gray-400">Текущая влажность</div>
-                  <div class="text-lg font-semibold text-blue-600 dark:text-blue-400">{{ humidor.humidity }}%</div>
-                </div>
-
-                <div
-                  v-if="humidor.description"
-                  class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Описание</div>
-                  <div class="text-gray-900 dark:text-white">{{ humidor.description }}</div>
-                </div>
-
-                <div
-                  v-else
-                  class="text-center py-8">
-                  <i class="pi pi-box text-gray-400 text-4xl mb-4"></i>
-                  <p class="text-gray-600 dark:text-gray-400">Сигара не хранится в хьюмидоре</p>
-                  <Button
-                    label="Добавить в хьюмидор"
-                    icon="pi pi-plus"
-                    class="mt-4"
-                    @click="editCigar" />
-                </div>
+                class="aspect-square bg-stone-100 dark:bg-stone-800/80 flex items-center justify-center"
+                data-testid="cigar-detail-no-image"
+                aria-hidden="true">
+                <span
+                  class="flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
+                  <i class="pi pi-image text-4xl" />
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Description -->
-          <Card v-if="cigar.description">
-            <template #title>
-              <div class="flex items-center gap-2">
-                <i class="pi pi-file-text text-indigo-500"></i>
-                <span>Описание</span>
+          <div class="lg:col-span-2 space-y-5 sm:space-y-6 min-w-0">
+            <section
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+              aria-labelledby="cigar-detail-info-heading">
+              <h2
+                id="cigar-detail-info-heading"
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                <i
+                  class="pi pi-info-circle text-amber-800/80 dark:text-amber-400/90"
+                  aria-hidden="true" />
+                Основная информация
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Название
+                  </span>
+                  <p class="mt-1 text-stone-900 dark:text-stone-100 font-medium">
+                    {{ cigar.name }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Бренд
+                  </span>
+                  <p class="mt-1 text-stone-900 dark:text-stone-100 font-medium">
+                    {{ cigar.brand.name }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Страна
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.country || '—' }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Размер
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.size || '—' }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Крепость
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ getStrengthLabel(cigar.strength) || '—' }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Цена
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.price != null ? `${cigar.price} ₽` : '—' }}
+                  </p>
+                </div>
               </div>
-            </template>
-            <template #content>
-              <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            </section>
+
+            <section
+              v-if="cigar.rating != null"
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+              aria-labelledby="cigar-detail-rating-heading">
+              <h2
+                id="cigar-detail-rating-heading"
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                <i
+                  class="pi pi-star text-amber-700 dark:text-amber-400"
+                  aria-hidden="true" />
+                Оценка
+              </h2>
+              <div class="flex flex-wrap items-center gap-4">
+                <Rating
+                  :model-value="cigar.rating"
+                  :readonly="true"
+                  :cancel="false"
+                  :stars="10" />
+                <span class="text-lg font-medium text-stone-900 dark:text-stone-100">
+                  {{ cigar.rating }}/10
+                </span>
+              </div>
+            </section>
+
+            <section
+              v-if="cigar.wrapper || cigar.binder || cigar.filler"
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+              aria-labelledby="cigar-detail-blend-heading">
+              <h2
+                id="cigar-detail-blend-heading"
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                <i
+                  class="pi pi-layer-group text-amber-800/80 dark:text-amber-400/90"
+                  aria-hidden="true" />
+                Структура сигары
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Покровный лист
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.wrapper || '—' }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Связующий лист
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.binder || '—' }}
+                  </p>
+                </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Наполнитель
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.filler || '—' }}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+              data-testid="cigar-detail-storage"
+              aria-labelledby="cigar-detail-storage-heading">
+              <h2
+                id="cigar-detail-storage-heading"
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                <i
+                  class="pi pi-box text-amber-800/80 dark:text-amber-400/90"
+                  aria-hidden="true" />
+                Хранение
+              </h2>
+
+              <div
+                v-if="cigar.humidorId && humidor"
+                class="space-y-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 class="text-base font-semibold text-stone-900 dark:text-amber-50/95">
+                    {{ humidor.name }}
+                  </h3>
+                  <Button
+                    data-testid="cigar-detail-open-humidor"
+                    class="w-full sm:w-auto min-h-12 sm:min-h-11 touch-manipulation shrink-0"
+                    label="Открыть хьюмидор"
+                    icon="pi pi-external-link"
+                    severity="secondary"
+                    outlined
+                    @click="goToHumidor(humidor.id!)" />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div
+                    class="rounded-xl border border-stone-200/80 bg-stone-50/90 px-4 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+                    <div class="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                      Вместимость
+                    </div>
+                    <div class="mt-1 text-lg font-semibold text-stone-900 dark:text-stone-100">
+                      {{ humidor.currentCount ?? 0 }} / {{ humidor.capacity }} сигар
+                    </div>
+                  </div>
+                  <div
+                    v-if="humidor.humidity != null"
+                    class="rounded-xl border border-stone-200/80 bg-stone-50/90 px-4 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+                    <div class="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                      Влажность
+                    </div>
+                    <div class="mt-1 inline-flex items-center gap-2">
+                      <Badge
+                        :value="humidor.humidity"
+                        :severity="humidorService.getHumiditySeverity(humidor.humidity)" />
+                    </div>
+                  </div>
+                </div>
+                <p
+                  v-if="humidor.description"
+                  class="text-sm leading-relaxed text-stone-600 dark:text-stone-400 border-t border-stone-100 dark:border-stone-700/80 pt-4 text-pretty">
+                  {{ humidor.description }}
+                </p>
+              </div>
+
+              <div
+                v-else-if="cigar.humidorId && !humidor"
+                class="rounded-xl border border-amber-800/20 bg-amber-50/50 px-4 py-3 dark:border-amber-200/15 dark:bg-amber-950/20"
+                role="status">
+                <p class="text-sm text-stone-700 dark:text-stone-300 mb-3 text-pretty">
+                  Данные хьюмидора не загрузились, но сигара привязана к нему.
+                </p>
+                <Button
+                  data-testid="cigar-detail-humidor-fallback"
+                  class="min-h-12 w-full sm:w-auto touch-manipulation"
+                  label="Перейти по ссылке"
+                  icon="pi pi-external-link"
+                  severity="secondary"
+                  outlined
+                  @click="goToHumidor(cigar.humidorId!)" />
+              </div>
+
+              <div
+                v-else
+                class="text-center rounded-xl border border-dashed border-amber-800/25 bg-white/60 px-4 py-8 dark:border-amber-200/15 dark:bg-stone-900/40"
+                data-testid="cigar-detail-no-humidor">
+                <span
+                  class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+                  aria-hidden="true">
+                  <i class="pi pi-box text-2xl" />
+                </span>
+                <p class="text-stone-600 dark:text-stone-400 mb-4 text-pretty max-w-md mx-auto text-sm sm:text-base">
+                  Сигара пока не привязана к хьюмидору. Укажите хранение при редактировании.
+                </p>
+                <Button
+                  data-testid="cigar-detail-add-humidor"
+                  class="min-h-12 px-6 touch-manipulation"
+                  label="Редактировать сигару"
+                  icon="pi pi-pencil"
+                  @click="editCigar" />
+              </div>
+            </section>
+
+            <section
+              v-if="cigar.description"
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+              aria-labelledby="cigar-detail-desc-heading">
+              <h2
+                id="cigar-detail-desc-heading"
+                class="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-amber-50/95 mb-4">
+                <i
+                  class="pi pi-file-edit text-amber-800/80 dark:text-amber-400/90"
+                  aria-hidden="true" />
+                Описание
+              </h2>
+              <p class="text-sm sm:text-base leading-relaxed text-stone-700 dark:text-stone-300 whitespace-pre-wrap text-pretty">
                 {{ cigar.description }}
               </p>
-            </template>
-          </Card>
+            </section>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
 
-    <!-- Delete Confirmation Dialog -->
     <ConfirmDialog />
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { computed, ref, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '../services/cigarService';
   import humidorService from '../services/humidorService';
-  import type { Cigar, Brand } from '../services/cigarService';
+  import type { Cigar } from '../services/cigarService';
   import type { Humidor } from '../services/humidorService';
   import { strengthOptions } from '../utils/cigarOptions';
 
-  // Composables
   const route = useRoute();
   const router = useRouter();
   const confirm = useConfirm();
   const toast = useToast();
 
-  // Reactive data
   const cigar = ref<Cigar | null>(null);
   const humidor = ref<Humidor | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
-  const brands = ref<Brand[]>([]);
 
-  // Methods
-  async function loadBrands(): Promise<void> {
-    try {
-      brands.value = await cigarService.getBrands();
-    } catch (error) {
-      console.error('Error loading brands:', error);
+  const primaryImageSrc = computed(() => {
+    const c = cigar.value;
+    if (!c?.images?.length) return '';
+    const first = c.images[0];
+    const raw = first.imageData ?? first.data;
+    if (raw == null) return '';
+    if (typeof raw === 'string') {
+      return raw.startsWith('data:') ? raw : `data:image/jpeg;base64,${raw}`;
     }
+    return '';
+  });
+
+  function getStrengthLabel(strength: string | null | undefined): string {
+    if (!strength) return '';
+    const opt = strengthOptions.find((o) => o.value === strength);
+    return opt?.label ?? strength;
   }
 
-  async function loadCigar(id: string) {
+  async function loadCigar(id: string): Promise<void> {
     loading.value = true;
+    error.value = null;
+    humidor.value = null;
     try {
       cigar.value = await cigarService.getCigar(id);
-      if (cigar.value && cigar.value.humidorId) {
+      if (cigar.value?.humidorId) {
         await loadHumidor(cigar.value.humidorId);
       }
     } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Ошибка при загрузке сигары:', err);
+      }
       error.value = 'Не удалось загрузить данные о сигаре.';
-      console.error(err);
+      cigar.value = null;
     } finally {
       loading.value = false;
     }
   }
 
-  async function loadHumidor(id: number) {
+  async function loadHumidor(id: number): Promise<void> {
     try {
       humidor.value = await humidorService.getHumidor(id);
     } catch (err) {
-      console.error('Не удалось загрузить данные о хьюмидоре:', err);
-      // Не показываем ошибку, так как это может быть ожидаемо
+      if (import.meta.env.DEV) {
+        console.error('Не удалось загрузить данные о хьюмидоре:', err);
+      }
+      humidor.value = null;
     }
   }
 
-  function getStrengthLabel(strength?: string | null): string {
-    if (!strength) return '';
-    const strengthMap: Record<string, string> = {
-      very_mild: 'Очень легкая',
-      mild: 'Легкая',
-      medium: 'Средняя',
-      full: 'Полная',
-      very_full: 'Очень полная',
-    };
-    return strengthMap[strength] || strength;
-  }
-
   function editCigar(): void {
-    if (!cigar.value) return;
-    router.push(`/cigars/${cigar.value.id}/edit`);
+    if (!cigar.value?.id) return;
+    router.push({ name: 'CigarEdit', params: { id: String(cigar.value.id) } });
   }
 
   function confirmDelete(): void {
     if (!cigar.value) return;
     confirm.require({
-      message: `Вы уверены, что хотите удалить сигару "${cigar.value.name}"?`,
+      message: `Вы уверены, что хотите удалить сигару «${cigar.value.name}»? Это действие нельзя отменить.`,
       header: 'Подтверждение удаления',
       icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
       acceptClass: 'p-button-danger',
-      accept: () => deleteCigar(),
-      reject: () => {
-        toast.add({
-          severity: 'info',
-          summary: 'Отменено',
-          detail: 'Операция удаления отменена',
-          life: 3000,
-        });
+      rejectLabel: 'Отмена',
+      acceptLabel: 'Удалить',
+      accept: () => {
+        void deleteCigar();
       },
     });
   }
@@ -368,12 +465,14 @@
       toast.add({
         severity: 'success',
         summary: 'Успешно',
-        detail: `Сигара "${cigar.value.name}" удалена`,
+        detail: `Сигара «${cigar.value.name}» удалена`,
         life: 3000,
       });
-      router.push('/cigars');
+      router.push({ name: 'CigarList' });
     } catch (err) {
-      console.error('Error deleting cigar:', err);
+      if (import.meta.env.DEV) {
+        console.error('Ошибка при удалении сигары:', err);
+      }
       toast.add({
         severity: 'error',
         summary: 'Ошибка',
@@ -384,12 +483,47 @@
   }
 
   function goToHumidor(humidorId: number): void {
-    router.push(`/humidors/${humidorId}`);
+    router.push({ name: 'HumidorDetail', params: { id: String(humidorId) } });
   }
 
-  // Lifecycle
-  onMounted(async () => {
-    await loadBrands();
-    await loadCigar(route.params.id as string);
+  onMounted(() => {
+    void loadCigar(route.params.id as string);
   });
 </script>
+
+<style scoped>
+  .cigar-detail-root {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .cigar-detail-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  :global(.dark) .cigar-detail-grain {
+    mix-blend-mode: soft-light;
+  }
+
+  .cigar-detail-enter {
+    animation: cigar-detail-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes cigar-detail-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cigar-detail-enter {
+      animation: none;
+    }
+  }
+</style>

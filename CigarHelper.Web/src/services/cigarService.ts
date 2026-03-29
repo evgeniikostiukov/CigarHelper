@@ -3,7 +3,10 @@ import api from './api';
 export interface CigarImage {
   id: number;
   isMain: boolean;
-  imageData?: string; // Base64 string
+  /** Личные сигары / часть ответов */
+  imageData?: string;
+  /** CigarImageDto с бэкенда: `Data` → в JSON `data` (base64 или массив байт после десериализации) */
+  data?: string | number[];
 }
 
 export interface CigarBase {
