@@ -24,6 +24,7 @@ public class CreateCigarRequest
     
     public string? Filler { get; set; }
     
+    [MaxLength(2048)]
     public string? ImageUrl { get; set; }
     
     public decimal? Price { get; set; }

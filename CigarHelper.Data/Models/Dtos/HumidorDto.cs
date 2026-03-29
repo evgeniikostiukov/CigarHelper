@@ -14,6 +14,9 @@ public class HumidorCreateDto
     [Required]
     [Range(1, 1000)]
     public int Capacity { get; set; }
+
+    [Range(1, 100)]
+    public int? Humidity { get; set; }
 }
 
 public class HumidorUpdateDto

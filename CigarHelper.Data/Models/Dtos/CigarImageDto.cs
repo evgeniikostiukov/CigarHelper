@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CigarHelper.Data.Models.Dtos;
 
 public class CigarImageDto
@@ -34,4 +36,14 @@ public class UpdateCigarImageRequest
     public byte[]? ImageData { get; set; }
     public string? Description { get; set; }
     public bool? IsMain { get; set; }
+}
+
+public class UploadCigarImageByUrlRequest
+{
+    [Required]
+    [MaxLength(2048)]
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>При редактировании CigarBase — сразу привязать запись изображения к базе.</summary>
+    public int? CigarBaseId { get; set; }
 } 

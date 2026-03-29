@@ -44,6 +44,8 @@ public class CigarResponseDto : CigarBriefDto
     public int UserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    /// <summary>Изображения личной сигары (UserCigar), не путать с фото базы CigarBase.</summary>
+    public List<CigarImageDto>? Images { get; set; }
 }
 
 public class CigarCreateDto
@@ -137,6 +139,10 @@ public class UserCigarUpdateRequest
     public int? Rating { get; set; }
 
     public int? HumidorId { get; set; }
+
+    /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки.</summary>
+    [MaxLength(2048)]
+    public string? ImageUrl { get; set; }
 }
 
 public class CreateCigarBaseRequest
