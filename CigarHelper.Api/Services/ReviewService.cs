@@ -30,6 +30,7 @@ public class ReviewService : IReviewService
             .Include(r => r.User)
             .Include(r => r.Cigar)
             .ThenInclude(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
             .Include(r => r.Images)
             .AsQueryable();
             
@@ -67,8 +68,6 @@ public class ReviewService : IReviewService
     
     public async Task<ReviewDto?> GetReviewByIdAsync(int id)
     {
-        var test = _context.Reviews.ToList();
-        
         var review = await _context.Reviews
             .Include(r => r.User)
             .Include(r => r.Cigar)
