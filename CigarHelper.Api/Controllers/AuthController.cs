@@ -31,10 +31,6 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
     {
-        // Debug - вывод данных запроса
-        Console.WriteLine($"Register request received: Username={request.Username}, Email={request.Email}, " +
-                         $"Password Length={request.Password?.Length ?? 0}, ConfirmPassword Length={request.ConfirmPassword?.Length ?? 0}");
-
         if (!ModelState.IsValid)
         {
             var errors = ModelState
@@ -44,17 +40,13 @@ public class AuthController : ControllerBase
                     kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                 );
 
-            Console.WriteLine($"Registration validation failed: {System.Text.Json.JsonSerializer.Serialize(errors)}");
             return BadRequest(new { message = "Validation failed", errors });
         }
 
         var response = await _authService.RegisterAsync(request);
 
         if (!response.Success)
-        {
-            Console.WriteLine($"Registration failed: {response.Message}");
             return BadRequest(response);
-        }
 
         return Ok(response);
     }

@@ -12,8 +12,8 @@
 | 2 | IDOR в `CigarImagesController` (владение, роли Admin/Moderator для каталога) | Сделано и закоммичено |
 | 3 | Пароли: PBKDF2-SHA256 (310k iter), legacy HMAC-SHA512 + апгрейд при логине | Сделано и закоммичено |
 | 4 | Логин: единое сообщение, rate limit login/register | Сделано и закоммичено |
-| 5 | `AuthResponse.Expiration` = реальный срок JWT (не парсинг мок-токена; срок из эмиттера JWT) | Сделано, не закоммичено |
-| 6 | Убрать чувствительный debug из `AuthController` (Console + длина пароля) | Не делали |
+| 5 | `AuthResponse.Expiration` = реальный срок JWT (не парсинг мок-токена; срок из эмиттера JWT) | Сделано и закоммичено |
+| 6 | Убрать чувствительный debug из `AuthController` (Console + длина пароля) | Сделано и закоммичено |
 | 7 | `AllowedHosts`, CORS из конфига, валидация загрузок изображений, `Include Error Detail` в строках БД | Не делали |
 
 ---
@@ -28,6 +28,8 @@
   - `feat(auth): store passwords with PBKDF2-SHA256`
   - `feat(auth): unify login failures and rate-limit auth`
   - `test(api): add auth integration tests for step 4` — `WebApplicationFactory`, `ProgramPartial`, Testing + InMemory в `Program.cs`
+  - `fix(auth): align JWT expiration with token and IJwtService tuple` — шаг 5
+  - `fix(api): remove sensitive register debug logging` — шаг 6
 
 ---
 
@@ -68,6 +70,10 @@
 - `AuthService` не парсит строку JWT; `ProfileService` / `AdminUserService` берут только `Token` из кортежа.
 - Интеграционные тесты читают `AuthResponse` с `JsonStringEnumConverter`, как в API.
 
+### Шаг 6 — сделано
+
+- Из `AuthController.Register` убраны `Console.WriteLine`: учётные данные, длины паролей, детали валидации и сообщения об ошибке регистрации не пишутся в stdout (утечки в лог-хосты / контейнеры).
+
 ---
 
 ## Файлы «рядом с темой»
@@ -89,7 +95,7 @@
 dotnet test CigarHelper.sln
 ```
 
-Ожидаемо после фикса шага 5: все тесты зелёные (сейчас без коммита шага 5 unit-теты auth падают из-за mock JWT).
+Ожидаемо: все тесты зелёные.
 
 ---
 
