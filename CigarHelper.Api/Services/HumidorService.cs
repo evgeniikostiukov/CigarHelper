@@ -52,6 +52,7 @@ public class HumidorService : IHumidorService
         var humidor = await _context.Humidors
             .Include(h => h.Cigars)
             .ThenInclude(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
             .Where(h => h.Id == humidorId && h.UserId == userId)
             .Select(h => new HumidorDetailResponseDto
             {
@@ -202,6 +203,7 @@ public class HumidorService : IHumidorService
         // Get cigars in the humidor
         var cigars = await _context.UserCigars
             .Include(c => c.CigarBase)
+            .ThenInclude(cb => cb.Brand)
             .Where(c => c.HumidorId == humidorId && c.UserId == userId)
             .Select(c => new CigarBriefDto
             {
