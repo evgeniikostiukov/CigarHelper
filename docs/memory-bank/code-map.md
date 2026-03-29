@@ -21,6 +21,7 @@
 
 ## API — сервисы и прочее
 
+- `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
 - `CigarHelper.API/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService` и др.
 - `CigarHelper.API/Helpers/` — например `ImageBinaryValidator` (проверка бинарных изображений).
 - `CigarHelper.API/Options/` — сильно типизированные опции конфигурации.
