@@ -1,6 +1,6 @@
 ---
 name: senior-qa
-description: Comprehensive QA and testing skill for quality assurance, test automation, and testing strategies for ReactJS, NextJS, NodeJS applications. Includes test suite generation, coverage analysis, E2E testing setup, and quality metrics. Use when designing test strategies, writing test cases, implementing test automation, performing manual testing, or analyzing test coverage.
+description: Comprehensive QA and testing skill for quality assurance, test automation, and testing strategies for C#, .NET (xUnit, NUnit, MSTest), ASP.NET Core integration tests (WebApplicationFactory), Playwright for .NET, and for ReactJS, NextJS, NodeJS stacks. Includes test suite generation, coverage analysis, E2E testing setup, and quality metrics. Use when designing test strategies, writing test cases, implementing test automation, performing manual testing, or analyzing test coverage.
 ---
 
 # Senior Qa
@@ -110,11 +110,12 @@ Technical reference guide in `references/qa_best_practices.md`:
 
 ## Tech Stack
 
-**Languages:** TypeScript, JavaScript, Python, Go, Swift, Kotlin
-**Frontend:** React, Next.js, React Native, Flutter
-**Backend:** Node.js, Express, GraphQL, REST APIs
-**Database:** PostgreSQL, Prisma, NeonDB, Supabase
-**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI
+**Languages:** C#, F#, TypeScript, JavaScript, Python, Go, Swift, Kotlin
+**Testing (.NET):** xUnit, NUnit, MSTest, FluentAssertions, Bogus, Moq, NSubstitute, Verify; `dotnet test`, coverlet; integration tests with `WebApplicationFactory`; Playwright .NET; SpecFlow / Reqnroll (BDD) when used
+**Frontend:** React, Next.js, React Native, Flutter, Blazor
+**Backend:** ASP.NET Core, Node.js, Express, GraphQL, REST APIs
+**Database:** PostgreSQL, SQL Server, SQLite, Prisma, NeonDB, Supabase
+**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI, Azure DevOps
 **Cloud:** AWS, GCP, Azure
 
 ## Development Workflow
@@ -126,6 +127,8 @@ Technical reference guide in `references/qa_best_practices.md`:
 npm install
 # or
 pip install -r requirements.txt
+# or (.NET)
+dotnet restore
 
 # Configure environment
 cp .env.example .env
@@ -182,6 +185,9 @@ npm run dev
 npm run build
 npm run test
 npm run lint
+# .NET
+dotnet build
+dotnet test
 
 # Analysis
 python scripts/coverage_analyzer.py .

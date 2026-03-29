@@ -1,6 +1,6 @@
 ---
 name: senior-architect
-description: Comprehensive software architecture skill for designing scalable, maintainable systems using ReactJS, NextJS, NodeJS, Express, React Native, Swift, Kotlin, Flutter, Postgres, GraphQL, Go, Python. Includes architecture diagram generation, system design patterns, tech stack decision frameworks, and dependency analysis. Use when designing system architecture, making technical decisions, creating architecture diagrams, evaluating trade-offs, or defining integration patterns.
+description: Comprehensive software architecture skill for designing scalable, maintainable systems using C#, .NET, ASP.NET Core (Web API, Minimal APIs), Blazor, EF Core, gRPC, SignalR, ReactJS, NextJS, NodeJS, Express, React Native, Swift, Kotlin, Flutter, Postgres, SQL Server, GraphQL, Go, Python. Includes architecture diagram generation, system design patterns, tech stack decision frameworks, and dependency analysis. Use when designing system architecture, making technical decisions, creating architecture diagrams, evaluating trade-offs, or defining integration patterns.
 ---
 
 # Senior Architect
@@ -111,11 +111,13 @@ Technical reference guide in `references/tech_decision_guide.md`:
 
 ## Tech Stack
 
-**Languages:** TypeScript, JavaScript, Python, Go, Swift, Kotlin
-**Frontend:** React, Next.js, React Native, Flutter
-**Backend:** Node.js, Express, GraphQL, REST APIs
-**Database:** PostgreSQL, Prisma, NeonDB, Supabase
-**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI
+**Languages:** C#, F#, TypeScript, JavaScript, Python, Go, Swift, Kotlin
+**.NET:** .NET (SDK/runtime), ASP.NET Core (Web API, Minimal APIs), Blazor (WebAssembly, Server), Razor Pages, Worker Service; EF Core, Dapper, Npgsql; gRPC (`grpc-dotnet`), SignalR; OData; common patterns (clean architecture, vertical slices, CQRS with MediatR where appropriate)
+**Frontend:** React, Next.js, React Native, Flutter, Blazor
+**Backend:** ASP.NET Core, Node.js, Express, GraphQL, REST APIs
+**Database:** PostgreSQL, SQL Server, SQLite, Prisma, NeonDB, Supabase
+**Mobile / desktop:** .NET MAUI, WPF, WinUI (when stack is Microsoft-centric)
+**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI, Azure DevOps
 **Cloud:** AWS, GCP, Azure
 
 ## Development Workflow
@@ -127,6 +129,8 @@ Technical reference guide in `references/tech_decision_guide.md`:
 npm install
 # or
 pip install -r requirements.txt
+# or (.NET)
+dotnet restore
 
 # Configure environment
 cp .env.example .env
@@ -183,6 +187,9 @@ npm run dev
 npm run build
 npm run test
 npm run lint
+# .NET
+dotnet build
+dotnet test
 
 # Analysis
 python scripts/project_architect.py .

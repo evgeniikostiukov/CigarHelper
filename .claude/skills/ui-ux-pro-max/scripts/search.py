@@ -6,7 +6,7 @@ Usage: python search.py "<query>" [--domain <domain>] [--stack <stack>] [--max-r
        python search.py "<query>" --design-system [-p "Project Name"]
 
 Domains: style, prompt, color, chart, landing, product, ux, typography
-Stacks: html-tailwind, react, nextjs
+Stacks: html-tailwind, react, nextjs, blazor, maui, ... (see AVAILABLE_STACKS in core.py)
 """
 
 import argparse

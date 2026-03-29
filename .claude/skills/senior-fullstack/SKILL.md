@@ -1,6 +1,6 @@
 ---
 name: senior-fullstack
-description: Comprehensive fullstack development skill for building complete web applications with React, Next.js, Node.js, GraphQL, and PostgreSQL. Includes project scaffolding, code quality analysis, architecture patterns, and complete tech stack guidance. Use when building new projects, analyzing code quality, implementing design patterns, or setting up development workflows.
+description: Comprehensive fullstack development skill for building complete web applications with C#, .NET, ASP.NET Core, Blazor, EF Core, React, Next.js, Node.js, GraphQL, and PostgreSQL (or SQL Server). Includes project scaffolding, code quality analysis, architecture patterns, and complete tech stack guidance. Use when building new projects, analyzing code quality, implementing design patterns, or setting up development workflows.
 ---
 
 # Senior Fullstack
@@ -110,11 +110,12 @@ Technical reference guide in `references/development_workflows.md`:
 
 ## Tech Stack
 
-**Languages:** TypeScript, JavaScript, Python, Go, Swift, Kotlin
-**Frontend:** React, Next.js, React Native, Flutter
-**Backend:** Node.js, Express, GraphQL, REST APIs
-**Database:** PostgreSQL, Prisma, NeonDB, Supabase
-**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI
+**Languages:** C#, F#, TypeScript, JavaScript, Python, Go, Swift, Kotlin
+**.NET:** .NET SDK, ASP.NET Core (Web API, Minimal APIs, Razor Pages), Blazor; EF Core, Dapper; Identity, JWT bearer auth; SignalR; gRPC
+**Frontend:** React, Next.js, React Native, Flutter, Blazor
+**Backend:** ASP.NET Core, Node.js, Express, GraphQL, REST APIs
+**Database:** PostgreSQL, SQL Server, SQLite, Prisma, NeonDB, Supabase
+**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI, Azure DevOps
 **Cloud:** AWS, GCP, Azure
 
 ## Development Workflow
@@ -126,6 +127,8 @@ Technical reference guide in `references/development_workflows.md`:
 npm install
 # or
 pip install -r requirements.txt
+# or (.NET)
+dotnet restore
 
 # Configure environment
 cp .env.example .env
@@ -182,6 +185,9 @@ npm run dev
 npm run build
 npm run test
 npm run lint
+# .NET
+dotnet build
+dotnet test
 
 # Analysis
 python scripts/project_scaffolder.py .

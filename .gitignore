@@ -40,6 +40,10 @@ yarn-error.log
 .env.test.local
 .env.production.local
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Misc
 .DS_Store
 Thumbs.db 

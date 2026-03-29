@@ -44,7 +44,8 @@ This skill covers world-class capabilities in:
 
 ## Tech Stack
 
-**Languages:** Python, SQL, R, Scala, Go
+**Languages:** Python, SQL, R, Scala, Go, C#
+**.NET AI:** Semantic Kernel, Azure OpenAI .NET SDK, `Microsoft.Extensions.AI` when applicable
 **ML Frameworks:** PyTorch, TensorFlow, Scikit-learn, XGBoost
 **Data Tools:** Spark, Airflow, dbt, Kafka, Databricks
 **LLM Frameworks:** LangChain, LlamaIndex, DSPy

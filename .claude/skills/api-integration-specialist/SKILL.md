@@ -1,6 +1,6 @@
 ---
 name: API Integration Specialist
-description: Expert in integrating third-party APIs with proper authentication, error handling, rate limiting, and retry logic. Use when integrating REST APIs, GraphQL endpoints, webhooks, or external services. Specializes in OAuth flows, API key management, request/response transformation, and building robust API clients.
+description: Expert in integrating third-party APIs with proper authentication, error handling, rate limiting, and retry logic. Covers .NET clients (HttpClient, IHttpClientFactory, Refit, Polly, System.Text.Json) and other stacks. Use when integrating REST APIs, GraphQL endpoints, webhooks, or external services. Specializes in OAuth flows, API key management, request/response transformation, and building robust API clients.
 ---
 
 # API Integration Specialist
@@ -22,6 +22,10 @@ Use this skill when:
 - Handling rate limits, retries, and circuit breakers
 - Transforming API responses for application use
 - Debugging API integration issues
+
+## .NET / ASP.NET Core
+
+Use **typed clients** with `IHttpClientFactory`, **Polly** for retries, timeouts, and circuit breaker, **Refit** or manual `HttpClient` for REST, **System.Text.Json** (or `JsonSerializerContext` for AOT) for payloads. Store secrets in environment variables, **User Secrets**, or **Azure Key Vault**; never hardcode keys. For outbound auth: **MSAL** / **Microsoft.Identity.Web** for Microsoft identity, or OAuth libraries aligned with your IdP. Webhooks: verify signatures (HMAC), use idempotent handlers, return quickly with queue/background work (`IHostedService`, **Hangfire**, **Azure Service Bus**).
 
 ## Core Integration Principles
 

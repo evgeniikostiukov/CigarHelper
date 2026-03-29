@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: Use when implementing any feature or bugfix, before writing implementation code
+description: Use when implementing any feature or bugfix, before writing implementation code. Applies to any stack including C# / .NET (xUnit, NUnit, MSTest, dotnet test).
 ---
 
 # Test-Driven Development (TDD)
@@ -13,6 +13,8 @@ description: Use when implementing any feature or bugfix, before writing impleme
 ## Overview
 
 Write the test first. Watch it fail. Write minimal code to pass.
+
+**On .NET:** run the failing test with `dotnet test` (optionally `--filter FullyQualifiedName~...`); use the test framework and naming conventions already present in the solution (xUnit `[Fact]`/`[Theory]`, NUnit, or MSTest).
 
 **Core principle:** If you didn't watch the test fail, you don't know if it tests the right thing.
 

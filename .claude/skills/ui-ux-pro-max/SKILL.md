@@ -1,11 +1,11 @@
 ---
 name: ui-ux-pro-max
-description: "UI/UX design intelligence. 50 styles, 21 palettes, 50 font pairings, 20 charts, 9 stacks (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui). Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples."
+description: "UI/UX design intelligence. 50 styles, 21 palettes, 50 font pairings, 20 charts, stacks including React, Next.js, Vue, Svelte, Blazor, SwiftUI, React Native, Flutter, .NET MAUI, Tailwind, shadcn/ui. Actions: plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, check UI/UX code. Projects: website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, mobile app, .html, .tsx, .vue, .svelte, .razor. Elements: button, modal, navbar, sidebar, card, table, form, chart. Styles: glassmorphism, claymorphism, minimalism, brutalism, neumorphism, bento grid, dark mode, responsive, skeuomorphism, flat design. Topics: color palette, accessibility, animation, layout, typography, font pairing, spacing, hover, shadow, gradient. Integrations: shadcn/ui MCP for component search and examples."
 ---
 
 # UI/UX Pro Max - Design Intelligence
 
-Comprehensive design guide for web and mobile applications. Contains 50+ styles, 97 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 9 technology stacks. Searchable database with priority-based recommendations.
+Comprehensive design guide for web and mobile applications. Contains 50+ styles, 97 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across multiple technology stacks (including .NET / Blazor / MAUI). Searchable database with priority-based recommendations.
 
 ## Язык
 
@@ -133,7 +133,7 @@ Extract key information from user request:
 - **Product type**: SaaS, e-commerce, portfolio, dashboard, landing page, etc.
 - **Style keywords**: minimal, playful, professional, elegant, dark mode, etc.
 - **Industry**: healthcare, fintech, gaming, education, etc.
-- **Stack**: React, Vue, Next.js, or default to `html-tailwind`
+- **Stack**: React, Vue, Next.js, Blazor (web), .NET MAUI (mobile or multi-platform), or default to `html-tailwind`
 
 ### Step 2: Generate Design System (REQUIRED)
 
@@ -180,7 +180,16 @@ Get implementation-specific best practices. If user doesn't specify a stack, **d
 python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack html-tailwind
 ```
 
-Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `swiftui`, `react-native`, `flutter`, `shadcn`
+**.NET examples:**
+
+```bash
+python3 .claude/skills/ui-ux-pro-max/scripts/search.py "virtualize form validation" --stack blazor
+python3 .claude/skills/ui-ux-pro-max/scripts/search.py "CollectionView Shell MVVM" --stack maui
+```
+
+Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `nuxtjs`, `nuxt-ui`, `swiftui`, `react-native`, `flutter`, `shadcn`, `blazor`, `maui`
+
+For **Blazor** or **.NET MAUI** use `--stack blazor` or `--stack maui` so BM25 search reads stack-specific rows from `data/stacks/`.
 
 ---
 
@@ -201,6 +210,8 @@ Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `swiftui`
 | `web` | Web interface guidelines | aria, focus, keyboard, semantic, virtualize |
 | `prompt` | AI prompts, CSS keywords | (style name) |
 
+**Blazor / .NET MAUI:** guidelines live in stack CSVs; use `--stack blazor` or `--stack maui` (not `--domain`).
+
 ### Available Stacks
 
 | Stack | Focus |
@@ -214,6 +225,8 @@ Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `swiftui`
 | `react-native` | Components, Navigation, Lists |
 | `flutter` | Widgets, State, Layout, Theming |
 | `shadcn` | shadcn/ui components, theming, forms, patterns |
+| `blazor` | Razor components, parameters EventCallback, Virtualize, EditForm, WASM trim, Blazor Server circuits |
+| `maui` | XAML MVVM compiled bindings, CollectionView, Shell, main thread, semantics, startup |
 
 ---
 
@@ -275,7 +288,7 @@ python3 .claude/skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design
 2. **Search multiple times** - Different keywords reveal different insights
 3. **Combine domains** - Style + Typography + Color = Complete design system
 4. **Always check UX** - Search "animation", "z-index", "accessibility" for common issues
-5. **Use stack flag** - Get implementation-specific best practices
+5. **Use stack flag** - Get implementation-specific best practices (`blazor` / `maui` for .NET UI)
 6. **Iterate** - If first search doesn't match, try different keywords
 
 ---

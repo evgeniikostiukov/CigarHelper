@@ -1,6 +1,6 @@
 ---
 name: webapp-testing
-description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.
+description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs. Works with backends started via `dotnet run` (ASP.NET Core, Blazor), `npm run dev`, or other local servers.
 license: Complete terms in LICENSE.txt
 ---
 
@@ -45,6 +45,11 @@ To start a server, run `--help` first, then use the helper:
 **Single server:**
 ```bash
 python scripts/with_server.py --server "npm run dev" --port 5173 -- python your_automation.py
+```
+
+**ASP.NET Core example:**
+```bash
+python scripts/with_server.py --server "dotnet run --project path/to/Api.csproj" --port 5000 -- python your_automation.py
 ```
 
 **Multiple servers (e.g., backend + frontend):**

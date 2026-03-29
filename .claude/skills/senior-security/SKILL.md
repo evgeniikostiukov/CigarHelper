@@ -1,6 +1,6 @@
 ---
 name: senior-security
-description: Comprehensive security engineering skill for application security, penetration testing, security architecture, and compliance auditing. Includes security assessment tools, threat modeling, crypto implementation, and security automation. Use when designing security architecture, conducting penetration tests, implementing cryptography, or performing security audits.
+description: Comprehensive security engineering skill for application security, penetration testing, security architecture, and compliance auditing for C# / .NET (ASP.NET Core auth, data protection, secrets, OWASP ASVS) and other stacks. Includes security assessment tools, threat modeling, crypto implementation, and security automation. Use when designing security architecture, conducting penetration tests, implementing cryptography, or performing security audits.
 ---
 
 # Senior Security
@@ -110,11 +110,12 @@ Technical reference guide in `references/cryptography_implementation.md`:
 
 ## Tech Stack
 
-**Languages:** TypeScript, JavaScript, Python, Go, Swift, Kotlin
-**Frontend:** React, Next.js, React Native, Flutter
-**Backend:** Node.js, Express, GraphQL, REST APIs
-**Database:** PostgreSQL, Prisma, NeonDB, Supabase
-**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI
+**Languages:** C#, F#, TypeScript, JavaScript, Python, Go, Swift, Kotlin
+**.NET security:** ASP.NET Core Identity, JWT/OAuth2/OpenID Connect, cookie auth; Data Protection API; secret storage (User Secrets, Azure Key Vault SDK); antiforgery; rate limiting middleware; `Microsoft.Identity.*`, MSAL when applicable; Safe NuGet supply chain (`dotnet nuget verify`, lock files)
+**Frontend:** React, Next.js, React Native, Flutter, Blazor
+**Backend:** ASP.NET Core, Node.js, Express, GraphQL, REST APIs
+**Database:** PostgreSQL, SQL Server, SQLite, Prisma, NeonDB, Supabase
+**DevOps:** Docker, Kubernetes, Terraform, GitHub Actions, CircleCI, Azure DevOps
 **Cloud:** AWS, GCP, Azure
 
 ## Development Workflow
@@ -126,6 +127,8 @@ Technical reference guide in `references/cryptography_implementation.md`:
 npm install
 # or
 pip install -r requirements.txt
+# or (.NET)
+dotnet restore
 
 # Configure environment
 cp .env.example .env
@@ -182,6 +185,9 @@ npm run dev
 npm run build
 npm run test
 npm run lint
+# .NET
+dotnet build
+dotnet test
 
 # Analysis
 python scripts/security_auditor.py .

@@ -1,6 +1,6 @@
 ---
 name: web-performance-optimization
-description: "Optimize website and web application performance including loading speed, Core Web Vitals, bundle size, caching strategies, and runtime performance"
+description: "Optimize website and web application performance including loading speed, Core Web Vitals, bundle size, caching strategies, and runtime performance; includes ASP.NET Core (Kestrel, response/output caching, compression, static files, Blazor bundle size and trimming)"
 ---
 
 # Web Performance Optimization
@@ -24,6 +24,7 @@ Help developers optimize website and web application performance to improve user
 - Use when implementing caching strategies
 - Use when debugging performance bottlenecks
 - Use when preparing for performance audits
+- Use when tuning **ASP.NET Core**: response caching, output caching, response compression, efficient static files, minimal middleware pipeline, pooling (`DbContext`, `HttpClient`), and **Blazor** (lazy loading, trimming, avoiding unnecessary re-renders)
 
 ## How It Works
 

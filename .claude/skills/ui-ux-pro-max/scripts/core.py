@@ -83,7 +83,9 @@ STACK_CONFIG = {
     "swiftui": {"file": "stacks/swiftui.csv"},
     "react-native": {"file": "stacks/react-native.csv"},
     "flutter": {"file": "stacks/flutter.csv"},
-    "shadcn": {"file": "stacks/shadcn.csv"}
+    "shadcn": {"file": "stacks/shadcn.csv"},
+    "blazor": {"file": "stacks/blazor.csv"},
+    "maui": {"file": "stacks/maui.csv"},
 }
 
 # Common columns for all stacks

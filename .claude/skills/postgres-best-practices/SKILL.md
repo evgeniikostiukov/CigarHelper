@@ -1,6 +1,6 @@
 ---
 name: supabase-postgres-best-practices
-description: Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.
+description: Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations—including from C# via Npgsql, EF Core, or Dapper.
 license: MIT
 metadata:
   author: supabase
@@ -25,6 +25,7 @@ Reference these guidelines when:
 - Configuring connection pooling or scaling
 - Optimizing for Postgres-specific features
 - Working with Row-Level Security (RLS)
+- Tuning apps that use **EF Core** with Npgsql (tracking, `AsNoTracking`, split queries, compiled models) or raw SQL via **Dapper** / ADO.NET
 
 ## Rule Categories by Priority
 
