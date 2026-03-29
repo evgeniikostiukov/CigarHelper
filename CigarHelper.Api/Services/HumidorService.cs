@@ -97,6 +97,7 @@ public class HumidorService : IHumidorService
             Name = dto.Name,
             Description = dto.Description,
             Capacity = dto.Capacity,
+            Humidity = dto.Humidity,
             UserId = userId,
             CreatedAt = DateTime.UtcNow
         };

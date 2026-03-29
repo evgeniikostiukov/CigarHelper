@@ -1,3 +1,4 @@
+using System.IO;
 using System.Security.Claims;
 using CigarHelper.Api.Helpers;
 using CigarHelper.Api.Options;
@@ -37,6 +38,61 @@ public class CigarImagesController : ControllerBase
 
     private async Task<bool> UserOwnsUserCigarAsync(int userCigarId, int userId, CancellationToken cancellationToken) =>
         await _context.UserCigars.AnyAsync(uc => uc.Id == userCigarId && uc.UserId == userId, cancellationToken);
+
+    /// <summary>Скачивает изображение по URL и сохраняет как CigarImage (только staff; для UI редактирования базы).</summary>
+    [HttpPost("upload-by-url")]
+    public async Task<ActionResult<object>> UploadCigarImageByUrl(
+        [FromBody] UploadCigarImageByUrlRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!IsStaff())
+            return Forbid();
+
+        if (request is null)
+            return BadRequest("Тело запроса пустое.");
+
+        if (string.IsNullOrWhiteSpace(request.Url))
+            return BadRequest("Укажите URL изображения.");
+
+        if (request.CigarBaseId.HasValue &&
+            !await _context.CigarBases.AnyAsync(cb => cb.Id == request.CigarBaseId.Value, cancellationToken))
+            return NotFound("CigarBase не найдена.");
+
+        var url = request.Url.Trim();
+        var imageBytes = await ImageDownloader.DownloadImageAsync(url);
+        if (imageBytes == null || imageBytes.Length == 0)
+            return BadRequest("Не удалось загрузить изображение по указанной ссылке.");
+
+        var contentType = GetContentTypeFromUrl(url);
+        if (string.IsNullOrWhiteSpace(contentType))
+            contentType = ImageBinaryValidator.SuggestContentType(imageBytes);
+        if (string.IsNullOrWhiteSpace(contentType))
+            contentType = "image/jpeg";
+
+        if (!ImageBinaryValidator.TryValidate(
+                imageBytes,
+                contentType,
+                imageBytes.Length,
+                _uploadOptions.MaxBytes,
+                out var validateError))
+            return BadRequest(validateError);
+
+        var cigarImage = new CigarImage
+        {
+            CigarBaseId = request.CigarBaseId,
+            FileName = GetFileNameFromUrl(url),
+            ContentType = contentType,
+            FileSize = imageBytes.Length,
+            ImageData = imageBytes,
+            IsMain = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.CigarImages.Add(cigarImage);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok(new { id = cigarImage.Id });
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CigarImageDto>>> GetCigarImages(
@@ -387,5 +443,32 @@ public class CigarImagesController : ControllerBase
         }
 
         return (false, NotFound());
+    }
+
+    private static string GetFileNameFromUrl(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            var fileName = Path.GetFileName(uri.LocalPath);
+            if (!string.IsNullOrEmpty(fileName))
+                return fileName;
+        }
+
+        return Guid.NewGuid().ToString("N")[..8] + ".jpg";
+    }
+
+    private static string GetContentTypeFromUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return "image/jpeg";
+
+        return Path.GetExtension(uri.LocalPath).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            _ => "image/jpeg"
+        };
     }
 }

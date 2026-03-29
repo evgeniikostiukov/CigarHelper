@@ -65,6 +65,20 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
+                Images = uc.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
                 UpdatedAt = uc.UpdatedAt
@@ -145,14 +159,13 @@ public class CigarsController : ControllerBase
         [FromQuery] string? sortOrder = "asc",
         [FromQuery] string? search = null,
         [FromQuery] int? brandId = null,
-        [FromQuery] string? strength = null)
+        [FromQuery] string? strength = null,
+        [FromQuery] bool excludeBinaryMedia = false)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
         var query = _context.CigarBases
-            .Include(cb => cb.Brand)
-            .Include(cb => cb.Images)
             .Where(cb => cb.IsModerated); // Только проверенные сигары
 
         // Применяем фильтры
@@ -188,50 +201,100 @@ public class CigarsController : ControllerBase
             _ => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name)
         };
 
-        // Применяем пагинацию
-        var items = await query
+        // Пагинация: без excludeBinaryMedia тянем bytea (лого, фото) — при pageSize=100 ответ раздувается и часто падает по памяти/таймауту.
+        var paged = query
             .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(cb => new CigarBaseDto
-            {
-                Id = cb.Id,
-                Name = cb.Name,
-                Brand = new BrandDto
+            .Take(pageSize);
+
+        List<CigarBaseDto> items;
+        if (excludeBinaryMedia)
+        {
+            items = await paged
+                .Select(cb => new CigarBaseDto
                 {
-                    Id = cb.BrandId,
-                    Name = cb.Brand.Name,
-                    Country = cb.Brand.Country,
-                    Description = cb.Brand.Description,
-                    LogoBytes = cb.Brand.LogoBytes,
-                    IsModerated = cb.Brand.IsModerated,
-                    CreatedAt = cb.Brand.CreatedAt,
-                    UpdatedAt = cb.Brand.UpdatedAt
-                },
-                Size = cb.Size,
-                Strength = cb.Strength,
-                Country = cb.Country,
-                Description = cb.Description,
-                Wrapper = cb.Wrapper,
-                Binder = cb.Binder,
-                Filler = cb.Filler,
-                Images = cb.Images.Where(img => img.ImageData != null)
-                    .Select(img => new CigarImageDto
+                    Id = cb.Id,
+                    Name = cb.Name,
+                    Brand = new BrandDto
                     {
-                        Id = img.Id,
-                        FileName = img.FileName,
-                        ContentType = img.ContentType,
-                        FileSize = img.FileSize,
-                        Description = img.Description,
-                        IsMain = img.IsMain,
-                        CigarBaseId = img.CigarBaseId,
-                        UserCigarId = img.UserCigarId,
-                        CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
-                    }).ToList(),
-                CreatedAt = cb.CreatedAt,
-                UpdatedAt = cb.UpdatedAt
-            })
-            .ToListAsync();
+                        Id = cb.BrandId,
+                        Name = cb.Brand.Name,
+                        Country = cb.Brand.Country,
+                        Description = cb.Brand.Description,
+                        LogoBytes = null,
+                        IsModerated = cb.Brand.IsModerated,
+                        CreatedAt = cb.Brand.CreatedAt,
+                        UpdatedAt = cb.Brand.UpdatedAt
+                    },
+                    Size = cb.Size,
+                    Strength = cb.Strength,
+                    Country = cb.Country,
+                    Description = cb.Description,
+                    Wrapper = cb.Wrapper,
+                    Binder = cb.Binder,
+                    Filler = cb.Filler,
+                    Images = cb.Images
+                        .Select(img => new CigarImageDto
+                        {
+                            Id = img.Id,
+                            FileName = img.FileName,
+                            ContentType = img.ContentType,
+                            FileSize = img.FileSize,
+                            Description = img.Description,
+                            IsMain = img.IsMain,
+                            CigarBaseId = img.CigarBaseId,
+                            UserCigarId = img.UserCigarId,
+                            CreatedAt = img.CreatedAt,
+                            Data = null
+                        }).ToList(),
+                    CreatedAt = cb.CreatedAt,
+                    UpdatedAt = cb.UpdatedAt
+                })
+                .ToListAsync();
+        }
+        else
+        {
+            items = await paged
+                .Select(cb => new CigarBaseDto
+                {
+                    Id = cb.Id,
+                    Name = cb.Name,
+                    Brand = new BrandDto
+                    {
+                        Id = cb.BrandId,
+                        Name = cb.Brand.Name,
+                        Country = cb.Brand.Country,
+                        Description = cb.Brand.Description,
+                        LogoBytes = cb.Brand.LogoBytes,
+                        IsModerated = cb.Brand.IsModerated,
+                        CreatedAt = cb.Brand.CreatedAt,
+                        UpdatedAt = cb.Brand.UpdatedAt
+                    },
+                    Size = cb.Size,
+                    Strength = cb.Strength,
+                    Country = cb.Country,
+                    Description = cb.Description,
+                    Wrapper = cb.Wrapper,
+                    Binder = cb.Binder,
+                    Filler = cb.Filler,
+                    Images = cb.Images.Where(img => img.ImageData != null)
+                        .Select(img => new CigarImageDto
+                        {
+                            Id = img.Id,
+                            FileName = img.FileName,
+                            ContentType = img.ContentType,
+                            FileSize = img.FileSize,
+                            Description = img.Description,
+                            IsMain = img.IsMain,
+                            CigarBaseId = img.CigarBaseId,
+                            UserCigarId = img.UserCigarId,
+                            CreatedAt = img.CreatedAt,
+                            Data = img.ImageData
+                        }).ToList(),
+                    CreatedAt = cb.CreatedAt,
+                    UpdatedAt = cb.UpdatedAt
+                })
+                .ToListAsync();
+        }
 
         var result = new PaginatedResult<CigarBaseDto>
         {
@@ -289,6 +352,20 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
+                Images = uc.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
                 UpdatedAt = uc.UpdatedAt
@@ -387,6 +464,9 @@ public class CigarsController : ControllerBase
         _context.UserCigars.Add(userCigar);
         await _context.SaveChangesAsync();
 
+        await TryAddUserCigarImageFromUrlAsync(userCigar.Id, request.ImageUrl);
+        await _context.SaveChangesAsync();
+
         // Возвращаем созданную сигару пользователя с данными из базы
         var createdCigar = await _context.UserCigars
             .Include(uc => uc.CigarBase)
@@ -428,6 +508,20 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
+                Images = uc.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
                 UpdatedAt = uc.UpdatedAt
@@ -476,6 +570,13 @@ public class CigarsController : ControllerBase
         existingUserCigar.CigarBase.Binder = request.Binder;
         existingUserCigar.CigarBase.Filler = request.Filler;
         existingUserCigar.CigarBase.UpdatedAt = DateTime.UtcNow;
+
+        if (!string.IsNullOrWhiteSpace(request.ImageUrl))
+        {
+            var oldImages = await _context.CigarImages.Where(i => i.UserCigarId == id).ToListAsync();
+            _context.CigarImages.RemoveRange(oldImages);
+            await TryAddUserCigarImageFromUrlAsync(id, request.ImageUrl);
+        }
 
         try
         {
@@ -530,6 +631,20 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
+                Images = uc.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
                 UpdatedAt = uc.UpdatedAt
@@ -537,6 +652,29 @@ public class CigarsController : ControllerBase
             .FirstOrDefaultAsync();
 
         return Ok(updatedCigar);
+    }
+
+    /// <summary>Скачивает изображение по URL и привязывает к личной сигаре (UserCigar).</summary>
+    private async Task TryAddUserCigarImageFromUrlAsync(int userCigarId, string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return;
+
+        var url = imageUrl.Trim();
+        var imageBytes = await ImageDownloader.DownloadImageAsync(url);
+        if (imageBytes == null || imageBytes.Length == 0)
+            return;
+
+        _context.CigarImages.Add(new CigarImage
+        {
+            UserCigarId = userCigarId,
+            FileName = GetFileNameFromUrl(url),
+            ContentType = GetContentTypeFromUrl(url),
+            FileSize = imageBytes.Length,
+            ImageData = imageBytes,
+            IsMain = true,
+            CreatedAt = DateTime.UtcNow
+        });
     }
 
     [HttpDelete("{id}")]
