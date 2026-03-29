@@ -32,7 +32,7 @@
 - [x] **SPA:** единый слой обработки ошибок API (toast + маппинг 401/403/5xx), меньше дублирования по view.
 - [x] **API:** health / readiness эндпоинты для хостинга и мониторинга (если ещё не покрыто текущей конфигурацией).
 - [x] **Docker Compose** для локалки: Postgres + API (опционально фронт) одной командой; кратко в memory bank / README.
-- [ ] **E2E (Playwright):** добавить в репозиторий (`e2e/` или внутри `CigarHelper.Web` — по решению команды).
+- [x] **E2E (Playwright):** добавить в репозиторий (`e2e/` или внутри `CigarHelper.Web` — по решению команды).
 - [ ] **E2E:** описать в README/memory bank, как поднимать API + фронт (порты, тестовый пользователь, env).
 - [ ] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/таблицей (например база сигар).
 - [ ] **E2E:** подключить прогон в CI (Testing/staging по возможности).
@@ -86,3 +86,4 @@
 - [x] **2026-03-30** — Vitest + `happy-dom`: `vitest.config.ts`, `imageUtils.test.ts`, `roles.test.ts`.
 - [x] **2026-03-30** — Добавлены корневые **`TODO.md`** (приоритетный бэклог + журнал) и **`DESIGN.md`** (UI/тема); правило в `.cursor/rules/memory-bank.mdc` ссылается на `TODO.md`.
 - [x] **2026-03-30** — P0 security: по `security-refactor-memory-bank.md` шаги 1–9 уже в коде; добавлен операционный чеклист `docs/memory-bank/security-deploy-checklist.md`, пункт бэклога закрыт, открыт явный follow-up на первый прод-выкат.
+- [x] **2026-03-30** — E2E: каталог `e2e/` с `@playwright/test`, `playwright.config.ts`, smoke `tests/smoke.spec.ts` (главная + `data-testid`), `README.md` с портами и порядком запуска API/фронта.
