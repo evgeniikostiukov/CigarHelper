@@ -44,3 +44,13 @@ body {
   right: 20px;
   z-index: 1050;
 }
+
+/* Vue DevTools (vite-plugin-vue-devtools): fullscreen-режим по умолчанию ставит z-index: 1, из-за чего панель может
+   уходить под fixed/sticky слои приложения. Поднимаем поверх всего UI. */
+.vue-devtools-frame.view-mode-fullscreen {
+  z-index: 2147483646 !important;
+}
+
+#vue-devtools-anchor {
+  z-index: 2147483646 !important;
+}
