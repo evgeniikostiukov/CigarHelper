@@ -162,7 +162,7 @@ public class DashboardServiceTests
         Assert.Equal(2, brand1Item.CigarCount);
         Assert.Equal(2, brand2Item.CigarCount);
         Assert.Equal(8, brand1Item.AverageRating);
-        Assert.Null(brand2Item.AverageRating);
+        Assert.Equal(5, brand2Item.AverageRating);
     }
 
     [Fact]
