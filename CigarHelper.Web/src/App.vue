@@ -135,6 +135,12 @@
 
   const menuItems = computed<MenuItem[]>(() => [
     {
+      label: 'Сводка',
+      icon: 'pi pi-chart-pie',
+      command: () => router.push({ name: 'Dashboard' }),
+      visible: () => isAuthenticated.value,
+    },
+    {
       label: 'Хьюмидоры',
       icon: 'pi pi-box',
       command: () => router.push({ name: 'HumidorList' }),
