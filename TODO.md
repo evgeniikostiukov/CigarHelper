@@ -100,6 +100,7 @@
 - [x] **2026-03-30** — Frontend: добавлен сервис `dashboardService` (`GET /api/dashboard/summary`), маршрут `Dashboard` (`/dashboard`, requiresAuth) с новым view `Dashboard.vue` в общем каркасе коллекции (панель «Сводка коллекции», блоки объёма, брендов и недавних обзоров, CTA при пустой коллекции); в `App.vue` добавлен пункт меню «Сводка».
 - [x] **2026-03-30** — E2E: обновлён `e2e/tests/smoke-journey.spec.ts` — после логина открывается «Сводка» (`/dashboard`), проверяются `data-testid="dashboard"` и `data-testid="dashboard-content"`; `npm test` (Playwright) — ok.
 - [x] **2026-03-30** — Unit (Vitest): добавлены `src/views/Dashboard.test.ts` (рендер контента/ошибка/навигация) и `src/services/dashboardService.test.ts` (контракт вызова `/dashboard/summary`); `npm test` в `CigarHelper.Web` — ok.
+- [x] **2026-03-30** — Docs (memory bank): обновлены `docs/memory-bank/frontend/code-map.md` и `docs/memory-bank/frontend/collection-list-views.md` — добавлены маршрут/экран `Dashboard` и `dashboardService`.
 - [x] **2026-03-30** — Зависимости: `npx npm-check-updates -u` в `CigarHelper.Web`, корне репо и `cigar-scraper` + `npm install`; TypeScript **^5.9.3** (peer `typescript-eslint@8`); TipTap 3 в `TextEditor.vue`; удалён `@types/dompurify`.
 - [x] **2026-03-30** — Фронт: палитра светлее, акцент rose — пресет PrimeVue Aura (`rose` primary, `surface` stone), Tailwind amber→rose, фоны stone, `App.vue` / `main.css`.
 - [x] **2026-03-30** — Этап 1 бэкенд: интеграционные тесты 401/403/404, публичный профиль, пагинация; InMemory одно имя БД на хост.

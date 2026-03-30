@@ -1,6 +1,6 @@
-# Коллекция, справочник, обзоры, админ и главная — Home, Login, HumidorList, HumidorDetail, Profile, PublicUserProfile, PublicHumidorDetail, CigarList, CigarForm, CigarDetail, CigarBases, ReviewList, ReviewDetail, ReviewForm, Brands, AdminUsers
+# Коллекция, сводка, справочник, обзоры, админ и главная — Home, Login, Dashboard, HumidorList, HumidorDetail, Profile, PublicUserProfile, PublicHumidorDetail, CigarList, CigarForm, CigarDetail, CigarBases, ReviewList, ReviewDetail, ReviewForm, Brands, AdminUsers
 
-Паритетный визуальный язык (градиент, grain, типографика Onest) для **корневой оболочки** (`App.vue`), **главной** (`Home.vue`), **входа** (`Login.vue`), **моих хьюмидоров**, **моих сигар**, **формы сигары** (`CigarForm.vue`), **карточки сигары** (`CigarDetail.vue`), **базы сигар** (`CigarBases.vue`), **ленты обзоров** (`ReviewList.vue`, `ReviewDetail.vue`), **публичного профиля** (`PublicUserProfile.vue`), **публичного состава хьюмидора** (`PublicHumidorDetail.vue`), **брендов** (`Brands.vue`) и **пользователей админки** (`AdminUsers.vue`). У базы на `lg+` сохранена **ленивая таблица** (`DataTable`) с серверной пагинацией и сортировкой; на мобиле — карточки и общий `Paginator`.
+Паритетный визуальный язык (градиент, grain, типографика Onest) для **корневой оболочки** (`App.vue`), **главной** (`Home.vue`), **входа** (`Login.vue`), **сводки** (`Dashboard.vue`), **моих хьюмидоров**, **моих сигар**, **формы сигары** (`CigarForm.vue`), **карточки сигары** (`CigarDetail.vue`), **базы сигар** (`CigarBases.vue`), **ленты обзоров** (`ReviewList.vue`, `ReviewDetail.vue`), **публичного профиля** (`PublicUserProfile.vue`), **публичного состава хьюмидора** (`PublicHumidorDetail.vue`), **брендов** (`Brands.vue`) и **пользователей админки** (`AdminUsers.vue`). У базы на `lg+` сохранена **ленивая таблица** (`DataTable`) с серверной пагинацией и сортировкой; на мобиле — карточки и общий `Paginator`.
 
 ## Общее
 
@@ -49,6 +49,18 @@
 | Файл | `src/views/Login.vue` |
 | `data-testid` | `login`, `login-error`, `login-form`, `login-username`, `login-email`, `login-password`, `login-confirm-password`, `login-submit`, `login-toggle-mode`, `login-home` |
 | Scoped классы | `login-root`, `login-grain`, `login-panel-enter` |
+
+## Dashboard.vue
+
+Дашборд пользователя `/dashboard` (`name: 'Dashboard'`, `meta.requiresAuth`): каркас как у страниц коллекции — `dashboard-root`, grain, градиент stone/rose, `ring`; контент `max-w-7xl`. Состояния: **загрузка** (`dashboard-loading`) со скелетонами; **ошибка** (`dashboard-error`) с retry (`dashboard-retry`); **контент** (`dashboard-content`) — 3 карточки метрик (сигары/хьюмидоры/заполненность) + 2 панели «Бренды» и «Недавние обзоры». При пустой коллекции (`totalCigars === 0`) — подсказка с CTA на список хьюмидоров. Навигация: кнопка «Все обзоры» → `ReviewList`, клик по карточке обзора → `ReviewDetail`.
+
+| Пункт | Значение |
+|-------|----------|
+| Файл | `src/views/Dashboard.vue` |
+| Данные | `dashboardService.getDashboardSummary()` → `GET /api/dashboard/summary` |
+| Маршруты | Страница: `Dashboard`; обзоры: `ReviewList`, `ReviewDetail`; хьюмидоры: `HumidorList` |
+| `data-testid` | `dashboard`, `dashboard-loading`, `dashboard-error`, `dashboard-retry`, `dashboard-content`, `dashboard-summary-total-cigars`, `dashboard-summary-total-humidors`, `dashboard-summary-fill`, `dashboard-brands`, `dashboard-brands-empty`, `dashboard-brands-item-{brandId}`, `dashboard-reviews`, `dashboard-reviews-empty`, `dashboard-review-{id}` |
+| Scoped классы | `dashboard-root`, `dashboard-grain`, `dashboard-enter` |
 
 ## HumidorList.vue
 
