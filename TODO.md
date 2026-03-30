@@ -40,6 +40,7 @@
 - [ ] **UX:** дашборд-сводка — объём коллекции, разрез по брендам, недавняя активность/отзывы.
   - [x] API: `DashboardController` + `IDashboardService.GetUserDashboardSummary(userId)` с агрегатами по коллекции и брендам, недавними отзывами.
   - [x] Frontend: маршрут `Dashboard` + блоки «Объём коллекции», «Бренды», «Недавние обзоры» в общем каркасе коллекции.
+  - [x] E2E: smoke-journey покрывает открытие `/dashboard` и наличие ключевых блоков.
 - [ ] **UX:** онбординг после регистрации (первый хьюмидор, 1–2 сигары из каталога).
 - [ ] **UX:** глобальный поиск по бренду/сигаре/хьюмидору и клавиатурные шорткаты.
 - [ ] **Домен:** история сигары во времени (купил/выкурил), средние сроки, мягкие напоминания «давно не трогал».
@@ -96,6 +97,7 @@
 - [x] **2026-03-30** — UX: анализ и проектирование дашборда-сводки (объём коллекции, разрез по брендам, недавняя активность/отзывы): выбран отдельный `DashboardController` и `IDashboardService.GetUserDashboardSummary(userId)`, определены ключевые блоки UI и маршрут `Dashboard`.
 - [x] **2026-03-30** — API: реализован `DashboardService.GetUserDashboardSummaryAsync(userId)` с агрегатами по хьюмидорам, пользовательским сигарам, брендам и недавним обзорам; добавлены `DashboardController` (`GET /api/dashboard/summary`), DTO `DashboardSummaryDto`/`BrandBreakdownItemDto`/`RecentReviewDto`, регистрация сервиса в `Program.cs` и unit-тесты `DashboardServiceTests` (InMemory EF).
 - [x] **2026-03-30** — Frontend: добавлен сервис `dashboardService` (`GET /api/dashboard/summary`), маршрут `Dashboard` (`/dashboard`, requiresAuth) с новым view `Dashboard.vue` в общем каркасе коллекции (панель «Сводка коллекции», блоки объёма, брендов и недавних обзоров, CTA при пустой коллекции); в `App.vue` добавлен пункт меню «Сводка».
+- [x] **2026-03-30** — E2E: обновлён `e2e/tests/smoke-journey.spec.ts` — после логина открывается «Сводка» (`/dashboard`), проверяются `data-testid="dashboard"` и `data-testid="dashboard-content"`; `npm test` (Playwright) — ok.
 - [x] **2026-03-30** — Зависимости: `npx npm-check-updates -u` в `CigarHelper.Web`, корне репо и `cigar-scraper` + `npm install`; TypeScript **^5.9.3** (peer `typescript-eslint@8`); TipTap 3 в `TextEditor.vue`; удалён `@types/dompurify`.
 - [x] **2026-03-30** — Фронт: палитра светлее, акцент rose — пресет PrimeVue Aura (`rose` primary, `surface` stone), Tailwind amber→rose, фоны stone, `App.vue` / `main.css`.
 - [x] **2026-03-30** — Этап 1 бэкенд: интеграционные тесты 401/403/404, публичный профиль, пагинация; InMemory одно имя БД на хост.
@@ -114,4 +116,5 @@
 - [x] **2026-03-30** — PrimeIcons: импорт `primeicons.css` перенесён из `main.css` в `main.ts`, шрифты попадают в `dist/assets` с хешами, предупреждения Vite при `vite build` убраны; `docs/memory-bank/frontend/workflow.md` обновлён.
 - [x] **2026-03-30** — Node **24.x**: эталон **24.14.1** из окружения — `CigarHelper.Web/.nvmrc`, `engines` во фронте и `e2e/`, CI `node-version-file`, разделы в `docs/memory-bank/workflow.md`, `frontend/workflow.md`, `e2e/README.md`.
 - [x] **2026-03-30** — Vite 8 + **vite-plugin-vue-devtools**: `npm overrides` подняли транзитивный **vite-plugin-inspect** до **12.0.0-beta.1** (peer Vite 8), убраны ложные `invalid` в `npm ls`; комментарий в `vite.config.js`, раздел в `frontend/workflow.md`, обновлён `package-lock.json`.
+- [x] **2026-03-30** — Frontend: откат Vite до **7.3.1** из‑за падения `vite-plugin-vue-devtools` на Vite 8; перевод флага `VITE_ENABLE_DEVTOOLS` на `loadEnv(mode, ...)` и добавлен `CigarHelper.Web/.env.development`.
 - [x] **2026-03-30** — В бэклог добавлены идеи развития продукта (экспорт коллекции, дашборд, онбординг, поиск, история сигар, наблюдаемость; OpenAPI/каталог/медиа; P3 — соц-слой, оси отзывов, PWA, тарифы).

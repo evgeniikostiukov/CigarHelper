@@ -37,6 +37,11 @@ test.describe('Smoke journey', () => {
     await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 });
     await expect(page.getByTestId('app')).toBeVisible();
 
+    await page.locator('.p-menubar').getByText('Сводка', { exact: true }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByTestId('dashboard')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId('dashboard-content')).toBeVisible({ timeout: 30_000 });
+
     await page.locator('.p-menubar').getByText('Хьюмидоры', { exact: true }).click();
     await expect(page).toHaveURL(/\/humidors$/);
     await expect(page.getByTestId('humidor-list')).toBeVisible({ timeout: 30_000 });
