@@ -91,6 +91,7 @@
 
 ## Журнал выполненного
 
+- [ ] **2026-03-30** — UX: анализ и план задачи «дашборд-сводка — объём коллекции, разрез по брендам, недавняя активность/отзывы» (без изменений кода).
 - [x] **2026-03-30** — Зависимости: `npx npm-check-updates -u` в `CigarHelper.Web`, корне репо и `cigar-scraper` + `npm install`; TypeScript **^5.9.3** (peer `typescript-eslint@8`); TipTap 3 в `TextEditor.vue`; удалён `@types/dompurify`.
 - [x] **2026-03-30** — Фронт: палитра светлее, акцент rose — пресет PrimeVue Aura (`rose` primary, `surface` stone), Tailwind amber→rose, фоны stone, `App.vue` / `main.css`.
 - [x] **2026-03-30** — Этап 1 бэкенд: интеграционные тесты 401/403/404, публичный профиль, пагинация; InMemory одно имя БД на хост.
