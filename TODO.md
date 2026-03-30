@@ -54,6 +54,7 @@
 - [ ] При изменении контрактов API — обновлять или добавлять тесты в `CigarHelper.Api.Tests` до или вместе с правкой фронта.
 - [ ] По мере выноса логики из крупных `.vue` — точечные тесты на чистые функции/composables (Vitest).
 - [x] Подключить **Vue Test Utils** совместно с Vitest (если ещё не на этапе unit-тестов).
+- [x] Подключить прекоммит-хуки: **husky + lint-staged + commitlint** (pre-commit: линт/формат только staged; commit-msg: conventional commits).
 - [ ] Компонентные тесты для 1–2 переиспользуемых или сложных компонентов (диалоги, нестандартная логика).
 - [ ] Периодически обновлять зависимости (`npm audit`, Browserslist) и устранять критичные уязвимости без ломки сборки.
 - [x] Разобраться с предупреждением Tailwind при `vite build` (`unknown utility class`, при необходимости `@reference` / конфиг v4).
@@ -98,6 +99,7 @@
 - [x] **2026-03-30** — UX: анализ и проектирование дашборда-сводки (объём коллекции, разрез по брендам, недавняя активность/отзывы): выбран отдельный `DashboardController` и `IDashboardService.GetUserDashboardSummary(userId)`, определены ключевые блоки UI и маршрут `Dashboard`.
 - [x] **2026-03-30** — API: реализован `DashboardService.GetUserDashboardSummaryAsync(userId)` с агрегатами по хьюмидорам, пользовательским сигарам, брендам и недавним обзорам; добавлены `DashboardController` (`GET /api/dashboard/summary`), DTO `DashboardSummaryDto`/`BrandBreakdownItemDto`/`RecentReviewDto`, регистрация сервиса в `Program.cs` и unit-тесты `DashboardServiceTests` (InMemory EF).
 - [x] **2026-03-30** — Frontend: добавлен сервис `dashboardService` (`GET /api/dashboard/summary`), маршрут `Dashboard` (`/dashboard`, requiresAuth) с новым view `Dashboard.vue` в общем каркасе коллекции (панель «Сводка коллекции», блоки объёма, брендов и недавних обзоров, CTA при пустой коллекции); в `App.vue` добавлен пункт меню «Сводка».
+- [x] **2026-03-30** — Repo hygiene: подключены git hooks на прекоммит: `husky` + `lint-staged` (eslint/prettier по staged-файлам фронта), `commitlint` (проверка commit message на conventional commits).
 - [x] **2026-03-30** — E2E: обновлён `e2e/tests/smoke-journey.spec.ts` — после логина открывается «Сводка» (`/dashboard`), проверяются `data-testid="dashboard"` и `data-testid="dashboard-content"`; `npm test` (Playwright) — ok.
 - [x] **2026-03-30** — Unit (Vitest): добавлены `src/views/Dashboard.test.ts` (рендер контента/ошибка/навигация) и `src/services/dashboardService.test.ts` (контракт вызова `/dashboard/summary`); `npm test` в `CigarHelper.Web` — ok.
 - [x] **2026-03-30** — Docs (memory bank): обновлены `docs/memory-bank/frontend/code-map.md` и `docs/memory-bank/frontend/collection-list-views.md` — добавлены маршрут/экран `Dashboard` и `dashboardService`.
