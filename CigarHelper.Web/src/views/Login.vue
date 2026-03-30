@@ -310,6 +310,7 @@
         if (!response.success) {
           throw new Error(response.message || 'Ошибка регистрации');
         }
+        localStorage.setItem('needsOnboarding', '1');
       } else {
         const payload: AuthCredentials = {
           email: form.email,
@@ -321,8 +322,12 @@
         }
       }
 
-      const redirectUrl = (route.query.redirect as string) || '/';
-      await router.push(redirectUrl);
+      if (isRegister.value) {
+        await router.push({ name: 'Onboarding' });
+      } else {
+        const redirectUrl = (route.query.redirect as string) || '/';
+        await router.push(redirectUrl);
+      }
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } }; message?: string };
       error.value =

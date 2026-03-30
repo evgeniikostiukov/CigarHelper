@@ -170,7 +170,7 @@
               class="flex! w-full"
               input-class="min-h-11"
               :min="1"
-              :max="3000"
+              :max="100"
               fluid
               show-buttons />
             <small class="text-stone-500 dark:text-stone-400"
@@ -259,11 +259,22 @@
     saving.value = true;
     saveError.value = null;
 
+    const cap = form.capacity;
+    if (cap == null || !Number.isFinite(cap) || cap < 1) {
+      saveError.value = 'Укажите вместимость (число от 1).';
+      toast.add({ severity: 'error', summary: 'Ошибка', detail: saveError.value, life: 4500 });
+      saving.value = false;
+      return;
+    }
+
+    const hum = form.humidity;
+    const humidity = hum == null || !Number.isFinite(hum) ? null : Math.floor(hum);
+
     const payload: Omit<Humidor, 'id' | 'currentCount' | 'userId'> = {
       name: form.name,
       description: form.description,
-      capacity: form.capacity,
-      humidity: form.humidity,
+      capacity: Math.floor(cap),
+      humidity,
     };
 
     try {

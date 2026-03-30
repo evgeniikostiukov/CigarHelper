@@ -9,6 +9,12 @@ const routes = [
     component: () => import('../views/Home.vue'),
   },
   {
+    path: '/onboarding',
+    name: 'Onboarding',
+    component: () => import('../views/Onboarding.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('../views/Dashboard.vue'),
@@ -135,7 +141,7 @@ const router = createRouter({
 });
 
 // Navigation guard to check for authentication
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const { isAuthenticated, user } = useAuth();
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
@@ -143,24 +149,26 @@ router.beforeEach((to, from, next) => {
     .map((record) => record.meta.requiresAnyRole as string[] | undefined)
     .find((r) => r !== undefined);
   const isPublic = to.matched.some((record) => record.meta.public);
+  const needsOnboarding = localStorage.getItem('needsOnboarding') === '1';
 
   if (!isAuthenticated.value && requiresAuth) {
     // Пользователь не аутентифицирован и пытается получить доступ к защищенному маршруту
-    next({
+    return {
       path: '/login',
       query: { redirect: to.fullPath }, // Сохраняем исходный путь для редиректа после входа
-    });
+    };
+  } else if (isAuthenticated.value && needsOnboarding && to.name !== 'Onboarding' && !isPublic) {
+    return { name: 'Onboarding' };
   } else if (isAuthenticated.value && isPublic) {
     // Аутентифицированный пользователь пытается получить доступ к публичной странице (например, /login)
-    next('/'); // Перенаправляем на главную
+    return '/'; // Перенаправляем на главную
   } else if (isAuthenticated.value && requiresAdmin && !hasRole(user.value, 'Admin')) {
-    next('/');
+    return '/';
   } else if (isAuthenticated.value && requiresAnyRole && !hasAnyRole(user.value, requiresAnyRole)) {
-    next('/');
-  } else {
-    // Во всех остальных случаях разрешаем переход
-    next();
+    return '/';
   }
+  // Во всех остальных случаях разрешаем переход
+  return true;
 });
 
 export default router;

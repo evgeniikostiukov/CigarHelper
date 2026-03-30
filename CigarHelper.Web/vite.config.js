@@ -9,10 +9,21 @@ import VitePluginVueDevTools from 'vite-plugin-vue-devtools';
 export default defineConfig(({ command, mode }) => {
   const rootDir = fileURLToPath(new URL('.', import.meta.url));
   const env = loadEnv(mode, rootDir, 'VITE_');
-  const enableDevTools =
-    command === 'serve' && (env.VITE_ENABLE_DEVTOOLS ?? '0') === '1';
+  // Важно: `vite-plugin-vue-devtools` может падать в рантайме (клиент) с
+  // "TypeError: Cannot read properties of undefined (reading 'rpc')".
+  // Поэтому по умолчанию держим выключенным и включаем только явным флагом.
+  const enableDevTools = (env.VITE_ENABLE_DEVTOOLS ?? '0') === '1' && (command === 'serve' || command === 'dev');
+  const isDevCommand = command === 'serve' || command === 'dev';
 
   return {
+    define: {
+      // Некоторые devtools-клиенты/инжекты ожидают этот флаг в рантайме.
+      // В противном случае в браузере может упасть: "__BUNDLED_DEV__ is not defined".
+      __BUNDLED_DEV__: JSON.stringify(isDevCommand),
+      // Аналогично: встречается в dev-инжектах, иначе падает
+      // "__SERVER_FORWARD_CONSOLE__ is not defined".
+      __SERVER_FORWARD_CONSOLE__: JSON.stringify(isDevCommand),
+    },
     plugins: [
       vue({
         script: {

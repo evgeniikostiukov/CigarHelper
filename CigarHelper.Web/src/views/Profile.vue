@@ -139,6 +139,14 @@
                 :loading="saving"
                 @click="saveProfile" />
               <Button
+                data-testid="profile-restart-onboarding"
+                class="min-h-12 w-full touch-manipulation sm:w-auto"
+                label="Пройти обучение заново"
+                icon="pi pi-compass"
+                severity="secondary"
+                outlined
+                @click="restartOnboarding" />
+              <Button
                 v-if="form.isProfilePublic"
                 data-testid="profile-preview"
                 class="min-h-12 w-full touch-manipulation sm:w-auto"
@@ -276,6 +284,17 @@
   function goPublicPreview(): void {
     if (!form.username.trim()) return;
     router.push({ name: 'PublicUserProfile', params: { username: form.username.trim() } });
+  }
+
+  function restartOnboarding(): void {
+    localStorage.setItem('needsOnboarding', '1');
+    toast.add({
+      severity: 'info',
+      summary: 'Онбординг',
+      detail: 'Запускаю обучение заново.',
+      life: 2500,
+    });
+    router.push({ name: 'Onboarding' });
   }
 
   async function load(): Promise<void> {

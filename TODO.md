@@ -42,7 +42,7 @@
   - [x] Frontend: маршрут `Dashboard` + блоки «Объём коллекции», «Бренды», «Недавние обзоры» в общем каркасе коллекции.
   - [x] E2E: smoke-journey покрывает открытие `/dashboard` и наличие ключевых блоков.
   - [x] Unit (Vitest): тесты для `Dashboard.vue` и `dashboardService`.
-- [ ] **UX:** онбординг после регистрации (первый хьюмидор, 1–2 сигары из каталога).
+- [x] **UX:** онбординг после регистрации (первый хьюмидор, 1–2 сигары из каталога).
 - [ ] **UX:** глобальный поиск по бренду/сигаре/хьюмидору и клавиатурные шорткаты.
 - [ ] **Домен:** история сигары во времени (купил/выкурил), средние сроки, мягкие напоминания «давно не трогал».
 - [ ] **Наблюдаемость:** структурированные логи, correlation id, базовые метрики (запросы, ошибки, длительность) после стабилизации API.
@@ -99,6 +99,7 @@
 - [x] **2026-03-30** — UX: анализ и проектирование дашборда-сводки (объём коллекции, разрез по брендам, недавняя активность/отзывы): выбран отдельный `DashboardController` и `IDashboardService.GetUserDashboardSummary(userId)`, определены ключевые блоки UI и маршрут `Dashboard`.
 - [x] **2026-03-30** — API: реализован `DashboardService.GetUserDashboardSummaryAsync(userId)` с агрегатами по хьюмидорам, пользовательским сигарам, брендам и недавним обзорам; добавлены `DashboardController` (`GET /api/dashboard/summary`), DTO `DashboardSummaryDto`/`BrandBreakdownItemDto`/`RecentReviewDto`, регистрация сервиса в `Program.cs` и unit-тесты `DashboardServiceTests` (InMemory EF).
 - [x] **2026-03-30** — Frontend: добавлен сервис `dashboardService` (`GET /api/dashboard/summary`), маршрут `Dashboard` (`/dashboard`, requiresAuth) с новым view `Dashboard.vue` в общем каркасе коллекции (панель «Сводка коллекции», блоки объёма, брендов и недавних обзоров, CTA при пустой коллекции); в `App.vue` добавлен пункт меню «Сводка».
+- [x] **2026-03-30** — UX: добавлен онбординг после регистрации: новый маршрут `/onboarding` (requiresAuth), флаг `needsOnboarding` в `localStorage`, редирект после регистрации на онбординг, мастер «создать хьюмидор → добавить 1–2 сигары из базы в коллекцию»; unit-тесты `src/views/Onboarding.test.ts`.
 - [x] **2026-03-30** — Repo hygiene: подключены git hooks на прекоммит: `husky` + `lint-staged` (eslint/prettier по staged-файлам фронта), `commitlint` (проверка commit message на conventional commits).
 - [x] **2026-03-30** — Repo hygiene: добавлены хуки для .NET: `dotnet format` (только staged `*.cs` через `--include`) на pre-commit и `dotnet test CigarHelper.sln -c Release` на pre-push.
 - [x] **2026-03-30** — E2E: обновлён `e2e/tests/smoke-journey.spec.ts` — после логина открывается «Сводка» (`/dashboard`), проверяются `data-testid="dashboard"` и `data-testid="dashboard-content"`; `npm test` (Playwright) — ok.
