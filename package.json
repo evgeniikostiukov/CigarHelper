@@ -11,6 +11,9 @@
     "lint-staged": "^16.1.6"
   },
   "lint-staged": {
+    "**/*.cs": [
+      "dotnet format CigarHelper.sln --include"
+    ],
     "CigarHelper.Web/**/*.{js,jsx,ts,tsx,vue}": [
       "npm --prefix CigarHelper.Web exec -- eslint --fix"
     ],
