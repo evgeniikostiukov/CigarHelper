@@ -37,12 +37,12 @@
 
 /* ─── Тёмная тема ─── */
 .dark {
-  --c-bg: #0c0a09; /* stone-950 */
-  --c-surface: #1c1917; /* stone-900 */
-  --c-surface-raised: #292524; /* stone-800 */
-  --c-border: #44403c; /* stone-700 */
-  --c-text: #f5f5f4; /* stone-100 */
-  --c-text-muted: #a8a29e; /* stone-400 */
+  --c-bg: #1c1917; /* stone-900 */
+  --c-surface: #292524; /* stone-800 */
+  --c-surface-raised: #44403c; /* stone-700 */
+  --c-border: #57534e; /* stone-600 */
+  --c-text: #fafaf9; /* stone-50  */
+  --c-text-muted: #d6d3d1; /* stone-300 */
   --c-accent: #fb7185; /* rose-400  */
   --c-accent-light: #f43f5e; /* rose-500  */
 }

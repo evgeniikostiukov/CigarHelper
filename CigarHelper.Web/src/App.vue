@@ -1,12 +1,12 @@
 <template>
   <div
     data-testid="app"
-    class="app-container app-shell min-h-screen min-w-full flex flex-col bg-gradient-to-b from-stone-50 via-rose-50/45 to-stone-50 text-stone-800 dark:from-stone-950 dark:via-rose-950/18 dark:to-stone-950 dark:text-stone-200">
+    class="app-container app-shell min-h-screen min-w-full flex flex-col bg-gradient-to-b from-stone-50 via-rose-50/45 to-stone-50 text-stone-800 dark:from-stone-900 dark:via-rose-900/12 dark:to-stone-900 dark:text-stone-100">
     <Toast />
     <ConfirmDialog />
 
     <header
-      class="app-header sticky top-0 z-50 border-b border-stone-200/90 bg-white/85 shadow-sm shadow-stone-900/5 backdrop-blur-md dark:border-stone-700/80 dark:bg-stone-900/90 dark:shadow-black/40"
+      class="app-header sticky top-0 z-50 border-b border-stone-200/90 bg-white/85 shadow-sm shadow-stone-900/5 backdrop-blur-md dark:border-stone-600/80 dark:bg-stone-800/90 dark:shadow-stone-950/40"
       data-testid="app-header">
       <Menubar
         data-testid="app-nav"
@@ -86,7 +86,7 @@
           <template #fallback>
             <div
               data-testid="app-suspense-fallback"
-              class="mx-auto flex min-h-[12rem] max-w-2xl flex-col items-center justify-center gap-4 rounded-2xl border border-stone-200/90 bg-white/90 px-6 py-10 text-center dark:border-stone-700/80 dark:bg-stone-900/80"
+              class="mx-auto flex min-h-[12rem] max-w-2xl flex-col items-center justify-center gap-4 rounded-2xl border border-stone-200/90 bg-white/90 px-6 py-10 text-center dark:border-stone-600/80 dark:bg-stone-800/80"
               aria-busy="true"
               aria-live="polite">
               <i
