@@ -47,10 +47,10 @@
   --c-accent-light: #f43f5e; /* rose-500  */
 }
 
-/* Плавный переход при смене темы */
-*,
-*::before,
-*::after {
+/* Плавный переход при смене темы.
+   Псевдоэлементы намеренно исключены: PrimeVue использует ::before/::after
+   для ripple и backdrop-масок — глобальный transition ломает их анимации. */
+* {
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
