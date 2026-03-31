@@ -250,13 +250,13 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task CreateReviewAsync_UserCigarMissing_ThrowsArgumentException()
+    public async Task CreateReviewAsync_UserCigarMissing_ThrowsNotFoundException()
     {
         await using var db = CreateContext();
         var user = await SeedUserAsync(db);
         var sut = Sut(db);
 
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+        var ex = await Assert.ThrowsAsync<CigarHelper.Api.Exceptions.NotFoundException>(() =>
             sut.CreateReviewAsync(user.Id, BuildCreateRequest(404, "Tit", "Content here long enough")));
 
         Assert.Contains("404", ex.Message, StringComparison.Ordinal);

@@ -1,3 +1,4 @@
+using CigarHelper.Api.Exceptions;
 using CigarHelper.Api.Helpers;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -116,7 +117,7 @@ public class ReviewService : IReviewService
         var cigar = await _context.UserCigars.FindAsync(request.CigarId);
         if (cigar == null)
         {
-            throw new ArgumentException($"Сигара пользователя с ID {request.CigarId} не найдена");
+            throw new NotFoundException($"Сигара пользователя с ID {request.CigarId} не найдена");
         }
         
         var review = new Review

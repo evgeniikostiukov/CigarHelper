@@ -6,6 +6,7 @@ using System.Threading.RateLimiting;
 using CigarHelper.Data.Data;
 using CigarHelper.Api.Services;
 using CigarHelper.Api.Extensions;
+using CigarHelper.Api.Exceptions;
 using CigarHelper.Api.Middleware;
 using CigarHelper.Api.Observability;
 using CigarHelper.Api.Options;
@@ -179,6 +180,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 builder.Services.AddMemoryCache();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("database", tags: ["ready"]);
@@ -230,6 +232,9 @@ app.UseForwardedHeaders();
 
 // Correlation ID: должен быть максимально ранним — до логов и метрик
 app.UseMiddleware<CorrelationIdMiddleware>();
+
+// Глобальная обработка исключений: после CorrelationId (нужен ID в ответе), перед Serilog (логирует уже обработанный запрос)
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 // Serilog request logging — обогащаем каждый запрос correlation id из Items
 app.UseSerilogRequestLogging(opts =>
