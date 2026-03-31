@@ -172,6 +172,7 @@ public class HumidorService : IHumidorService
 
         cigar.HumidorId = humidorId;
         cigar.UpdatedAt = DateTime.UtcNow;
+        cigar.LastTouchedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
         return true;
@@ -187,6 +188,7 @@ public class HumidorService : IHumidorService
 
         cigar.HumidorId = null;
         cigar.UpdatedAt = DateTime.UtcNow;
+        cigar.LastTouchedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
         return true;

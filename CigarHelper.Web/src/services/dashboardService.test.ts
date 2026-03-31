@@ -18,8 +18,11 @@ describe('dashboardService', () => {
       totalCigars: 2,
       totalCapacity: 25,
       averageFillPercent: 8.5,
+      averageDaysToSmoke: 19,
       brandBreakdown: [],
       recentReviews: [],
+      timeline: [],
+      staleCigarReminders: [],
     };
 
     vi.mocked(api.get).mockResolvedValueOnce({ data: payload } as any);
@@ -30,4 +33,3 @@ describe('dashboardService', () => {
     expect(res).toEqual(payload);
   });
 });
-

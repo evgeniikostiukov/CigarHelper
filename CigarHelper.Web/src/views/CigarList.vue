@@ -193,10 +193,28 @@
                 aria-hidden="true" />
               <span>В хьюмидоре</span>
             </div>
+            <div
+              v-if="cigar.isSmoked"
+              class="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-300 pt-1">
+              <i
+                class="pi pi-check-circle shrink-0"
+                aria-hidden="true" />
+              <span>Уже выкурена</span>
+            </div>
           </router-link>
 
           <footer
             class="relative z-20 mt-auto flex justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+            <Button
+              v-if="!cigar.isSmoked"
+              :data-testid="`cigar-smoke-${cigar.id}`"
+              class="min-h-11 min-w-11 touch-manipulation"
+              icon="pi pi-check-circle"
+              text
+              rounded
+              severity="success"
+              aria-label="Отметить как выкуренную"
+              @click="confirmMarkAsSmoked(cigar)" />
             <Button
               :data-testid="`cigar-edit-${cigar.id}`"
               class="min-h-11 min-w-11 touch-manipulation"
@@ -331,6 +349,49 @@
             severity: 'error',
             summary: 'Ошибка',
             detail: 'Не удалось удалить сигару',
+            life: 3000,
+          });
+        }
+      },
+    });
+  }
+
+  function confirmMarkAsSmoked(cigar: Cigar): void {
+    confirm.require({
+      message: `Отметить «${cigar.name}» как выкуренную? Сигара будет убрана из хьюмидора.`,
+      header: 'Подтверждение',
+      icon: 'pi pi-check-circle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-success',
+      rejectLabel: 'Отмена',
+      acceptLabel: 'Отметить',
+      accept: async () => {
+        if (cigar.id == null) {
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось определить ID сигары',
+            life: 3000,
+          });
+          return;
+        }
+        try {
+          const updated = await cigarService.markCigarAsSmoked(cigar.id);
+          cigars.value = cigars.value.map((item) => (item.id === updated.id ? updated : item));
+          toast.add({
+            severity: 'success',
+            summary: 'Готово',
+            detail: 'Сигара отмечена как выкуренная',
+            life: 3000,
+          });
+        } catch (err) {
+          if (import.meta.env.DEV) {
+            console.error('Ошибка отметки выкуривания:', err);
+          }
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось отметить сигару как выкуренную',
             life: 3000,
           });
         }

@@ -32,6 +32,15 @@ public class UserCigar
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     
     public ICollection<CigarImage> Images { get; set; } = new List<CigarImage>();
+
+    /// <summary>Дата попадания сигары в коллекцию пользователя.</summary>
+    public DateTime PurchasedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Дата, когда сигара была выкурена (если уже выкурена).</summary>
+    public DateTime? SmokedAt { get; set; }
+
+    /// <summary>Последнее взаимодействие пользователя с сигарой (добавление, перенос, выкуривание, редактирование).</summary>
+    public DateTime LastTouchedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     

@@ -20,6 +20,7 @@ public class DashboardService : IDashboardService
 
     public async Task<DashboardSummaryDto> GetUserDashboardSummaryAsync(int userId)
     {
+        var now = DateTime.UtcNow;
         var humidorsQuery = _context.Humidors
             .Where(h => h.UserId == userId)
             .Select(h => new
@@ -90,14 +91,78 @@ public class DashboardService : IDashboardService
             })
             .ToListAsync();
 
+        var lifecycle = await _context.UserCigars
+            .Where(uc => uc.UserId == userId)
+            .Select(uc => new
+            {
+                uc.Id,
+                uc.PurchasedAt,
+                uc.SmokedAt,
+                uc.LastTouchedAt,
+                CigarName = uc.CigarBase.Name,
+                BrandName = uc.CigarBase.Brand.Name
+            })
+            .ToListAsync();
+
+        var smokedDurations = lifecycle
+            .Where(x => x.SmokedAt.HasValue && x.PurchasedAt <= x.SmokedAt.Value)
+            .Select(x => (x.SmokedAt!.Value.Date - x.PurchasedAt.Date).Days)
+            .Where(days => days >= 0)
+            .ToList();
+
+        var averageDaysToSmoke = smokedDurations.Count == 0
+            ? 0
+            : (int)Math.Round(smokedDurations.Average(), MidpointRounding.AwayFromZero);
+
+        var timelineStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-5);
+        var timeline = Enumerable
+            .Range(0, 6)
+            .Select(i => timelineStart.AddMonths(i))
+            .Select(monthStart =>
+            {
+                var nextMonth = monthStart.AddMonths(1);
+                return new CigarTimelinePointDto
+                {
+                    Period = monthStart.ToString("yyyy-MM"),
+                    PurchasedCount = lifecycle.Count(x => x.PurchasedAt >= monthStart && x.PurchasedAt < nextMonth),
+                    SmokedCount = lifecycle.Count(x => x.SmokedAt.HasValue && x.SmokedAt.Value >= monthStart && x.SmokedAt.Value < nextMonth)
+                };
+            })
+            .ToList();
+
+        const int staleThresholdDays = 45;
+        var staleReminders = lifecycle
+            .Where(x => !x.SmokedAt.HasValue)
+            .Select(x =>
+            {
+                var touchPoint = x.LastTouchedAt > x.PurchasedAt ? x.LastTouchedAt : x.PurchasedAt;
+                var daysUntouched = (now.Date - touchPoint.Date).Days;
+                return new StaleCigarReminderDto
+                {
+                    CigarId = x.Id,
+                    CigarName = x.CigarName,
+                    BrandName = x.BrandName,
+                    LastTouchedAt = touchPoint,
+                    DaysUntouched = daysUntouched
+                };
+            })
+            .Where(x => x.DaysUntouched >= staleThresholdDays)
+            .OrderByDescending(x => x.DaysUntouched)
+            .ThenBy(x => x.CigarName)
+            .Take(5)
+            .ToList();
+
         return new DashboardSummaryDto
         {
             TotalHumidors = totalHumidors,
             TotalCigars = totalUserCigars,
             TotalCapacity = totalCapacity,
             AverageFillPercent = Math.Round(averageFillPercent, 1),
+            AverageDaysToSmoke = averageDaysToSmoke,
             BrandBreakdown = brandBreakdown,
-            RecentReviews = recentReviews
+            RecentReviews = recentReviews,
+            Timeline = timeline,
+            StaleCigarReminders = staleReminders
         };
     }
 }

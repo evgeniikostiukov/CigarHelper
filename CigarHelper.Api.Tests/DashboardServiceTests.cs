@@ -120,8 +120,16 @@ public class DashboardServiceTests
         Assert.Equal(0, summary.TotalCigars);
         Assert.Equal(0, summary.TotalCapacity);
         Assert.Equal(0, summary.AverageFillPercent);
+        Assert.Equal(0, summary.AverageDaysToSmoke);
         Assert.Empty(summary.BrandBreakdown);
         Assert.Empty(summary.RecentReviews);
+        Assert.Equal(6, summary.Timeline.Count);
+        Assert.All(summary.Timeline, item =>
+        {
+            Assert.Equal(0, item.PurchasedCount);
+            Assert.Equal(0, item.SmokedCount);
+        });
+        Assert.Empty(summary.StaleCigarReminders);
     }
 
     [Fact]
@@ -199,6 +207,75 @@ public class DashboardServiceTests
             .ToList();
 
         Assert.Equal(ordered, summary.RecentReviews.Select(r => r.Id).ToList());
+    }
+
+    [Fact]
+    public async Task GetUserDashboardSummaryAsync_ComputesAverageDaysToSmokeAndStaleReminders()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db, "Lifecycle");
+        var humidor = await SeedHumidorAsync(db, user.Id, capacity: 20);
+
+        var now = DateTime.UtcNow;
+
+        var smokedFast = await SeedUserCigarAsync(db, user.Id, cb.Id, humidor.Id, rating: 8);
+        smokedFast.PurchasedAt = now.AddDays(-12);
+        smokedFast.SmokedAt = now.AddDays(-2);
+        smokedFast.LastTouchedAt = now.AddDays(-2);
+
+        var smokedSlow = await SeedUserCigarAsync(db, user.Id, cb.Id, humidor.Id, rating: 7);
+        smokedSlow.PurchasedAt = now.AddDays(-42);
+        smokedSlow.SmokedAt = now.AddDays(-2);
+        smokedSlow.LastTouchedAt = now.AddDays(-2);
+
+        var stale = await SeedUserCigarAsync(db, user.Id, cb.Id, humidor.Id, rating: null);
+        stale.PurchasedAt = now.AddDays(-80);
+        stale.SmokedAt = null;
+        stale.LastTouchedAt = now.AddDays(-63);
+
+        var fresh = await SeedUserCigarAsync(db, user.Id, cb.Id, humidor.Id, rating: null);
+        fresh.PurchasedAt = now.AddDays(-20);
+        fresh.SmokedAt = null;
+        fresh.LastTouchedAt = now.AddDays(-4);
+
+        await db.SaveChangesAsync();
+
+        var sut = new DashboardService(db);
+        var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
+
+        Assert.Equal(25, summary.AverageDaysToSmoke);
+        Assert.Single(summary.StaleCigarReminders);
+        Assert.Equal(stale.Id, summary.StaleCigarReminders[0].CigarId);
+        Assert.True(summary.StaleCigarReminders[0].DaysUntouched >= 60);
+    }
+
+    [Fact]
+    public async Task GetUserDashboardSummaryAsync_BuildsMonthlyTimelineForPurchasedAndSmoked()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db, "Timeline");
+        var humidor = await SeedHumidorAsync(db, user.Id, capacity: 10);
+
+        var janPurchase = await SeedUserCigarAsync(db, user.Id, cb.Id, humidor.Id);
+        janPurchase.PurchasedAt = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc);
+        janPurchase.SmokedAt = null;
+        janPurchase.LastTouchedAt = janPurchase.PurchasedAt;
+
+        var febSmoked = await SeedUserCigarAsync(db, user.Id, cb.Id, humidor.Id);
+        febSmoked.PurchasedAt = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc);
+        febSmoked.SmokedAt = new DateTime(2026, 2, 20, 0, 0, 0, DateTimeKind.Utc);
+        febSmoked.LastTouchedAt = febSmoked.SmokedAt!.Value;
+
+        await db.SaveChangesAsync();
+
+        var sut = new DashboardService(db);
+        var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
+
+        Assert.True(summary.Timeline.Count >= 2);
+        Assert.Contains(summary.Timeline, x => x.Period == "2026-01" && x.PurchasedCount >= 1);
+        Assert.Contains(summary.Timeline, x => x.Period == "2026-02" && x.PurchasedCount >= 1 && x.SmokedCount >= 1);
     }
 }
 

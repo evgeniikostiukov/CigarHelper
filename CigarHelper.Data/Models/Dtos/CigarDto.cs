@@ -44,6 +44,10 @@ public class CigarResponseDto : CigarBriefDto
     public int UserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public DateTime PurchasedAt { get; set; }
+    public DateTime? SmokedAt { get; set; }
+    public DateTime LastTouchedAt { get; set; }
+    public bool IsSmoked => SmokedAt.HasValue;
     /// <summary>Изображения личной сигары (UserCigar), не путать с фото базы CigarBase.</summary>
     public List<CigarImageDto>? Images { get; set; }
 }
@@ -143,6 +147,11 @@ public class UserCigarUpdateRequest
     /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки.</summary>
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }
+}
+
+public class MarkCigarSmokedRequest
+{
+    public DateTime? SmokedAt { get; set; }
 }
 
 public class CreateCigarBaseRequest

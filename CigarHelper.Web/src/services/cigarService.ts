@@ -41,6 +41,10 @@ export interface Cigar {
   binder: string | null;
   filler: string | null;
   humidorId: number | null;
+  purchasedAt?: string;
+  smokedAt?: string | null;
+  lastTouchedAt?: string;
+  isSmoked?: boolean;
   images?: CigarImage[];
 }
 
@@ -159,6 +163,11 @@ const cigarService = {
 
   async deleteCigar(id: number): Promise<void> {
     await api.delete(`/cigars/${id}`);
+  },
+
+  async markCigarAsSmoked(id: number): Promise<Cigar> {
+    const response = await api.post<Cigar>(`/cigars/${id}/smoked`, {});
+    return response.data;
   },
 
   async getBrands(): Promise<Brand[]> {

@@ -81,7 +81,10 @@ public class CigarsController : ControllerBase
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt
+                UpdatedAt = uc.UpdatedAt,
+                PurchasedAt = uc.PurchasedAt,
+                SmokedAt = uc.SmokedAt,
+                LastTouchedAt = uc.LastTouchedAt
             })
             .ToListAsync();
 
@@ -368,7 +371,10 @@ public class CigarsController : ControllerBase
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt
+                UpdatedAt = uc.UpdatedAt,
+                PurchasedAt = uc.PurchasedAt,
+                SmokedAt = uc.SmokedAt,
+                LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();
 
@@ -458,7 +464,9 @@ public class CigarsController : ControllerBase
             Rating = request.Rating,
             HumidorId = request.HumidorId,
             UserId = userId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            PurchasedAt = DateTime.UtcNow,
+            LastTouchedAt = DateTime.UtcNow
         };
 
         _context.UserCigars.Add(userCigar);
@@ -524,7 +532,10 @@ public class CigarsController : ControllerBase
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt
+                UpdatedAt = uc.UpdatedAt,
+                PurchasedAt = uc.PurchasedAt,
+                SmokedAt = uc.SmokedAt,
+                LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();
 
@@ -558,6 +569,7 @@ public class CigarsController : ControllerBase
         existingUserCigar.Rating = request.Rating;
         existingUserCigar.HumidorId = request.HumidorId;
         existingUserCigar.UpdatedAt = DateTime.UtcNow;
+        existingUserCigar.LastTouchedAt = DateTime.UtcNow;
 
         // Обновляем поля базовой сигары
         existingUserCigar.CigarBase.Name = request.Name;
@@ -647,7 +659,10 @@ public class CigarsController : ControllerBase
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt
+                UpdatedAt = uc.UpdatedAt,
+                PurchasedAt = uc.PurchasedAt,
+                SmokedAt = uc.SmokedAt,
+                LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();
 
@@ -675,6 +690,93 @@ public class CigarsController : ControllerBase
             IsMain = true,
             CreatedAt = DateTime.UtcNow
         });
+    }
+
+    [HttpPost("{id}/smoked")]
+    public async Task<ActionResult<CigarResponseDto>> MarkCigarAsSmoked(int id, [FromBody] MarkCigarSmokedRequest? request)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var cigar = await _context.UserCigars
+            .FirstOrDefaultAsync(uc => uc.Id == id && uc.UserId == userId);
+
+        if (cigar == null)
+            return NotFound();
+
+        var smokedAt = request?.SmokedAt?.ToUniversalTime() ?? DateTime.UtcNow;
+        if (smokedAt > DateTime.UtcNow.AddMinutes(1))
+            return BadRequest("Дата выкуривания не может быть в будущем.");
+
+        cigar.SmokedAt = smokedAt;
+        cigar.LastTouchedAt = smokedAt;
+        cigar.UpdatedAt = DateTime.UtcNow;
+        cigar.HumidorId = null;
+
+        await _context.SaveChangesAsync();
+
+        var updatedCigar = await _context.UserCigars
+            .Include(uc => uc.CigarBase)
+            .ThenInclude(cb => cb.Brand)
+            .Include(uc => uc.Humidor)
+            .Where(uc => uc.Id == id && uc.UserId == userId)
+            .Select(uc => new CigarResponseDto
+            {
+                Id = uc.Id,
+                Name = uc.CigarBase.Name,
+                Brand = new BrandDto()
+                {
+                    Id = uc.CigarBase.Brand.Id,
+                    Name = uc.CigarBase.Brand.Name,
+                    Description = uc.CigarBase.Brand.Description,
+                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
+                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
+                    Country = uc.CigarBase.Brand.Country,
+                    IsModerated = uc.CigarBase.Brand.IsModerated,
+                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
+                },
+                BrandName = uc.CigarBase.Brand.Name,
+                Size = uc.CigarBase.Size,
+                Strength = uc.CigarBase.Strength,
+                Price = uc.Price,
+                Rating = uc.Rating,
+                Country = uc.CigarBase.Country,
+                Description = uc.CigarBase.Description,
+                Wrapper = uc.CigarBase.Wrapper,
+                Binder = uc.CigarBase.Binder,
+                Filler = uc.CigarBase.Filler,
+                HumidorId = uc.HumidorId,
+                Humidor = uc.Humidor != null ? new HumidorDto
+                {
+                    Id = uc.Humidor.Id,
+                    Name = uc.Humidor.Name,
+                    Description = uc.Humidor.Description,
+                    Capacity = uc.Humidor.Capacity,
+                    CreatedAt = uc.Humidor.CreatedAt,
+                    UpdatedAt = uc.Humidor.UpdatedAt
+                } : null,
+                Images = uc.Images.Where(img => img.ImageData != null)
+                    .Select(img => new CigarImageDto
+                    {
+                        Id = img.Id,
+                        FileName = img.FileName,
+                        ContentType = img.ContentType,
+                        FileSize = img.FileSize,
+                        Description = img.Description,
+                        IsMain = img.IsMain,
+                        CigarBaseId = img.CigarBaseId,
+                        UserCigarId = img.UserCigarId,
+                        CreatedAt = img.CreatedAt,
+                        Data = img.ImageData
+                    }).ToList(),
+                UserId = uc.UserId,
+                CreatedAt = uc.CreatedAt,
+                UpdatedAt = uc.UpdatedAt,
+                PurchasedAt = uc.PurchasedAt,
+                SmokedAt = uc.SmokedAt,
+                LastTouchedAt = uc.LastTouchedAt
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(updatedCigar);
     }
 
     [HttpDelete("{id}")]

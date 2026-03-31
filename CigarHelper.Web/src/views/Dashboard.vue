@@ -73,7 +73,7 @@
           class="dashboard-enter space-y-6 sm:space-y-8"
           data-testid="dashboard-content">
           <section
-            class="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6"
+            class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 sm:gap-6"
             aria-label="Основные показатели коллекции">
             <article
               class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
@@ -118,6 +118,20 @@
                 :show-value="false" />
               <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
                 В расчёте учтены только хьюмидоры с заданной вместимостью.
+              </p>
+            </article>
+
+            <article
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+              data-testid="dashboard-summary-aging">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                Средний срок до выкуривания
+              </h2>
+              <p class="text-3xl font-semibold text-stone-900 dark:text-rose-50/95">
+                {{ summary.averageDaysToSmoke }} дн.
+              </p>
+              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
+                Считается по сигарам, где отмечена дата выкуривания.
               </p>
             </article>
           </section>
@@ -254,6 +268,59 @@
           </section>
 
           <section
+            class="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6"
+            aria-label="История и напоминания">
+            <article
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+              data-testid="dashboard-timeline">
+              <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">История во времени</h2>
+              <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
+                Помесячно: сколько сигар куплено и выкурено.
+              </p>
+              <ul class="mt-4 space-y-2">
+                <li
+                  v-for="point in summary.timeline"
+                  :key="point.period"
+                  class="flex items-center justify-between gap-2 rounded-xl border border-stone-100 bg-stone-50/80 px-3 py-2 text-sm dark:border-stone-700/70 dark:bg-stone-950/40">
+                  <span class="font-medium text-stone-800 dark:text-stone-200">{{ formatPeriod(point.period) }}</span>
+                  <span class="text-stone-600 dark:text-stone-400">
+                    купил: {{ point.purchasedCount }} · выкурил: {{ point.smokedCount }}
+                  </span>
+                </li>
+              </ul>
+            </article>
+
+            <article
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+              data-testid="dashboard-reminders">
+              <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">Мягкие напоминания</h2>
+              <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">Сигары, к которым вы давно не возвращались.</p>
+              <div
+                v-if="summary.staleCigarReminders.length === 0"
+                class="mt-4 rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-6 text-center text-sm text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
+                data-testid="dashboard-reminders-empty">
+                Сейчас все сигары под контролем — напоминаний нет.
+              </div>
+              <ul
+                v-else
+                class="mt-4 space-y-3">
+                <li
+                  v-for="item in summary.staleCigarReminders"
+                  :key="item.cigarId"
+                  :data-testid="`dashboard-reminder-${item.cigarId}`"
+                  class="rounded-xl border border-stone-100 bg-stone-50/80 px-4 py-3 text-sm dark:border-stone-700/70 dark:bg-stone-950/40">
+                  <p class="font-medium text-stone-900 dark:text-rose-50/95">
+                    {{ item.brandName }} · {{ item.cigarName }}
+                  </p>
+                  <p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
+                    Не трогали {{ item.daysUntouched }} дн. (с {{ formatDate(item.lastTouchedAt) }})
+                  </p>
+                </li>
+              </ul>
+            </article>
+          </section>
+
+          <section
             v-if="summary.totalCigars === 0"
             class="rounded-2xl border border-dashed border-rose-800/25 bg-white/90 p-5 text-center shadow-md shadow-stone-900/5 dark:border-rose-200/20 dark:bg-stone-900/85 dark:shadow-black/40 sm:p-6"
             aria-label="Подсказка по первому шагу">
@@ -292,8 +359,11 @@
     totalCigars: 0,
     totalCapacity: 0,
     averageFillPercent: 0,
+    averageDaysToSmoke: 0,
     brandBreakdown: [],
     recentReviews: [],
+    timeline: [],
+    staleCigarReminders: [],
   });
 
   const loadSummary = async (): Promise<void> => {
@@ -322,6 +392,17 @@
 
   const goToReviews = (): void => {
     router.push({ name: 'ReviewList' });
+  };
+
+  const formatPeriod = (period: string): string => {
+    const [year, month] = period.split('-').map(Number);
+    if (!year || !month) {
+      return period;
+    }
+    return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString('ru-RU', {
+      year: 'numeric',
+      month: 'short',
+    });
   };
 
   const goToHumidors = (): void => {

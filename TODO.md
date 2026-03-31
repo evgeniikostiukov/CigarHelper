@@ -44,7 +44,7 @@
   - [x] Unit (Vitest): тесты для `Dashboard.vue` и `dashboardService`.
 - [x] **UX:** онбординг после регистрации (первый хьюмидор, 1–2 сигары из каталога).
 - [x] **UX:** глобальный поиск по бренду/сигаре/хьюмидору и клавиатурные шорткаты.
-- [ ] **Домен:** история сигары во времени (купил/выкурил), средние сроки, мягкие напоминания «давно не трогал».
+- [x] **Домен:** история сигары во времени (купил/выкурил), средние сроки, мягкие напоминания «давно не трогал».
 - [ ] **Наблюдаемость:** структурированные логи, correlation id, базовые метрики (запросы, ошибки, длительность) после стабилизации API.
 
 ---
@@ -128,3 +128,4 @@
 - [x] **2026-03-30** — В бэклог добавлены идеи развития продукта (экспорт коллекции, дашборд, онбординг, поиск, история сигар, наблюдаемость; OpenAPI/каталог/медиа; P3 — соц-слой, оси отзывов, PWA, тарифы).
 - [x] **2026-03-31** — UX: глобальный поиск — `SearchController` (`GET /api/search?q=&limit=`), DTO `GlobalSearchResultDto` + вложенные; composable `useGlobalSearch` (дебаунс 300 мс, клавиатурная навигация ↑↓ Enter Esc, шорткат Ctrl+K); компонент `GlobalSearch.vue` (модал PrimeVue Dialog, группированные результаты по типам); кнопка поиска в шапке `App.vue`.
 - [x] **2026-03-31** — Frontend: реализовано переключение тёмной/светлой темы. `@custom-variant dark` в Tailwind v4 (класс-based по `.dark` на `<html>`); `darkModeSelector: '.dark'` в PrimeVue; семантические CSS-переменные (`--c-bg`, `--c-surface`, `--c-border`, `--c-text`, `--c-accent`) в `:root`/`.dark` + Tailwind-утилиты `bg-theme-*` / `text-theme-*`; composable `useTheme` (useDark из @vueuse/core, localStorage `cigar-color-scheme`); компонент `ThemeToggle.vue` добавлен в шапку приложения.
+- [x] **2026-03-31** — Домен/UX: добавлен lifecycle сигары (`PurchasedAt`, `SmokedAt`, `LastTouchedAt`) и API-операция `POST /api/cigars/{id}/smoked`; `DashboardSummary` расширен блоками истории по месяцам (купил/выкурил), среднего срока до выкуривания и мягких напоминаний по «давно не трогал»; `Dashboard.vue` и `CigarList.vue` обновлены под новый сценарий, добавлены/обновлены unit-тесты `DashboardServiceTests`, `Dashboard.test.ts`, `dashboardService.test.ts`, создана миграция `AddUserCigarLifecycleDates`.

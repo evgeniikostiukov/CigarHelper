@@ -50,6 +50,7 @@ describe('Dashboard.vue', () => {
       totalCigars: 5,
       totalCapacity: 30,
       averageFillPercent: 50.1,
+      averageDaysToSmoke: 17,
       brandBreakdown: [
         { brandId: 10, brandName: 'X', cigarCount: 3, averageRating: 8.2 },
         { brandId: 11, brandName: 'Y', cigarCount: 2, averageRating: null },
@@ -64,6 +65,16 @@ describe('Dashboard.vue', () => {
           createdAt: '2026-03-30T10:00:00.000Z',
         },
       ],
+      timeline: [{ period: '2026-03', purchasedCount: 3, smokedCount: 1 }],
+      staleCigarReminders: [
+        {
+          cigarId: 4,
+          cigarName: 'Robusto',
+          brandName: 'X',
+          daysUntouched: 52,
+          lastTouchedAt: '2026-02-01T00:00:00.000Z',
+        },
+      ],
     });
 
     const w = mount(Dashboard, {
@@ -76,6 +87,9 @@ describe('Dashboard.vue', () => {
 
     expect(w.get('[data-testid="dashboard-content"]')).toBeTruthy();
     expect(w.get('[data-testid="dashboard-summary-total-cigars"]').text()).toContain('5');
+    expect(w.get('[data-testid="dashboard-summary-aging"]').text()).toContain('17');
+    expect(w.get('[data-testid="dashboard-timeline"]').text()).toContain('купил: 3');
+    expect(w.get('[data-testid="dashboard-reminder-4"]').text()).toContain('Не трогали 52');
     expect(w.get('[data-testid="dashboard-brands-item-10"]').text()).toContain('X');
     expect(w.get('[data-testid="dashboard-review-100"]').text()).toContain('Отличная сигара');
   });
@@ -101,6 +115,7 @@ describe('Dashboard.vue', () => {
       totalCigars: 1,
       totalCapacity: 0,
       averageFillPercent: 0,
+      averageDaysToSmoke: 0,
       brandBreakdown: [],
       recentReviews: [
         {
@@ -112,6 +127,8 @@ describe('Dashboard.vue', () => {
           createdAt: '2026-03-30T10:00:00.000Z',
         },
       ],
+      timeline: [],
+      staleCigarReminders: [],
     });
 
     const w = mount(Dashboard, {
@@ -127,4 +144,3 @@ describe('Dashboard.vue', () => {
     expect(pushMock).toHaveBeenCalledWith({ name: 'ReviewDetail', params: { id: 42 } });
   });
 });
-
