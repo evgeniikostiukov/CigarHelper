@@ -26,6 +26,7 @@
         </template>
         <template #end>
           <div class="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             <div
               v-if="isAuthenticated"
               class="flex items-center gap-1 sm:gap-2">
@@ -110,6 +111,7 @@
   import { useAuth } from '@/services/useAuth';
   import { registerApiErrorNotifier } from '@/services/apiErrorNotifier';
   import { hasRole } from '@/utils/roles';
+  import ThemeToggle from '@/components/ThemeToggle.vue';
 
   interface MenuItem {
     label: string;

@@ -1,24 +1,77 @@
-@import "tailwindcss";
-@import "tailwindcss-primeui";
-@import "/fonts/onest/onest.css";
-@import "./app-shell.css";
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
+@import '/fonts/onest/onest.css';
+@import './app-shell.css';
+
+/* Класс-based dark mode: dark: утилиты Tailwind активируются по классу .dark на <html> */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans:
-    "Onest", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
+    'Onest', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
   /* Светлый тёплый нейтраль для текста вне PrimeVue */
   --color-app-body: #5a4a4a;
+
+  /* Семантические токены темы — доступны как Tailwind-утилиты (bg-theme-bg, text-theme-text, …) */
+  --color-theme-bg: var(--c-bg);
+  --color-theme-surface: var(--c-surface);
+  --color-theme-surface-raised: var(--c-surface-raised);
+  --color-theme-border: var(--c-border);
+  --color-theme-text: var(--c-text);
+  --color-theme-muted: var(--c-text-muted);
+  --color-theme-accent: var(--c-accent);
+}
+
+/* ─── Светлая тема (по умолчанию) ─── */
+:root {
+  --c-bg: #fafaf9; /* stone-50  */
+  --c-surface: #ffffff;
+  --c-surface-raised: #f5f5f4; /* stone-100 */
+  --c-border: #e7e5e4; /* stone-200 */
+  --c-text: #1c1917; /* stone-900 */
+  --c-text-muted: #57534e; /* stone-600 */
+  --c-accent: #9f1239; /* rose-800  */
+  --c-accent-light: #be185d; /* rose-700  */
+}
+
+/* ─── Тёмная тема ─── */
+.dark {
+  --c-bg: #0c0a09; /* stone-950 */
+  --c-surface: #1c1917; /* stone-900 */
+  --c-surface-raised: #292524; /* stone-800 */
+  --c-border: #44403c; /* stone-700 */
+  --c-text: #f5f5f4; /* stone-100 */
+  --c-text-muted: #a8a29e; /* stone-400 */
+  --c-accent: #fb7185; /* rose-400  */
+  --c-accent-light: #f43f5e; /* rose-500  */
+}
+
+/* Плавный переход при смене темы */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.15s ease;
+}
+
+/* Исключаем transition для элементов, где он вреден */
+.no-theme-transition,
+.no-theme-transition * {
+  transition: none !important;
 }
 
 body {
   font-family: var(--font-sans);
-  font-feature-settings: "kern" 1;
+  font-feature-settings: 'kern' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--color-app-body);
   margin: 0;
   padding: 0;
+  background-color: var(--c-bg);
 }
 
 .card-img-top {

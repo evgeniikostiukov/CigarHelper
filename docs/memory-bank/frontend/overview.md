@@ -18,9 +18,11 @@
 
 ## Тема и палитра (UI)
 
-- **`src/main.ts`**: `definePreset` из `@primeuix/styled` на базе `Aura` — пресет **CigarAura**. Акцент **primary** = палитра **rose** (вместо emerald по умолчанию). **Surface** в светлой и тёмной схеме = **stone** (теплее прежнего slate в Aura).
-- **Tailwind**: на экранах акцентные классы **`rose-*`** (раньше единообразно использовался amber); корневые фоны страниц осветлены (**`from-stone-50` / `to-stone-50`** вместо `stone-100` там, где был общий градиент).
-- **`src/assets/main.css`**: в `@theme` задан **`--color-app-body`** для цвета текста `body` вне компонентов PrimeVue (тёплый нейтраль).
+- **`src/main.ts`**: `definePreset` из `@primeuix/styled` на базе `Aura` — пресет **CigarAura**. Акцент **primary** = палитра **rose**. **Surface** = **stone**. `darkModeSelector: '.dark'` — PrimeVue переключается синхронно с Tailwind.
+- **Tailwind**: класс-based dark mode через `@custom-variant dark (&:where(.dark, .dark *))` в `main.css`. Классы `dark:` активируются при `.dark` на `<html>`.
+- **`src/assets/main.css`**: семантические CSS-переменные (`--c-bg`, `--c-surface`, `--c-border`, `--c-text`, `--c-text-muted`, `--c-accent`) в `:root` и `.dark` блоках. В `@theme` зарегистрированы как Tailwind-утилиты (`bg-theme-bg`, `text-theme-text` и т.д.).
+- **`src/composables/useTheme.ts`**: синглтон-composable `useTheme()`. Использует `useDark` из `@vueuse/core` (читает system preference, сохраняет в `localStorage` ключ `cigar-color-scheme`). Экспортирует `{ isDark, toggleTheme, setTheme }`.
+- **`src/components/ThemeToggle.vue`**: кнопка переключения темы (иконка ☀️/🌙). Добавлена в `App.vue` header (`data-testid="theme-toggle"`).
 - **`src/App.vue`**: градиент оболочки (`stone-50` + лёгкий **`rose-50`** / в dark **`rose-950`**), hover и focus пунктов Menubar под розовую гамму.
 
 ## Точка входа

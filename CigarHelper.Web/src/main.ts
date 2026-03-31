@@ -70,6 +70,7 @@ app.use(PrimeVue, {
   theme: {
     preset: CigarAura,
     options: {
+      darkModeSelector: '.dark',
       cssLayer: {
         name: 'primevue',
         order: 'theme, base, primevue',
