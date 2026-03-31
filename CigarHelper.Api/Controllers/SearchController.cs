@@ -36,7 +36,7 @@ public class SearchController : ControllerBase
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var term = q.Trim().ToLower();
 
-        var cigarsTask = _context.UserCigars
+        var cigars = await _context.UserCigars
             .Include(uc => uc.CigarBase).ThenInclude(cb => cb.Brand)
             .Include(uc => uc.Humidor)
             .Where(uc => uc.UserId == userId &&
@@ -53,7 +53,7 @@ public class SearchController : ControllerBase
             })
             .ToListAsync();
 
-        var humidorsTask = _context.Humidors
+        var humidors = await _context.Humidors
             .Where(h => h.UserId == userId && h.Name.ToLower().Contains(term))
             .OrderBy(h => h.Name)
             .Take(limit)
@@ -65,7 +65,7 @@ public class SearchController : ControllerBase
             })
             .ToListAsync();
 
-        var cigarBasesTask = _context.CigarBases
+        var cigarBases = await _context.CigarBases
             .Include(cb => cb.Brand)
             .Where(cb => cb.IsModerated &&
                          (cb.Name.ToLower().Contains(term) ||
@@ -80,7 +80,7 @@ public class SearchController : ControllerBase
             })
             .ToListAsync();
 
-        var brandsTask = _context.Brands
+        var brands = await _context.Brands
             .Where(b => b.IsModerated && b.Name.ToLower().Contains(term))
             .OrderBy(b => b.Name)
             .Take(limit)
@@ -92,14 +92,12 @@ public class SearchController : ControllerBase
             })
             .ToListAsync();
 
-        await Task.WhenAll(cigarsTask, humidorsTask, cigarBasesTask, brandsTask);
-
         return Ok(new GlobalSearchResultDto
         {
-            Cigars = await cigarsTask,
-            Humidors = await humidorsTask,
-            CigarBases = await cigarBasesTask,
-            Brands = await brandsTask
+            Cigars = cigars,
+            Humidors = humidors,
+            CigarBases = cigarBases,
+            Brands = brands
         });
     }
 }
