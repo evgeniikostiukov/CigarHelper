@@ -6,6 +6,8 @@ using System.Threading.RateLimiting;
 using CigarHelper.Data.Data;
 using CigarHelper.Api.Services;
 using CigarHelper.Api.Extensions;
+using CigarHelper.Api.Middleware;
+using CigarHelper.Api.Observability;
 using CigarHelper.Api.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -14,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Microsoft.OpenApi;
+using Serilog;
 
 static string GetRateLimitPartitionKey(HttpContext httpContext)
 {
@@ -22,6 +25,14 @@ static string GetRateLimitPartitionKey(HttpContext httpContext)
 }
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Serilog: конфигурация из appsettings + enrichers.
+// Намеренно не используем CreateBootstrapLogger() — он фиксирует статический Log.Logger,
+// что ломает параллельный запуск WebApplicationFactory в интеграционных тестах.
+builder.Host.UseSerilog((ctx, services, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration)
+       .ReadFrom.Services(services)
+       .Enrich.FromLogContext());
 
 // Лимит тела запроса: JSON с base64 изображениями и крупный HTML в обзорах (см. ImageUpload:MaxBytes).
 builder.WebHost.ConfigureKestrel(options =>
@@ -174,6 +185,9 @@ builder.Services.AddHealthChecks()
 
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
 
+// Observability
+builder.Services.AddSingleton<IMetricsCollector, InMemoryMetricsCollector>();
+
 // Register Services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<AuthService>();
@@ -214,6 +228,23 @@ var app = builder.Build();
 // Первым: иначе схема/Host/клиентский IP из запроса к Kestrel без учёта X-Forwarded-*.
 app.UseForwardedHeaders();
 
+// Correlation ID: должен быть максимально ранним — до логов и метрик
+app.UseMiddleware<CorrelationIdMiddleware>();
+
+// Serilog request logging — обогащаем каждый запрос correlation id из Items
+app.UseSerilogRequestLogging(opts =>
+{
+    opts.EnrichDiagnosticContext = (diag, httpCtx) =>
+    {
+        if (httpCtx.Items[CorrelationIdMiddleware.ItemsKey] is string cid)
+            diag.Set("CorrelationId", cid);
+        diag.Set("UserAgent", httpCtx.Request.Headers.UserAgent.ToString());
+    };
+});
+
+// Метрики запросов
+app.UseMiddleware<RequestMetricsMiddleware>();
+
 app.UseSecurityHeaders();
 
 if (app.Environment.IsProduction())
@@ -250,6 +281,21 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = static reg => reg.Tags.Contains("ready"),
 });
+
+// Базовые метрики доступны только из локалки / dev — не экспонировать без аутентификации в проде
+app.MapGet("/metrics", (IMetricsCollector collector) =>
+{
+    var snap = collector.Snapshot();
+    return Results.Ok(new
+    {
+        totalRequests = snap.TotalRequests,
+        totalErrors = snap.TotalErrors,
+        totalDurationMs = Math.Round(snap.TotalDurationMs, 2),
+        avgDurationMs = snap.TotalRequests > 0
+            ? Math.Round(snap.TotalDurationMs / snap.TotalRequests, 2)
+            : 0.0,
+    });
+}).ExcludeFromDescription();
 
 app.MapControllers();
 
