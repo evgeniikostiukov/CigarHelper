@@ -50,6 +50,56 @@ npm run ci          # typecheck + lint + test + build
 
 **ESLint 10** (`eslint.config.js`) и **Prettier** (через `eslint-plugin-prettier` + `eslint-config-prettier`). Игнорируются сгенерированные файлы (`components.d.ts`, `vitest.config.ts` и т.д.).
 
+## OpenAPI — источник правды + генерация типов
+
+Инструменты: **`Swashbuckle.AspNetCore.Cli`** (dotnet local tool, `dotnet-tools.json` в корне) + **`openapi-typescript`** (devDependency фронта).
+
+### Файлы (оба коммитятся)
+
+| Файл | Описание |
+|------|----------|
+| `openapi.json` | Спецификация OpenAPI (источник правды) |
+| `CigarHelper.Web/src/types/api.generated.ts` | Авто-сгенерированные TypeScript-типы |
+
+### Обновление типов при изменении API-контракта
+
+```bash
+# 1. Сборка API
+dotnet build CigarHelper.API/CigarHelper.Api.csproj -c Debug
+
+# 2. Генерация спецификации (в корне репозитория)
+dotnet tool run swagger tofile --output openapi.json \
+  "CigarHelper.API/bin/Debug/net10.0/CigarHelper.Api.dll" v1
+# PowerShell: установить $env:ASPNETCORE_ENVIRONMENT = "Development" перед командой
+
+# 3. Генерация TypeScript-типов (из CigarHelper.Web)
+npm run generate:api
+
+# 4. Обновить тест-контракт при переименовании полей
+#    src/types/api.types.test.ts → npm run typecheck
+```
+
+Либо, если API запущен на `localhost:5184`:
+```bash
+# Из CigarHelper.Web:
+npm run generate:spec   # скачивает openapi.json из /swagger/v1/swagger.json
+npm run generate:api    # перегенерирует api.generated.ts
+```
+
+### Использование сгенерированных типов
+
+```typescript
+// Публичный фасад — всегда импортировать из @/types
+import type { ApiCigarResponse, ApiDashboardSummary } from '@/types';
+
+// Сырые схемы при необходимости
+import type { components } from '@/types/api.generated';
+type RawDto = components['schemas']['CigarResponseDto'];
+```
+
+- **Сервисный слой нормализует** `optional/nullable` поля API → компоненты получают определённые типы (см. `dashboardService.ts`).
+- **TDD-тест контракта:** `src/types/api.types.test.ts` — при переименовании DTO typecheck упадёт раньше, чем сломается компонент.
+
 ## Согласование с backend
 
 - JWT и cookie-less схема: только заголовок Bearer из `localStorage`.

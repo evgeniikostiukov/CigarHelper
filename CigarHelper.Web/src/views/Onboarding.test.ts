@@ -133,7 +133,21 @@ describe('Onboarding.vue', () => {
       ],
       totalCount: 1,
     });
-    vi.mocked(cigarService.createCigar).mockResolvedValueOnce({ id: 1 });
+    vi.mocked(cigarService.createCigar).mockResolvedValueOnce({
+      id: 1,
+      name: 'Robusto',
+      brand: { id: 1, name: 'X', isModerated: true, createdAt: '2026-03-30T00:00:00.000Z' },
+      country: null,
+      size: null,
+      strength: null,
+      price: null,
+      rating: null,
+      description: null,
+      wrapper: null,
+      binder: null,
+      filler: null,
+      humidorId: null,
+    });
 
     const w = mount(Onboarding, {
       global: {

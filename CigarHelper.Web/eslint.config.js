@@ -22,6 +22,8 @@ export default tseslint.config(
       'components.d.ts',
       'postcss.config.js',
       'vitest.config.ts',
+      // Авто-сгенерированный файл OpenAPI-типов — не линтируем
+      'src/types/api.generated.ts',
     ],
   },
   {
@@ -30,10 +32,7 @@ export default tseslint.config(
       'no-debugger': 'warn',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-useless-escape': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-unused-labels': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       // '@typescript-eslint/no-implicit-any': 'warn',

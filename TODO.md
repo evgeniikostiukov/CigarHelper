@@ -37,7 +37,7 @@
 - [x] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/таблицей (например база сигар).
 - [ ] **E2E:** подключить прогон в CI (Testing/staging по возможности). *(Пока пропущено по запросу.)*
 - [ ] **Коллекция:** экспорт/импорт данных пользователя (CSV/JSON) для бэкапа и переноса.
-- [ ] **UX:** дашборд-сводка — объём коллекции, разрез по брендам, недавняя активность/отзывы.
+- [x] **UX:** дашборд-сводка — объём коллекции, разрез по брендам, недавняя активность/отзывы.
   - [x] API: `DashboardController` + `IDashboardService.GetUserDashboardSummary(userId)` с агрегатами по коллекции и брендам, недавними отзывами.
   - [x] Frontend: маршрут `Dashboard` + блоки «Объём коллекции», «Бренды», «Недавние обзоры» в общем каркасе коллекции.
   - [x] E2E: smoke-journey покрывает открытие `/dashboard` и наличие ключевых блоков.
@@ -68,7 +68,7 @@
 - [ ] Рассмотреть **Dependabot / Renovate** (или регламент) для автоматических PR по зависимостям с лимитами на major.
 - [x] **`index.html`:** выставить `lang="ru"` (или иной язык интерфейса), если контент не на английском.
 - [x] В `docs/memory-bank/workflow.md` (и при желании `engines` в `CigarHelper.Web/package.json`) зафиксировать **целевую ветку Node**, совпадающую с CI/локальной средой (**24.x**, эталон **24.14.1** в `.nvmrc`).
-- [ ] **Контракт API:** OpenAPI как источник правды + генерация типов клиента для `CigarHelper.Web` (или иной регламент синхронизации с ростом контроллеров).
+- [x] **Контракт API:** OpenAPI как источник правды + генерация типов клиента для `CigarHelper.Web` (или иной регламент синхронизации с ростом контроллеров).
 - [ ] **Каталог:** регламент периодического обновления данных (import/scraper), дедуп и при необходимости версионирование записей `CigarBase`.
 - [ ] **Медиа:** миниатюры, политика хранения изображений (локально vs объектное хранилище) при росте нагрузки и объёма.
 
@@ -131,3 +131,4 @@
 - [x] **2026-03-31** — Домен/UX: добавлен lifecycle сигары (`PurchasedAt`, `SmokedAt`, `LastTouchedAt`) и API-операция `POST /api/cigars/{id}/smoked`; `DashboardSummary` расширен блоками истории по месяцам (купил/выкурил), среднего срока до выкуривания и мягких напоминаний по «давно не трогал»; `Dashboard.vue` и `CigarList.vue` обновлены под новый сценарий, добавлены/обновлены unit-тесты `DashboardServiceTests`, `Dashboard.test.ts`, `dashboardService.test.ts`, создана миграция `AddUserCigarLifecycleDates`.
 - [x] **2026-03-31** — Глобальная обработка ошибок (TDD): доменные исключения (`NotFoundException`→404, `ForbiddenException`→403, `ConflictException`→409, `ArgumentException`→422, `UnauthorizedAccessException`→403); `GlobalExceptionHandlerMiddleware` — RFC 7807 Problem Details (`application/problem+json`), correlation ID в теле, стек-трейс скрыт в Production; `ReviewService.ArgumentException` → `NotFoundException`; `AddProblemDetails()` в DI. 130/130 тестов.
 - [x] **2026-03-31** — Наблюдаемость (TDD): `CorrelationIdMiddleware` (X-Correlation-ID в response + HttpContext.Items, 3 теста), `RequestMetricsMiddleware` + `IMetricsCollector`/`InMemoryMetricsCollector` (счётчики запросов, ошибок 5xx, суммарная длительность, 5 тестов); Serilog.AspNetCore (JSON-логи через `UseSerilogRequestLogging` с enrichment correlation id), endpoint `GET /metrics` (JSON-снимок). 121/121 тестов зелёные.
+- [x] **2026-03-31** — OpenAPI как источник правды (TDD): `Swashbuckle.AspNetCore.Cli` (dotnet local tool `dotnet-tools.json`) генерирует `openapi.json` из сборки API; `openapi-typescript` генерирует `src/types/api.generated.ts`; фасад `src/types/index.ts` с дружелюбными алиасами (`ApiCigarResponse`, `ApiDashboardSummary`, …); TDD-тест контракта `src/types/api.types.test.ts` (type-level проверки через `expectTypeOf`); `dashboardService.ts` и `searchService.ts` мигрированы на сгенерированные типы (сервис нормализует optional API → definite компонентные типы); pre-existing ошибки `Onboarding.vue`/`Onboarding.test.ts` исправлены; `useGlobalSearch.ts` исправлен под nullable поля; CI green 35/35.

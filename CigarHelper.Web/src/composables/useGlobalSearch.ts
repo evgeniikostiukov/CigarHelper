@@ -29,44 +29,68 @@ export function useGlobalSearch() {
     if (!rawResult.value) return [];
     const r = rawResult.value;
     const items: SearchResultItem[] = [
-      ...r.cigars.map((c) => ({
-        type: 'cigar' as const,
-        id: c.id,
-        label: c.name,
-        sub: c.brandName + (c.humidorName ? ` · ${c.humidorName}` : ''),
-        icon: 'pi pi-star',
-        routeName: 'CigarDetail',
-        routeParams: { id: c.id },
-      })),
-      ...r.humidors.map((h) => ({
-        type: 'humidor' as const,
-        id: h.id,
-        label: h.name,
-        sub: h.description ?? undefined,
-        icon: 'pi pi-box',
-        routeName: 'HumidorDetail',
-        routeParams: { id: h.id },
-      })),
-      ...r.cigarBases.map((cb) => ({
-        type: 'cigarBase' as const,
-        id: cb.id,
-        label: cb.name,
-        sub: cb.brandName,
-        icon: 'pi pi-database',
-        routeName: 'CigarBases',
-        routeParams: undefined,
-        routeQuery: { selectedCigarBaseId: cb.id },
-      })),
-      ...r.brands.map((b) => ({
-        type: 'brand' as const,
-        id: b.id,
-        label: b.name,
-        sub: b.country ?? undefined,
-        icon: 'pi pi-tag',
-        routeName: 'Brands',
-        routeParams: undefined,
-        routeQuery: { selectedBrandId: b.id },
-      })),
+      ...(r.cigars ?? []).flatMap((c) =>
+        c.id == null
+          ? []
+          : [
+              {
+                type: 'cigar' as const,
+                id: c.id,
+                label: c.name ?? '',
+                sub: (c.brandName ?? '') + (c.humidorName ? ` · ${c.humidorName}` : ''),
+                icon: 'pi pi-star',
+                routeName: 'CigarDetail',
+                routeParams: { id: c.id },
+              },
+            ],
+      ),
+      ...(r.humidors ?? []).flatMap((h) =>
+        h.id == null
+          ? []
+          : [
+              {
+                type: 'humidor' as const,
+                id: h.id,
+                label: h.name ?? '',
+                sub: h.description ?? undefined,
+                icon: 'pi pi-box',
+                routeName: 'HumidorDetail',
+                routeParams: { id: h.id },
+              },
+            ],
+      ),
+      ...(r.cigarBases ?? []).flatMap((cb) =>
+        cb.id == null
+          ? []
+          : [
+              {
+                type: 'cigarBase' as const,
+                id: cb.id,
+                label: cb.name ?? '',
+                sub: cb.brandName ?? undefined,
+                icon: 'pi pi-database',
+                routeName: 'CigarBases',
+                routeParams: undefined,
+                routeQuery: { selectedCigarBaseId: cb.id },
+              },
+            ],
+      ),
+      ...(r.brands ?? []).flatMap((b) =>
+        b.id == null
+          ? []
+          : [
+              {
+                type: 'brand' as const,
+                id: b.id,
+                label: b.name ?? '',
+                sub: b.country ?? undefined,
+                icon: 'pi pi-tag',
+                routeName: 'Brands',
+                routeParams: undefined,
+                routeQuery: { selectedBrandId: b.id },
+              },
+            ],
+      ),
     ];
     return items;
   });

@@ -527,7 +527,6 @@
 
   function cigarBaseToCreatePayload(base: CigarBase, humidorId: number): Omit<Cigar, 'id' | 'brandName'> {
     return {
-      id: 0,
       name: base.name,
       brand: base.brand,
       country: base.country ?? null,
