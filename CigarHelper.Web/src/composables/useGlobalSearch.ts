@@ -10,6 +10,7 @@ export interface SearchResultItem {
   icon: string;
   routeName: string;
   routeParams?: Record<string, string | number>;
+  routeQuery?: Record<string, string | number>;
 }
 
 const DEBOUNCE_MS = 300;
@@ -54,6 +55,7 @@ export function useGlobalSearch() {
         icon: 'pi pi-database',
         routeName: 'CigarBases',
         routeParams: undefined,
+        routeQuery: { selectedCigarBaseId: cb.id },
       })),
       ...r.brands.map((b) => ({
         type: 'brand' as const,
@@ -63,6 +65,7 @@ export function useGlobalSearch() {
         icon: 'pi pi-tag',
         routeName: 'Brands',
         routeParams: undefined,
+        routeQuery: { selectedBrandId: b.id },
       })),
     ];
     return items;
@@ -89,7 +92,7 @@ export function useGlobalSearch() {
   }
 
   function navigateToItem(item: SearchResultItem) {
-    router.push({ name: item.routeName, params: item.routeParams });
+    router.push({ name: item.routeName, params: item.routeParams, query: item.routeQuery });
     close();
   }
 

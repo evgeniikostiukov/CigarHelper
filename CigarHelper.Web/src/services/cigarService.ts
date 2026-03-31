@@ -166,6 +166,11 @@ const cigarService = {
     return response.data;
   },
 
+  async getBrand(id: number): Promise<Brand> {
+    const response = await api.get<Brand>(`/brands/${id}`);
+    return response.data;
+  },
+
   async getAllBrands(params: any = {}) {
     const response = await api.get<Brand[]>('/cigars/brands', { params });
     return response.data;
@@ -186,6 +191,11 @@ const cigarService = {
 
   async getCigarBasesPaginated(params: any = {}): Promise<PaginatedResult<CigarBase>> {
     const response = await api.get('/cigars/bases/paginated', { params });
+    return response.data;
+  },
+
+  async getCigarBase(id: number): Promise<CigarBase> {
+    const response = await api.get<CigarBase>(`/cigars/bases/${id}`);
     return response.data;
   },
 

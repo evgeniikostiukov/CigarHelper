@@ -529,8 +529,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { ref, computed, onMounted, watch } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
   import type { CigarBase, CigarImage, PaginatedResult, Brand } from '@/services/cigarService';
@@ -559,6 +559,7 @@
   }
 
   const router = useRouter();
+  const route = useRoute();
   const toast = useToast();
 
   const loading = ref<boolean>(true);
@@ -817,10 +818,45 @@
     target.style.display = 'none';
   }
 
+  async function openSelectedCigarBaseFromQuery(cigarBaseIdParam: unknown): Promise<void> {
+    const cigarBaseId = Number(cigarBaseIdParam);
+    if (!Number.isFinite(cigarBaseId) || cigarBaseId <= 0) return;
+
+    const clearSelectionQuery = async () => {
+      const nextQuery = { ...route.query };
+      delete nextQuery.selectedCigarBaseId;
+      await router.replace({ query: nextQuery });
+    };
+
+    try {
+      const localCigar = cigars.value.find((c) => c.id === cigarBaseId);
+      const cigar = localCigar ?? (await cigarService.getCigarBase(cigarBaseId));
+      viewCigar(cigar);
+    } catch {
+      toast.add({
+        severity: 'warn',
+        summary: 'Сигара не найдена',
+        detail: 'Не удалось открыть выбранную сигару из базы',
+        life: 3000,
+      });
+    } finally {
+      await clearSelectionQuery();
+    }
+  }
+
   onMounted(() => {
-    loadCigars();
-    loadBrands();
+    void loadCigars().then(() => openSelectedCigarBaseFromQuery(route.query.selectedCigarBaseId));
+    void loadBrands();
   });
+
+  watch(
+    () => route.query.selectedCigarBaseId,
+    (value) => {
+      if (value) {
+        void openSelectedCigarBaseFromQuery(value);
+      }
+    },
+  );
 </script>
 
 <style scoped>
@@ -834,9 +870,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .cigar-bases-grain {
+  /*:global(.dark) .cigar-bases-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .line-clamp-2 {
     display: -webkit-box;

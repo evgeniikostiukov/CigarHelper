@@ -489,7 +489,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import { useConfirm } from 'primevue/useconfirm';
   import cigarService from '@/services/cigarService';
@@ -530,6 +531,8 @@
 
   const toast = useToast();
   const confirm = useConfirm();
+  const route = useRoute();
+  const router = useRouter();
 
   const loading = ref(true);
   const loadError = ref<string | null>(null);
@@ -741,9 +744,44 @@
     errors.value = {};
   }
 
+  async function openSelectedBrandFromQuery(brandIdParam: unknown): Promise<void> {
+    const brandId = Number(brandIdParam);
+    if (!Number.isFinite(brandId) || brandId <= 0) return;
+
+    const clearSelectionQuery = async () => {
+      const nextQuery = { ...route.query };
+      delete nextQuery.selectedBrandId;
+      await router.replace({ query: nextQuery });
+    };
+
+    try {
+      const localBrand = brands.value.find((b) => b.id === brandId);
+      const brand = localBrand ?? (await cigarService.getBrand(brandId));
+      viewBrand(brand);
+    } catch {
+      toast.add({
+        severity: 'warn',
+        summary: 'Бренд не найден',
+        detail: 'Не удалось открыть выбранный бренд',
+        life: 3000,
+      });
+    } finally {
+      await clearSelectionQuery();
+    }
+  }
+
   onMounted(() => {
-    void loadBrands();
+    void loadBrands().then(() => openSelectedBrandFromQuery(route.query.selectedBrandId));
   });
+
+  watch(
+    () => route.query.selectedBrandId,
+    (value) => {
+      if (value) {
+        void openSelectedBrandFromQuery(value);
+      }
+    },
+  );
 </script>
 
 <style scoped>
@@ -757,9 +795,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .brands-grain {
+  /*:global(.dark) .brands-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .line-clamp-2 {
     display: -webkit-box;
