@@ -522,9 +522,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .cigar-detail-grain {
+  /*:global(.dark) .cigar-detail-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .cigar-detail-enter {
     animation: cigar-detail-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

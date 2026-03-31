@@ -130,16 +130,14 @@
               data-testid="dashboard-brands">
               <div class="flex items-center justify-between gap-2">
                 <div>
-                  <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">
-                    Бренды в коллекции
-                  </h2>
-                  <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
-                    Топ брендов по количеству сигар.
-                  </p>
+                  <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">Бренды в коллекции</h2>
+                  <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">Топ брендов по количеству сигар.</p>
                 </div>
               </div>
 
-              <div v-if="summary.brandBreakdown.length === 0" class="mt-4">
+              <div
+                v-if="summary.brandBreakdown.length === 0"
+                class="mt-4">
                 <div
                   class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-8 text-center text-sm text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
                   data-testid="dashboard-brands-empty">
@@ -186,12 +184,8 @@
               data-testid="dashboard-reviews">
               <div class="flex items-center justify-between gap-2">
                 <div>
-                  <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">
-                    Недавние обзоры
-                  </h2>
-                  <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
-                    Последние впечатления от сигар.
-                  </p>
+                  <h2 class="text-lg font-semibold text-stone-900 dark:text-rose-50/95">Недавние обзоры</h2>
+                  <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">Последние впечатления от сигар.</p>
                 </div>
                 <Button
                   class="hidden min-h-10 touch-manipulation text-sm sm:inline-flex"
@@ -202,7 +196,9 @@
                   @click="goToReviews" />
               </div>
 
-              <div v-if="summary.recentReviews.length === 0" class="mt-4">
+              <div
+                v-if="summary.recentReviews.length === 0"
+                class="mt-4">
                 <div
                   class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-8 text-center text-sm text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
                   data-testid="dashboard-reviews-empty">
@@ -352,9 +348,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .dashboard-grain {
+  /*:global(.dark) .dashboard-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .dashboard-enter {
     animation: dashboard-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
@@ -378,4 +374,3 @@
     }
   }
 </style>
-

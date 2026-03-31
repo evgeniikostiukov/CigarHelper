@@ -515,9 +515,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .humidor-detail-grain {
+  /*:global(.dark) .humidor-detail-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .humidor-detail-enter {
     animation: humidor-detail-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

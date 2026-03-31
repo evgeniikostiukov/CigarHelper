@@ -352,9 +352,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .login-grain {
+  /*:global(.dark) .login-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .login-panel-enter {
     animation: login-panel-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

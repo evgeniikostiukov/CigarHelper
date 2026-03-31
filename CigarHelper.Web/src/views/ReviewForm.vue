@@ -832,9 +832,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .review-form-grain {
+  /*:global(.dark) .review-form-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .review-form-enter {
     animation: review-form-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;

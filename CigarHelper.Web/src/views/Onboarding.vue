@@ -602,9 +602,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .onboarding-grain {
+  /*:global(.dark) .onboarding-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .line-clamp-2 {
     display: -webkit-box;

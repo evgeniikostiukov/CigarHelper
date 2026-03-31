@@ -244,9 +244,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .humidor-list-grain {
+  /*:global(.dark) .humidor-list-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .line-clamp-2 {
     display: -webkit-box;

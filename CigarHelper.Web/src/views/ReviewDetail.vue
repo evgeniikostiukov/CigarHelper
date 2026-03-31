@@ -423,9 +423,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .review-detail-grain {
+  /*:global(.dark) .review-detail-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .review-detail-enter {
     animation: review-detail-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

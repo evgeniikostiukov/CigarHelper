@@ -293,9 +293,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .public-humidor-detail-grain {
+  /*:global(.dark) .public-humidor-detail-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .public-humidor-detail-enter {
     animation: public-humidor-detail-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

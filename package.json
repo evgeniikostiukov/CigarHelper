@@ -14,11 +14,11 @@
     "**/*.cs": [
       "dotnet format CigarHelper.sln --include"
     ],
-    "CigarHelper.Web/**/*.{js,jsx,ts,tsx,vue}": [
-      "npm --prefix CigarHelper.Web exec -- eslint --fix"
-    ],
     "CigarHelper.Web/**/*.{css,html,js,jsx,json,md,scss,ts,tsx,vue,yaml,yml}": [
       "npm --prefix CigarHelper.Web exec -- prettier --write"
+    ],
+    "CigarHelper.Web/**/*.{js,jsx,ts,tsx,vue}": [
+      "npm --prefix CigarHelper.Web exec -- eslint --fix"
     ]
   },
   "commitlint": {

@@ -348,9 +348,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .admin-users-grain {
+  /*:global(.dark) .admin-users-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .admin-users-panel-enter {
     animation: admin-users-panel-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

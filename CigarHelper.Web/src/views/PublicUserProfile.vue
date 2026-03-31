@@ -216,9 +216,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .public-profile-grain {
+  /*:global(.dark) .public-profile-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .public-profile-enter {
     animation: public-profile-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;

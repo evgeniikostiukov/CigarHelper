@@ -354,9 +354,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .cigar-list-grain {
+  /*:global(.dark) .cigar-list-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .cigar-list-card-image-frame {
     display: block;

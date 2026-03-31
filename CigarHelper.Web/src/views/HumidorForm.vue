@@ -332,7 +332,7 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .humidor-form-grain {
+  /*:global(.dark) .humidor-form-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 </style>
