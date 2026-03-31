@@ -4,6 +4,7 @@
     class="app-container app-shell min-h-screen min-w-full flex flex-col bg-gradient-to-b from-stone-50 via-rose-50/45 to-stone-50 text-stone-800 dark:from-stone-900 dark:via-rose-900/12 dark:to-stone-900 dark:text-stone-100">
     <Toast />
     <ConfirmDialog />
+    <GlobalSearch ref="searchRef" />
 
     <header
       class="app-header sticky top-0 z-50 border-b border-stone-200/90 bg-white/85 shadow-sm shadow-stone-900/5 backdrop-blur-md dark:border-stone-600/80 dark:bg-stone-800/90 dark:shadow-stone-950/40"
@@ -26,6 +27,39 @@
         </template>
         <template #end>
           <div class="flex items-center gap-2 sm:gap-3">
+            <Button
+              v-if="isAuthenticated"
+              data-testid="app-nav-search"
+              class="hidden min-h-9 touch-manipulation sm:inline-flex"
+              severity="secondary"
+              text
+              rounded
+              aria-label="Поиск (Ctrl+K)"
+              title="Поиск (Ctrl+K)"
+              @click="searchRef?.open()">
+              <template #icon>
+                <i
+                  class="pi pi-search text-sm"
+                  aria-hidden="true" />
+              </template>
+              <span class="ml-1.5 text-sm text-stone-500 dark:text-stone-400">
+                Поиск
+                <kbd
+                  class="ml-1 rounded border border-stone-200/80 bg-stone-100/80 px-1 py-px text-[0.6rem] font-mono text-stone-400 dark:border-stone-600/60 dark:bg-stone-800 dark:text-stone-500">
+                  Ctrl K
+                </kbd>
+              </span>
+            </Button>
+            <Button
+              v-if="isAuthenticated"
+              data-testid="app-nav-search-icon"
+              class="min-h-11 min-w-11 touch-manipulation sm:hidden"
+              icon="pi pi-search"
+              text
+              rounded
+              severity="secondary"
+              aria-label="Поиск"
+              @click="searchRef?.open()" />
             <ThemeToggle />
             <div
               v-if="isAuthenticated"
@@ -101,7 +135,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { computed, onMounted } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import Toast from 'primevue/toast';
@@ -112,6 +146,7 @@
   import { registerApiErrorNotifier } from '@/services/apiErrorNotifier';
   import { hasRole } from '@/utils/roles';
   import ThemeToggle from '@/components/ThemeToggle.vue';
+  import GlobalSearch from '@/components/GlobalSearch.vue';
 
   interface MenuItem {
     label: string;
@@ -180,6 +215,8 @@
   ]);
 
   const menuItemsVisible = computed(() => menuItems.value.filter((item) => (item.visible ? item.visible() : true)));
+
+  const searchRef = ref<InstanceType<typeof GlobalSearch> | null>(null);
 
   const handleLogout = (): void => {
     logout();
