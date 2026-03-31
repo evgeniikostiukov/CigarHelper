@@ -268,6 +268,12 @@
 
 <script setup lang="ts">
   import { ref, reactive, computed, onMounted } from 'vue';
+  import Avatar from 'primevue/avatar';
+  import Button from 'primevue/button';
+  import Message from 'primevue/message';
+  import Select from 'primevue/select';
+  import Skeleton from 'primevue/skeleton';
+  import Tag from 'primevue/tag';
   import reviewService from '../services/reviewService';
   import { useAuth } from '@/services/useAuth';
   import type { Review } from '../services/reviewService';
@@ -371,9 +377,9 @@
     mix-blend-mode: multiply;
   }
 
-  :global(.dark) .review-list-grain {
+  /*:global(.dark) .review-list-grain {
     mix-blend-mode: soft-light;
-  }
+  }*/
 
   .line-clamp-2 {
     display: -webkit-box;
