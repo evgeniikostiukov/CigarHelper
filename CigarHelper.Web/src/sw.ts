@@ -7,10 +7,6 @@ import { clientsClaim } from 'workbox-core';
 
 declare let self: ServiceWorkerGlobalScope;
 
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
-  if (event.data?.type === 'REPLAY_QUEUE') replayMutations();
-});
 clientsClaim();
 
 cleanupOutdatedCaches();
@@ -28,66 +24,96 @@ function broadcastToClients(data: Record<string, unknown>) {
 // ── Очередь мутаций (Queue напрямую, без BackgroundSyncPlugin) ─────────────
 let pendingCount = 0;
 
-const mutationQueue = new Queue('cigar-helper-mutations', {
-  maxRetentionTime: 7 * 24 * 60,
-  onSync: async ({ queue }) => {
-    let entry;
-    while ((entry = await queue.shiftRequest())) {
-      try {
-        await fetch(entry.request.clone());
-        pendingCount = Math.max(0, pendingCount - 1);
-        broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
-      } catch (error) {
-        await queue.unshiftRequest(entry);
-        broadcastToClients({
-          type: 'SYNC_ERROR',
-          pendingCount,
-          message: 'Ошибка синхронизации. Повтор при следующем подключении.',
-        });
-        throw error;
-      }
+/** Цепочка промисов: два drain не выполняют shiftRequest параллельно. */
+let drainSerial = Promise.resolve();
+
+function runSerializedDrain(fn: () => Promise<void>): Promise<void> {
+  const p = drainSerial.then(() => fn());
+  drainSerial = p.then(
+    () => undefined,
+    () => undefined,
+  );
+  return p;
+}
+
+type WorkboxQueue = InstanceType<typeof Queue>;
+
+let mutationQueue: WorkboxQueue;
+
+async function drainMutationQueue(rethrowOnFailure: boolean): Promise<void> {
+  let allEntries: Awaited<ReturnType<WorkboxQueue['getAll']>>;
+  try {
+    allEntries = await mutationQueue.getAll();
+  } catch {
+    if (rethrowOnFailure) throw new Error('mutation queue read failed');
+    return;
+  }
+
+  pendingCount = allEntries.length;
+  if (pendingCount === 0) return;
+
+  broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+
+  let entry;
+  while ((entry = await mutationQueue.shiftRequest())) {
+    try {
+      await fetch(entry.request.clone());
+      pendingCount = Math.max(0, pendingCount - 1);
+      broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+    } catch (error) {
+      await mutationQueue.unshiftRequest(entry);
+      pendingCount = (await mutationQueue.getAll()).length;
+      broadcastToClients({
+        type: 'SYNC_ERROR',
+        pendingCount,
+        message: rethrowOnFailure
+          ? 'Ошибка синхронизации. Повтор при следующем подключении.'
+          : 'Ошибка синхронизации. Повтор позже.',
+      });
+      if (rethrowOnFailure) throw error;
+      return;
     }
-    broadcastToClients({ type: 'SYNC_COMPLETE', pendingCount: 0 });
-    pendingCount = 0;
+  }
+
+  broadcastToClients({ type: 'SYNC_COMPLETE', pendingCount: 0 });
+  pendingCount = 0;
+}
+
+mutationQueue = new Queue('cigar-helper-mutations', {
+  maxRetentionTime: 7 * 24 * 60,
+  onSync: async () => {
+    await runSerializedDrain(() => drainMutationQueue(true));
   },
 });
 
-async function replayMutations() {
-  try {
-    const allEntries = await mutationQueue.getAll();
-    if (allEntries.length === 0) return;
-    pendingCount = allEntries.length;
-    broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    mutationQueue
+      .getAll()
+      .then((entries) => {
+        pendingCount = entries.length;
+        if (pendingCount > 0) {
+          broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+        }
+      })
+      .catch(() => undefined),
+  );
+});
 
-    let entry;
-    while ((entry = await mutationQueue.shiftRequest())) {
-      try {
-        await fetch(entry.request.clone());
-        pendingCount = Math.max(0, pendingCount - 1);
-        broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
-      } catch {
-        await mutationQueue.unshiftRequest(entry);
-        broadcastToClients({
-          type: 'SYNC_ERROR',
-          pendingCount,
-          message: 'Ошибка синхронизации. Повтор позже.',
-        });
-        return;
-      }
-    }
-    broadcastToClients({ type: 'SYNC_COMPLETE', pendingCount: 0 });
-    pendingCount = 0;
-  } catch {
-    // Queue access failed — ignore silently
-  }
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'REPLAY_QUEUE') replayMutations();
+});
+
+function replayMutations(): void {
+  void runSerializedDrain(() => drainMutationQueue(false));
 }
 
-// Fallback: при восстановлении сети SW тоже получает событие —
-// вручную запускаем replay, не дожидаясь ненадёжного sync event.
+// Пока в очереди есть мутации, любой GET с клиента — повод попробовать replay
+// (pendingCount после перезапуска SW поднимается в activate).
 self.addEventListener('fetch', (event) => {
-  // Любой успешный GET-запрос — признак наличия сети, пробуем replay.
   if (event.request.method === 'GET' && pendingCount > 0) {
-    event.waitUntil(replayMutations());
+    event.waitUntil(runSerializedDrain(() => drainMutationQueue(false)));
   }
 });
 
@@ -194,8 +220,7 @@ registerRoute(
 
 // ── GET /api/cigar-images/*/thumbnail|data → CacheFirst ────────────────────
 registerRoute(
-  ({ url, request }) =>
-    request.method === 'GET' && /^\/api\/cigar-images\/\d+\/(thumbnail|data)$/.test(url.pathname),
+  ({ url, request }) => request.method === 'GET' && /^\/api\/cigar-images\/\d+\/(thumbnail|data)$/.test(url.pathname),
   new CacheFirst({
     cacheName: 'api-images',
     plugins: [new ExpirationPlugin({ maxAgeSeconds: 30 * 24 * 60 * 60, maxEntries: 200 })],

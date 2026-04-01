@@ -62,6 +62,8 @@ npm run generate:pwa-assets   # pwa-assets-generator (конфиг pwa-assets.co
 
 Для **GET** списков (`/api/humidors`, `/api/cigars`, …) при **`!navigator.onLine`** SW не вызывает сеть: только **`api-lists`** cache, иначе синтетический JSON (пустые массивы / нулевая сводка дашборда), чтобы не было `net::ERR_*` от `NetworkFirst`.
 
+Воспроизведение очереди мутаций: один общий **`drainMutationQueue`** для **`onSync`**, **`REPLAY_QUEUE`** и эвристики на **GET** (через цепочку промисов — без параллельных `shiftRequest`). В **`activate`** счётчик **`pendingCount`** подтягивается из IndexedDB и рассылается клиентам, чтобы после перезапуска SW UI не терял длину очереди.
+
 ### Composables (в `src/composables/`)
 
 | Файл | Назначение |
