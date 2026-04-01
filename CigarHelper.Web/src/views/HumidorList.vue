@@ -162,6 +162,7 @@
   import { ref, onMounted } from 'vue';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import humidorService from '../services/humidorService';
   import type { Humidor } from '../services/humidorService';
 
@@ -216,6 +217,7 @@
             life: 3000,
           });
         } catch (err) {
+          if (isOfflineQueued(err)) return;
           if (import.meta.env.DEV) {
             console.error('Ошибка при удалении хьюмидора:', err);
           }

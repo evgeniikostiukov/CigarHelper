@@ -240,6 +240,7 @@
   import { useRouter } from 'vue-router';
   import axios from 'axios';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import Button from 'primevue/button';
   import InputText from 'primevue/inputtext';
   import InputSwitch from 'primevue/inputswitch';
@@ -345,6 +346,7 @@
       }
       toast.add({ severity: 'success', summary: 'Сохранено', detail: res.message || 'Профиль обновлён', life: 2500 });
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       const pe = parseApiErrors(err);
       if (Object.keys(pe).length) {
         Object.assign(fieldErrors, pe);
@@ -378,6 +380,7 @@
       pwd.confirmNewPassword = '';
       toast.add({ severity: 'success', summary: 'Готово', detail: 'Пароль изменён', life: 2500 });
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       if (axios.isAxiosError(err) && err.response?.status === 429) {
         const data = err.response.data as ChangePasswordResponse;
         const sec = data.retryAfterSeconds ?? 3600;

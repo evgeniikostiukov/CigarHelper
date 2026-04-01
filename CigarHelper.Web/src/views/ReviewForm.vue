@@ -432,7 +432,7 @@
 <script setup lang="ts">
   import { ref, reactive, computed, watch, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import api from '../services/api';
+  import api, { isOfflineQueued } from '../services/api';
   import TextEditor from '../components/TextEditor.vue';
   import ImageUploader from '../components/ImageUploader.vue';
   import AutoComplete, {
@@ -709,6 +709,10 @@
         await router.push({ name: 'ReviewDetail', params: { id: String(response.data.id) } });
       }
     } catch (err: unknown) {
+      if (isOfflineQueued(err)) {
+        await router.push({ name: 'ReviewList' });
+        return;
+      }
       if (import.meta.env.DEV) {
         console.error('Ошибка при сохранении обзора:', err);
       }

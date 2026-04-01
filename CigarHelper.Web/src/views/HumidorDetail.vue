@@ -353,6 +353,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
   import ProgressBar from 'primevue/progressbar';
@@ -443,6 +444,7 @@
       await loadHumidor();
       await loadAvailableCigars();
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       if (import.meta.env.DEV) {
         console.error('Ошибка при добавлении сигары:', err);
       }
@@ -482,6 +484,7 @@
           });
           await Promise.all([loadHumidor(), loadAvailableCigars()]);
         } catch (err) {
+          if (isOfflineQueued(err)) return;
           if (import.meta.env.DEV) {
             console.error(err);
           }

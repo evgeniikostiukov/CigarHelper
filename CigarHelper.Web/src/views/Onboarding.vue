@@ -394,6 +394,7 @@
   import { ref, reactive, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import InputText from 'primevue/inputtext';
   import Textarea from 'primevue/textarea';
   import InputNumber from 'primevue/inputnumber';
@@ -481,6 +482,7 @@
       step.value = 2;
       await loadCigarBases();
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       if (import.meta.env.DEV) {
         console.error('Failed to create humidor:', err);
       }
@@ -561,6 +563,7 @@
         life: 2000,
       });
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       if (import.meta.env.DEV) {
         console.error('Failed to create cigar:', err);
       }

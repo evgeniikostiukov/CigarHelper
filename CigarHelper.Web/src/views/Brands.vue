@@ -493,6 +493,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import { useConfirm } from 'primevue/useconfirm';
+  import { isOfflineQueued } from '@/services/api';
   import cigarService from '@/services/cigarService';
   import type { Brand } from '@/services/cigarService';
   import DataTable from 'primevue/datatable';
@@ -669,6 +670,7 @@
       closeBrandDialog();
       await loadBrands();
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       if (import.meta.env.DEV) {
         console.error('Ошибка сохранения бренда:', err);
       }
@@ -721,6 +723,7 @@
           toast.add({ severity: 'success', summary: 'Готово', detail: 'Бренд удалён', life: 3000 });
           await loadBrands();
         } catch (err) {
+          if (isOfflineQueued(err)) return;
           if (import.meta.env.DEV) {
             console.error('Ошибка удаления бренда:', err);
           }

@@ -181,6 +181,7 @@
   import axios from 'axios';
   import { useToast } from 'primevue/usetoast';
   import { useConfirm } from 'primevue/useconfirm';
+  import { isOfflineQueued } from '@/services/api';
   import Button from 'primevue/button';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
@@ -303,6 +304,7 @@
             await load();
           }
         } catch (err: unknown) {
+          if (isOfflineQueued(err)) return;
           let detail = 'Не удалось сохранить';
           if (axios.isAxiosError(err)) {
             const data = err.response?.data as { message?: string } | undefined;

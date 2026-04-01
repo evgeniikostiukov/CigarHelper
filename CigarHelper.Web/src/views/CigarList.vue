@@ -245,6 +245,7 @@
   import { useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import cigarService from '../services/cigarService';
   import type { Cigar, CigarImage } from '../services/cigarService';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
@@ -342,6 +343,7 @@
           cigars.value = cigars.value.filter((c) => c.id !== cigar.id);
           toast.add({ severity: 'success', summary: 'Удалено', detail: 'Сигара удалена', life: 3000 });
         } catch (err) {
+          if (isOfflineQueued(err)) return;
           if (import.meta.env.DEV) {
             console.error('Ошибка удаления сигары:', err);
           }
@@ -385,6 +387,7 @@
             life: 3000,
           });
         } catch (err) {
+          if (isOfflineQueued(err)) return;
           if (import.meta.env.DEV) {
             console.error('Ошибка отметки выкуривания:', err);
           }

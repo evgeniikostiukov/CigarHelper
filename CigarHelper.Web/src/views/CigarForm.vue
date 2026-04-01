@@ -515,6 +515,7 @@
   import { ref, computed, onMounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import cigarService from '@/services/cigarService';
   import humidorService from '@/services/humidorService';
   import type { Cigar, CigarBase, Brand, CigarImage } from '@/services/cigarService';
@@ -798,6 +799,10 @@
         }
       }
     } catch (error: unknown) {
+      if (isOfflineQueued(error)) {
+        await router.push({ name: 'CigarList' });
+        return;
+      }
       if (error instanceof Error && error.message === 'BRAND_REQUIRED') {
         errors.value.brandId = 'Выберите бренд из списка';
         saveError.value = 'Укажите бренд.';

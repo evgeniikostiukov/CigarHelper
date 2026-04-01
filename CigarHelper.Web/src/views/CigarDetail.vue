@@ -375,6 +375,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import cigarService from '../services/cigarService';
   import humidorService from '../services/humidorService';
   import type { Cigar } from '../services/cigarService';
@@ -473,6 +474,7 @@
       });
       router.push({ name: 'CigarList' });
     } catch (err) {
+      if (isOfflineQueued(err)) return;
       if (import.meta.env.DEV) {
         console.error('Ошибка при удалении сигары:', err);
       }

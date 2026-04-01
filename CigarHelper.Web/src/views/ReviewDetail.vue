@@ -315,6 +315,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import { isOfflineQueued } from '@/services/api';
   import reviewService from '../services/reviewService';
   import type { Review } from '../services/reviewService';
   import authService from '../services/authService';
@@ -393,6 +394,7 @@
           });
           await router.push({ name: 'ReviewList' });
         } catch (err) {
+          if (isOfflineQueued(err)) return;
           if (import.meta.env.DEV) {
             console.error('Ошибка при удалении обзора:', err);
           }
