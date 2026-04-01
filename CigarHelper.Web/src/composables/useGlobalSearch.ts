@@ -162,7 +162,9 @@ export function useGlobalSearch() {
   });
 
   function onKeydown(e: KeyboardEvent) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    // e.code — физическая позиция клавиши, не зависит от раскладки (работает с кириллицей)
+    const isK = e.code === 'KeyK' || e.key.toLowerCase() === 'k';
+    if ((e.ctrlKey || e.metaKey) && isK) {
       e.preventDefault();
       toggle();
       return;
