@@ -209,6 +209,7 @@
   import { useToast } from 'primevue/usetoast';
   import humidorService from '../services/humidorService';
   import type { Humidor } from '../services/humidorService';
+  import { isOfflineQueued } from '@/services/api';
 
   interface HumidorFormModel {
     name: string;
@@ -292,6 +293,10 @@
       });
       await router.push({ name: 'HumidorList' });
     } catch (err) {
+      if (isOfflineQueued(err)) {
+        await router.push({ name: 'HumidorList' });
+        return;
+      }
       const action = isEdit.value ? 'обновить' : 'создать';
       saveError.value = `Не удалось ${action} хьюмидор. Проверьте данные и попробуйте снова.`;
       if (import.meta.env.DEV) {

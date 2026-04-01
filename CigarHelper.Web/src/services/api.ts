@@ -1,6 +1,17 @@
 import axios, { type AxiosInstance, isAxiosError } from 'axios';
 import { notifyApiError } from './apiErrorNotifier';
 
+export class OfflineQueuedError extends Error {
+  constructor() {
+    super('Request queued for background sync');
+    this.name = 'OfflineQueuedError';
+  }
+}
+
+export function isOfflineQueued(err: unknown): err is OfflineQueuedError {
+  return err instanceof OfflineQueuedError;
+}
+
 const api: AxiosInstance = axios.create({
   baseURL: '/api',
 });
@@ -64,11 +75,23 @@ api.interceptors.response.use(
         });
       }
     } else if (error instanceof Error) {
-      notifyApiError({
-        summary: 'Сеть недоступна',
-        detail: error.message || 'Проверьте подключение и повторите попытку.',
-        severity: 'error',
-      });
+      const method = isAxiosError(error) ? error.config?.method?.toUpperCase() : undefined;
+      const isMutation = method === 'POST' || method === 'PUT' || method === 'DELETE';
+
+      if (!navigator.onLine && isMutation) {
+        notifyApiError({
+          summary: 'Действие в очереди',
+          detail: 'Запрос сохранён и будет отправлен при восстановлении сети.',
+          severity: 'info',
+        });
+        return Promise.reject(new OfflineQueuedError());
+      } else {
+        notifyApiError({
+          summary: 'Сеть недоступна',
+          detail: error.message || 'Проверьте подключение и повторите попытку.',
+          severity: 'error',
+        });
+      }
     }
 
     return Promise.reject(error);
