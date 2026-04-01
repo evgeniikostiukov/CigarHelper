@@ -6,6 +6,43 @@
     <ConfirmDialog />
     <GlobalSearch ref="searchRef" />
 
+    <!-- Офлайн-баннер -->
+    <div
+      v-if="!isOnline"
+      data-testid="offline-banner"
+      class="sticky top-0 z-[60] flex items-center justify-center gap-2 bg-amber-500 px-4 py-2 text-sm font-medium text-amber-950 dark:bg-amber-600 dark:text-amber-50"
+      role="alert">
+      <i class="pi pi-wifi-off text-base" aria-hidden="true" />
+      Вы работаете офлайн
+      <span v-if="pendingCount > 0" class="ml-1 rounded-full bg-amber-800/20 px-2 py-0.5 text-xs">
+        {{ pendingCount }} {{ pendingCount === 1 ? 'действие' : 'действий' }} в очереди
+      </span>
+    </div>
+
+    <!-- Обновление PWA -->
+    <div
+      v-if="needRefresh"
+      data-testid="pwa-update-banner"
+      class="sticky top-0 z-[60] flex items-center justify-center gap-3 bg-sky-600 px-4 py-2 text-sm font-medium text-white dark:bg-sky-700"
+      role="alert">
+      <i class="pi pi-refresh text-base" aria-hidden="true" />
+      Доступна новая версия
+      <Button
+        size="small"
+        severity="contrast"
+        label="Обновить"
+        class="!py-1 !text-xs"
+        @click="applyUpdate" />
+      <Button
+        size="small"
+        text
+        severity="contrast"
+        icon="pi pi-times"
+        class="!py-1"
+        aria-label="Закрыть"
+        @click="dismissUpdate" />
+    </div>
+
     <header
       class="app-header sticky top-0 z-50 border-b border-stone-200/90 bg-white/85 shadow-sm shadow-stone-900/5 backdrop-blur-md dark:border-stone-600/80 dark:bg-stone-800/90 dark:shadow-stone-950/40"
       data-testid="app-header">
@@ -57,6 +94,28 @@
               severity="secondary"
               aria-label="Поиск"
               @click="searchRef?.open()" />
+            <Button
+              v-if="canInstall"
+              data-testid="pwa-install-btn"
+              class="min-h-11 min-w-11 touch-manipulation"
+              icon="pi pi-download"
+              text
+              rounded
+              severity="secondary"
+              aria-label="Установить приложение"
+              title="Установить приложение"
+              @click="install" />
+            <div
+              v-if="pendingCount > 0 && isOnline"
+              data-testid="sync-badge"
+              class="relative flex items-center"
+              :title="`${pendingCount} действий ожидают синхронизации`">
+              <i class="pi pi-sync animate-spin text-lg text-amber-600 dark:text-amber-400" />
+              <span
+                class="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-600 px-1 text-[0.6rem] font-bold text-white">
+                {{ pendingCount }}
+              </span>
+            </div>
             <ThemeToggle />
             <div
               v-if="isAuthenticated"
@@ -132,7 +191,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, ref, watch } from 'vue';
   import { useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import Toast from 'primevue/toast';
@@ -144,6 +203,10 @@
   import { hasRole } from '@/utils/roles';
   import ThemeToggle from '@/components/ThemeToggle.vue';
   import GlobalSearch from '@/components/GlobalSearch.vue';
+  import { useOnlineStatus } from '@/composables/useOnlineStatus';
+  import { usePendingSync } from '@/composables/usePendingSync';
+  import { useInstallPrompt } from '@/composables/useInstallPrompt';
+  import { usePwaUpdate } from '@/composables/usePwaUpdate';
 
   interface MenuItem {
     label: string;
@@ -214,6 +277,39 @@
   const menuItemsVisible = computed(() => menuItems.value.filter((item) => (item.visible ? item.visible() : true)));
 
   const searchRef = ref<InstanceType<typeof GlobalSearch> | null>(null);
+
+  const { isOnline } = useOnlineStatus((online) => {
+    toast.add({
+      summary: online ? 'Соединение восстановлено' : 'Вы офлайн',
+      detail: online
+        ? 'Ожидающие действия будут синхронизированы.'
+        : 'Изменения сохранятся и отправятся при восстановлении сети.',
+      severity: online ? 'success' : 'warn',
+      life: 4000,
+    });
+  });
+
+  const { pendingCount, lastError } = usePendingSync();
+  const { canInstall, install } = useInstallPrompt();
+  const { needRefresh, applyUpdate, dismiss: dismissUpdate } = usePwaUpdate();
+
+  watch(needRefresh, (v) => {
+    if (v) {
+      toast.add({
+        summary: 'Доступно обновление',
+        detail: 'Новая версия приложения готова к установке.',
+        severity: 'info',
+        life: 0,
+        closable: true,
+      });
+    }
+  });
+
+  watch(lastError, (err) => {
+    if (err) {
+      toast.add({ summary: 'Ошибка синхронизации', detail: err, severity: 'error', life: 6000 });
+    }
+  });
 
   const handleLogout = (): void => {
     logout();

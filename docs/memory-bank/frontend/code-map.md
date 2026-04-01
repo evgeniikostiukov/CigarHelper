@@ -49,6 +49,21 @@ Guards: неавторизованный → `/login?redirect=…`; автори
 
 Имена файлов по домену: `dashboardService`, `profileService`, `adminUsersService`, `humidorService`, `reviewService`, `cigarService`, `authService`. Точные пути REST дублировать в документе не обязательно — смотреть вызовы `api.get/post/...` в соответствующих файлах.
 
+## Composables (`src/composables/`)
+
+| Файл | Назначение |
+|------|-----------|
+| `useTheme.ts` | Переключение светлой/тёмной темы (VueUse `useDark`) |
+| `useGlobalSearch.ts` | Глобальный поиск: дебаунс, клавиатурная навигация, шорткат Ctrl+K |
+| `usePwaUpdate.ts` | Prompt for SW update (toast + кнопка «Обновить») |
+| `useOnlineStatus.ts` | Реактивный `isOnline`, callback при переходах |
+| `usePendingSync.ts` | `pendingCount` / `lastError` — слушает postMessage от SW |
+| `useInstallPrompt.ts` | PWA install prompt (`canInstall`, `install()`) |
+
+## Service Worker (`src/sw.ts`)
+
+Custom Workbox SW (стратегия `injectManifest` через `vite-plugin-pwa`): precache build assets, runtime caching API (NetworkFirst / CacheFirst / SWR), BackgroundSync для POST/PUT/DELETE мутаций. Подробности в [workflow.md](./workflow.md#pwa--service-worker).
+
 ## Компоненты
 
 - **CigarDetailDialog**, **CigarBaseEditDialog** — работа с данными сигар/каталога.

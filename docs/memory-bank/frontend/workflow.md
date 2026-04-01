@@ -26,6 +26,57 @@ npm run preview
 
 Для production обычно настраивают обратный прокси или static host так, чтобы префикс `/api` уходил на тот же backend; `baseURL: '/api'` в axios остаётся относительным от origin фронта.
 
+## PWA / Service Worker
+
+Приложение — полноценное PWA: manifest, иконки, установка на домашний экран, офлайн-кеш GET-запросов, BackgroundSync-очередь мутаций.
+
+### Стек
+
+- **`vite-plugin-pwa`** (Workbox), стратегия **`injectManifest`** — кастомный SW в `src/sw.ts`.
+- Override peer `"vite-plugin-pwa": { "vite": "$vite" }` в `package.json` (плагин ещё не объявил peer Vite 8; работает штатно).
+
+### Иконки
+
+Исходник — `public/logo.svg`; генерация в `public/` через `@vite-pwa/assets-generator`:
+
+```bash
+npm run generate:pwa-assets   # pwa-assets-generator (конфиг pwa-assets.config.ts)
+```
+
+Генерирует: `favicon.ico`, `pwa-64x64.png`, `pwa-192x192.png`, `pwa-512x512.png`, `maskable-icon-512x512.png`, `apple-touch-icon-180x180.png`.
+
+### Стратегии кеширования (в `src/sw.ts`)
+
+| Маршрут | Стратегия |
+|---------|-----------|
+| Build assets | **Precache** (Workbox) |
+| `GET /api/(humidors\|cigars\|dashboard\|reviews\|brands)` | **NetworkFirst** (TTL 1h) |
+| `GET /api/cigars/bases/*` | **StaleWhileRevalidate** (TTL 24h) |
+| `GET /api/cigar-images/*/thumbnail\|data` | **CacheFirst** (TTL 30d, max 200) |
+| `GET /api/search` | **NetworkOnly** |
+| `POST/PUT/DELETE /api/*` | **NetworkOnly + BackgroundSync** (очередь `cigar-helper-mutations`, 7 дней) |
+
+### Composables (в `src/composables/`)
+
+| Файл | Назначение |
+|------|-----------|
+| `usePwaUpdate.ts` | Prompt for update (toast «Доступно обновление» + кнопка «Обновить») |
+| `useOnlineStatus.ts` | Реактивный `isOnline`, toast при переходах online/offline |
+| `usePendingSync.ts` | `pendingCount`, `lastError` — postMessage от SW |
+| `useInstallPrompt.ts` | `canInstall`, `install()` — beforeinstallprompt |
+
+### UI (App.vue)
+
+- **Офлайн-баннер**: жёлтый sticky `z-60` при `!isOnline`, показывает число действий в очереди.
+- **Update-баннер**: синий sticky при `needRefresh`, кнопка «Обновить» / «Закрыть».
+- **Sync-badge**: счётчик ожидающих мутаций в шапке (анимированная иконка `pi-sync`).
+- **Install-кнопка**: `pi-download` в шапке, только когда `canInstall === true`.
+
+### Ограничения MVP
+
+- **Зависимые операции**: создание сущности офлайн + последующая привязка к ней — второй запрос может не найти ID при воспроизведении. Пользователь увидит предупреждение.
+- **JWT**: токен может истечь за время офлайна; после синхронизации потребуется re-login.
+
 ### Замечания к сборке
 
 - **Tailwind CSS v4:** не использовать устаревшие утилиты вида `bg-opacity-*` — прозрачность задаётся через слэш (`bg-red-500/70`, `bg-black/0`, `group-hover:bg-black/50`). Иначе при `vite build` возможны предупреждения про неизвестные классы. В `<style>` с `@apply` к кастомной теме из `main.css` может понадобиться `@reference` на этот файл (см. документацию Tailwind v4).
