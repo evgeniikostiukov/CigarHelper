@@ -94,6 +94,12 @@
           :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
           <div
             class="relative z-20 shrink-0 h-48 rounded-t-2xl overflow-hidden border-b border-stone-100 dark:border-stone-700/80 bg-stone-100 dark:bg-stone-800/80">
+            <span
+              v-if="remainingStock(cigar) > 0"
+              class="pointer-events-none absolute right-2 top-2 z-[25] rounded-full bg-stone-900/80 px-2.5 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-[2px] dark:bg-rose-950/85 dark:text-rose-50/95"
+              :data-testid="`cigar-card-qty-badge-${cigar.id}`">
+              {{ remainingStock(cigar) }}&nbsp;шт.
+            </span>
             <Carousel
               :value="cigar.images ?? []"
               :num-visible="1"
@@ -152,6 +158,12 @@
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-600 dark:text-stone-400">
               <span v-if="cigar.size">{{ cigar.size }}</span>
               <span v-if="cigar.strength">{{ cigar.strength }}</span>
+              <span
+                v-if="!cigar.isSmoked"
+                class="font-medium text-rose-900/90 dark:text-rose-200/90"
+                :data-testid="`cigar-card-qty-${cigar.id}`">
+                Остаток: {{ remainingStock(cigar) }}&nbsp;шт.
+              </span>
             </div>
             <div
               class="flex flex-wrap items-center justify-between gap-2 mt-auto pt-2 border-t border-stone-100 dark:border-stone-700/80">
@@ -273,6 +285,18 @@
     return imageSrc(cigarImageRawBytes(img) ?? null);
   }
 
+  /** Остаток для UI: у выкуренной — 0, иначе quantity с бэка или 1. */
+  function remainingStock(cigar: Cigar): number {
+    if (cigar.isSmoked) {
+      return 0;
+    }
+    const q = cigar.quantity;
+    if (q != null && q >= 0) {
+      return q;
+    }
+    return 1;
+  }
+
   function memoKey(cigar: Cigar): (string | number | null | undefined)[] {
     const first = cigar.images?.[0];
     const raw = cigarImageRawBytes(first);
@@ -286,6 +310,8 @@
       cigar.rating,
       cigar.price,
       cigar.humidorId,
+      cigar.quantity,
+      cigar.isSmoked === true ? 1 : 0,
       cigar.images?.length,
       imgRef,
     ];

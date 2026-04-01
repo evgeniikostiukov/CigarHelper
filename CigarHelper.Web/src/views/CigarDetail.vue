@@ -182,6 +182,17 @@
                     {{ cigar.price != null ? `${cigar.price} ₽` : '—' }}
                   </p>
                 </div>
+                <div>
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Остаток
+                  </span>
+                  <p
+                    class="mt-1 text-stone-800 dark:text-stone-200"
+                    data-testid="cigar-detail-quantity">
+                    <template v-if="cigar.isSmoked">0&nbsp;шт. (выкурена)</template>
+                    <template v-else>{{ detailRemainingStock }}&nbsp;шт.</template>
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -402,6 +413,18 @@
       return raw.startsWith('data:') ? raw : `data:image/jpeg;base64,${raw}`;
     }
     return '';
+  });
+
+  const detailRemainingStock = computed(() => {
+    const c = cigar.value;
+    if (!c || c.isSmoked) {
+      return 0;
+    }
+    const q = c.quantity;
+    if (q != null && q >= 0) {
+      return q;
+    }
+    return 1;
   });
 
   function getStrengthLabel(strength: string | null | undefined): string {
