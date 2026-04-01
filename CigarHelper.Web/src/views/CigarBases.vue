@@ -80,7 +80,7 @@
                   @input="onSearch" />
               </IconField>
             </div>
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-2 lg:gap-6">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-3 lg:gap-6">
               <div class="min-w-0">
                 <label
                   for="cigar-bases-filter-brand-input"
@@ -114,6 +114,24 @@
                   placeholder="Все"
                   class="w-full [&_.p-dropdown]:min-h-12 sm:[&_.p-dropdown]:min-h-11"
                   input-id="cigar-bases-filter-strength-input"
+                  :show-clear="true"
+                  @change="onFilterChange" />
+              </div>
+              <div class="min-w-0">
+                <label
+                  for="cigar-bases-filter-moderation-input"
+                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Модерация
+                </label>
+                <Dropdown
+                  v-model="filters.moderation"
+                  data-testid="cigar-bases-filter-moderation"
+                  :options="moderationOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Все"
+                  class="w-full [&_.p-dropdown]:min-h-12 sm:[&_.p-dropdown]:min-h-11"
+                  input-id="cigar-bases-filter-moderation-input"
                   :show-clear="true"
                   @change="onFilterChange" />
               </div>
@@ -241,8 +259,16 @@
             header="Название"
             sortable>
             <template #body="{ data }">
-              <div class="font-semibold text-stone-900 dark:text-rose-50/90">
-                {{ data.name }}
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-stone-900 dark:text-rose-50/90">
+                  {{ data.name }}
+                </span>
+                <span
+                  v-if="data.isModerated === false"
+                  class="shrink-0 rounded-full bg-amber-100/90 px-2 py-0.5 text-[0.65rem] font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200"
+                  title="Не прошла модерацию">
+                  Не модерирована
+                </span>
               </div>
             </template>
           </Column>
@@ -426,6 +452,11 @@
                 <h2 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-rose-50/95">
                   {{ cigar.name }}
                 </h2>
+                <span
+                  v-if="cigar.isModerated === false"
+                  class="mt-1 inline-block rounded-full bg-amber-100/90 px-2 py-0.5 text-[0.65rem] font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+                  Не модерирована
+                </span>
                 <div class="mt-1 flex flex-wrap items-center gap-2">
                   <img
                     v-if="getBrandLogoSrc(cigar)"
@@ -545,6 +576,7 @@
     search: string;
     brand: number | null;
     strength: string | null;
+    moderation: string | null;
   }
 
   interface Pagination {
@@ -575,7 +607,14 @@
     search: '',
     brand: null,
     strength: null,
+    moderation: null,
   });
+
+  const moderationOptions: SelectOption[] = [
+    { label: 'Все', value: 'all' },
+    { label: 'Отмодерированные', value: 'moderated' },
+    { label: 'Неотмодерированные', value: 'unmoderated' },
+  ];
 
   const sortField = ref<string>('name');
   const sortOrder = ref<1 | -1>(1);
@@ -592,7 +631,7 @@
 
   const filtersActive = computed(() => {
     const f = filters.value;
-    return Boolean(f.search?.trim()) || f.brand != null || f.strength != null;
+    return Boolean(f.search?.trim()) || f.brand != null || f.strength != null || f.moderation != null;
   });
 
   /** Байты изображения из инлайн-полей (только DB-хранилище, MinIO не заполняет их). */
@@ -639,7 +678,7 @@
   }
 
   function resetFilters(): void {
-    filters.value = { search: '', brand: null, strength: null };
+    filters.value = { search: '', brand: null, strength: null, moderation: null };
     pagination.value.first = 0;
     if (searchTimeout) {
       clearTimeout(searchTimeout);
@@ -652,7 +691,12 @@
     loading.value = true;
     error.value = null;
     try {
-      const params = {
+      const moderationMap: Record<string, boolean | undefined> = {
+        moderated: true,
+        unmoderated: false,
+      };
+      const isModerated = filters.value.moderation ? moderationMap[filters.value.moderation] : undefined;
+      const params: Record<string, unknown> = {
         page: pagination.value.first / pagination.value.rows + 1,
         pageSize: pagination.value.rows,
         sortField: sortField.value,
@@ -660,6 +704,7 @@
         name: filters.value.search,
         brandId: filters.value.brand,
         strength: filters.value.strength,
+        ...(isModerated !== undefined ? { isModerated } : {}),
       };
       const result: PaginatedResult<CigarBase> = await cigarService.getCigarBasesPaginated(params);
       cigars.value = result.items || [];

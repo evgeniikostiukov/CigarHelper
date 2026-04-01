@@ -27,6 +27,7 @@ public class CigarBaseDto
     public string? Wrapper { get; set; }
     public string? Binder { get; set; }
     public string? Filler { get; set; }
+    public bool IsModerated { get; set; }
     public List<CigarImageDto>? Images { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

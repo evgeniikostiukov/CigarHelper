@@ -26,6 +26,7 @@ export interface CigarBase {
   binder?: string;
   filler?: string;
   description?: string;
+  isModerated?: boolean;
   images?: CigarImage[];
   brandLogoBytes?: string;
   brandLogoUrl?: string;

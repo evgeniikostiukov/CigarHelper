@@ -135,6 +135,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
+                IsModerated = cb.IsModerated,
                 Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
@@ -167,13 +168,18 @@ public class CigarsController : ControllerBase
         [FromQuery] string? search = null,
         [FromQuery] int? brandId = null,
         [FromQuery] string? strength = null,
-        [FromQuery] bool excludeBinaryMedia = false)
+        [FromQuery] bool excludeBinaryMedia = false,
+        [FromQuery] bool? isModerated = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
-        var query = _context.CigarBases
-            .Where(cb => cb.IsModerated); // Только проверенные сигары
+        var query = _context.CigarBases.AsQueryable();
+
+        if (isModerated.HasValue)
+            query = query.Where(cb => cb.IsModerated == isModerated.Value);
+        else
+            query = query.Where(cb => cb.IsModerated);
 
         // Применяем фильтры
         if (!string.IsNullOrWhiteSpace(search))
@@ -239,6 +245,7 @@ public class CigarsController : ControllerBase
                     Wrapper = cb.Wrapper,
                     Binder = cb.Binder,
                     Filler = cb.Filler,
+                    IsModerated = cb.IsModerated,
                     Images = cb.Images
                         .Select(img => new CigarImageDto
                         {
@@ -283,6 +290,7 @@ public class CigarsController : ControllerBase
                     Wrapper = cb.Wrapper,
                     Binder = cb.Binder,
                     Filler = cb.Filler,
+                    IsModerated = cb.IsModerated,
                     Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                         .Select(img => new CigarImageDto
                         {
@@ -892,6 +900,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
+                IsModerated = cb.IsModerated,
                 Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
@@ -920,7 +929,7 @@ public class CigarsController : ControllerBase
         var cigarBase = await _context.CigarBases
             .Include(cb => cb.Brand)
             .Include(cb => cb.Images)
-            .Where(cb => cb.Id == id && cb.IsModerated)
+            .Where(cb => cb.Id == id)
             .Select(cb => new CigarBaseDto
             {
                 Id = cb.Id,
@@ -943,6 +952,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
+                IsModerated = cb.IsModerated,
                 Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
@@ -1085,6 +1095,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
+                IsModerated = cb.IsModerated,
                 Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
