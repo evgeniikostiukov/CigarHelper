@@ -149,4 +149,5 @@
 - **2026-04-02** — PWA `src/sw.ts`: общий `drainMutationQueue` для `onSync`/replay, сериализация drain (без гонок на очереди), в `activate` восстановление `pendingCount` из IndexedDB; уточнён комментарий к GET-эвристике; `docs/memory-bank/frontend/workflow.md` и `code-map.md` обновлены.
 - **2026-04-02** — PWA: вынесен `src/sw-serialized-drain.ts`, `sw.ts` импортирует `runSerializedDrain`; Vitest `src/sw-serialized-drain.test.ts` (порядок задач, устойчивость к reject, проброс ошибки). E2E офлайн-очереди против `vite dev` не добавлялся (SW в dev выключен в `vite.config.js`).
 - **2026-04-02** — E2E PWA: `e2e/tests/pwa-offline-queue.spec.ts` (opt-in: `PLAYWRIGHT_BASE_URL` на 4173 или `E2E_PWA_OFFLINE=1`); в `vite.config.js` добавлен **`preview.proxy`** для `/api`; обновлены `e2e/README.md`, `docs/memory-bank/workflow.md`, `frontend/workflow.md`.
+- **2026-04-02** — E2E PWA: после логина обработан `/onboarding` — клик **`onboarding-cancel`** («Отложить»), иначе menubar не ведёт на хьюмидоры; прогон против preview **4173** + API **5184** — зелёный.
 
