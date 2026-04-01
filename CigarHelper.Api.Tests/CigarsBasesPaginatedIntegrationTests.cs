@@ -133,4 +133,73 @@ public class CigarsBasesPaginatedIntegrationTests
             "/api/cigars/bases/paginated?page=1&pageSize=100&excludeBinaryMedia=true");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
+
+    [Fact]
+    public async Task GetCigarBasesPaginated_WithoutIsModerated_IncludesUnmoderated()
+    {
+        const string unmoderatedName = "Unmoderated Paginated Row";
+        await using var factory = new AuthIntegrationWebAppFactory();
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var brand = new Brand
+            {
+                Name = $"B_um_{Guid.NewGuid():N}"[..16],
+                CreatedAt = DateTime.UtcNow,
+                IsModerated = true
+            };
+            db.Brands.Add(brand);
+            await db.SaveChangesAsync();
+
+            db.CigarBases.Add(new CigarBase
+            {
+                Name = unmoderatedName,
+                BrandId = brand.Id,
+                IsModerated = false,
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"w{Guid.NewGuid():N}"[..11],
+            Email = $"{Guid.NewGuid():N}@y.co",
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(authBody?.Token);
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBody.Token);
+
+        using var allRes = await client.GetAsync(
+            "/api/cigars/bases/paginated?page=1&pageSize=100&excludeBinaryMedia=true");
+        Assert.Equal(HttpStatusCode.OK, allRes.StatusCode);
+        var allPage = await allRes.Content.ReadFromJsonAsync<PaginatedCigarBasesNameRows>(JsonOptions);
+        Assert.NotNull(allPage?.Items);
+        Assert.Contains(allPage.Items, row => row.Name == unmoderatedName && row.IsModerated == false);
+
+        using var moderatedOnlyRes = await client.GetAsync(
+            "/api/cigars/bases/paginated?page=1&pageSize=100&excludeBinaryMedia=true&isModerated=true");
+        Assert.Equal(HttpStatusCode.OK, moderatedOnlyRes.StatusCode);
+        var modPage = await moderatedOnlyRes.Content.ReadFromJsonAsync<PaginatedCigarBasesNameRows>(JsonOptions);
+        Assert.NotNull(modPage?.Items);
+        Assert.DoesNotContain(modPage.Items, row => row.Name == unmoderatedName);
+    }
+
+    private sealed class PaginatedCigarBasesNameRows
+    {
+        public List<CigarBaseNameModerationRow> Items { get; set; } = new();
+    }
+
+    private sealed class CigarBaseNameModerationRow
+    {
+        public string Name { get; set; } = string.Empty;
+        public bool IsModerated { get; set; }
+    }
 }

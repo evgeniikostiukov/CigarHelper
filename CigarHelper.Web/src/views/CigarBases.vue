@@ -691,11 +691,9 @@
     loading.value = true;
     error.value = null;
     try {
-      const moderationMap: Record<string, boolean | undefined> = {
-        moderated: true,
-        unmoderated: false,
-      };
-      const isModerated = filters.value.moderation ? moderationMap[filters.value.moderation] : undefined;
+      const mod = filters.value.moderation;
+      const isModerated =
+        mod === 'moderated' ? true : mod === 'unmoderated' ? false : undefined;
       const params: Record<string, unknown> = {
         page: pagination.value.first / pagination.value.rows + 1,
         pageSize: pagination.value.rows,

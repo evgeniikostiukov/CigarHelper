@@ -178,8 +178,6 @@ public class CigarsController : ControllerBase
 
         if (isModerated.HasValue)
             query = query.Where(cb => cb.IsModerated == isModerated.Value);
-        else
-            query = query.Where(cb => cb.IsModerated);
 
         // Применяем фильтры
         if (!string.IsNullOrWhiteSpace(search))
