@@ -132,7 +132,7 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import Toast from 'primevue/toast';
@@ -156,6 +156,15 @@
   const toast = useToast();
   const { isAuthenticated, user, logout } = useAuth();
 
+  function onKeydown(e: KeyboardEvent): void {
+    if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (isAuthenticated.value) {
+        searchRef.value?.open();
+      }
+    }
+  }
+
   onMounted(() => {
     registerApiErrorNotifier(({ summary, detail, severity }) => {
       toast.add({
@@ -165,6 +174,11 @@
         life: 6000,
       });
     });
+    window.addEventListener('keydown', onKeydown);
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('keydown', onKeydown);
   });
 
   const menuItems = computed<MenuItem[]>(() => [
