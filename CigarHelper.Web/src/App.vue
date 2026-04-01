@@ -26,22 +26,19 @@
           </router-link>
         </template>
         <template #end>
-          <div class="flex items-center gap-2 sm:gap-3">
+          <div class="flex min-w-0 items-center gap-2 sm:gap-3">
             <Button
               v-if="isAuthenticated"
               data-testid="app-nav-search"
-              class="hidden min-h-9 touch-manipulation sm:inline-flex"
+              class="hidden min-h-9 shrink-0 touch-manipulation whitespace-nowrap !rounded-lg sm:inline-flex"
               severity="secondary"
               text
-              rounded
               aria-label="Поиск (Ctrl+K)"
               title="Поиск (Ctrl+K)"
               @click="searchRef?.open()">
-              <template #icon>
-                <i
-                  class="pi pi-search text-sm"
-                  aria-hidden="true" />
-              </template>
+              <i
+                class="pi pi-search text-sm"
+                aria-hidden="true" />
               <span class="ml-1.5 text-sm text-stone-500 dark:text-stone-400">
                 Поиск
                 <kbd
