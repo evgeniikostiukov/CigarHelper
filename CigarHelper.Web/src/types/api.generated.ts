@@ -749,6 +749,7 @@ export interface paths {
           brandId?: number;
           strength?: string;
           excludeBinaryMedia?: boolean;
+          isModerated?: boolean;
         };
         header?: never;
         path?: never;
@@ -2051,6 +2052,7 @@ export interface components {
       wrapper?: string | null;
       binder?: string | null;
       filler?: string | null;
+      isModerated?: boolean;
       images?: components['schemas']['CigarImageDto'][] | null;
       /** Format: date-time */
       createdAt?: string;
@@ -2091,6 +2093,7 @@ export interface components {
       fileSize?: number | null;
       description?: string | null;
       isMain?: boolean;
+      hasThumbnail?: boolean;
       /** Format: int32 */
       cigarBaseId?: number | null;
       /** Format: int32 */
@@ -2098,6 +2101,8 @@ export interface components {
       /** Format: date-time */
       createdAt?: string;
       /** Format: byte */
+      imageData?: string | null;
+      /** @deprecated Use imageData instead */
       data?: string | null;
     };
     CigarResponseDto: {
