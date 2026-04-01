@@ -1,7 +1,7 @@
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
+import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate, NetworkOnly } from 'workbox-strategies';
-import { BackgroundSyncPlugin, Queue } from 'workbox-background-sync';
+import { BackgroundSyncPlugin } from 'workbox-background-sync';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { clientsClaim } from 'workbox-core';
 
@@ -15,6 +15,9 @@ clientsClaim();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
+// SPA fallback: любой навигационный запрос (HTML-страница) → закешированный index.html
+registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')));
+
 // ── Утилита: оповестить всех клиентов ──────────────────────────────────────
 function broadcastToClients(data: Record<string, unknown>) {
   self.clients.matchAll({ type: 'window' }).then((clients) => {
@@ -25,7 +28,7 @@ function broadcastToClients(data: Record<string, unknown>) {
 // ── BackgroundSync: очередь мутаций ────────────────────────────────────────
 let pendingCount = 0;
 
-const mutationQueue = new Queue('cigar-helper-mutations', {
+const bgSyncPlugin = new BackgroundSyncPlugin('cigar-helper-mutations', {
   maxRetentionTime: 7 * 24 * 60, // 7 дней
   onSync: async ({ queue }) => {
     let entry;
@@ -47,10 +50,6 @@ const mutationQueue = new Queue('cigar-helper-mutations', {
     broadcastToClients({ type: 'SYNC_COMPLETE', pendingCount: 0 });
     pendingCount = 0;
   },
-});
-
-const bgSyncPlugin = new BackgroundSyncPlugin('cigar-helper-mutations', {
-  maxRetentionTime: 7 * 24 * 60,
 });
 
 // ── GET /api/(humidors|cigars|dashboard|reviews|brands) → NetworkFirst ─────
