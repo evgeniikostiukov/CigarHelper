@@ -62,7 +62,7 @@ Guards: неавторизованный → `/login?redirect=…`; автори
 
 ## Service Worker (`src/sw.ts`)
 
-Custom Workbox SW (стратегия `injectManifest` через `vite-plugin-pwa`): precache build assets, runtime caching API (NetworkFirst / CacheFirst / SWR), очередь мутаций (Workbox `Queue` + sync/replay), сериализованный drain и синхронизация `pendingCount` в `activate`. Подробности в [workflow.md](./workflow.md#pwa--service-worker).
+Custom Workbox SW (стратегия `injectManifest` через `vite-plugin-pwa`): precache build assets, runtime caching API (NetworkFirst / CacheFirst / SWR), очередь мутаций (Workbox `Queue` + sync/replay), сериализация drain в `sw-serialized-drain.ts`, синхронизация `pendingCount` в `activate`. Подробности в [workflow.md](./workflow.md#pwa--service-worker).
 
 ## Компоненты
 

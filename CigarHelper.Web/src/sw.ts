@@ -4,6 +4,7 @@ import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategi
 import { Queue } from 'workbox-background-sync';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { clientsClaim } from 'workbox-core';
+import { runSerializedDrain } from './sw-serialized-drain';
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -23,18 +24,6 @@ function broadcastToClients(data: Record<string, unknown>) {
 
 // ── Очередь мутаций (Queue напрямую, без BackgroundSyncPlugin) ─────────────
 let pendingCount = 0;
-
-/** Цепочка промисов: два drain не выполняют shiftRequest параллельно. */
-let drainSerial = Promise.resolve();
-
-function runSerializedDrain(fn: () => Promise<void>): Promise<void> {
-  const p = drainSerial.then(() => fn());
-  drainSerial = p.then(
-    () => undefined,
-    () => undefined,
-  );
-  return p;
-}
 
 type WorkboxQueue = InstanceType<typeof Queue>;
 
