@@ -214,8 +214,15 @@ public class CigarImagesController : ControllerBase
             var (origData, origType) = await _imageService.GetImageDataAsync(image, cancellationToken);
             if (origData == null || origData.Length == 0)
                 return NotFound("Данные изображения отсутствуют.");
+
+            if (image.CigarBaseId.HasValue)
+                Response.Headers.CacheControl = "public, max-age=86400";
+
             return File(origData, origType);
         }
+
+        if (image.CigarBaseId.HasValue)
+            Response.Headers.CacheControl = "public, max-age=86400";
 
         return File(thumbData, "image/webp");
     }

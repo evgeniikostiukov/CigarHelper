@@ -565,6 +565,7 @@
   const loading = ref<boolean>(true);
   const error = ref<string | null>(null);
   const cigars = ref<CigarBase[]>([]);
+  const failedImageIds = ref<Set<number>>(new Set());
   const showDetailDialog = ref<boolean>(false);
   const selectedCigar = ref<CigarBase>();
   const showEditDialog = ref<boolean>(false);
@@ -616,6 +617,9 @@
     const img = primaryCigarBaseImage(cigar);
     if (!img) return '';
 
+    // Если изображение уже давало ошибку — показываем плейсхолдер
+    if (img.id && failedImageIds.value.has(img.id)) return '';
+
     // Инлайн-байты (DB-хранилище)
     const raw = cigarImageBytes(img);
     if (raw != null && (typeof raw === 'string' ? raw.length > 0 : raw.length > 0)) {
@@ -630,7 +634,8 @@
   function memoKey(cigar: CigarBase): (string | number | null | undefined)[] {
     const img = primaryCigarBaseImage(cigar);
     const imgKey = img?.id ?? 0;
-    return [cigar.id, cigar.name, cigar.brand?.name, cigar.country, cigar.size, cigar.strength, imgKey];
+    const imgFailed = img?.id ? (failedImageIds.value.has(img.id) ? 1 : 0) : 0;
+    return [cigar.id, cigar.name, cigar.brand?.name, cigar.country, cigar.size, cigar.strength, imgKey, imgFailed];
   }
 
   function resetFilters(): void {
@@ -816,9 +821,16 @@
   function handleImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     if (import.meta.env.DEV) {
-      console.error('Ошибка загрузки изображения:', target.src);
+      console.warn('Не удалось загрузить изображение:', target.src);
     }
-    target.style.display = 'none';
+    // Извлекаем ID из URL /api/cigarimages/{id}/thumbnail и помечаем как упавшее.
+    // Замена Set на новый экземпляр нужна для срабатывания реактивности → v-memo инвалидируется → v-else показывает плейсхолдер.
+    const match = /\/api\/cigarimages\/(\d+)\//.exec(target.src);
+    if (match) {
+      failedImageIds.value = new Set([...failedImageIds.value, Number(match[1])]);
+    } else {
+      target.style.display = 'none';
+    }
   }
 
   async function openSelectedCigarBaseFromQuery(cigarBaseIdParam: unknown): Promise<void> {
