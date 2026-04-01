@@ -94,16 +94,16 @@
               class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
               Поиск
             </label>
-            <span class="p-input-icon-left flex w-full [&_input]:min-h-11 [&_input]:w-full">
-              <i class="pi pi-search text-stone-400" />
+            <IconField class="w-full">
+              <InputIcon class="pi pi-search text-stone-400" />
               <InputText
                 id="brands-search"
                 v-model="filters.search"
                 data-testid="brands-filter-search"
-                class="w-full"
+                class="w-full min-h-11"
                 placeholder="Название бренда…"
                 @input="applyFilters" />
-            </span>
+            </IconField>
           </div>
           <div class="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
             <div class="min-w-[min(100%,12rem)] flex-1 sm:flex-initial">

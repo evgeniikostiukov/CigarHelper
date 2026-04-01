@@ -232,19 +232,19 @@
                     class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
                     Поиск по базе
                   </label>
-                  <span class="p-input-icon-left flex w-full [&_input]:w-full [&_input]:min-h-12 sm:[&_input]:min-h-11">
-                    <i
+                  <IconField class="w-full">
+                    <InputIcon
                       class="pi pi-search text-stone-400"
                       aria-hidden="true" />
                     <InputText
                       id="onboarding-cigar-search"
                       v-model="search"
                       data-testid="onboarding-cigar-search"
-                      class="w-full"
+                      class="w-full min-h-12 sm:min-h-11"
                       placeholder="Название или бренд…"
                       autocomplete="off"
                       @input="onSearchChanged" />
-                  </span>
+                  </IconField>
                 </div>
                 <div class="flex flex-col gap-2">
                   <label class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400"> Действия </label>

@@ -66,19 +66,19 @@
                 class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
                 Поиск
               </label>
-              <span class="p-input-icon-left flex w-full [&_input]:w-full [&_input]:min-h-12 sm:[&_input]:min-h-11">
-                <i
+              <IconField class="w-full">
+                <InputIcon
                   class="pi pi-search text-stone-400"
                   aria-hidden="true" />
                 <InputText
                   id="cigar-bases-search"
                   v-model="filters.search"
                   placeholder="Название или бренд..."
-                  class="w-full"
+                  class="w-full min-h-12 sm:min-h-11"
                   data-testid="cigar-bases-search"
                   autocomplete="off"
                   @input="onSearch" />
-              </span>
+              </IconField>
             </div>
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-2 lg:gap-6">
               <div class="min-w-0">

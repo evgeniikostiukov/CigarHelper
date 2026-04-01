@@ -66,16 +66,16 @@
               class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
               Поиск
             </label>
-            <span class="p-input-icon-left flex w-full [&_input]:min-h-11 [&_input]:w-full">
-              <i class="pi pi-search text-stone-400" />
+            <IconField class="w-full">
+              <InputIcon class="pi pi-search text-stone-400" />
               <InputText
                 id="admin-users-search"
                 v-model="search"
                 data-testid="admin-users-search"
-                class="w-full"
+                class="w-full min-h-11"
                 placeholder="Имя или email…"
                 @keyup.enter="applySearch" />
-            </span>
+            </IconField>
           </div>
           <Button
             data-testid="admin-users-search-submit"
