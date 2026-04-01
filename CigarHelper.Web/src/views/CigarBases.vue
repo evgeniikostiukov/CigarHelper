@@ -594,7 +594,7 @@
     return Boolean(f.search?.trim()) || f.brand != null || f.strength != null;
   });
 
-  /** Пиксели: API отдаёт `CigarImageDto.Data` как `data`, а не `imageData`. */
+  /** Байты изображения из инлайн-полей (только DB-хранилище, MinIO не заполняет их). */
   function cigarImageBytes(img: CigarImage | undefined): string | number[] | undefined {
     if (!img) {
       return undefined;
@@ -602,32 +602,35 @@
     return img.imageData ?? img.data;
   }
 
+  /** Находит лучшее изображение для отображения: с байтами или по id (MinIO). */
   function primaryCigarBaseImage(cigar: CigarBase): CigarImage | undefined {
     const list = cigar.images;
     if (!list?.length) {
       return undefined;
     }
-    const withBytes = list.filter((i) => {
-      const p = cigarImageBytes(i);
-      return p != null && (typeof p === 'string' ? p.length > 0 : p.length > 0);
-    });
-    if (!withBytes.length) {
-      return undefined;
-    }
-    const main = withBytes.find((i) => i.isMain);
-    return main ?? withBytes[0];
+    const main = list.find((i) => i.isMain);
+    return main ?? list[0];
   }
 
   function cigarBaseThumbnailSrc(cigar: CigarBase): string {
-    const raw = cigarImageBytes(primaryCigarBaseImage(cigar));
-    const b64 = arrayBufferToBase64(raw ?? undefined);
-    return b64 ? `data:image/jpeg;base64,${b64}` : '';
+    const img = primaryCigarBaseImage(cigar);
+    if (!img) return '';
+
+    // Инлайн-байты (DB-хранилище)
+    const raw = cigarImageBytes(img);
+    if (raw != null && (typeof raw === 'string' ? raw.length > 0 : raw.length > 0)) {
+      const b64 = arrayBufferToBase64(raw);
+      return b64 ? `data:image/jpeg;base64,${b64}` : '';
+    }
+
+    // MinIO / внешнее хранилище — используем публичный API-эндпоинт
+    return img.id ? `/api/cigarimages/${img.id}/thumbnail` : '';
   }
 
   function memoKey(cigar: CigarBase): (string | number | null | undefined)[] {
-    const raw = cigarImageBytes(primaryCigarBaseImage(cigar));
-    const imgLen = raw == null ? 0 : typeof raw === 'string' ? raw.length : raw.length;
-    return [cigar.id, cigar.name, cigar.brand?.name, cigar.country, cigar.size, cigar.strength, imgLen];
+    const img = primaryCigarBaseImage(cigar);
+    const imgKey = img?.id ?? 0;
+    return [cigar.id, cigar.name, cigar.brand?.name, cigar.country, cigar.size, cigar.strength, imgKey];
   }
 
   function resetFilters(): void {

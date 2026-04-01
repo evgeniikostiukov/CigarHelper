@@ -3,11 +3,15 @@ import api from './api';
 export interface CigarImage {
   id: number;
   isMain: boolean;
-  /** С бэкенда CigarImageDto.ContentType */
   contentType?: string | null;
-  /** Личные сигары / часть ответов */
+  fileName?: string | null;
+  fileSize?: number | null;
+  hasThumbnail?: boolean;
+  cigarBaseId?: number | null;
+  userCigarId?: number | null;
+  /** Инлайн-байты (только DB-хранилище, при MinIO = null) */
   imageData?: string;
-  /** CigarImageDto с бэкенда: `Data` → в JSON `data` (base64 или массив байт после десериализации) */
+  /** Устаревшее поле: CigarImageDto.Data */
   data?: string | number[];
 }
 

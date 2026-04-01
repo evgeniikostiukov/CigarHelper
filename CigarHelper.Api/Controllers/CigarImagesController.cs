@@ -168,17 +168,21 @@ public class CigarImagesController : ControllerBase
         });
     }
 
-    /// <summary>Отдаёт бинарные данные полного изображения.</summary>
+    /// <summary>Отдаёт бинарные данные полного изображения. CigarBase-изображения публичны; UserCigar — только владелец или staff.</summary>
     [HttpGet("{id}/data")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetImageData(int id, CancellationToken cancellationToken)
     {
         var image = await _context.CigarImages.AsNoTracking().FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
         if (image == null) return NotFound();
 
-        var userId = GetCurrentUserId();
-        if (image.UserCigarId.HasValue && !IsStaff() &&
-            !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
-            return NotFound();
+        if (image.UserCigarId.HasValue)
+        {
+            if (User.Identity?.IsAuthenticated != true) return Unauthorized();
+            var userId = GetCurrentUserId();
+            if (!IsStaff() && !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
+                return NotFound();
+        }
 
         var (data, contentType) = await _imageService.GetImageDataAsync(image, cancellationToken);
         if (data == null || data.Length == 0)
@@ -187,17 +191,21 @@ public class CigarImagesController : ControllerBase
         return File(data, contentType);
     }
 
-    /// <summary>Отдаёт миниатюру изображения (WebP, 320×320 max).</summary>
+    /// <summary>Отдаёт миниатюру изображения (WebP, 320×320 max). CigarBase-изображения публичны; UserCigar — только владелец или staff.</summary>
     [HttpGet("{id}/thumbnail")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetThumbnail(int id, CancellationToken cancellationToken)
     {
         var image = await _context.CigarImages.AsNoTracking().FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
         if (image == null) return NotFound();
 
-        var userId = GetCurrentUserId();
-        if (image.UserCigarId.HasValue && !IsStaff() &&
-            !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
-            return NotFound();
+        if (image.UserCigarId.HasValue)
+        {
+            if (User.Identity?.IsAuthenticated != true) return Unauthorized();
+            var userId = GetCurrentUserId();
+            if (!IsStaff() && !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
+                return NotFound();
+        }
 
         var thumbData = await _imageService.GetThumbnailDataAsync(image, cancellationToken);
         if (thumbData == null || thumbData.Length == 0)
