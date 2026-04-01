@@ -12,8 +12,11 @@ export function isOfflineQueued(err: unknown): err is OfflineQueuedError {
   return err instanceof OfflineQueuedError;
 }
 
+// fetch — чтобы запросы шли через Service Worker (очередь офлайн-мутаций).
+// По умолчанию Axios в браузере использует XHR, который SW не видит.
 const api: AxiosInstance = axios.create({
   baseURL: '/api',
+  adapter: 'fetch',
 });
 
 // Add a request interceptor to include the auth token in every request

@@ -56,6 +56,8 @@ npm run generate:pwa-assets   # pwa-assets-generator (конфиг pwa-assets.co
 | `GET /api/search` | **NetworkOnly** |
 | `POST/PUT/DELETE /api/*` | **NetworkOnly + BackgroundSync** (очередь `cigar-helper-mutations`, 7 дней) |
 
+Экземпляр Axios в **`src/services/api.ts`** должен использовать **`adapter: 'fetch'`**: по умолчанию в браузере идёт XHR, который Service Worker не перехватывает, поэтому мутации не попадали бы в очередь.
+
 ### Composables (в `src/composables/`)
 
 | Файл | Назначение |
