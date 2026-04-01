@@ -92,6 +92,18 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
+    /** Для E2E PWA (`npm run build && npm run preview`) — тот же прокси `/api`, что и в dev. */
+    preview: {
+      host: true,
+      port: 4173,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5184',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
     build: {
       rollupOptions: {
         output: {

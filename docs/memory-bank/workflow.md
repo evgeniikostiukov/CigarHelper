@@ -113,6 +113,8 @@ dotnet test CigarHelper.sln
 
 **Базовый URL фронта:** по умолчанию `http://localhost:3000`; переопределение: `PLAYWRIGHT_BASE_URL`.
 
+**PWA / офлайн-очередь:** спек **`e2e/tests/pwa-offline-queue.spec.ts`** требует **`npm run build && npm run preview`** в `CigarHelper.Web` (порт **4173**, прокси `/api` → 5184 в `vite.config.js`) и не выполняется при базовом URL на **3000** (тест помечается *skipped*), если не задан **`E2E_PWA_OFFLINE=1`**.
+
 Детали по фронту и прокси: [frontend/workflow.md](./frontend/workflow.md).
 
 ## Продакшен

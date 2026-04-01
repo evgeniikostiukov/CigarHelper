@@ -22,6 +22,7 @@ npx playwright install chromium
 
 - **`tests/smoke.spec.ts`** — главная без логина (`data-testid="app"`).
 - **`tests/smoke-journey.spec.ts`** — регистрация через UI (уникальный email/username) **или** вход по переменным **`E2E_EMAIL`** и **`E2E_PASSWORD`** (обе заданы — регистрация не выполняется). Далее: хьюмидоры → форма создания → назад, «Мои сигары», «Обзоры», прямой переход на `/cigar-bases` (таблица / пусто / ошибка API).
+- **`tests/pwa-offline-queue.spec.ts`** — очередь мутаций в Service Worker (toast «Действие в очереди»). **Не** гоняется при обычном `npm test` на порту 3000: нужен **собранный** фронт и **`vite preview`** (порт **4173**), т.к. в `vite dev` PWA выключен. Условия запуска: **`PLAYWRIGHT_BASE_URL` с портом 4173** или **`E2E_PWA_OFFLINE=1`**. Порядок: API на 5184 → `cd CigarHelper.Web && npm run build && npm run preview` → `PLAYWRIGHT_BASE_URL=http://localhost:4173 npx playwright test tests/pwa-offline-queue.spec.ts`.
 
 ## Запуск
 

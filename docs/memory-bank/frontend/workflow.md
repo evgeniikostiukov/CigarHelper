@@ -169,4 +169,4 @@ type RawDto = components['schemas']['CigarResponseDto'];
 Интеграционные браузерные тесты живут в корневом каталоге **`e2e/`** (не внутри `CigarHelper.Web`). Краткая инструкция: **[`e2e/README.md`](../../../e2e/README.md)**. Полный порядок «БД → API → Vite → `npm test` в `e2e/`» и заметки про тестового пользователя и env — в **[`docs/memory-bank/workflow.md`](../workflow.md)** (раздел «E2E (Playwright)»).
 
 - **Фронт:** `http://localhost:3000` (`npm run dev`).
-- **API:** прокси с фронта на **`http://localhost:5184`** (см. `vite.config.js`); при смене порта API обновить `server.proxy['/api'].target`.
+- **API:** прокси с фронта на **`http://localhost:5184`** (см. `vite.config.js`); при смене порта API обновить `server.proxy['/api'].target` и **`preview.proxy['/api'].target`** (для `vite preview` и E2E PWA).
