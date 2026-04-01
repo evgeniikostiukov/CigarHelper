@@ -1,4 +1,5 @@
 using CigarHelper.Api.Helpers;
+using CigarHelper.Api.Models;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -803,7 +804,7 @@ public class CigarsController : ControllerBase
 
     [HttpPost("bases")]
     [Authorize]
-    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase(CreateCigarBaseRequest request)
+    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase([FromForm] CreateCigarBaseFormRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -843,27 +844,24 @@ public class CigarsController : ControllerBase
         _context.CigarBases.Add(cigarBase);
         await _context.SaveChangesAsync();
 
-        // Обрабатываем изображения по ссылкам
-        if (request.ImageUrls != null && request.ImageUrls.Any())
+        // Загружаем файлы изображений
+        if (request.NewImages != null)
         {
-            foreach (var imageUrl in request.ImageUrls)
+            foreach (var item in request.NewImages)
             {
-                if (!string.IsNullOrWhiteSpace(imageUrl))
-                {
-                    var imageBytes = await ImageDownloader.DownloadImageAsync(imageUrl);
-                    if (imageBytes != null)
-                    {
-                        var isMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain);
-                        await _imageService.SaveImageAsync(
-                            imageData: imageBytes,
-                            contentType: GetContentTypeFromUrl(imageUrl),
-                            fileName: GetFileNameFromUrl(imageUrl),
-                            description: null,
-                            isMain: isMain,
-                            cigarBaseId: cigarBase.Id,
-                            userCigarId: null);
-                    }
-                }
+                if (item.File is not { Length: > 0 }) continue;
+
+                var imageBytes = await ReadFormFileAsync(item.File);
+                var isMain = item.IsMain ||
+                             !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain);
+                await _imageService.SaveImageAsync(
+                    imageData: imageBytes,
+                    contentType: item.File.ContentType,
+                    fileName: item.File.FileName,
+                    description: null,
+                    isMain: isMain,
+                    cigarBaseId: cigarBase.Id,
+                    userCigarId: null);
             }
         }
 
@@ -972,7 +970,7 @@ public class CigarsController : ControllerBase
 
     [HttpPut("bases/{id}")]
     [Authorize]
-    public async Task<ActionResult<CigarBaseDto>> UpdateCigarBase(int id, [FromForm]UpdateCigarBaseRequest request)
+    public async Task<ActionResult<CigarBaseDto>> UpdateCigarBase(int id, [FromForm] UpdateCigarBaseFormRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -1013,35 +1011,32 @@ public class CigarsController : ControllerBase
         cigarBase.Filler = request.Filler;
         cigarBase.UpdatedAt = DateTime.UtcNow;
 
-        // Обрабатываем новые изображения по ссылкам
-        if (request.ImageUrlsToAdd != null && request.ImageUrlsToAdd.Any())
+        // Загружаем новые файлы изображений
+        if (request.NewImages != null)
         {
-            foreach (var imageUrl in request.ImageUrlsToAdd)
+            foreach (var item in request.NewImages)
             {
-                if (!string.IsNullOrWhiteSpace(imageUrl))
-                {
-                    var imageBytes = await ImageDownloader.DownloadImageAsync(imageUrl);
-                    if (imageBytes != null)
-                    {
-                        var isMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain);
-                        await _imageService.SaveImageAsync(
-                            imageData: imageBytes,
-                            contentType: GetContentTypeFromUrl(imageUrl),
-                            fileName: GetFileNameFromUrl(imageUrl),
-                            description: null,
-                            isMain: isMain,
-                            cigarBaseId: cigarBase.Id,
-                            userCigarId: null);
-                    }
-                }
+                if (item.File is not { Length: > 0 }) continue;
+
+                var imageBytes = await ReadFormFileAsync(item.File);
+                var isMain = item.IsMain ||
+                             !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain);
+                await _imageService.SaveImageAsync(
+                    imageData: imageBytes,
+                    contentType: item.File.ContentType,
+                    fileName: item.File.FileName,
+                    description: null,
+                    isMain: isMain,
+                    cigarBaseId: cigarBase.Id,
+                    userCigarId: null);
             }
         }
 
         // Удаляем изображения, если указаны
-        if (request.ImageIdsToRemove != null && request.ImageIdsToRemove.Any())
+        if (request.ImageIdsToDelete != null && request.ImageIdsToDelete.Any())
         {
             var imagesToRemove = cigarBase.Images
-                .Where(img => request.ImageIdsToRemove.Contains(img.Id))
+                .Where(img => request.ImageIdsToDelete.Contains(img.Id))
                 .ToList();
 
             foreach (var image in imagesToRemove)
@@ -1050,17 +1045,14 @@ public class CigarsController : ControllerBase
             }
         }
 
-        // Обновляем главное изображение, если указано
-        if (request.MainImageId.HasValue)
+        // Обновляем флаг IsMain по состоянию, переданному фронтендом
+        if (request.ExistingImages != null && request.ExistingImages.Any())
         {
-            var mainImage = cigarBase.Images.FirstOrDefault(img => img.Id == request.MainImageId.Value);
-            if (mainImage != null)
+            var mainId = request.ExistingImages.FirstOrDefault(e => e.IsMain)?.Id;
+            if (mainId.HasValue)
             {
-                // Сбрасываем флаг IsMain у всех изображений
                 foreach (var img in cigarBase.Images)
-                {
-                    img.IsMain = (img.Id == request.MainImageId.Value);
-                }
+                    img.IsMain = img.Id == mainId.Value;
             }
         }
 
@@ -1149,5 +1141,12 @@ public class CigarsController : ControllerBase
         }
 
         return "image/jpeg"; // По умолчанию
+    }
+
+    private static async Task<byte[]> ReadFormFileAsync(IFormFile file)
+    {
+        using var ms = new MemoryStream();
+        await file.CopyToAsync(ms);
+        return ms.ToArray();
     }
 }
