@@ -65,7 +65,7 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null)
+                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -77,7 +77,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
@@ -131,7 +131,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
-                Images = cb.Images.Where(img => img.ImageData != null)
+                Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -143,7 +143,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
                 UpdatedAt = cb.UpdatedAt
@@ -247,7 +247,7 @@ public class CigarsController : ControllerBase
                             CigarBaseId = img.CigarBaseId,
                             UserCigarId = img.UserCigarId,
                             CreatedAt = img.CreatedAt,
-                            Data = null
+                            HasThumbnail = false
                         }).ToList(),
                     CreatedAt = cb.CreatedAt,
                     UpdatedAt = cb.UpdatedAt
@@ -279,7 +279,7 @@ public class CigarsController : ControllerBase
                     Wrapper = cb.Wrapper,
                     Binder = cb.Binder,
                     Filler = cb.Filler,
-                    Images = cb.Images.Where(img => img.ImageData != null)
+                    Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                         .Select(img => new CigarImageDto
                         {
                             Id = img.Id,
@@ -291,7 +291,7 @@ public class CigarsController : ControllerBase
                             CigarBaseId = img.CigarBaseId,
                             UserCigarId = img.UserCigarId,
                             CreatedAt = img.CreatedAt,
-                            Data = img.ImageData
+                            HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                         }).ToList(),
                     CreatedAt = cb.CreatedAt,
                     UpdatedAt = cb.UpdatedAt
@@ -355,7 +355,7 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null)
+                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -367,7 +367,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
@@ -516,7 +516,7 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null)
+                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -528,7 +528,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
@@ -643,7 +643,7 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null)
+                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -655,7 +655,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
@@ -753,7 +753,7 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null)
+                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -765,7 +765,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 UserId = uc.UserId,
                 CreatedAt = uc.CreatedAt,
@@ -897,7 +897,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
-                Images = cb.Images.Where(img => img.ImageData != null)
+                Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -909,7 +909,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
                 UpdatedAt = cb.UpdatedAt
@@ -948,7 +948,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
-                Images = cb.Images.Where(img => img.ImageData != null)
+                Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -960,7 +960,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
                 UpdatedAt = cb.UpdatedAt
@@ -1099,7 +1099,7 @@ public class CigarsController : ControllerBase
                 Wrapper = cb.Wrapper,
                 Binder = cb.Binder,
                 Filler = cb.Filler,
-                Images = cb.Images.Where(img => img.ImageData != null)
+                Images = cb.Images.Where(img => img.ImageData != null || img.StoragePath != null)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -1111,7 +1111,7 @@ public class CigarsController : ControllerBase
                         CigarBaseId = img.CigarBaseId,
                         UserCigarId = img.UserCigarId,
                         CreatedAt = img.CreatedAt,
-                        Data = img.ImageData
+                        HasThumbnail = img.ThumbnailData != null || img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
                 UpdatedAt = cb.UpdatedAt

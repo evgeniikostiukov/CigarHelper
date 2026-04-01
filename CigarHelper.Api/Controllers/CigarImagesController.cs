@@ -1,7 +1,7 @@
-using System.IO;
 using System.Security.Claims;
 using CigarHelper.Api.Helpers;
 using CigarHelper.Api.Options;
+using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
@@ -20,11 +20,16 @@ public class CigarImagesController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly ImageUploadOptions _uploadOptions;
+    private readonly IImageService _imageService;
 
-    public CigarImagesController(AppDbContext context, IOptions<ImageUploadOptions> uploadOptions)
+    public CigarImagesController(
+        AppDbContext context,
+        IOptions<ImageUploadOptions> uploadOptions,
+        IImageService imageService)
     {
         _context = context;
         _uploadOptions = uploadOptions.Value;
+        _imageService = imageService;
     }
 
     private int GetCurrentUserId()
@@ -36,10 +41,10 @@ public class CigarImagesController : ControllerBase
     private bool IsStaff() =>
         User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator));
 
-    private async Task<bool> UserOwnsUserCigarAsync(int userCigarId, int userId, CancellationToken cancellationToken) =>
-        await _context.UserCigars.AnyAsync(uc => uc.Id == userCigarId && uc.UserId == userId, cancellationToken);
+    private async Task<bool> UserOwnsUserCigarAsync(int userCigarId, int userId, CancellationToken ct) =>
+        await _context.UserCigars.AnyAsync(uc => uc.Id == userCigarId && uc.UserId == userId, ct);
 
-    /// <summary>Скачивает изображение по URL и сохраняет как CigarImage (только staff; для UI редактирования базы).</summary>
+    /// <summary>Скачивает изображение по URL и сохраняет (только staff).</summary>
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<object>> UploadCigarImageByUrl(
         [FromBody] UploadCigarImageByUrlRequest request,
@@ -77,19 +82,15 @@ public class CigarImagesController : ControllerBase
                 out var validateError))
             return BadRequest(validateError);
 
-        var cigarImage = new CigarImage
-        {
-            CigarBaseId = request.CigarBaseId,
-            FileName = GetFileNameFromUrl(url),
-            ContentType = contentType,
-            FileSize = imageBytes.Length,
-            ImageData = imageBytes,
-            IsMain = false,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.CigarImages.Add(cigarImage);
-        await _context.SaveChangesAsync(cancellationToken);
+        var cigarImage = await _imageService.SaveImageAsync(
+            imageData: imageBytes,
+            contentType: contentType,
+            fileName: GetFileNameFromUrl(url),
+            description: null,
+            isMain: false,
+            cigarBaseId: request.CigarBaseId,
+            userCigarId: null,
+            ct: cancellationToken);
 
         return Ok(new { id = cigarImage.Id });
     }
@@ -118,22 +119,26 @@ public class CigarImagesController : ControllerBase
         if (userCigarId.HasValue)
             query = query.Where(ci => ci.UserCigarId == userCigarId);
 
-        var images = await query.ToListAsync(cancellationToken);
-        
-        return Ok(images.Select(image => new CigarImageDto
-        {
-            Id = image.Id,
-            FileName = image.FileName,
-            ContentType = image.ContentType,
-            FileSize = image.FileSize,
-            Description = image.Description,
-            IsMain = image.IsMain,
-            CigarBaseId = image.CigarBaseId,
-            UserCigarId = image.UserCigarId,
-            CreatedAt = image.CreatedAt
-        }));
+        // Не выбираем бинарные данные в списке — только метаданные
+        var images = await query
+            .Select(ci => new CigarImageDto
+            {
+                Id = ci.Id,
+                FileName = ci.FileName,
+                ContentType = ci.ContentType,
+                FileSize = ci.FileSize,
+                Description = ci.Description,
+                IsMain = ci.IsMain,
+                CigarBaseId = ci.CigarBaseId,
+                UserCigarId = ci.UserCigarId,
+                CreatedAt = ci.CreatedAt,
+                HasThumbnail = ci.ThumbnailData != null || ci.ThumbnailPath != null
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(images);
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult<CigarImageDto>> GetCigarImage(int id, CancellationToken cancellationToken)
     {
@@ -148,7 +153,7 @@ public class CigarImagesController : ControllerBase
             !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
             return NotFound();
 
-        var imageDto = new CigarImageDto
+        return Ok(new CigarImageDto
         {
             Id = image.Id,
             FileName = image.FileName,
@@ -158,12 +163,55 @@ public class CigarImagesController : ControllerBase
             IsMain = image.IsMain,
             CigarBaseId = image.CigarBaseId,
             UserCigarId = image.UserCigarId,
-            CreatedAt = image.CreatedAt
-        };
-        
-        return Ok(imageDto);
+            CreatedAt = image.CreatedAt,
+            HasThumbnail = image.ThumbnailData != null || image.ThumbnailPath != null
+        });
     }
-    
+
+    /// <summary>Отдаёт бинарные данные полного изображения.</summary>
+    [HttpGet("{id}/data")]
+    public async Task<IActionResult> GetImageData(int id, CancellationToken cancellationToken)
+    {
+        var image = await _context.CigarImages.AsNoTracking().FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
+        if (image == null) return NotFound();
+
+        var userId = GetCurrentUserId();
+        if (image.UserCigarId.HasValue && !IsStaff() &&
+            !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
+            return NotFound();
+
+        var (data, contentType) = await _imageService.GetImageDataAsync(image, cancellationToken);
+        if (data == null || data.Length == 0)
+            return NotFound("Бинарные данные изображения отсутствуют.");
+
+        return File(data, contentType);
+    }
+
+    /// <summary>Отдаёт миниатюру изображения (WebP, 320×320 max).</summary>
+    [HttpGet("{id}/thumbnail")]
+    public async Task<IActionResult> GetThumbnail(int id, CancellationToken cancellationToken)
+    {
+        var image = await _context.CigarImages.AsNoTracking().FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
+        if (image == null) return NotFound();
+
+        var userId = GetCurrentUserId();
+        if (image.UserCigarId.HasValue && !IsStaff() &&
+            !await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
+            return NotFound();
+
+        var thumbData = await _imageService.GetThumbnailDataAsync(image, cancellationToken);
+        if (thumbData == null || thumbData.Length == 0)
+        {
+            // Если миниатюры нет — возвращаем оригинал
+            var (origData, origType) = await _imageService.GetImageDataAsync(image, cancellationToken);
+            if (origData == null || origData.Length == 0)
+                return NotFound("Данные изображения отсутствуют.");
+            return File(origData, origType);
+        }
+
+        return File(thumbData, "image/webp");
+    }
+
     [HttpPost]
     public async Task<ActionResult<CigarImageDto>> CreateCigarImage(
         CreateCigarImageRequest request,
@@ -180,9 +228,7 @@ public class CigarImagesController : ControllerBase
 
         if (request.CigarBaseId.HasValue)
         {
-            if (!staff)
-                return Forbid();
-
+            if (!staff) return Forbid();
             var cigarBase = await _context.CigarBases.FindAsync(new object[] { request.CigarBaseId.Value }, cancellationToken);
             if (cigarBase == null)
                 return NotFound($"CigarBase с ID {request.CigarBaseId} не найден");
@@ -210,66 +256,21 @@ public class CigarImagesController : ControllerBase
         if (request.ImageData is { Length: > 0 } data && string.IsNullOrWhiteSpace(contentType))
             contentType = ImageBinaryValidator.SuggestContentType(data);
 
-        // Если это главное изображение, отменяем флаг IsMain у других изображений
-        if (request.IsMain)
-        {
-            if (request.CigarBaseId.HasValue)
-            {
-                var existingMainImages = await _context.CigarImages
-                    .Where(ci => ci.CigarBaseId == request.CigarBaseId.Value && ci.IsMain)
-                    .ToListAsync();
-                
-                foreach (var img in existingMainImages)
-                {
-                    img.IsMain = false;
-                }
-            }
-            
-            if (request.UserCigarId.HasValue)
-            {
-                var existingMainImages = await _context.CigarImages
-                    .Where(ci => ci.UserCigarId == request.UserCigarId.Value && ci.IsMain)
-                    .ToListAsync();
-                
-                foreach (var img in existingMainImages)
-                {
-                    img.IsMain = false;
-                }
-            }
-        }
-        
-        // Создаем новое изображение
-        var cigarImage = new CigarImage
-        {
-            FileName = request.FileName,
-            ContentType = contentType,
-            FileSize = request.ImageData?.Length ?? request.FileSize,
-            ImageData = request.ImageData,
-            Description = request.Description,
-            IsMain = request.IsMain,
-            CigarBaseId = request.CigarBaseId,
-            UserCigarId = request.UserCigarId
-        };
-        
-        _context.CigarImages.Add(cigarImage);
-        await _context.SaveChangesAsync(cancellationToken);
-        
-        var imageDto = new CigarImageDto
-        {
-            Id = cigarImage.Id,
-            FileName = cigarImage.FileName,
-            ContentType = cigarImage.ContentType,
-            FileSize = cigarImage.FileSize,
-            Description = cigarImage.Description,
-            IsMain = cigarImage.IsMain,
-            CigarBaseId = cigarImage.CigarBaseId,
-            UserCigarId = cigarImage.UserCigarId,
-            CreatedAt = cigarImage.CreatedAt
-        };
-        
-        return CreatedAtAction(nameof(GetCigarImage), new { id = imageDto.Id }, imageDto);
+        await ClearMainFlagIfNeededAsync(request.IsMain, request.CigarBaseId, request.UserCigarId, null, cancellationToken);
+
+        var cigarImage = await _imageService.SaveImageAsync(
+            imageData: request.ImageData,
+            contentType: contentType,
+            fileName: request.FileName,
+            description: request.Description,
+            isMain: request.IsMain,
+            cigarBaseId: request.CigarBaseId,
+            userCigarId: request.UserCigarId,
+            ct: cancellationToken);
+
+        return CreatedAtAction(nameof(GetCigarImage), new { id = cigarImage.Id }, ToDto(cigarImage));
     }
-    
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCigarImage(
         int id,
@@ -277,13 +278,10 @@ public class CigarImagesController : ControllerBase
         CancellationToken cancellationToken)
     {
         var cigarImage = await _context.CigarImages.FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
-
-        if (cigarImage == null)
-            return NotFound();
+        if (cigarImage == null) return NotFound();
 
         var access = await ResolveImageAccessAsync(cigarImage, cancellationToken);
-        if (!access.CanMutate)
-            return access.FailResult!;
+        if (!access.CanMutate) return access.FailResult!;
 
         if (request.ImageData != null)
         {
@@ -296,63 +294,28 @@ public class CigarImagesController : ControllerBase
                     out var updateErr))
                 return BadRequest(updateErr);
 
-            cigarImage.ImageData = request.ImageData;
-            cigarImage.FileSize = request.ImageData.Length;
-            if (request.ContentType != null)
-                cigarImage.ContentType = request.ContentType;
-            else if (ImageBinaryValidator.SuggestContentType(request.ImageData) is { } inferred)
-                cigarImage.ContentType = inferred;
+            var newType = request.ContentType
+                ?? ImageBinaryValidator.SuggestContentType(request.ImageData)
+                ?? cigarImage.ContentType;
+
+            await _imageService.UpdateImageDataAsync(cigarImage, request.ImageData, newType, cancellationToken);
         }
 
-        // Обновляем поля
-        if (request.FileName != null)
-            cigarImage.FileName = request.FileName;
-        
-        if (request.ContentType != null)
-            cigarImage.ContentType = request.ContentType;
+        if (request.FileName != null) cigarImage.FileName = request.FileName;
+        if (request.ContentType != null) cigarImage.ContentType = request.ContentType;
+        if (request.FileSize.HasValue && request.ImageData == null) cigarImage.FileSize = request.FileSize;
+        if (request.Description != null) cigarImage.Description = request.Description;
 
-        if (request.FileSize.HasValue && request.ImageData == null)
-            cigarImage.FileSize = request.FileSize;
-        
-        if (request.Description != null)
-            cigarImage.Description = request.Description;
-        
-        if (request.IsMain.HasValue && request.IsMain.Value && !cigarImage.IsMain)
+        if (request.IsMain.HasValue)
         {
-            // Если изображение становится главным, отменяем этот флаг у других изображений
-            if (cigarImage.CigarBaseId.HasValue)
+            if (request.IsMain.Value && !cigarImage.IsMain)
             {
-                var existingMainImages = await _context.CigarImages
-                    .Where(ci => ci.CigarBaseId == cigarImage.CigarBaseId.Value && ci.IsMain && ci.Id != cigarImage.Id)
-                    .ToListAsync();
-                
-                foreach (var img in existingMainImages)
-                {
-                    img.IsMain = false;
-                }
+                await ClearMainFlagIfNeededAsync(true, cigarImage.CigarBaseId, cigarImage.UserCigarId, cigarImage.Id, cancellationToken);
             }
-            
-            if (cigarImage.UserCigarId.HasValue)
-            {
-                var existingMainImages = await _context.CigarImages
-                    .Where(ci => ci.UserCigarId == cigarImage.UserCigarId.Value && ci.IsMain && ci.Id != cigarImage.Id)
-                    .ToListAsync();
-                
-                foreach (var img in existingMainImages)
-                {
-                    img.IsMain = false;
-                }
-            }
-            
-            cigarImage.IsMain = true;
-        }
-        else if (request.IsMain.HasValue)
-        {
             cigarImage.IsMain = request.IsMain.Value;
         }
-        
-        cigarImage.UpdatedAt = DateTime.UtcNow;
 
+        cigarImage.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
 
         return NoContent();
@@ -362,16 +325,12 @@ public class CigarImagesController : ControllerBase
     public async Task<IActionResult> DeleteCigarImage(int id, CancellationToken cancellationToken)
     {
         var cigarImage = await _context.CigarImages.FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
-
-        if (cigarImage == null)
-            return NotFound();
+        if (cigarImage == null) return NotFound();
 
         var access = await ResolveImageAccessAsync(cigarImage, cancellationToken);
-        if (!access.CanMutate)
-            return access.FailResult!;
+        if (!access.CanMutate) return access.FailResult!;
 
-        _context.CigarImages.Remove(cigarImage);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _imageService.DeleteImageAsync(cigarImage, cancellationToken);
 
         return NoContent();
     }
@@ -380,64 +339,58 @@ public class CigarImagesController : ControllerBase
     public async Task<IActionResult> SetMainImage(int id, CancellationToken cancellationToken)
     {
         var cigarImage = await _context.CigarImages.FirstOrDefaultAsync(ci => ci.Id == id, cancellationToken);
-
-        if (cigarImage == null)
-            return NotFound();
+        if (cigarImage == null) return NotFound();
 
         var access = await ResolveImageAccessAsync(cigarImage, cancellationToken);
-        if (!access.CanMutate)
-            return access.FailResult!;
+        if (!access.CanMutate) return access.FailResult!;
 
-        // Сбрасываем флаг IsMain у всех других изображений
-        if (cigarImage.CigarBaseId.HasValue)
-        {
-            var existingMainImages = await _context.CigarImages
-                .Where(ci => ci.CigarBaseId == cigarImage.CigarBaseId.Value && ci.IsMain && ci.Id != cigarImage.Id)
-                .ToListAsync();
-            
-            foreach (var img in existingMainImages)
-            {
-                img.IsMain = false;
-            }
-        }
-        
-        if (cigarImage.UserCigarId.HasValue)
-        {
-            var existingMainImages = await _context.CigarImages
-                .Where(ci => ci.UserCigarId == cigarImage.UserCigarId.Value && ci.IsMain && ci.Id != cigarImage.Id)
-                .ToListAsync();
-            
-            foreach (var img in existingMainImages)
-            {
-                img.IsMain = false;
-            }
-        }
-        
+        await ClearMainFlagIfNeededAsync(true, cigarImage.CigarBaseId, cigarImage.UserCigarId, cigarImage.Id, cancellationToken);
+
         cigarImage.IsMain = true;
         cigarImage.UpdatedAt = DateTime.UtcNow;
-
         await _context.SaveChangesAsync(cancellationToken);
 
         return NoContent();
     }
 
+    private async Task ClearMainFlagIfNeededAsync(
+        bool isMain,
+        int? cigarBaseId,
+        int? userCigarId,
+        int? excludeId,
+        CancellationToken ct)
+    {
+        if (!isMain) return;
+
+        IQueryable<CigarImage> q = _context.CigarImages.Where(ci => ci.IsMain);
+        if (excludeId.HasValue) q = q.Where(ci => ci.Id != excludeId.Value);
+
+        if (cigarBaseId.HasValue)
+        {
+            var others = await q.Where(ci => ci.CigarBaseId == cigarBaseId.Value).ToListAsync(ct);
+            foreach (var img in others) img.IsMain = false;
+        }
+
+        if (userCigarId.HasValue)
+        {
+            var others = await q.Where(ci => ci.UserCigarId == userCigarId.Value).ToListAsync(ct);
+            foreach (var img in others) img.IsMain = false;
+        }
+    }
+
     private async Task<(bool CanMutate, IActionResult? FailResult)> ResolveImageAccessAsync(
         CigarImage image,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         var userId = GetCurrentUserId();
         var staff = IsStaff();
 
         if (image.CigarBaseId.HasValue)
-        {
-            if (!staff)
-                return (false, Forbid());
-            return (true, null);
-        }
+            return staff ? (true, null) : (false, Forbid());
 
         if (image.UserCigarId.HasValue)
         {
-            if (staff || await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, cancellationToken))
+            if (staff || await UserOwnsUserCigarAsync(image.UserCigarId.Value, userId, ct))
                 return (true, null);
             return (false, NotFound());
         }
@@ -445,15 +398,27 @@ public class CigarImagesController : ControllerBase
         return (false, NotFound());
     }
 
+    private static CigarImageDto ToDto(CigarImage image) => new()
+    {
+        Id = image.Id,
+        FileName = image.FileName,
+        ContentType = image.ContentType,
+        FileSize = image.FileSize,
+        Description = image.Description,
+        IsMain = image.IsMain,
+        CigarBaseId = image.CigarBaseId,
+        UserCigarId = image.UserCigarId,
+        CreatedAt = image.CreatedAt,
+        HasThumbnail = image.ThumbnailData != null || image.ThumbnailPath != null
+    };
+
     private static string GetFileNameFromUrl(string url)
     {
         if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
             var fileName = Path.GetFileName(uri.LocalPath);
-            if (!string.IsNullOrEmpty(fileName))
-                return fileName;
+            if (!string.IsNullOrEmpty(fileName)) return fileName;
         }
-
         return Guid.NewGuid().ToString("N")[..8] + ".jpg";
     }
 

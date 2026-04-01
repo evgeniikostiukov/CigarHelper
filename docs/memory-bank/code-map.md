@@ -22,10 +22,30 @@
 ## API — сервисы и прочее
 
 - `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
-- `CigarHelper.API/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService` и др.
-- `CigarHelper.API/Helpers/` — например `ImageBinaryValidator` (проверка бинарных изображений).
-- `CigarHelper.API/Options/` — сильно типизированные опции конфигурации.
+- `CigarHelper.API/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
+- `CigarHelper.API/Storage/` — **`IImageStorageProvider`** + реализации `DatabaseImageStorage`/`LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`.
+- `CigarHelper.API/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
+- `CigarHelper.API/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
 - `CigarHelper.API/Extensions/` — расширения DI/приложения.
+
+### Политика хранения изображений
+
+Конфигурируется секцией `ImageStorage` в `appsettings.json`:
+
+| `Provider` | Где хранятся данные | Когда использовать |
+|---|---|---|
+| `Database` (default) | `bytea` в таблице `CigarImages` | Dev / малый объём (< 1 000 изображений) |
+| `LocalFile` | Папка `ImageStorage:LocalPath` на диске | Один инстанс; требует общего тома при горизонтальном масштабировании |
+| `S3` (не реализован, заготовка) | S3/MinIO объектное хранилище | Продакшен с несколькими инстансами / большой объём |
+
+При добавлении нового провайдера — реализовать `IImageStorageProvider` и зарегистрировать в `Program.cs`.
+
+### Миниатюры
+
+- Генерируются автоматически при загрузке/обновлении изображения через `IImageService`.
+- Формат: WebP, ограничение 320×320 px (конфиг: `ImageStorage:ThumbnailMaxWidth/Height`).
+- Эндпоинты: `GET /api/cigar-images/{id}/data` (оригинал) и `GET /api/cigar-images/{id}/thumbnail` (WebP).
+- `CigarImageDto.HasThumbnail = true` означает наличие миниатюры.
 
 ## Data (`CigarHelper.Data/`)
 

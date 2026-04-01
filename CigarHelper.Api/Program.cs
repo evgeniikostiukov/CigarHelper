@@ -10,6 +10,8 @@ using CigarHelper.Api.Exceptions;
 using CigarHelper.Api.Middleware;
 using CigarHelper.Api.Observability;
 using CigarHelper.Api.Options;
+using CigarHelper.Api.Storage;
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
@@ -186,6 +188,24 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("database", tags: ["ready"]);
 
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
+builder.Services.Configure<ImageStorageOptions>(builder.Configuration.GetSection(ImageStorageOptions.SectionName));
+
+// Image storage provider — выбирается по ImageStorage:Provider
+builder.Services.AddSingleton<IImageStorageProvider>(sp =>
+{
+    var opts = sp.GetRequiredService<IOptions<ImageStorageOptions>>().Value;
+    if (opts.Provider.Equals("LocalFile", StringComparison.OrdinalIgnoreCase))
+    {
+        var rootPath = Path.IsPathRooted(opts.LocalPath)
+            ? opts.LocalPath
+            : Path.Combine(builder.Environment.ContentRootPath, opts.LocalPath);
+        var logger = sp.GetRequiredService<ILogger<LocalFileImageStorage>>();
+        return new LocalFileImageStorage(rootPath, logger);
+    }
+    return new DatabaseImageStorage();
+});
+
+builder.Services.AddSingleton<IThumbnailGenerator, ImageSharpThumbnailGenerator>();
 
 // Observability
 builder.Services.AddSingleton<IMetricsCollector, InMemoryMetricsCollector>();
@@ -198,6 +218,7 @@ builder.Services.AddScoped<IHumidorService, HumidorService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:3000"];
 if (corsOrigins.Length == 0)
