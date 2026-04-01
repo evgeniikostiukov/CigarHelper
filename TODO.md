@@ -150,4 +150,5 @@
 - **2026-04-02** — PWA: вынесен `src/sw-serialized-drain.ts`, `sw.ts` импортирует `runSerializedDrain`; Vitest `src/sw-serialized-drain.test.ts` (порядок задач, устойчивость к reject, проброс ошибки). E2E офлайн-очереди против `vite dev` не добавлялся (SW в dev выключен в `vite.config.js`).
 - **2026-04-02** — E2E PWA: `e2e/tests/pwa-offline-queue.spec.ts` (opt-in: `PLAYWRIGHT_BASE_URL` на 4173 или `E2E_PWA_OFFLINE=1`); в `vite.config.js` добавлен **`preview.proxy`** для `/api`; обновлены `e2e/README.md`, `docs/memory-bank/workflow.md`, `frontend/workflow.md`.
 - **2026-04-02** — E2E PWA: после логина обработан `/onboarding` — клик **`onboarding-cancel`** («Отложить»), иначе menubar не ведёт на хьюмидоры; прогон против preview **4173** + API **5184** — зелёный.
+- **2026-04-02** — Шапка: в `app-shell.css` убран горизонтальный скролл у `.p-menubar-root-list` (`overflow-x: auto` + псевдо-отступ), пункты переносятся (`flex-wrap: wrap`).
 

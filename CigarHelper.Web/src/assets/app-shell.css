@@ -39,25 +39,11 @@
 
 .app-menubar-bar .p-menubar-root-list {
   gap: 0.125rem;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   flex-shrink: 1;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.app-menubar-bar .p-menubar-root-list::-webkit-scrollbar {
-  display: none;
-}
-
-/* Trailing spacer для overflow-scroll — несколько подходов для надёжности */
-.app-menubar-bar .p-menubar-root-list::after {
-  content: '';
-  display: block;
-  min-width: 0.75rem;
-  width: 0.75rem;
-  flex-shrink: 0;
-  align-self: stretch;
+  overflow-x: visible;
+  row-gap: 0.25rem;
 }
 
 .app-menubar-bar .p-menubar-end {
