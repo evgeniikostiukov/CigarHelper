@@ -410,7 +410,7 @@
                   :alt="cigar.name"
                   width="96"
                   height="96"
-                  class="h-full w-full object-cover"
+                  class="h-full w-full object-contain"
                   loading="lazy"
                   decoding="async"
                   @error="handleImageError" />
