@@ -88,6 +88,7 @@ public class CigarsController : ControllerBase
                 UpdatedAt = uc.UpdatedAt,
                 PurchasedAt = uc.PurchasedAt,
                 SmokedAt = uc.SmokedAt,
+                Quantity = uc.Quantity,
                 LastTouchedAt = uc.LastTouchedAt
             })
             .ToListAsync();
@@ -384,6 +385,7 @@ public class CigarsController : ControllerBase
                 UpdatedAt = uc.UpdatedAt,
                 PurchasedAt = uc.PurchasedAt,
                 SmokedAt = uc.SmokedAt,
+                Quantity = uc.Quantity,
                 LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();
@@ -466,6 +468,8 @@ public class CigarsController : ControllerBase
             cigarBaseId = newCigarBase.Id;
         }
 
+        var quantity = request.Quantity is >= 1 and <= 10_000 ? request.Quantity.Value : 1;
+
         // Создаем сигару пользователя
         var userCigar = new UserCigar
         {
@@ -476,7 +480,8 @@ public class CigarsController : ControllerBase
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             PurchasedAt = DateTime.UtcNow,
-            LastTouchedAt = DateTime.UtcNow
+            LastTouchedAt = DateTime.UtcNow,
+            Quantity = quantity
         };
 
         _context.UserCigars.Add(userCigar);
@@ -545,6 +550,7 @@ public class CigarsController : ControllerBase
                 UpdatedAt = uc.UpdatedAt,
                 PurchasedAt = uc.PurchasedAt,
                 SmokedAt = uc.SmokedAt,
+                Quantity = uc.Quantity,
                 LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();
@@ -574,12 +580,18 @@ public class CigarsController : ControllerBase
             return BadRequest($"Бренд с ID {request.BrandId} не найден");
         }
 
+        if (request.Quantity.HasValue && (request.Quantity.Value < 1 || request.Quantity.Value > 10_000))
+            return BadRequest("Количество должно быть от 1 до 10000.");
+
         // Обновляем поля пользовательской сигары
         existingUserCigar.Price = request.Price;
         existingUserCigar.Rating = request.Rating;
         existingUserCigar.HumidorId = request.HumidorId;
         existingUserCigar.UpdatedAt = DateTime.UtcNow;
         existingUserCigar.LastTouchedAt = DateTime.UtcNow;
+
+        if (!existingUserCigar.SmokedAt.HasValue && request.Quantity.HasValue)
+            existingUserCigar.Quantity = request.Quantity.Value;
 
         // Обновляем поля базовой сигары
         existingUserCigar.CigarBase.Name = request.Name;
@@ -672,6 +684,7 @@ public class CigarsController : ControllerBase
                 UpdatedAt = uc.UpdatedAt,
                 PurchasedAt = uc.PurchasedAt,
                 SmokedAt = uc.SmokedAt,
+                Quantity = uc.Quantity,
                 LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();
@@ -710,14 +723,30 @@ public class CigarsController : ControllerBase
         if (cigar == null)
             return NotFound();
 
+        if (cigar.SmokedAt.HasValue)
+            return BadRequest("Сигара уже отмечена как выкуренная.");
+
+        if (cigar.Quantity <= 0)
+            return BadRequest("Нет сигар для отметки.");
+
         var smokedAt = request?.SmokedAt?.ToUniversalTime() ?? DateTime.UtcNow;
         if (smokedAt > DateTime.UtcNow.AddMinutes(1))
             return BadRequest("Дата выкуривания не может быть в будущем.");
 
-        cigar.SmokedAt = smokedAt;
-        cigar.LastTouchedAt = smokedAt;
-        cigar.UpdatedAt = DateTime.UtcNow;
-        cigar.HumidorId = null;
+        if (cigar.Quantity > 1)
+        {
+            cigar.Quantity--;
+            cigar.LastTouchedAt = smokedAt;
+            cigar.UpdatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            cigar.Quantity = 0;
+            cigar.SmokedAt = smokedAt;
+            cigar.LastTouchedAt = smokedAt;
+            cigar.UpdatedAt = DateTime.UtcNow;
+            cigar.HumidorId = null;
+        }
 
         await _context.SaveChangesAsync();
 
@@ -780,6 +809,7 @@ public class CigarsController : ControllerBase
                 UpdatedAt = uc.UpdatedAt,
                 PurchasedAt = uc.PurchasedAt,
                 SmokedAt = uc.SmokedAt,
+                Quantity = uc.Quantity,
                 LastTouchedAt = uc.LastTouchedAt
             })
             .FirstOrDefaultAsync();

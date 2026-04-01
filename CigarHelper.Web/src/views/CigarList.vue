@@ -359,8 +359,13 @@
   }
 
   function confirmMarkAsSmoked(cigar: Cigar): void {
+    const qty = cigar.quantity ?? 1;
+    const message =
+      qty > 1
+        ? `Списать одну сигару «${cigar.name}»? Останется ${qty - 1} шт. Запись останется в коллекции.`
+        : `Отметить «${cigar.name}» как выкуренную? Сигара будет убрана из хьюмидора.`;
     confirm.require({
-      message: `Отметить «${cigar.name}» как выкуренную? Сигара будет убрана из хьюмидора.`,
+      message,
       header: 'Подтверждение',
       icon: 'pi pi-check-circle',
       rejectClass: 'p-button-secondary p-button-outlined',

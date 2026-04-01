@@ -71,6 +71,8 @@ export interface Cigar {
   smokedAt?: string | null;
   lastTouchedAt?: string;
   isSmoked?: boolean;
+  /** Остаток сигар в записи коллекции. */
+  quantity?: number;
   images?: CigarImage[];
 }
 
@@ -93,6 +95,7 @@ export interface CigarWriteApiPayload {
   rating?: number | null;
   humidorId?: number | null;
   imageUrl?: string | null;
+  quantity?: number | null;
 }
 
 // ── Нормализация API → компонентные типы ────────────────────────────────────
@@ -160,6 +163,7 @@ function normalizeCigar(uc: ApiCigarResponse): Cigar {
     smokedAt: uc.smokedAt,
     lastTouchedAt: uc.lastTouchedAt,
     isSmoked: uc.isSmoked,
+    quantity: uc.quantity ?? 0,
     images: uc.images?.map(normalizeCigarImage),
   };
 }
@@ -201,6 +205,7 @@ function toCreateCigarPayload(
     rating: data.rating,
     humidorId: data.humidorId ?? null,
     ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
+    ...(data.quantity != null && data.quantity >= 1 ? { quantity: data.quantity } : { quantity: 1 }),
   };
 }
 
@@ -227,6 +232,7 @@ function toUpdateCigarPayload(data: Partial<Cigar>, imageUrl?: string | null): C
     rating: data.rating,
     humidorId: data.humidorId ?? null,
     ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
+    ...(data.quantity != null && data.quantity >= 1 ? { quantity: data.quantity } : {}),
   };
 }
 

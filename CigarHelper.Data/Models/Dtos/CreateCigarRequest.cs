@@ -32,4 +32,8 @@ public class CreateCigarRequest
     public int? Rating { get; set; }
     
     public int? HumidorId { get; set; }
-} 
+
+    /// <summary>Количество сигар при добавлении в коллекцию (по умолчанию 1).</summary>
+    [Range(1, 10_000)]
+    public int? Quantity { get; set; }
+}

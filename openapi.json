@@ -2835,6 +2835,10 @@
             "type": "string",
             "format": "date-time"
           },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
           "isSmoked": {
             "type": "boolean",
             "readOnly": true
@@ -3060,6 +3064,13 @@
             "nullable": true
           },
           "humidorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "quantity": {
+            "maximum": 10000,
+            "minimum": 1,
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -4236,6 +4247,13 @@
           "imageUrl": {
             "maxLength": 2048,
             "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },

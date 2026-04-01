@@ -41,6 +41,9 @@ public class UserCigar
 
     /// <summary>Последнее взаимодействие пользователя с сигарой (добавление, перенос, выкуривание, редактирование).</summary>
     public DateTime LastTouchedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Остаток сигар в этой записи коллекции (уменьшается при отметке «прокурена»).</summary>
+    public int Quantity { get; set; } = 1;
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     

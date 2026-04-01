@@ -156,8 +156,26 @@
                     </div>
                   </template>
                   <template #empty>
-                    <div class="p-2 text-stone-500 dark:text-stone-400">
-                      {{ searchLoading ? 'Поиск...' : 'Сигары не найдены. Введите имя для создания новой.' }}
+                    <div class="flex flex-col gap-2 p-2">
+                      <p class="text-stone-500 dark:text-stone-400">
+                        {{ searchLoading ? 'Поиск...' : 'В справочнике нет совпадений.' }}
+                      </p>
+                      <Button
+                        v-if="!isEditing && !searchLoading && autocompleteLastQuery.trim().length > 0"
+                        data-testid="cigar-form-add-unmoderated"
+                        type="button"
+                        class="touch-manipulation"
+                        severity="secondary"
+                        outlined
+                        size="small"
+                        icon="pi pi-plus"
+                        :label="`Добавить «${autocompleteLastQuery.trim()}» без модерации`"
+                        @click="addAsUnmoderatedFromSearch" />
+                      <p
+                        v-if="!searchLoading && !isEditing"
+                        class="text-xs text-stone-400 dark:text-stone-500">
+                        Без модерации в базе; выберите бренд и при необходимости отметьте «В коллекцию».
+                      </p>
                     </div>
                   </template>
                 </AutoComplete>
@@ -428,6 +446,58 @@
                 </small>
               </div>
 
+              <div
+                v-if="(!isEditing && form.addToCollection) || (isEditing && !editingFullySmoked)"
+                class="flex flex-col gap-2">
+                <label
+                  for="cigar-form-quantity"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Количество сигар
+                </label>
+                <InputNumber
+                  id="cigar-form-quantity"
+                  v-model="form.quantity"
+                  data-testid="cigar-form-quantity"
+                  class="flex! w-full"
+                  input-class="min-h-11"
+                  :min="1"
+                  :max="10000"
+                  show-buttons
+                  :disabled="pageLoading"
+                  fluid />
+                <small class="text-stone-500 dark:text-stone-400">
+                  Остаток уменьшается при отметке «прокурена» (на форме или в списке сигар).
+                </small>
+                <small
+                  v-if="errors.quantity"
+                  class="text-sm text-red-600 dark:text-red-400"
+                  >{{ errors.quantity }}</small
+                >
+              </div>
+
+              <div
+                v-if="isEditing && editingFullySmoked"
+                class="rounded-lg border border-stone-200/80 bg-stone-100/50 px-3 py-2 text-sm text-stone-600 dark:border-stone-600/80 dark:bg-stone-800/40 dark:text-stone-400">
+                Выкурена (остаток 0). Количество менять нельзя.
+              </div>
+
+              <div
+                v-if="isEditing && !editingFullySmoked && form.quantity > 0"
+                class="flex flex-col gap-2">
+                <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Выкуривание</span>
+                <Button
+                  data-testid="cigar-form-mark-smoked"
+                  type="button"
+                  class="min-h-12 w-full touch-manipulation sm:min-h-11 sm:w-auto sm:self-start"
+                  :label="form.quantity > 1 ? 'Прокурена (минус одна)' : 'Прокурена (последняя)'"
+                  icon="pi pi-check"
+                  severity="secondary"
+                  outlined
+                  :loading="markingSmoked"
+                  :disabled="markingSmoked"
+                  @click="confirmMarkOneSmoked" />
+              </div>
+
               <div class="flex flex-col gap-2">
                 <label
                   for="humidorId"
@@ -515,6 +585,7 @@
   import { ref, computed, onMounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
+  import { useConfirm } from 'primevue/useconfirm';
   import { isOfflineQueued } from '@/services/api';
   import cigarService from '@/services/cigarService';
   import humidorService from '@/services/humidorService';
@@ -545,6 +616,7 @@
     binder: string;
     filler: string;
     addToCollection: boolean;
+    quantity: number;
   }
 
   interface CigarGroup {
@@ -555,12 +627,14 @@
   interface FormErrors {
     name?: string;
     brandId?: string;
+    quantity?: string;
     [key: string]: string | undefined;
   }
 
   const route = useRoute();
   const router = useRouter();
   const toast = useToast();
+  const confirm = useConfirm();
 
   const pageLoading = ref(false);
   const saving = ref(false);
@@ -575,6 +649,9 @@
   const selectedCigar = ref<Cigar | null>(null);
   const searchLoading = ref<boolean>(false);
   const searchCache = ref<Map<string, CigarGroup[]>>(new Map());
+  const autocompleteLastQuery = ref('');
+  const editingFullySmoked = ref(false);
+  const markingSmoked = ref(false);
 
   const form = ref<FormData>({
     cigar: {} as Cigar,
@@ -590,6 +667,7 @@
     binder: '',
     filler: '',
     addToCollection: false,
+    quantity: 1,
   });
 
   const isEditing = computed<boolean>(() => !!route.params.id);
@@ -688,6 +766,9 @@
     try {
       const cigar = await cigarService.getCigar(route.params.id as string);
 
+      editingFullySmoked.value = cigar.isSmoked === true;
+      const q = cigar.quantity ?? (cigar.isSmoked ? 0 : 1);
+
       form.value = {
         cigar: {
           name: cigar.name || '',
@@ -704,6 +785,8 @@
           filler: cigar.filler || '',
           rating: cigar.rating ?? 0,
           images: cigar.images || [],
+          isSmoked: cigar.isSmoked,
+          quantity: q,
         },
         country: cigar.country || '',
         size: cigar.size || '',
@@ -717,6 +800,7 @@
         binder: cigar.binder || '',
         filler: cigar.filler || '',
         addToCollection: false,
+        quantity: q,
       };
     } catch (err) {
       if (import.meta.env.DEV) {
@@ -739,6 +823,14 @@
       const bid = form.value.cigar?.brand?.id;
       if (bid == null || bid <= 0) {
         errors.value.brandId = 'Выберите бренд из списка';
+      }
+    }
+
+    const needQty = (!isEditing.value && form.value.addToCollection) || (isEditing.value && !editingFullySmoked.value);
+    if (needQty) {
+      const q = form.value.quantity;
+      if (q == null || !Number.isFinite(q) || q < 1 || q > 10000) {
+        errors.value.quantity = 'Укажите количество от 1 до 10000';
       }
     }
 
@@ -766,10 +858,15 @@
         price: form.value.price,
         rating: form.value.rating,
         humidorId: form.value.humidorId,
+        quantity: form.value.quantity,
       };
 
       if (isEditing.value) {
-        await cigarService.updateCigar(parseInt(route.params.id as string, 10), cigarData, form.value.imageUrl);
+        const updatePayload: Partial<Cigar> = { ...cigarData };
+        if (editingFullySmoked.value) {
+          delete updatePayload.quantity;
+        }
+        await cigarService.updateCigar(parseInt(route.params.id as string, 10), updatePayload, form.value.imageUrl);
         toast.add({
           severity: 'success',
           summary: 'Успешно',
@@ -933,6 +1030,7 @@
   const debouncedSearch = debounce(performSearch, 300);
 
   function searchCigars(event: AutoCompleteCompleteEvent): void {
+    autocompleteLastQuery.value = event.query ?? '';
     debouncedSearch(event.query);
   }
 
@@ -973,7 +1071,92 @@
       binder: selectedCigarData.binder || '',
       filler: selectedCigarData.filler || '',
       addToCollection: true,
+      quantity: 1,
     };
+  }
+
+  function addAsUnmoderatedFromSearch(): void {
+    const q = autocompleteLastQuery.value.trim();
+    if (!q || isEditing.value) {
+      return;
+    }
+    form.value.addToCollection = true;
+    void loadHumidors();
+    const prev = form.value.cigar && typeof form.value.cigar === 'object' ? form.value.cigar : ({} as Partial<Cigar>);
+    form.value.cigar = {
+      ...prev,
+      name: q,
+      id: 0,
+    } as Cigar;
+    selectedCigar.value = null;
+    form.value.quantity = Math.max(1, form.value.quantity || 1);
+    toast.add({
+      severity: 'info',
+      summary: 'Немодерированная позиция',
+      detail: 'Выберите бренд и сохраните: новая запись попадёт в базу без модерации (как при ручном вводе названия).',
+      life: 6000,
+    });
+  }
+
+  function confirmMarkOneSmoked(): void {
+    if (!isEditing.value || editingFullySmoked.value || form.value.quantity <= 0) {
+      return;
+    }
+    const id = parseInt(route.params.id as string, 10);
+    const leftAfter = form.value.quantity - 1;
+    const msg =
+      form.value.quantity > 1
+        ? `Списать одну сигару? Останется ${leftAfter} шт. Запись останется в коллекции.`
+        : 'Отметить последнюю сигару как выкуренную? Позиция будет помечена как выкуренная и убрана из хьюмидора.';
+
+    confirm.require({
+      message: msg,
+      header: 'Подтверждение',
+      icon: 'pi pi-check-circle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-success',
+      rejectLabel: 'Отмена',
+      acceptLabel: 'Списать',
+      accept: async () => {
+        markingSmoked.value = true;
+        try {
+          const updated = await cigarService.markCigarAsSmoked(id);
+          form.value.quantity = updated.quantity ?? 0;
+          editingFullySmoked.value = updated.isSmoked === true;
+          form.value.cigar = {
+            ...form.value.cigar,
+            isSmoked: updated.isSmoked,
+            quantity: updated.quantity,
+            humidorId: updated.humidorId ?? null,
+          };
+          form.value.humidorId = updated.humidorId ?? null;
+          toast.add({
+            severity: 'success',
+            summary: 'Готово',
+            detail:
+              updated.isSmoked === true
+                ? 'Сигара полностью выкурена'
+                : `Списана одна сигара, осталось ${updated.quantity ?? form.value.quantity} шт.`,
+            life: 4000,
+          });
+        } catch (err) {
+          if (isOfflineQueued(err)) {
+            return;
+          }
+          if (import.meta.env.DEV) {
+            console.error('Ошибка отметки выкуривания:', err);
+          }
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось отметить сигару',
+            life: 4000,
+          });
+        } finally {
+          markingSmoked.value = false;
+        }
+      },
+    });
   }
 
   /**
@@ -1004,6 +1187,7 @@
     if (val == null || val === '') {
       form.value.cigar = {} as Cigar;
       selectedCigar.value = null;
+      form.value.quantity = 1;
       return;
     }
 

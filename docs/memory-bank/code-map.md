@@ -14,7 +14,7 @@
 | `AdminUsersController` | Админ-операции с пользователями |
 | `PublicUsersController` | Публичные данные пользователей |
 | `BrandsController` | Бренды |
-| `CigarsController` | Каталог / сигары |
+| `CigarsController` | Каталог / сигары; `UserCigar.Quantity` (остаток), `POST .../smoked` при остатке &gt;1 уменьшает количество, при последней — `SmokedAt` + снятие с хьюмидора |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Отзывы |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |

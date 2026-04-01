@@ -27,7 +27,7 @@ public class DashboardService : IDashboardService
             {
                 h.Id,
                 h.Capacity,
-                CurrentCount = h.Cigars.Count
+                CurrentCount = h.Cigars.Where(c => !c.SmokedAt.HasValue).Sum(c => c.Quantity)
             });
 
         var humidors = await humidorsQuery.ToListAsync();
@@ -38,7 +38,7 @@ public class DashboardService : IDashboardService
 
         var totalUserCigars = await _context.UserCigars
             .Where(c => c.UserId == userId)
-            .CountAsync();
+            .SumAsync(c => (int?)(c.SmokedAt.HasValue ? 0 : c.Quantity)) ?? 0;
 
         double averageFillPercent = 0;
         if (humidors.Count > 0)
@@ -63,7 +63,7 @@ public class DashboardService : IDashboardService
             {
                 BrandId = g.Key.BrandId,
                 BrandName = g.Key.Name,
-                CigarCount = g.Count(),
+                CigarCount = g.Sum(uc => uc.SmokedAt.HasValue ? 0 : uc.Quantity),
                 AverageRating = g.Any(uc => uc.Rating.HasValue)
                     ? g.Where(uc => uc.Rating.HasValue).Average(uc => uc.Rating)!.Value
                     : null
