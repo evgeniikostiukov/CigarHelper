@@ -31,6 +31,39 @@ docker compose up -d postgres
 
 `Host=localhost;Port=5432;Database=cigarhelper;Username=cigarhelper;Password=dev`
 
+### Локальный MinIO через Docker
+
+```bash
+docker compose up -d minio
+```
+
+- S3 API: `http://localhost:9000`
+- Веб-консоль: `http://localhost:9001` (логин/пароль: `minioadmin` / `minioadmin`)
+
+Для переключения API на MinIO задать через User Secrets:
+
+```json
+{
+  "ImageStorage": {
+    "Provider": "Minio",
+    "Minio": {
+      "AccessKey": "minioadmin",
+      "SecretKey": "minioadmin"
+    }
+  }
+}
+```
+
+Команда для User Secrets:
+
+```bash
+dotnet user-secrets set "ImageStorage:Provider" "Minio" --project CigarHelper.API/CigarHelper.Api.csproj
+dotnet user-secrets set "ImageStorage:Minio:AccessKey" "minioadmin" --project CigarHelper.API/CigarHelper.Api.csproj
+dotnet user-secrets set "ImageStorage:Minio:SecretKey" "minioadmin" --project CigarHelper.API/CigarHelper.Api.csproj
+```
+
+Бакет `cigar-images` создаётся автоматически при старте API (если не существует).
+
 ### Диагностика API
 
 - **`GET /health`** — живость процесса.

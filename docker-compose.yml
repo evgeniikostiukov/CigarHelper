@@ -1,18 +1,20 @@
-# Локальная PostgreSQL для разработки. API: `dotnet run --project CigarHelper.API/CigarHelper.Api.csproj`
-# со строкой подключения на host `localhost`, порт 5432 (см. docs/memory-bank/workflow.md).
+# Локальная инфраструктура для разработки (Postgres + MinIO).
+# Секреты задаются в файле .env (из .env.example; в git не попадает).
+# API: `dotnet run --project CigarHelper.API/CigarHelper.Api.csproj`
+# (см. docs/memory-bank/workflow.md)
 services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: cigarhelper
-      POSTGRES_PASSWORD: dev
-      POSTGRES_DB: cigarhelper
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - cigarhelper-pg:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U cigarhelper -d cigarhelper']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,8 +23,8 @@ services:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"   # S3 API
       - "9001:9001"   # Web UI

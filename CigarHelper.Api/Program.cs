@@ -194,6 +194,7 @@ builder.Services.Configure<ImageStorageOptions>(builder.Configuration.GetSection
 builder.Services.AddSingleton<IImageStorageProvider>(sp =>
 {
     var opts = sp.GetRequiredService<IOptions<ImageStorageOptions>>().Value;
+
     if (opts.Provider.Equals("LocalFile", StringComparison.OrdinalIgnoreCase))
     {
         var rootPath = Path.IsPathRooted(opts.LocalPath)
@@ -202,6 +203,15 @@ builder.Services.AddSingleton<IImageStorageProvider>(sp =>
         var logger = sp.GetRequiredService<ILogger<LocalFileImageStorage>>();
         return new LocalFileImageStorage(rootPath, logger);
     }
+
+    if (opts.Provider.Equals("Minio", StringComparison.OrdinalIgnoreCase))
+    {
+        var logger = sp.GetRequiredService<ILogger<MinioImageStorageProvider>>();
+        var provider = new MinioImageStorageProvider(opts.Minio, logger);
+        provider.EnsureBucketExistsAsync().GetAwaiter().GetResult();
+        return provider;
+    }
+
     return new DatabaseImageStorage();
 });
 
