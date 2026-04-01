@@ -9,6 +9,10 @@ let initialized = false;
 function handleOnline() {
   isOnline.value = true;
   listeners.forEach((fn) => fn(true));
+  // Явно просим SW воспроизвести очередь — sync event ненадёжен
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'REPLAY_QUEUE' });
+  }
 }
 
 function handleOffline() {

@@ -1,7 +1,7 @@
 import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute, NavigationRoute } from 'workbox-routing';
-import { NetworkFirst, CacheFirst, StaleWhileRevalidate, NetworkOnly } from 'workbox-strategies';
-import { BackgroundSyncPlugin } from 'workbox-background-sync';
+import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { Queue } from 'workbox-background-sync';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { clientsClaim } from 'workbox-core';
 
@@ -9,13 +9,13 @@ declare let self: ServiceWorkerGlobalScope;
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'REPLAY_QUEUE') replayMutations();
 });
 clientsClaim();
 
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
-// SPA fallback: любой навигационный запрос (HTML-страница) → закешированный index.html
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')));
 
 // ── Утилита: оповестить всех клиентов ──────────────────────────────────────
@@ -25,11 +25,11 @@ function broadcastToClients(data: Record<string, unknown>) {
   });
 }
 
-// ── BackgroundSync: очередь мутаций ────────────────────────────────────────
+// ── Очередь мутаций (Queue напрямую, без BackgroundSyncPlugin) ─────────────
 let pendingCount = 0;
 
-const bgSyncPlugin = new BackgroundSyncPlugin('cigar-helper-mutations', {
-  maxRetentionTime: 7 * 24 * 60, // 7 дней
+const mutationQueue = new Queue('cigar-helper-mutations', {
+  maxRetentionTime: 7 * 24 * 60,
   onSync: async ({ queue }) => {
     let entry;
     while ((entry = await queue.shiftRequest())) {
@@ -51,6 +51,61 @@ const bgSyncPlugin = new BackgroundSyncPlugin('cigar-helper-mutations', {
     pendingCount = 0;
   },
 });
+
+async function replayMutations() {
+  try {
+    const allEntries = await mutationQueue.getAll();
+    if (allEntries.length === 0) return;
+    pendingCount = allEntries.length;
+    broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+
+    let entry;
+    while ((entry = await mutationQueue.shiftRequest())) {
+      try {
+        await fetch(entry.request.clone());
+        pendingCount = Math.max(0, pendingCount - 1);
+        broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+      } catch {
+        await mutationQueue.unshiftRequest(entry);
+        broadcastToClients({
+          type: 'SYNC_ERROR',
+          pendingCount,
+          message: 'Ошибка синхронизации. Повтор позже.',
+        });
+        return;
+      }
+    }
+    broadcastToClients({ type: 'SYNC_COMPLETE', pendingCount: 0 });
+    pendingCount = 0;
+  } catch {
+    // Queue access failed — ignore silently
+  }
+}
+
+// Fallback: при восстановлении сети SW тоже получает событие —
+// вручную запускаем replay, не дожидаясь ненадёжного sync event.
+self.addEventListener('fetch', (event) => {
+  // Любой успешный GET-запрос — признак наличия сети, пробуем replay.
+  if (event.request.method === 'GET' && pendingCount > 0) {
+    event.waitUntil(replayMutations());
+  }
+});
+
+// ── POST/PUT/DELETE /api/* → fetch, при ошибке → очередь ──────────────────
+registerRoute(
+  ({ url, request }) => ['POST', 'PUT', 'DELETE'].includes(request.method) && url.pathname.startsWith('/api/'),
+  async ({ request }) => {
+    try {
+      const response = await fetch(request.clone());
+      return response;
+    } catch (error) {
+      await mutationQueue.pushRequest({ request });
+      pendingCount++;
+      broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+      throw error;
+    }
+  },
+);
 
 // ── GET /api/(humidors|cigars|dashboard|reviews|brands) → NetworkFirst ─────
 registerRoute(
@@ -82,30 +137,8 @@ registerRoute(
   }),
 );
 
-// ── GET /api/search → NetworkOnly (поиск из кеша бессмысленен) ─────────────
+// ── GET /api/search → сеть или ничего ──────────────────────────────────────
 registerRoute(
   ({ url, request }) => request.method === 'GET' && url.pathname.startsWith('/api/search'),
-  new NetworkOnly(),
+  async ({ request }) => fetch(request),
 );
-
-// ── POST/PUT/DELETE /api/* → NetworkOnly + BackgroundSync ──────────────────
-registerRoute(
-  ({ url, request }) => ['POST', 'PUT', 'DELETE'].includes(request.method) && url.pathname.startsWith('/api/'),
-  new NetworkOnly({ plugins: [bgSyncPlugin] }),
-);
-
-// Перехват fetchDidFail не нужен — bgSyncPlugin сам кладёт в очередь.
-// Дополнительно оповещаем клиент о постановке в очередь.
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  if (!['POST', 'PUT', 'DELETE'].includes(request.method)) return;
-  if (!new URL(request.url).pathname.startsWith('/api/')) return;
-
-  // Через микротаск после того, как bgSyncPlugin обработал ошибку —
-  // оповестить клиента о новом элементе в очереди.
-  const originalFetch = fetch(request.clone());
-  originalFetch.catch(() => {
-    pendingCount++;
-    broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
-  });
-});
