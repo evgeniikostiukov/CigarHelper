@@ -1,3 +1,5 @@
+using CigarHelper.Api.Helpers;
+using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
@@ -5,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using CigarHelper.Api.Helpers;
 
 namespace CigarHelper.Api.Controllers;
 
@@ -15,10 +16,12 @@ namespace CigarHelper.Api.Controllers;
 public class CigarsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IImageService _imageService;
 
-    public CigarsController(AppDbContext context)
+    public CigarsController(AppDbContext context, IImageService imageService)
     {
         _context = context;
+        _imageService = imageService;
     }
 
     [HttpGet]
@@ -680,16 +683,14 @@ public class CigarsController : ControllerBase
         if (imageBytes == null || imageBytes.Length == 0)
             return;
 
-        _context.CigarImages.Add(new CigarImage
-        {
-            UserCigarId = userCigarId,
-            FileName = GetFileNameFromUrl(url),
-            ContentType = GetContentTypeFromUrl(url),
-            FileSize = imageBytes.Length,
-            ImageData = imageBytes,
-            IsMain = true,
-            CreatedAt = DateTime.UtcNow
-        });
+        await _imageService.SaveImageAsync(
+            imageData: imageBytes,
+            contentType: GetContentTypeFromUrl(url),
+            fileName: GetFileNameFromUrl(url),
+            description: null,
+            isMain: true,
+            cigarBaseId: null,
+            userCigarId: userCigarId);
     }
 
     [HttpPost("{id}/smoked")]
@@ -852,22 +853,18 @@ public class CigarsController : ControllerBase
                     var imageBytes = await ImageDownloader.DownloadImageAsync(imageUrl);
                     if (imageBytes != null)
                     {
-                        var cigarImage = new CigarImage
-                        {
-                            CigarBaseId = cigarBase.Id,
-                            FileName = GetFileNameFromUrl(imageUrl),
-                            ContentType = GetContentTypeFromUrl(imageUrl),
-                            FileSize = imageBytes.Length,
-                            ImageData = imageBytes,
-                            IsMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain),
-                            CreatedAt = DateTime.UtcNow
-                        };
-
-                        _context.CigarImages.Add(cigarImage);
+                        var isMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain);
+                        await _imageService.SaveImageAsync(
+                            imageData: imageBytes,
+                            contentType: GetContentTypeFromUrl(imageUrl),
+                            fileName: GetFileNameFromUrl(imageUrl),
+                            description: null,
+                            isMain: isMain,
+                            cigarBaseId: cigarBase.Id,
+                            userCigarId: null);
                     }
                 }
             }
-            await _context.SaveChangesAsync();
         }
 
         // Возвращаем созданную сигару с данными
@@ -1026,18 +1023,15 @@ public class CigarsController : ControllerBase
                     var imageBytes = await ImageDownloader.DownloadImageAsync(imageUrl);
                     if (imageBytes != null)
                     {
-                        var cigarImage = new CigarImage
-                        {
-                            CigarBaseId = cigarBase.Id,
-                            FileName = GetFileNameFromUrl(imageUrl),
-                            ContentType = GetContentTypeFromUrl(imageUrl),
-                            FileSize = imageBytes.Length,
-                            ImageData = imageBytes,
-                            IsMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain),
-                            CreatedAt = DateTime.UtcNow
-                        };
-
-                        _context.CigarImages.Add(cigarImage);
+                        var isMain = !_context.CigarImages.Any(ci => ci.CigarBaseId == cigarBase.Id && ci.IsMain);
+                        await _imageService.SaveImageAsync(
+                            imageData: imageBytes,
+                            contentType: GetContentTypeFromUrl(imageUrl),
+                            fileName: GetFileNameFromUrl(imageUrl),
+                            description: null,
+                            isMain: isMain,
+                            cigarBaseId: cigarBase.Id,
+                            userCigarId: null);
                     }
                 }
             }
@@ -1052,7 +1046,7 @@ public class CigarsController : ControllerBase
 
             foreach (var image in imagesToRemove)
             {
-                _context.CigarImages.Remove(image);
+                await _imageService.DeleteImageAsync(image);
             }
         }
 
