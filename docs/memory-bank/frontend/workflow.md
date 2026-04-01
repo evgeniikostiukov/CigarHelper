@@ -58,6 +58,8 @@ npm run generate:pwa-assets   # pwa-assets-generator (конфиг pwa-assets.co
 
 Экземпляр Axios в **`src/services/api.ts`** должен использовать **`adapter: 'fetch'`**: по умолчанию в браузере идёт XHR, который Service Worker не перехватывает, поэтому мутации не попадали бы в очередь.
 
+При постановке в очередь SW отвечает **202** с заголовком **`X-CigarHelper-Offline-Queued: 1`**, чтобы страничный `fetch` не завершался сетевой ошибкой (`net::ERR_INTERNET_DISCONNECTED` в консоли). В **`api.ts`** это превращается в **`OfflineQueuedError`**. Если `navigator.onLine === false`, SW **не вызывает** сетевой `fetch` для мутации — только кладёт запрос в очередь.
+
 ### Composables (в `src/composables/`)
 
 | Файл | Назначение |

@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, isAxiosError } from 'axios';
+import axios, { type AxiosInstance, type AxiosResponse, isAxiosError } from 'axios';
 import { notifyApiError } from './apiErrorNotifier';
 
 export class OfflineQueuedError extends Error {
@@ -10,6 +10,14 @@ export class OfflineQueuedError extends Error {
 
 export function isOfflineQueued(err: unknown): err is OfflineQueuedError {
   return err instanceof OfflineQueuedError;
+}
+
+/** Ответ SW при постановке мутации в очередь (без сетевого провала страницы). */
+function isOfflineQueuedAxiosResponse(response: AxiosResponse): boolean {
+  if (response.status !== 202) return false;
+  const raw = response.headers['x-cigarhelper-offline-queued'];
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  return v === '1';
 }
 
 // fetch — чтобы запросы шли через Service Worker (очередь офлайн-мутаций).
@@ -35,8 +43,22 @@ api.interceptors.request.use(
 
 // Ответы: 401 — сброс сессии; 403/5xx и прочие ошибки — единый toast (без 404, чтобы не дублировать экраны).
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (isOfflineQueuedAxiosResponse(response)) {
+      notifyApiError({
+        summary: 'Действие в очереди',
+        detail: 'Запрос сохранён и будет отправлен при восстановлении сети.',
+        severity: 'info',
+      });
+      return Promise.reject(new OfflineQueuedError());
+    }
+    return response;
+  },
   (error: unknown) => {
+    if (isOfflineQueued(error)) {
+      return Promise.reject(error);
+    }
+
     if (isAxiosError(error) && error.response?.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');

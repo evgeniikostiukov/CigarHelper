@@ -91,18 +91,35 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// ── POST/PUT/DELETE /api/* → fetch, при ошибке → очередь ──────────────────
+function offlineQueuedResponse(): Response {
+  return new Response(JSON.stringify({ offlineQueued: true }), {
+    status: 202,
+    statusText: 'Accepted',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CigarHelper-Offline-Queued': '1',
+    },
+  });
+}
+
+// ── POST/PUT/DELETE /api/* → сеть; офлайн/сбой → очередь + 202 (без throw) ─
+// Иначе страничный fetch падает → консоль net::ERR_*; при !onLine не зовём fetch.
 registerRoute(
   ({ url, request }) => ['POST', 'PUT', 'DELETE'].includes(request.method) && url.pathname.startsWith('/api/'),
   async ({ request }) => {
-    try {
-      const response = await fetch(request.clone());
-      return response;
-    } catch (error) {
+    if (!self.navigator.onLine) {
       await mutationQueue.pushRequest({ request });
       pendingCount++;
       broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
-      throw error;
+      return offlineQueuedResponse();
+    }
+    try {
+      return await fetch(request.clone());
+    } catch {
+      await mutationQueue.pushRequest({ request });
+      pendingCount++;
+      broadcastToClients({ type: 'SYNC_STATUS', pendingCount });
+      return offlineQueuedResponse();
     }
   },
 );
