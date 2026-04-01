@@ -100,6 +100,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-01** — PWA: GET списков API при `!navigator.onLine` — только кеш `api-lists` или синтетика (без сетевого fetch в `NetworkFirst`); маршрут не перехватывает `/api/cigars/bases`.
 - **2026-04-01** — PWA офлайн-мутации: SW при очереди отвечает 202 + `X-CigarHelper-Offline-Queued` вместо throw; при `!navigator.onLine` не вызывается сетевой fetch — без `net::ERR_INTERNET_DISCONNECTED` в консоли; `api.ts` маппит в `OfflineQueuedError`.
 - **2026-04-01** — PWA офлайн-мутации: для экземпляра Axios в `api.ts` задан `adapter: 'fetch'`, чтобы POST/PUT/DELETE проходили через Service Worker и попадали в очередь Workbox (XHR SW не перехватывает).
 - **2026-03-30** — UX: анализ и проектирование дашборда-сводки (объём коллекции, разрез по брендам, недавняя активность/отзывы): выбран отдельный `DashboardController` и `IDashboardService.GetUserDashboardSummary(userId)`, определены ключевые блоки UI и маршрут `Dashboard`.

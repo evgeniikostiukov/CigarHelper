@@ -60,6 +60,8 @@ npm run generate:pwa-assets   # pwa-assets-generator (конфиг pwa-assets.co
 
 При постановке в очередь SW отвечает **202** с заголовком **`X-CigarHelper-Offline-Queued: 1`**, чтобы страничный `fetch` не завершался сетевой ошибкой (`net::ERR_INTERNET_DISCONNECTED` в консоли). В **`api.ts`** это превращается в **`OfflineQueuedError`**. Если `navigator.onLine === false`, SW **не вызывает** сетевой `fetch` для мутации — только кладёт запрос в очередь.
 
+Для **GET** списков (`/api/humidors`, `/api/cigars`, …) при **`!navigator.onLine`** SW не вызывает сеть: только **`api-lists`** cache, иначе синтетический JSON (пустые массивы / нулевая сводка дашборда), чтобы не было `net::ERR_*` от `NetworkFirst`.
+
 ### Composables (в `src/composables/`)
 
 | Файл | Назначение |

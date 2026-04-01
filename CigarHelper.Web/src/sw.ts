@@ -124,15 +124,63 @@ registerRoute(
   },
 );
 
+const API_LISTS_CACHE = 'api-lists';
+
+const listNetworkFirst = new NetworkFirst({
+  cacheName: API_LISTS_CACHE,
+  plugins: [new ExpirationPlugin({ maxAgeSeconds: 60 * 60, maxEntries: 100 })],
+  networkTimeoutSeconds: 5,
+});
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/** Офлайн без сетевого fetch — иначе консоль net::ERR_INTERNET_DISCONNECTED. */
+function offlineListGetFallback(url: URL): Response {
+  const p = url.pathname;
+  if (p === '/api/humidors') return jsonResponse([]);
+  if (p === '/api/cigars') return jsonResponse([]);
+  if (p === '/api/cigars/brands') return jsonResponse([]);
+  if (p === '/api/reviews') return jsonResponse([]);
+  if (p === '/api/brands') return jsonResponse([]);
+  if (p === '/api/dashboard/summary') {
+    return jsonResponse({
+      totalHumidors: 0,
+      totalCigars: 0,
+      totalCapacity: 0,
+      averageFillPercent: 0,
+      averageDaysToSmoke: 0,
+      brandBreakdown: [],
+      recentReviews: [],
+      timeline: [],
+      staleCigarReminders: [],
+    });
+  }
+  if (/^\/api\/humidors\/\d+\/cigars\/?$/.test(p)) return jsonResponse([]);
+  return jsonResponse({ title: 'Not Found', status: 404 }, 404);
+}
+
 // ── GET /api/(humidors|cigars|dashboard|reviews|brands) → NetworkFirst ─────
+// /api/cigars/bases — отдельный маршрут ниже (не перехватывать здесь).
 registerRoute(
-  ({ url, request }) =>
-    request.method === 'GET' && /^\/api\/(humidors|cigars|dashboard|reviews|brands)(\/|$|\?)/.test(url.pathname),
-  new NetworkFirst({
-    cacheName: 'api-lists',
-    plugins: [new ExpirationPlugin({ maxAgeSeconds: 60 * 60, maxEntries: 100 })],
-    networkTimeoutSeconds: 5,
-  }),
+  ({ url, request }) => {
+    if (request.method !== 'GET') return false;
+    if (url.pathname.startsWith('/api/cigars/bases')) return false;
+    return /^\/api\/(humidors|cigars|dashboard|reviews|brands)(\/|$|\?)/.test(url.pathname);
+  },
+  async (args) => {
+    if (!self.navigator.onLine) {
+      const cache = await caches.open(API_LISTS_CACHE);
+      const cached = await cache.match(args.request);
+      if (cached) return cached;
+      return offlineListGetFallback(args.url);
+    }
+    return listNetworkFirst.handle(args);
+  },
 );
 
 // ── GET /api/cigars/bases/* → StaleWhileRevalidate ─────────────────────────
