@@ -66,6 +66,12 @@ test.describe('PWA offline mutation queue (preview)', () => {
     await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 });
     await expect(page.getByTestId('app')).toBeVisible();
 
+    // Регистрация ставит needsOnboarding → редирект сюда; «Отложить» вызывает finishOnboarding().
+    if (page.url().includes('/onboarding')) {
+      await page.getByTestId('onboarding-cancel').click();
+      await expect(page).toHaveURL(/\/dashboard$/, { timeout: 15_000 });
+    }
+
     await ensureServiceWorkerControlsPage(page);
 
     await page.locator('.p-menubar').getByText('Хьюмидоры', { exact: true }).click();
