@@ -43,20 +43,19 @@
 
   function cigarImagePreviewSrc(img: CigarImage): string {
     const raw = cigarImageBytes(img);
-    if (raw == null) {
-      return '';
+    const hasBytes = raw != null && (typeof raw === 'string' ? raw.length > 0 : raw.length > 0);
+
+    if (hasBytes) {
+      const b64 = arrayBufferToBase64(raw);
+      if (b64) {
+        const mime = (img.contentType ?? '').trim();
+        const safeMime = mime.startsWith('image/') ? mime : 'image/jpeg';
+        return `data:${safeMime};base64,${b64}`;
+      }
     }
-    const empty = typeof raw === 'string' ? raw.length === 0 : raw.length === 0;
-    if (empty) {
-      return '';
-    }
-    const b64 = arrayBufferToBase64(raw);
-    if (!b64) {
-      return '';
-    }
-    const mime = (img.contentType ?? '').trim();
-    const safeMime = mime.startsWith('image/') ? mime : 'image/jpeg';
-    return `data:${safeMime};base64,${b64}`;
+
+    // MinIO / внешнее хранилище — используем публичный API-эндпоинт
+    return img.id ? `/api/cigarimages/${img.id}/thumbnail` : '';
   }
 
   const cigarImages = computed(() => {
