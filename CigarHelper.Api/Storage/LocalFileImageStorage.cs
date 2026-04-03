@@ -30,6 +30,45 @@ public sealed class LocalFileImageStorage : IImageStorageProvider
         return safeFileName;
     }
 
+    public Task<bool> ExistsAsync(string storagePath, CancellationToken ct = default)
+    {
+        var fullPath = ResolvePath(storagePath);
+        return Task.FromResult(File.Exists(fullPath));
+    }
+
+    public async Task PutAtKeyAsync(byte[] data, string storagePath, string contentType, CancellationToken ct = default)
+    {
+        var fullPath = ResolvePath(storagePath);
+        var dir = Path.GetDirectoryName(fullPath);
+        if (!string.IsNullOrEmpty(dir))
+            Directory.CreateDirectory(dir);
+        await File.WriteAllBytesAsync(fullPath, data, ct);
+    }
+
+    public Task<ImageStorageObjectInfo?> TryDescribeAsync(string storagePath, CancellationToken ct = default)
+    {
+        var fullPath = ResolvePath(storagePath);
+        if (!File.Exists(fullPath))
+            return Task.FromResult<ImageStorageObjectInfo?>(null);
+
+        try
+        {
+            var info = new FileInfo(fullPath);
+            return Task.FromResult<ImageStorageObjectInfo?>(new ImageStorageObjectInfo(info.Length, null));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to stat file at {Path}", storagePath);
+            return Task.FromResult<ImageStorageObjectInfo?>(null);
+        }
+    }
+
+    private string ResolvePath(string storagePath)
+    {
+        var rel = storagePath.Replace('/', Path.DirectorySeparatorChar);
+        return Path.Combine(_basePath, rel);
+    }
+
     public async Task<byte[]?> ReadAsync(string storagePath, CancellationToken ct = default)
     {
         var fullPath = Path.Combine(_basePath, storagePath);

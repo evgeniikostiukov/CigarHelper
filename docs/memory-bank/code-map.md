@@ -3,7 +3,7 @@
 ## Точки входа
 
 - API: `CigarHelper.API/Program.cs` (+ `ProgramPartial.cs` для интеграционных тестов).
-- Import: `CigarHelper.Import/Program.cs` → `ImportCigarsFromCsv`.
+- Import: `CigarHelper.Import/Program.cs` → `ImportCigarsFromCsv`; картинки CSV — `ImportImagePersistence`, который вызывает тот же `IImageStorageProvider`, что и API (`MinioImageStorageProvider` / `LocalFileImageStorage`), а не отдельный MinIO-клиент в проекте Import.
 
 ## API — контроллеры (`CigarHelper.API/Controllers/`)
 

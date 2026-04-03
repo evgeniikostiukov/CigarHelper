@@ -1,10 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using CigarHelper.Api.Options;
+using CigarHelper.Api.Storage;
 using Microsoft.Extensions.Logging;
-using Minio;
-using Minio.DataModel.Args;
-using Minio.Exceptions;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
@@ -12,21 +11,22 @@ using SixLabors.ImageSharp.Processing;
 namespace CigarHelper.Import;
 
 /// <summary>
-/// Сохраняет изображения импорта в MinIO или на диск — та же политика, что и у API (<c>ImageStorage</c>).
+/// Сохраняет изображения импорта через <see cref="IImageStorageProvider"/> (тот же MinIO/LocalFile, что и API).
 /// Ключи объектов детерминированы от нормализованного URL картинки (SHA256), чтобы повторный импорт не скачивал и не перезаливал те же файлы.
 /// </summary>
-public sealed class ImportImagePersistence : IAsyncDisposable
+public sealed class ImportImagePersistence
 {
-    private readonly IConfiguration _configuration;
+    private readonly IImageStorageProvider _storage;
+    private readonly ImageStorageOptions _storageOptions;
     private readonly ILogger<ImportImagePersistence> _logger;
-    private IMinioClient? _minio;
-    private string? _minioBucket;
-    private string? _localBasePath;
-    private readonly object _gate = new();
 
-    public ImportImagePersistence(IConfiguration configuration, ILogger<ImportImagePersistence> logger)
+    public ImportImagePersistence(
+        IImageStorageProvider storage,
+        IOptions<ImageStorageOptions> storageOptions,
+        ILogger<ImportImagePersistence> logger)
     {
-        _configuration = configuration;
+        _storage = storage;
+        _storageOptions = storageOptions.Value;
         _logger = logger;
     }
 
@@ -42,48 +42,20 @@ public sealed class ImportImagePersistence : IAsyncDisposable
             return null;
 
         var (mainKey, thumbKey) = GetDeterministicKeys(sourceImageUrl, fileName);
-        var provider = (_configuration["ImageStorage:Provider"] ?? "Minio").Trim();
 
-        if (provider.Equals("LocalFile", StringComparison.OrdinalIgnoreCase))
-        {
-            EnsureLocalBase();
-            var mainFull = LocalFullPath(mainKey);
-            var thumbFull = LocalFullPath(thumbKey);
-            if (File.Exists(mainFull) && File.Exists(thumbFull))
-            {
-                var len = new FileInfo(mainFull).Length;
-                return new ExistingImportImageInfo(
-                    mainKey,
-                    thumbKey,
-                    len,
-                    DetectContentType(fileName));
-            }
-
-            return null;
-        }
-
-        await EnsureMinioReadyAsync(cancellationToken);
-        if (_minio is null || _minioBucket is null)
+        var mainMeta = await _storage.TryDescribeAsync(mainKey, cancellationToken);
+        if (mainMeta is null)
             return null;
 
-        try
-        {
-            var mainStat = await _minio.StatObjectAsync(
-                new StatObjectArgs().WithBucket(_minioBucket).WithObject(mainKey),
-                cancellationToken);
-            await _minio.StatObjectAsync(
-                new StatObjectArgs().WithBucket(_minioBucket).WithObject(thumbKey),
-                cancellationToken);
-            return new ExistingImportImageInfo(
-                mainKey,
-                thumbKey,
-                (long)mainStat.Size,
-                mainStat.ContentType ?? DetectContentType(fileName));
-        }
-        catch (ObjectNotFoundException)
-        {
+        var thumbMeta = await _storage.TryDescribeAsync(thumbKey, cancellationToken);
+        if (thumbMeta is null)
             return null;
-        }
+
+        return new ExistingImportImageInfo(
+            mainKey,
+            thumbKey,
+            mainMeta.Size,
+            mainMeta.ContentType ?? DetectContentType(fileName));
     }
 
     public async Task<(string StoragePath, string? ThumbnailPath)> SaveImageAsync(
@@ -92,9 +64,8 @@ public sealed class ImportImagePersistence : IAsyncDisposable
         string sourceImageUrl,
         CancellationToken cancellationToken = default)
     {
-        var provider = (_configuration["ImageStorage:Provider"] ?? "Minio").Trim();
-        var thumbW = int.TryParse(_configuration["ImageStorage:ThumbnailMaxWidth"], out var tw) ? tw : 320;
-        var thumbH = int.TryParse(_configuration["ImageStorage:ThumbnailMaxHeight"], out var th) ? th : 320;
+        var thumbW = _storageOptions.ThumbnailMaxWidth > 0 ? _storageOptions.ThumbnailMaxWidth : 320;
+        var thumbH = _storageOptions.ThumbnailMaxHeight > 0 ? _storageOptions.ThumbnailMaxHeight : 320;
 
         byte[]? thumbBytes = null;
         try
@@ -107,27 +78,12 @@ public sealed class ImportImagePersistence : IAsyncDisposable
         }
 
         var (mainKey, thumbKey) = GetDeterministicKeys(sourceImageUrl, fileName);
+        await _storage.PutAtKeyAsync(data, mainKey, DetectContentType(fileName), cancellationToken);
 
-        if (provider.Equals("LocalFile", StringComparison.OrdinalIgnoreCase))
-        {
-            EnsureLocalBase();
-            await WriteLocalObjectAsync(mainKey, data, cancellationToken);
-            string? thumbPath = null;
-            if (thumbBytes is { Length: > 0 })
-            {
-                await WriteLocalObjectAsync(thumbKey, thumbBytes, cancellationToken);
-                thumbPath = thumbKey;
-            }
-
-            return (mainKey, thumbPath);
-        }
-
-        await EnsureMinioReadyAsync(cancellationToken);
-        await PutMinioObjectAtKeyAsync(mainKey, data, DetectContentType(fileName), cancellationToken);
         string? thumbKeyOut = null;
         if (thumbBytes is { Length: > 0 })
         {
-            await PutMinioObjectAtKeyAsync(thumbKey, thumbBytes, "image/webp", cancellationToken);
+            await _storage.PutAtKeyAsync(thumbBytes, thumbKey, "image/webp", cancellationToken);
             thumbKeyOut = thumbKey;
         }
 
@@ -154,94 +110,6 @@ public sealed class ImportImagePersistence : IAsyncDisposable
         return (mainKey, thumbKey);
     }
 
-    private string LocalFullPath(string storageRelativeKey)
-    {
-        if (_localBasePath == null)
-            throw new InvalidOperationException("Local base не инициализирован.");
-        var rel = storageRelativeKey.Replace('/', Path.DirectorySeparatorChar);
-        return Path.Combine(_localBasePath, rel);
-    }
-
-    private void EnsureLocalBase()
-    {
-        lock (_gate)
-        {
-            if (_localBasePath != null)
-                return;
-        }
-
-        var relativeRoot = _configuration["ImageStorage:LocalPath"] ?? "uploads/images";
-        var basePath = Path.IsPathRooted(relativeRoot)
-            ? relativeRoot
-            : Path.Combine(AppContext.BaseDirectory, relativeRoot);
-        Directory.CreateDirectory(basePath);
-        Directory.CreateDirectory(Path.Combine(basePath, "import"));
-        lock (_gate)
-        {
-            _localBasePath ??= basePath;
-        }
-    }
-
-    private async Task WriteLocalObjectAsync(string relativeKey, byte[] data, CancellationToken ct)
-    {
-        EnsureLocalBase();
-        var full = LocalFullPath(relativeKey);
-        var dir = Path.GetDirectoryName(full);
-        if (!string.IsNullOrEmpty(dir))
-            Directory.CreateDirectory(dir);
-        await File.WriteAllBytesAsync(full, data, ct);
-    }
-
-    private async Task EnsureMinioReadyAsync(CancellationToken ct)
-    {
-        lock (_gate)
-        {
-            if (_minio != null)
-                return;
-        }
-
-        var endpoint = _configuration["ImageStorage:Minio:Endpoint"] ?? "localhost:9000";
-        var bucket = _configuration["ImageStorage:Minio:BucketName"] ?? "cigar-images";
-        var access = _configuration["ImageStorage:Minio:AccessKey"] ?? "";
-        var secret = _configuration["ImageStorage:Minio:SecretKey"] ?? "";
-        var useSsl = bool.TryParse(_configuration["ImageStorage:Minio:UseSsl"], out var ssl) && ssl;
-
-        var client = new MinioClient()
-            .WithEndpoint(endpoint)
-            .WithCredentials(access, secret)
-            .WithSSL(useSsl)
-            .Build();
-
-        var exists = await client.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket), ct);
-        if (!exists)
-        {
-            await client.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket), ct);
-            _logger.LogInformation("Импорт MinIO: создан бакет {Bucket}", bucket);
-        }
-
-        lock (_gate)
-        {
-            _minio = client;
-            _minioBucket = bucket;
-        }
-    }
-
-    private async Task PutMinioObjectAtKeyAsync(string objectName, byte[] data, string contentType, CancellationToken ct)
-    {
-        if (_minio is null || _minioBucket is null)
-            throw new InvalidOperationException("MinIO не инициализирован.");
-
-        using var stream = new MemoryStream(data);
-        await _minio.PutObjectAsync(
-            new PutObjectArgs()
-                .WithBucket(_minioBucket)
-                .WithObject(objectName)
-                .WithStreamData(stream)
-                .WithObjectSize(data.Length)
-                .WithContentType(contentType),
-            ct);
-    }
-
     private static async Task<byte[]> GenerateWebpThumbnailAsync(
         byte[] sourceData,
         int maxWidth,
@@ -264,12 +132,6 @@ public sealed class ImportImagePersistence : IAsyncDisposable
         var encoder = new WebpEncoder { Quality = 80 };
         await image.SaveAsync(ms, encoder, ct);
         return ms.ToArray();
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        _minio?.Dispose();
-        return ValueTask.CompletedTask;
     }
 
     internal static string DetectContentType(string fileName) =>

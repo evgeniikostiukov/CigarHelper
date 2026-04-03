@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Options;
+using CigarHelper.Api.Options;
+using CigarHelper.Api.Storage;
 using CigarHelper.Data.Data;
 using CigarHelper.Import;
 
@@ -104,6 +106,32 @@ public class Program
                         configuration.GetConnectionString("DefaultConnection")
                         ?? throw new InvalidOperationException(
                             "Задайте ConnectionStrings:DefaultConnection (appsettings, user-secrets или переменная ConnectionStrings__DefaultConnection).")));
+
+                services.Configure<ImageStorageOptions>(configuration.GetSection(ImageStorageOptions.SectionName));
+                services.AddSingleton<IImageStorageProvider>(sp =>
+                {
+                    var opts = sp.GetRequiredService<IOptions<ImageStorageOptions>>().Value;
+
+                    if (opts.Provider.Equals("LocalFile", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var rootPath = Path.IsPathRooted(opts.LocalPath)
+                            ? opts.LocalPath
+                            : Path.Combine(AppContext.BaseDirectory, opts.LocalPath);
+                        var logger = sp.GetRequiredService<ILogger<LocalFileImageStorage>>();
+                        return new LocalFileImageStorage(rootPath, logger);
+                    }
+
+                    if (opts.Provider.Equals("Minio", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var logger = sp.GetRequiredService<ILogger<MinioImageStorageProvider>>();
+                        var provider = new MinioImageStorageProvider(opts.Minio, logger);
+                        provider.EnsureBucketExistsAsync().GetAwaiter().GetResult();
+                        return provider;
+                    }
+
+                    throw new InvalidOperationException(
+                        $"ImageStorage:Provider '{opts.Provider}' не поддерживается. Укажите Minio или LocalFile.");
+                });
 
                 services.AddSingleton<ImportImagePersistence>();
                 services.AddHttpClient();
