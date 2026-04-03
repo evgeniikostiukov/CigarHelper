@@ -26,7 +26,10 @@ public class CreateCigarRequest
     
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }
-    
+
+    /// <summary>Несколько URL — скачиваются по порядку; первое успешно загруженное становится главным. Если задано, <see cref="ImageUrl"/> игнорируется.</summary>
+    public List<string>? ImageUrls { get; set; }
+
     public decimal? Price { get; set; }
     
     public int? Rating { get; set; }

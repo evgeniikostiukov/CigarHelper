@@ -69,7 +69,10 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
+                Images = _context.CigarImages
+                    .Where(img => img.UserCigarId == uc.Id && (img.ImageData != null || img.StoragePath != null))
+                    .OrderByDescending(img => img.IsMain)
+                    .ThenBy(img => img.Id)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -359,7 +362,10 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
+                Images = _context.CigarImages
+                    .Where(img => img.UserCigarId == uc.Id && (img.ImageData != null || img.StoragePath != null))
+                    .OrderByDescending(img => img.IsMain)
+                    .ThenBy(img => img.Id)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -476,8 +482,10 @@ public class CigarsController : ControllerBase
         _context.UserCigars.Add(userCigar);
         await _context.SaveChangesAsync();
 
-        await TryAddUserCigarImageFromUrlAsync(userCigar.Id, request.ImageUrl);
-        await _context.SaveChangesAsync();
+        if (request.ImageUrls is { Count: > 0 })
+            await TryAddUserCigarImagesFromOrderedUrlsAsync(userCigar.Id, request.ImageUrls);
+        else
+            await TryAddUserCigarImageFromUrlAsync(userCigar.Id, request.ImageUrl);
 
         // Возвращаем созданную сигару пользователя с данными из базы
         var createdCigar = await _context.UserCigars
@@ -520,7 +528,10 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
+                Images = _context.CigarImages
+                    .Where(img => img.UserCigarId == uc.Id && (img.ImageData != null || img.StoragePath != null))
+                    .OrderByDescending(img => img.IsMain)
+                    .ThenBy(img => img.Id)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -593,6 +604,27 @@ public class CigarsController : ControllerBase
             _context.CigarImages.RemoveRange(oldImages);
             await TryAddUserCigarImageFromUrlAsync(id, request.ImageUrl);
         }
+        else
+        {
+            var galleryTouched = false;
+            if (request.ImageIdsToRemove is { Count: > 0 })
+            {
+                var toRemove = await _context.CigarImages
+                    .Where(i => i.UserCigarId == id && request.ImageIdsToRemove.Contains(i.Id))
+                    .ToListAsync();
+                _context.CigarImages.RemoveRange(toRemove);
+                galleryTouched = true;
+            }
+
+            if (request.ImageUrlsToAdd is { Count: > 0 })
+            {
+                await TryAppendUserCigarImagesFromUrlsAsync(id, request.ImageUrlsToAdd);
+                galleryTouched = true;
+            }
+
+            if (galleryTouched)
+                await EnsureUserCigarHasMainImageIfNoneAsync(id);
+        }
 
         try
         {
@@ -647,7 +679,10 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
+                Images = _context.CigarImages
+                    .Where(img => img.UserCigarId == uc.Id && (img.ImageData != null || img.StoragePath != null))
+                    .OrderByDescending(img => img.IsMain)
+                    .ThenBy(img => img.Id)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,
@@ -673,25 +708,88 @@ public class CigarsController : ControllerBase
         return Ok(updatedCigar);
     }
 
-    /// <summary>Скачивает изображение по URL и привязывает к личной сигаре (UserCigar).</summary>
-    private async Task TryAddUserCigarImageFromUrlAsync(int userCigarId, string? imageUrl)
+    /// <summary>Скачивает одно или несколько изображений по URL; первое успешно загруженное — главное.</summary>
+    private async Task TryAddUserCigarImagesFromOrderedUrlsAsync(int userCigarId, IEnumerable<string> urls)
     {
-        if (string.IsNullOrWhiteSpace(imageUrl))
+        var mainAssigned = false;
+        foreach (var raw in urls)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+
+            var url = raw.Trim();
+            var imageBytes = await ImageDownloader.DownloadImageAsync(url);
+            if (imageBytes == null || imageBytes.Length == 0)
+                continue;
+
+            var contentType = GetContentTypeFromUrl(url);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = ImageBinaryValidator.SuggestContentType(imageBytes);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = "image/jpeg";
+
+            await _imageService.SaveImageAsync(
+                imageData: imageBytes,
+                contentType: contentType,
+                fileName: GetFileNameFromUrl(url),
+                description: null,
+                isMain: !mainAssigned,
+                cigarBaseId: null,
+                userCigarId: userCigarId);
+            mainAssigned = true;
+        }
+    }
+
+    /// <summary>Скачивает изображение по URL и привязывает к личной сигаре (UserCigar).</summary>
+    private Task TryAddUserCigarImageFromUrlAsync(int userCigarId, string? imageUrl) =>
+        string.IsNullOrWhiteSpace(imageUrl)
+            ? Task.CompletedTask
+            : TryAddUserCigarImagesFromOrderedUrlsAsync(userCigarId, new[] { imageUrl.Trim() });
+
+    /// <summary>Добавляет изображения по URL к уже существующим; главное не трогаем, если оно уже есть.</summary>
+    private async Task TryAppendUserCigarImagesFromUrlsAsync(int userCigarId, IEnumerable<string> urls)
+    {
+        var list = urls.Where(u => !string.IsNullOrWhiteSpace(u)).Select(u => u.Trim()).ToList();
+        if (list.Count == 0)
             return;
 
-        var url = imageUrl.Trim();
-        var imageBytes = await ImageDownloader.DownloadImageAsync(url);
-        if (imageBytes == null || imageBytes.Length == 0)
-            return;
+        var hasMain = await _context.CigarImages.AsNoTracking()
+            .AnyAsync(i => i.UserCigarId == userCigarId && i.IsMain);
 
-        await _imageService.SaveImageAsync(
-            imageData: imageBytes,
-            contentType: GetContentTypeFromUrl(url),
-            fileName: GetFileNameFromUrl(url),
-            description: null,
-            isMain: true,
-            cigarBaseId: null,
-            userCigarId: userCigarId);
+        foreach (var url in list)
+        {
+            var imageBytes = await ImageDownloader.DownloadImageAsync(url);
+            if (imageBytes == null || imageBytes.Length == 0)
+                continue;
+
+            var contentType = GetContentTypeFromUrl(url);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = ImageBinaryValidator.SuggestContentType(imageBytes);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = "image/jpeg";
+
+            var setMain = !hasMain;
+            await _imageService.SaveImageAsync(
+                imageData: imageBytes,
+                contentType: contentType,
+                fileName: GetFileNameFromUrl(url),
+                description: null,
+                isMain: setMain,
+                cigarBaseId: null,
+                userCigarId: userCigarId);
+            if (setMain)
+                hasMain = true;
+        }
+    }
+
+    private async Task EnsureUserCigarHasMainImageIfNoneAsync(int userCigarId)
+    {
+        var imgs = await _context.CigarImages.Where(i => i.UserCigarId == userCigarId).ToListAsync();
+        if (imgs.Count == 0)
+            return;
+        if (imgs.Exists(i => i.IsMain))
+            return;
+        imgs.OrderBy(i => i.Id).First().IsMain = true;
     }
 
     [HttpPost("{id}/smoked")]
@@ -755,7 +853,10 @@ public class CigarsController : ControllerBase
                     CreatedAt = uc.Humidor.CreatedAt,
                     UpdatedAt = uc.Humidor.UpdatedAt
                 } : null,
-                Images = uc.Images.Where(img => img.ImageData != null || img.StoragePath != null)
+                Images = _context.CigarImages
+                    .Where(img => img.UserCigarId == uc.Id && (img.ImageData != null || img.StoragePath != null))
+                    .OrderByDescending(img => img.IsMain)
+                    .ThenBy(img => img.Id)
                     .Select(img => new CigarImageDto
                     {
                         Id = img.Id,

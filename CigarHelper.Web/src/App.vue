@@ -12,7 +12,7 @@
       <Menubar
         data-testid="app-nav"
         :model="menuItemsVisible"
-        class="app-menubar-bar mx-auto max-w-7xl border-0 bg-transparent px-2 sm:px-4">
+        class="app-menubar-bar mx-auto container border-0 bg-transparent px-2 sm:px-4">
         <template #start>
           <router-link
             :to="{ name: 'Home' }"

@@ -342,7 +342,7 @@
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Описание и изображение</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Описание и изображения</h2>
             <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,14rem)_1fr] lg:items-start lg:gap-8">
               <div class="flex flex-col gap-2 lg:sticky lg:top-4">
                 <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Предпросмотр</span>
@@ -363,7 +363,7 @@
                       <i
                         class="pi pi-image text-3xl opacity-70"
                         aria-hidden="true" />
-                      <span class="text-xs leading-snug">Укажите URL или сохраните сигару с фото</span>
+                      <span class="text-xs leading-snug">Добавьте ссылки или оставьте сохранённые фото</span>
                     </div>
                   </div>
                 </div>
@@ -385,19 +385,80 @@
                     placeholder="Вкус, аромат, сочетания…" />
                 </div>
 
-                <div class="flex flex-col gap-2">
-                  <label
-                    for="imageUrl"
-                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                    URL изображения
-                  </label>
-                  <InputText
-                    id="imageUrl"
-                    v-model="form.imageUrl"
-                    data-testid="cigar-form-image-url"
-                    class="min-h-11 w-full"
-                    placeholder="https://example.com/cigar-image.jpg" />
-                  <small class="text-stone-500 dark:text-stone-400">Ссылка на изображение сигары</small>
+                <div
+                  v-if="isEditing && persistedImagesForDisplay.length > 0"
+                  class="flex flex-col gap-2"
+                  data-testid="cigar-form-saved-images">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сохранённые фото</span>
+                  <div class="flex flex-wrap gap-3">
+                    <div
+                      v-for="img in persistedImagesForDisplay"
+                      :key="img.id"
+                      class="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-stone-200/90 bg-stone-100 dark:border-stone-600/80 dark:bg-stone-900/60">
+                      <img
+                        v-if="persistedThumbUrls[img.id]"
+                        :src="persistedThumbUrls[img.id]"
+                        alt=""
+                        class="h-full w-full object-contain"
+                        loading="lazy" />
+                      <span
+                        v-if="img.isMain"
+                        class="absolute bottom-1 left-1 rounded bg-stone-900/75 px-1.5 py-0.5 text-[0.65rem] font-medium text-white">
+                        Главное
+                      </span>
+                      <Button
+                        type="button"
+                        class="absolute right-0.5 top-0.5 h-8 min-h-8 w-8 min-w-8 touch-manipulation"
+                        icon="pi pi-times"
+                        text
+                        rounded
+                        severity="danger"
+                        :aria-label="`Удалить фото`"
+                        @click="removePersistedImage(img.id)" />
+                    </div>
+                  </div>
+                  <small class="text-stone-500 dark:text-stone-400">
+                    Удалённые фото исчезнут после сохранения. Новые ссылки добавляются ниже.
+                  </small>
+                </div>
+
+                <div
+                  class="flex flex-col gap-2"
+                  data-testid="cigar-form-image-urls">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Ссылки на новые фото</span>
+                  <div
+                    v-for="(_u, idx) in form.imageUrls"
+                    :key="'img-url-' + idx"
+                    class="flex items-center gap-2">
+                    <InputText
+                      v-model="form.imageUrls[idx]"
+                      class="min-h-11 min-w-0 flex-1"
+                      :data-testid="idx === 0 ? 'cigar-form-image-url' : `cigar-form-image-url-${idx}`"
+                      placeholder="https://example.com/cigar.jpg" />
+                    <Button
+                      type="button"
+                      class="min-h-11 min-w-11 shrink-0 touch-manipulation"
+                      icon="pi pi-trash"
+                      text
+                      rounded
+                      severity="secondary"
+                      aria-label="Удалить строку"
+                      @click="removeImageUrlRow(idx)" />
+                  </div>
+                  <Button
+                    type="button"
+                    class="min-h-11 w-full touch-manipulation sm:w-auto"
+                    label="Добавить ссылку"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    outlined
+                    data-testid="cigar-form-add-image-url"
+                    :disabled="form.imageUrls.length >= maxNewImageUrls"
+                    @click="addImageUrlRow" />
+                  <small class="text-stone-500 dark:text-stone-400">
+                    До {{ maxNewImageUrls }} ссылок за раз. Сервер скачает каждую: при создании первый рабочий URL —
+                    главное фото; при редактировании новые фото добавляются к галерее.
+                  </small>
                 </div>
               </div>
             </div>
@@ -512,9 +573,10 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, watch } from 'vue';
+  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
+  import api from '@/services/api';
   import cigarService from '@/services/cigarService';
   import humidorService from '@/services/humidorService';
   import type { Cigar, CigarBase, Brand, CigarImage } from '@/services/cigarService';
@@ -539,7 +601,10 @@
     price: number | null;
     description: string;
     humidorId: number | null;
-    imageUrl: string;
+    /** Новые URL (пустые строки отфильтровываются при сохранении). */
+    imageUrls: string[];
+    /** Редактирование: id сохранённых фото, помеченных к удалению. */
+    removedImageIds: number[];
     wrapper: string;
     binder: string;
     filler: string;
@@ -575,6 +640,8 @@
   const searchLoading = ref<boolean>(false);
   const searchCache = ref<Map<string, CigarGroup[]>>(new Map());
 
+  const maxNewImageUrls = 12;
+
   const form = ref<FormData>({
     cigar: {} as Cigar,
     country: '',
@@ -584,7 +651,8 @@
     price: null,
     description: '',
     humidorId: null,
-    imageUrl: '',
+    imageUrls: [],
+    removedImageIds: [],
     wrapper: '',
     binder: '',
     filler: '',
@@ -598,19 +666,115 @@
     return img.imageData ?? img.data;
   }
 
-  /** Превью: приоритет URL в поле, иначе первое сохранённое фото (целиком в рамке, без обрезки). */
-  const cigarImagePreviewSrc = computed(() => {
-    const rawUrl = form.value.imageUrl?.trim();
-    if (rawUrl) {
-      if (/^https?:\/\//i.test(rawUrl) || rawUrl.startsWith('data:')) {
-        return rawUrl;
+  const persistedImagesForDisplay = computed(() => {
+    const imgs = form.value.cigar?.images ?? [];
+    const removed = new Set(form.value.removedImageIds);
+    return imgs
+      .filter((i) => !removed.has(i.id))
+      .slice()
+      .sort((a, b) => {
+        if (a.isMain !== b.isMain) {
+          return a.isMain ? -1 : 1;
+        }
+        return a.id - b.id;
+      });
+  });
+
+  const persistedThumbUrls = ref<Record<number, string>>({});
+
+  function revokeAllPersistedThumbs(): void {
+    for (const u of Object.values(persistedThumbUrls.value)) {
+      if (u.startsWith('blob:')) {
+        URL.revokeObjectURL(u);
       }
     }
-    const first = form.value.cigar.images?.[0];
+    persistedThumbUrls.value = {};
+  }
+
+  watch(
+    () =>
+      isEditing.value
+        ? persistedImagesForDisplay.value
+            .map((i) => i.id)
+            .sort((a, b) => a - b)
+            .join(',')
+        : '',
+    async () => {
+      revokeAllPersistedThumbs();
+      if (!isEditing.value) {
+        return;
+      }
+      const imgs = persistedImagesForDisplay.value;
+      const next: Record<number, string> = {};
+      for (const img of imgs) {
+        try {
+          const { data } = await api.get<Blob>(`cigarimages/${img.id}/thumbnail`, { responseType: 'blob' });
+          next[img.id] = URL.createObjectURL(data);
+        } catch {
+          if (import.meta.env.DEV) {
+            console.warn('Не удалось загрузить миниатюру', img.id);
+          }
+        }
+      }
+      persistedThumbUrls.value = next;
+    },
+    { flush: 'post' },
+  );
+
+  /** Превью: новые URL → миниатюра сохранённого → инлайн-байты из DTO. */
+  const cigarImagePreviewSrc = computed(() => {
+    for (const raw of form.value.imageUrls) {
+      const t = raw?.trim() ?? '';
+      if (!t) {
+        continue;
+      }
+      if (/^https?:\/\//i.test(t) || t.startsWith('data:')) {
+        return t;
+      }
+    }
+    for (const img of persistedImagesForDisplay.value) {
+      const blobUrl = persistedThumbUrls.value[img.id];
+      if (blobUrl) {
+        return blobUrl;
+      }
+    }
+    const first = persistedImagesForDisplay.value[0];
     const bytes = cigarImageRawBytes(first);
-    const b64 = arrayBufferToBase64(bytes ?? undefined);
-    return b64 ? `data:image/jpeg;base64,${b64}` : '';
+    if (bytes == null) {
+      return '';
+    }
+    const b64 = arrayBufferToBase64(bytes);
+    if (!b64) {
+      return '';
+    }
+    if (typeof bytes === 'string' && bytes.startsWith('data:')) {
+      return bytes;
+    }
+    const mime = (first?.contentType ?? '').trim();
+    const safeMime = mime.startsWith('image/') ? mime : 'image/jpeg';
+    return `data:${safeMime};base64,${b64}`;
   });
+
+  function addImageUrlRow(): void {
+    if (form.value.imageUrls.length >= maxNewImageUrls) {
+      return;
+    }
+    form.value.imageUrls.push('');
+  }
+
+  function removeImageUrlRow(index: number): void {
+    form.value.imageUrls.splice(index, 1);
+  }
+
+  function removePersistedImage(imageId: number): void {
+    if (!form.value.removedImageIds.includes(imageId)) {
+      form.value.removedImageIds.push(imageId);
+    }
+  }
+
+  function collectTrimmedNewImageUrls(): string[] {
+    return form.value.imageUrls.map((u) => u.trim()).filter(Boolean);
+  }
 
   const selectedHumidor = computed<Humidor | null>(() => {
     if (!form.value.humidorId) return null;
@@ -711,7 +875,8 @@
         price: cigar.price || null,
         description: cigar.description || '',
         humidorId: cigar.humidorId || null,
-        imageUrl: cigar.images?.[0]?.imageData || '',
+        imageUrls: [],
+        removedImageIds: [],
         wrapper: cigar.wrapper || '',
         binder: cigar.binder || '',
         filler: cigar.filler || '',
@@ -767,8 +932,12 @@
         humidorId: form.value.humidorId,
       };
 
+      const newUrls = collectTrimmedNewImageUrls();
       if (isEditing.value) {
-        await cigarService.updateCigar(parseInt(route.params.id as string, 10), cigarData, form.value.imageUrl);
+        await cigarService.updateCigar(parseInt(route.params.id as string, 10), cigarData, {
+          imageUrlsToAdd: newUrls.length > 0 ? newUrls : undefined,
+          imageIdsToRemove: form.value.removedImageIds.length > 0 ? [...form.value.removedImageIds] : undefined,
+        });
         toast.add({
           severity: 'success',
           summary: 'Успешно',
@@ -778,7 +947,7 @@
         await router.push({ name: 'CigarList' });
       } else {
         if (form.value.addToCollection) {
-          await cigarService.createCigar(cigarData, form.value.imageUrl);
+          await cigarService.createCigar(cigarData, newUrls.length > 0 ? newUrls : null);
           toast.add({
             severity: 'success',
             summary: 'Успешно',
@@ -963,7 +1132,8 @@
       price: null,
       description: selectedCigarData.description || '',
       humidorId: form.value.humidorId,
-      imageUrl: '',
+      imageUrls: [],
+      removedImageIds: [],
       wrapper: selectedCigarData.wrapper || '',
       binder: selectedCigarData.binder || '',
       filler: selectedCigarData.filler || '',
@@ -1038,6 +1208,10 @@
       }
     },
   );
+
+  onUnmounted(() => {
+    revokeAllPersistedThumbs();
+  });
 
   onMounted(() => {
     void loadBrands();

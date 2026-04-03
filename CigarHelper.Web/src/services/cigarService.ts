@@ -84,6 +84,18 @@ export interface CigarWriteApiPayload {
   humidorId?: number | null;
   /** Скачивается на API и сохраняется как CigarImage (UserCigar). */
   imageUrl?: string | null;
+  /** Несколько URL при создании (приоритетнее одиночного imageUrl). */
+  imageUrls?: string[] | null;
+  /** При обновлении: добавить по URL. */
+  imageUrlsToAdd?: string[] | null;
+  /** При обновлении: удалить по id. */
+  imageIdsToRemove?: number[] | null;
+}
+
+export interface CigarUpdateImageOptions {
+  imageUrl?: string | null;
+  imageUrlsToAdd?: string[];
+  imageIdsToRemove?: number[];
 }
 
 function resolveBrandId(brand: Brand | undefined): number {
@@ -91,15 +103,23 @@ function resolveBrandId(brand: Brand | undefined): number {
   return typeof id === 'number' && !Number.isNaN(id) ? id : 0;
 }
 
+function normalizeImageUrlList(urls: string[] | null | undefined): string[] {
+  return (urls ?? []).map((u) => u.trim()).filter(Boolean);
+}
+
 function toCreateCigarPayload(
   data: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>,
-  imageUrl?: string | null,
+  imageUrls?: string[] | null,
+  legacyImageUrl?: string | null,
 ): CigarWriteApiPayload {
   const brandId = resolveBrandId(data.brand);
   if (brandId <= 0) {
     throw new Error('BRAND_REQUIRED');
   }
-  const trimmedUrl = imageUrl?.trim();
+  const list = normalizeImageUrlList(imageUrls ?? []);
+  const trimmedLegacy = legacyImageUrl?.trim();
+  const imagePart: Pick<CigarWriteApiPayload, 'imageUrl' | 'imageUrls'> =
+    list.length > 0 ? { imageUrls: list } : trimmedLegacy ? { imageUrl: trimmedLegacy } : {};
   return {
     name: data.name,
     brandId,
@@ -113,11 +133,14 @@ function toCreateCigarPayload(
     price: data.price,
     rating: data.rating,
     humidorId: data.humidorId ?? null,
-    ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
+    ...imagePart,
   };
 }
 
-function toUpdateCigarPayload(data: Partial<Cigar>, imageUrl?: string | null): CigarWriteApiPayload {
+function toUpdateCigarPayload(
+  data: Partial<Cigar>,
+  image?: CigarUpdateImageOptions | string | null,
+): CigarWriteApiPayload {
   const brandId = resolveBrandId(data.brand);
   if (brandId <= 0) {
     throw new Error('BRAND_REQUIRED');
@@ -125,7 +148,15 @@ function toUpdateCigarPayload(data: Partial<Cigar>, imageUrl?: string | null): C
   if (!data.name?.trim()) {
     throw new Error('NAME_REQUIRED');
   }
-  const trimmedUrl = imageUrl?.trim();
+  const opts: CigarUpdateImageOptions =
+    typeof image === 'string' || image === null || image === undefined
+      ? { imageUrl: typeof image === 'string' ? image : null }
+      : image;
+
+  const trimmedUrl = opts.imageUrl?.trim();
+  const toAdd = normalizeImageUrlList(opts.imageUrlsToAdd);
+  const toRemove = (opts.imageIdsToRemove ?? []).filter((id) => Number.isFinite(id));
+
   return {
     name: data.name,
     brandId,
@@ -140,6 +171,8 @@ function toUpdateCigarPayload(data: Partial<Cigar>, imageUrl?: string | null): C
     rating: data.rating,
     humidorId: data.humidorId ?? null,
     ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
+    ...(toAdd.length > 0 ? { imageUrlsToAdd: toAdd } : {}),
+    ...(toRemove.length > 0 ? { imageIdsToRemove: toRemove } : {}),
   };
 }
 
@@ -154,14 +187,22 @@ const cigarService = {
     return response.data;
   },
 
-  async createCigar(cigarData: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>, imageUrl?: string | null): Promise<Cigar> {
-    const payload = toCreateCigarPayload(cigarData, imageUrl);
+  async createCigar(
+    cigarData: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>,
+    imageUrls?: string[] | null,
+    legacyImageUrl?: string | null,
+  ): Promise<Cigar> {
+    const payload = toCreateCigarPayload(cigarData, imageUrls, legacyImageUrl);
     const response = await api.post<Cigar>('/cigars', payload);
     return response.data;
   },
 
-  async updateCigar(id: number, cigarData: Partial<Cigar>, imageUrl?: string | null): Promise<void> {
-    const payload = toUpdateCigarPayload(cigarData, imageUrl);
+  async updateCigar(
+    id: number,
+    cigarData: Partial<Cigar>,
+    image?: CigarUpdateImageOptions | string | null,
+  ): Promise<void> {
+    const payload = toUpdateCigarPayload(cigarData, image);
     await api.put(`/cigars/${id}`, payload);
   },
 

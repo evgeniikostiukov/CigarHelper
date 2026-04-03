@@ -95,10 +95,11 @@
           <div
             class="relative z-20 shrink-0 h-48 rounded-t-2xl overflow-hidden border-b border-stone-100 dark:border-stone-700/80 bg-stone-100 dark:bg-stone-800/80">
             <Carousel
-              :value="cigar.images ?? []"
+              :value="orderUserCigarGalleryImages(cigar.images)"
               :num-visible="1"
               :num-scroll="1"
               class="cigar-carousel w-full h-full max-h-48"
+              :circular="(cigar.images?.length ?? 0) > 1"
               :show-indicators="(cigar.images?.length ?? 0) > 1"
               :show-navigators="(cigar.images?.length ?? 0) > 1">
               <template #item="slotProps">
@@ -241,13 +242,14 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, onUnmounted, watch } from 'vue';
   import { useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import api from '@/services/api';
   import cigarService from '../services/cigarService';
   import type { Cigar, CigarImage } from '../services/cigarService';
-  import { arrayBufferToBase64 } from '@/utils/imageUtils';
+  import { cigarImageInlineDataSrc, orderUserCigarGalleryImages } from '@/utils/cigarImageDisplay';
 
   const router = useRouter();
   const confirm = useConfirm();
@@ -257,25 +259,79 @@
   const error = ref<string | null>(null);
   const cigars = ref<Cigar[]>([]);
 
-  function imageSrc(imageData: string | Array<number> | undefined | null): string {
-    const b64 = arrayBufferToBase64(imageData ?? undefined);
-    return b64 ? `data:image/jpeg;base64,${b64}` : '';
+  /** Blob/data URL по id изображения (MinIO: только после GET с Authorization). */
+  const listThumbByImageId = ref<Record<number, string>>({});
+  let listThumbLoadGen = 0;
+
+  function revokeListThumbBlobs(rec: Record<number, string>): void {
+    for (const u of Object.values(rec)) {
+      if (u.startsWith('blob:')) {
+        URL.revokeObjectURL(u);
+      }
+    }
   }
 
-  /** Список с /api/cigars отдаёт байты в `data`; часть ответов — в `imageData` */
-  function cigarImageRawBytes(img: CigarImage | undefined): string | number[] | undefined {
-    if (!img) return undefined;
-    return img.imageData ?? img.data;
-  }
+  watch(
+    cigars,
+    async () => {
+      const gen = ++listThumbLoadGen;
+      revokeListThumbBlobs(listThumbByImageId.value);
+      const inline: Record<number, string> = {};
+      const idsToFetchSet = new Set<number>();
+
+      for (const c of cigars.value) {
+        for (const img of c.images ?? []) {
+          const local = cigarImageInlineDataSrc(img);
+          if (local) {
+            inline[img.id] = local;
+          } else if (img.id) {
+            idsToFetchSet.add(img.id);
+          }
+        }
+      }
+
+      const idsToFetch = [...idsToFetchSet];
+
+      listThumbByImageId.value = { ...inline };
+
+      await Promise.all(
+        idsToFetch.map(async (imageId) => {
+          try {
+            const { data } = await api.get<Blob>(`cigarimages/${imageId}/thumbnail`, { responseType: 'blob' });
+            const objectUrl = URL.createObjectURL(data);
+            if (gen !== listThumbLoadGen) {
+              URL.revokeObjectURL(objectUrl);
+              return;
+            }
+            listThumbByImageId.value = { ...listThumbByImageId.value, [imageId]: objectUrl };
+          } catch {
+            if (import.meta.env.DEV) {
+              console.warn('Миниатюра не загружена для изображения', imageId);
+            }
+          }
+        }),
+      );
+    },
+    { deep: true, immediate: true },
+  );
 
   function carouselItemImageSrc(img: CigarImage | undefined): string {
-    return imageSrc(cigarImageRawBytes(img) ?? null);
+    if (!img) {
+      return '';
+    }
+    const fromMap = listThumbByImageId.value[img.id];
+    if (fromMap) {
+      return fromMap;
+    }
+    return cigarImageInlineDataSrc(img);
   }
 
   function memoKey(cigar: Cigar): (string | number | null | undefined)[] {
-    const first = cigar.images?.[0];
-    const raw = cigarImageRawBytes(first);
-    const imgRef = raw == null ? 0 : typeof raw === 'string' ? raw.length : (raw as Array<number>).length;
+    const imageIds = (cigar.images ?? [])
+      .map((i) => i.id)
+      .slice()
+      .sort((a, b) => a - b)
+      .join(',');
     return [
       cigar.id,
       cigar.name,
@@ -286,9 +342,15 @@
       cigar.price,
       cigar.humidorId,
       cigar.images?.length,
-      imgRef,
+      imageIds,
     ];
   }
+
+  onUnmounted(() => {
+    revokeListThumbBlobs(listThumbByImageId.value);
+    listThumbByImageId.value = {};
+    listThumbLoadGen += 1;
+  });
 
   async function loadCigars(): Promise<void> {
     loading.value = true;

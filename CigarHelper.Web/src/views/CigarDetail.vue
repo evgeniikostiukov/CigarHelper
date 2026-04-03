@@ -96,17 +96,37 @@
             <div
               class="rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 overflow-hidden dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50">
               <div
-                v-if="primaryImageSrc"
-                class="cigar-detail-image-frame relative aspect-square w-full min-h-0 overflow-hidden bg-stone-100 dark:bg-stone-800/80"
+                v-if="galleryPending"
+                class="aspect-square bg-stone-100 dark:bg-stone-800/80 flex items-center justify-center p-4"
+                data-testid="cigar-detail-image-loading"
+                aria-busy="true">
+                <Skeleton
+                  class="h-full w-full max-h-[min(100%,24rem)] max-w-full rounded-xl border border-stone-200/80 dark:border-stone-700/80"
+                  height="100%" />
+              </div>
+              <div
+                v-else-if="gallerySlides.length > 0"
+                class="cigar-detail-gallery relative aspect-square w-full min-h-0 overflow-hidden bg-stone-100 dark:bg-stone-800/80"
                 data-testid="cigar-detail-image">
-                <div
-                  class="cigar-detail-image-frame-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-3 sm:p-4">
-                  <img
-                    :src="primaryImageSrc"
-                    :alt="cigar.name"
-                    loading="lazy"
-                    decoding="async" />
-                </div>
+                <Carousel
+                  :value="gallerySlides"
+                  :num-visible="1"
+                  :num-scroll="1"
+                  class="cigar-detail-carousel h-full w-full"
+                  :circular="gallerySlides.length > 1"
+                  :show-indicators="gallerySlides.length > 1"
+                  :show-navigators="gallerySlides.length > 1">
+                  <template #item="slotProps">
+                    <div class="flex h-full min-h-[12rem] w-full items-center justify-center p-3 sm:p-4 box-border">
+                      <img
+                        :src="slotProps.data.src"
+                        :alt="cigar.name"
+                        class="cigar-detail-gallery-img"
+                        loading="lazy"
+                        decoding="async" />
+                    </div>
+                  </template>
+                </Carousel>
               </div>
               <div
                 v-else
@@ -371,15 +391,18 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref, onMounted } from 'vue';
+  import { ref, onMounted, onUnmounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
+  import Carousel from 'primevue/carousel';
   import cigarService from '../services/cigarService';
   import humidorService from '../services/humidorService';
+  import api from '../services/api';
   import type { Cigar } from '../services/cigarService';
   import type { Humidor } from '../services/humidorService';
   import { strengthOptions } from '../utils/cigarOptions';
+  import { cigarImageInlineDataSrc, orderUserCigarGalleryImages } from '../utils/cigarImageDisplay';
 
   const route = useRoute();
   const router = useRouter();
@@ -391,17 +414,70 @@
   const loading = ref(true);
   const error = ref<string | null>(null);
 
-  const primaryImageSrc = computed(() => {
-    const c = cigar.value;
-    if (!c?.images?.length) return '';
-    const first = c.images[0];
-    const raw = first.imageData ?? first.data;
-    if (raw == null) return '';
-    if (typeof raw === 'string') {
-      return raw.startsWith('data:') ? raw : `data:image/jpeg;base64,${raw}`;
+  interface GallerySlide {
+    id: number;
+    src: string;
+  }
+
+  const gallerySlides = ref<GallerySlide[]>([]);
+  const galleryPending = ref(false);
+  let galleryLoadGen = 0;
+
+  function revokeGalleryBlobs(slides: GallerySlide[]): void {
+    for (const s of slides) {
+      if (s.src.startsWith('blob:')) {
+        URL.revokeObjectURL(s.src);
+      }
     }
-    return '';
-  });
+  }
+
+  async function loadGallery(): Promise<void> {
+    const gen = ++galleryLoadGen;
+    revokeGalleryBlobs(gallerySlides.value);
+    gallerySlides.value = [];
+    galleryPending.value = true;
+
+    const imgs = orderUserCigarGalleryImages(cigar.value?.images);
+    if (imgs.length === 0) {
+      if (gen === galleryLoadGen) {
+        galleryPending.value = false;
+      }
+      return;
+    }
+
+    const results = await Promise.all(
+      imgs.map(async (img) => {
+        const inline = cigarImageInlineDataSrc(img);
+        if (inline) {
+          return { id: img.id, src: inline };
+        }
+        if (!img.id) {
+          return null;
+        }
+        try {
+          const { data } = await api.get<Blob>(`cigarimages/${img.id}/data`, { responseType: 'blob' });
+          return { id: img.id, src: URL.createObjectURL(data) };
+        } catch (err) {
+          if (import.meta.env.DEV) {
+            console.warn('Не удалось загрузить изображение сигары:', err);
+          }
+          return null;
+        }
+      }),
+    );
+
+    if (gen !== galleryLoadGen) {
+      for (const r of results) {
+        if (r?.src.startsWith('blob:')) {
+          URL.revokeObjectURL(r.src);
+        }
+      }
+      return;
+    }
+
+    gallerySlides.value = results.filter((r): r is GallerySlide => r != null);
+    galleryPending.value = false;
+  }
 
   function getStrengthLabel(strength: string | null | undefined): string {
     if (!strength) return '';
@@ -413,17 +489,22 @@
     loading.value = true;
     error.value = null;
     humidor.value = null;
+    revokeGalleryBlobs(gallerySlides.value);
+    gallerySlides.value = [];
+    galleryPending.value = false;
     try {
       cigar.value = await cigarService.getCigar(id);
-      if (cigar.value?.humidorId) {
-        await loadHumidor(cigar.value.humidorId);
-      }
+      const humidorId = cigar.value?.humidorId;
+      await Promise.all([loadGallery(), humidorId != null ? loadHumidor(humidorId) : Promise.resolve()]);
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Ошибка при загрузке сигары:', err);
       }
       error.value = 'Не удалось загрузить данные о сигаре.';
       cigar.value = null;
+      revokeGalleryBlobs(gallerySlides.value);
+      gallerySlides.value = [];
+      galleryPending.value = false;
     } finally {
       loading.value = false;
     }
@@ -492,6 +573,21 @@
   onMounted(() => {
     void loadCigar(route.params.id as string);
   });
+
+  onUnmounted(() => {
+    revokeGalleryBlobs(gallerySlides.value);
+    gallerySlides.value = [];
+    galleryLoadGen += 1;
+  });
+
+  watch(
+    () => route.params.id,
+    (id) => {
+      if (typeof id === 'string' && id.length > 0) {
+        void loadCigar(id);
+      }
+    },
+  );
 </script>
 
 <style scoped>
@@ -505,16 +601,21 @@
     max-width: 100%;
   }
 
-  .cigar-detail-image-frame img {
+  .cigar-detail-gallery-img {
     display: block;
     width: auto;
     height: auto;
     min-width: 0;
     min-height: 0;
     max-width: 100%;
-    max-height: 100%;
+    max-height: min(70vh, 100%);
     object-fit: contain;
     object-position: center;
+  }
+
+  .cigar-detail-carousel :deep(.p-carousel-content),
+  .cigar-detail-carousel :deep(.p-carousel-container) {
+    height: 100%;
   }
 
   .cigar-detail-grain {

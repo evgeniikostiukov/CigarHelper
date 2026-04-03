@@ -144,9 +144,15 @@ public class UserCigarUpdateRequest
 
     public int? HumidorId { get; set; }
 
-    /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки.</summary>
+    /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки (кроме полей ниже).</summary>
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }
+
+    /// <summary>Добавить изображения по URL. Не используется вместе с непустым <see cref="ImageUrl"/> (тот полностью заменяет галерею).</summary>
+    public List<string>? ImageUrlsToAdd { get; set; }
+
+    /// <summary>Удалить изображения по id (только привязанные к этой UserCigar).</summary>
+    public List<int>? ImageIdsToRemove { get; set; }
 }
 
 public class MarkCigarSmokedRequest
