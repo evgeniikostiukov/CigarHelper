@@ -33,6 +33,14 @@ docker compose up -d postgres
 
 `Host=localhost;Port=5432;Database=cigarhelper;Username=cigarhelper;Password=<как в .env>`
 
+### Локальный PostgreSQL (без Docker)
+
+Плейсхолдеры в `appsettings.json` ориентированы на сценарий с **docker compose** (`cigarhelper` / БД `cigarhelper`). Если Postgres установлен локально (инсталлятор, пакетный менеджер и т.д.), задайте **свою** строку через User Secrets или `ConnectionStrings__DefaultConnection`: `Host`, `Port`, `Database`, `Username`, `Password` должны совпадать с тем, что вы создали в кластере (часто это роль `postgres` и отдельная БД под проект).
+
+Для **Import** и **API** удобно дублировать одну и ту же строку в secrets обоих проектов (или одна переменная окружения перед запуском).
+
+Ошибка **`28P01`** от Npgsql означает неверный пароль или несовпадение пользователя с тем, что настроено на сервере — это не проблема кода, а конфигурации строки подключения.
+
 ### Локальный MinIO через Docker
 
 ```bash
