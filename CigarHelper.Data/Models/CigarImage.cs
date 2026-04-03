@@ -17,11 +17,14 @@ public class CigarImage
 
     public long? FileSize { get; set; }
 
-    /// <summary>Ключ объекта в MinIO / относительный путь при LocalFile (оригинал).</summary>
+    /// <summary>
+    /// Ключ оригинала во внешнем хранилище: имя объекта MinIO или имя файла в корне <c>ImageStorage:LocalPath</c>
+    /// (формат <c>{guid}_{fileName}</c>, как при загрузке через API и при CSV-импорте).
+    /// </summary>
     [MaxLength(500)]
     public string? StoragePath { get; set; }
 
-    /// <summary>Путь/ключ миниатюры во внешнем хранилище (WebP).</summary>
+    /// <summary>Ключ миниатюры WebP в том же хранилище (генерация и именование как при загрузке через API).</summary>
     [MaxLength(500)]
     public string? ThumbnailPath { get; set; }
 

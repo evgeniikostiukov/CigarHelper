@@ -3,7 +3,7 @@
 ## Точки входа
 
 - API: `CigarHelper.API/Program.cs` (+ `ProgramPartial.cs` для интеграционных тестов).
-- Import: `CigarHelper.Import/Program.cs` → `ImportCigarsFromCsv`; картинки CSV — `ImportImagePersistence`, который вызывает тот же `IImageStorageProvider`, что и API (`MinioImageStorageProvider` / `LocalFileImageStorage`), а не отдельный MinIO-клиент в проекте Import.
+- Import: `CigarHelper.Import/Program.cs` → `ImportCigarsFromCsv`; картинки CSV — `CigarImageStorageWriter` + `IImageStorageProvider` / `IThumbnailGenerator` (те же ключи `StoragePath` / `ThumbnailPath`, что при загрузке из UI).
 
 ## API — контроллеры (`CigarHelper.API/Controllers/`)
 
@@ -23,7 +23,7 @@
 
 - `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
 - `CigarHelper.API/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
-- `CigarHelper.API/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`.
+- `CigarHelper.API/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`; **`CigarImageStorageWriter`** — общая запись оригинала + миниатюры (API и CSV-импорт).
 - `CigarHelper.API/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
 - `CigarHelper.API/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
 - `CigarHelper.API/Extensions/` — расширения DI/приложения.

@@ -29,12 +29,15 @@ public class Program
         {
             var context = services.GetRequiredService<AppDbContext>();
             var logger = services.GetRequiredService<ILogger<ImportCigarsFromCsv>>();
-            var imagePersistence = services.GetRequiredService<ImportImagePersistence>();
+            var imageStorage = services.GetRequiredService<IImageStorageProvider>();
+            var thumbnails = services.GetRequiredService<IThumbnailGenerator>();
+            var imageOpts = services.GetRequiredService<IOptions<ImageStorageOptions>>();
 
             // Определяем путь к CSV-файлу
             string csvFilePath = GetCsvFilePath(args);
 
-            var importer = new ImportCigarsFromCsv(context, imagePersistence, logger);
+            var importer = new ImportCigarsFromCsv(
+                context, imageStorage, thumbnails, imageOpts, logger);
             
             // Запускаем импорт
             await importer.ImportAsync(csvFilePath);
@@ -133,7 +136,7 @@ public class Program
                         $"ImageStorage:Provider '{opts.Provider}' не поддерживается. Укажите Minio или LocalFile.");
                 });
 
-                services.AddSingleton<ImportImagePersistence>();
+                services.AddSingleton<IThumbnailGenerator, ImageSharpThumbnailGenerator>();
                 services.AddHttpClient();
             });
 }

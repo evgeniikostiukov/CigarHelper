@@ -2,7 +2,6 @@ using CigarHelper.Api.Options;
 using Microsoft.Extensions.Logging;
 using Minio;
 using Minio.DataModel.Args;
-using Minio.Exceptions;
 
 namespace CigarHelper.Api.Storage;
 
@@ -51,55 +50,6 @@ public sealed class MinioImageStorageProvider : IImageStorageProvider, IAsyncDis
     public async Task<string?> SaveAsync(byte[] data, string suggestedFileName, CancellationToken ct = default)
     {
         var objectName = $"{Guid.NewGuid():N}_{SanitizeFileName(suggestedFileName)}";
-        await PutObjectInternalAsync(data, objectName, DetectContentType(suggestedFileName), ct);
-        return objectName;
-    }
-
-    public async Task<bool> ExistsAsync(string storagePath, CancellationToken ct = default)
-    {
-        try
-        {
-            await _client.StatObjectAsync(
-                new StatObjectArgs().WithBucket(_bucketName).WithObject(storagePath),
-                ct);
-            return true;
-        }
-        catch (ObjectNotFoundException)
-        {
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "MinIO: не удалось проверить объект {Object}", storagePath);
-            return false;
-        }
-    }
-
-    public Task PutAtKeyAsync(byte[] data, string storagePath, string contentType, CancellationToken ct = default) =>
-        PutObjectInternalAsync(data, storagePath, contentType, ct);
-
-    public async Task<ImageStorageObjectInfo?> TryDescribeAsync(string storagePath, CancellationToken ct = default)
-    {
-        try
-        {
-            var stat = await _client.StatObjectAsync(
-                new StatObjectArgs().WithBucket(_bucketName).WithObject(storagePath),
-                ct);
-            return new ImageStorageObjectInfo((long)stat.Size, stat.ContentType);
-        }
-        catch (ObjectNotFoundException)
-        {
-            return null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "MinIO: StatObject {Object}", storagePath);
-            return null;
-        }
-    }
-
-    private async Task PutObjectInternalAsync(byte[] data, string objectName, string contentType, CancellationToken ct)
-    {
         using var stream = new MemoryStream(data);
         await _client.PutObjectAsync(
             new PutObjectArgs()
@@ -107,8 +57,10 @@ public sealed class MinioImageStorageProvider : IImageStorageProvider, IAsyncDis
                 .WithObject(objectName)
                 .WithStreamData(stream)
                 .WithObjectSize(data.Length)
-                .WithContentType(contentType),
+                .WithContentType(DetectContentType(suggestedFileName)),
             ct);
+
+        return objectName;
     }
 
     public async Task<byte[]?> ReadAsync(string storagePath, CancellationToken ct = default)

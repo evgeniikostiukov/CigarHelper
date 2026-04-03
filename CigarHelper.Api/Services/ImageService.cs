@@ -110,27 +110,7 @@ public sealed class ImageService : IImageService
         return await _storage.ReadAsync(image.ThumbnailPath, ct);
     }
 
-    private async Task WriteDataAsync(CigarImage image, byte[] data, CancellationToken ct)
-    {
-        image.FileSize = data.Length;
-
-        image.StoragePath = await _storage.SaveAsync(data, image.FileName ?? "image", ct)
-            ?? throw new InvalidOperationException("Хранилище не вернуло ключ объекта для изображения.");
-
-        try
-        {
-            var thumbData = await _thumbnails.GenerateAsync(
-                data,
-                _options.ThumbnailMaxWidth,
-                _options.ThumbnailMaxHeight,
-                ct);
-
-            var thumbFileName = "thumb_" + (image.FileName ?? "image") + ".webp";
-            image.ThumbnailPath = await _storage.SaveAsync(thumbData, thumbFileName, ct);
-        }
-        catch (Exception)
-        {
-            // Ошибка генерации миниатюры не должна блокировать сохранение оригинала
-        }
-    }
+    private Task WriteDataAsync(CigarImage image, byte[] data, CancellationToken ct) =>
+        CigarImageStorageWriter.WriteOriginalAndThumbnailAsync(
+            image, data, _storage, _thumbnails, _options, ct);
 }

@@ -116,28 +116,4 @@ public class LocalFileImageStorageTests : IDisposable
 
         Assert.NotEqual(key1, key2);
     }
-
-    [Fact]
-    public async Task PutAtKeyAsync_NestedPath_WritesAndDescribe()
-    {
-        var data = new byte[] { 1, 2, 3, 4 };
-        const string key = "import/ab/deadbeef.jpg";
-
-        await _storage.PutAtKeyAsync(data, key, "image/jpeg");
-
-        var described = await _storage.TryDescribeAsync(key);
-        Assert.NotNull(described);
-        Assert.Equal(data.LongLength, described!.Size);
-
-        Assert.True(await _storage.ExistsAsync(key));
-        var read = await _storage.ReadAsync(key);
-        Assert.Equal(data, read);
-    }
-
-    [Fact]
-    public async Task TryDescribeAsync_Missing_ReturnsNull()
-    {
-        var described = await _storage.TryDescribeAsync("import/none.jpg");
-        Assert.Null(described);
-    }
 }

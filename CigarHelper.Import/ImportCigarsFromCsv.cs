@@ -7,14 +7,17 @@ using System.Text.RegularExpressions;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using CigarHelper.Data.Models;
+using CigarHelper.Api.Options;
+using CigarHelper.Api.Storage;
 using CigarHelper.Data.Data;
+using CigarHelper.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace CigarHelper.Import;
 
@@ -24,7 +27,9 @@ public class ImportCigarsFromCsv
     private readonly Dictionary<string, Brand> _brandCache = new();
     private readonly HttpClient _httpClient;
     private readonly ILogger<ImportCigarsFromCsv> _logger;
-    private readonly ImportImagePersistence _imagePersistence;
+    private readonly IImageStorageProvider _imageStorage;
+    private readonly IThumbnailGenerator _thumbnails;
+    private readonly ImageStorageOptions _imageStorageOptions;
 
     // Словарь с информацией о брендах (страна и описание)
     private readonly Dictionary<string, (string Country, string Description)> _brandInfo = new()
@@ -176,11 +181,15 @@ public class ImportCigarsFromCsv
 
     public ImportCigarsFromCsv(
         AppDbContext context,
-        ImportImagePersistence imagePersistence,
+        IImageStorageProvider imageStorage,
+        IThumbnailGenerator thumbnails,
+        IOptions<ImageStorageOptions> imageStorageOptions,
         ILogger<ImportCigarsFromCsv>? logger = null)
     {
         _context = context;
-        _imagePersistence = imagePersistence;
+        _imageStorage = imageStorage;
+        _thumbnails = thumbnails;
+        _imageStorageOptions = imageStorageOptions.Value;
         _httpClient = new HttpClient();
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
         _logger = logger ?? NullLogger<ImportCigarsFromCsv>.Instance;
@@ -326,7 +335,6 @@ public class ImportCigarsFromCsv
         var skippedCount = 0;
         var imagesCount = 0;
         var imagesErrorCount = 0;
-        var imagesReusedFromStorageCount = 0;
         
         var addedCigars = new List<string>();
         var progressTick = 0;
@@ -345,17 +353,9 @@ public class ImportCigarsFromCsv
 
                 var brand = _brandCache[brandName.ToLower()];
 
-                // Проверка MinIO / LocalFile до запроса БД: детерминированные ключи, оригинал + миниатюра.
-                string importImageFileName = string.Empty;
-                ExistingImportImageInfo? existingImportImageInStorage = null;
-                if (!string.IsNullOrEmpty(cigarData.ImageUrl))
-                {
-                    importImageFileName = GetFileNameFromUrl(cigarData.ImageUrl);
-                    existingImportImageInStorage = await _imagePersistence.TryGetExistingBySourceImageUrlAsync(
-                        cigarData.ImageUrl,
-                        importImageFileName,
-                        CancellationToken.None);
-                }
+                var importImageFileName = string.IsNullOrEmpty(cigarData.ImageUrl)
+                    ? string.Empty
+                    : GetFileNameFromUrl(cigarData.ImageUrl);
 
                 // Проверяем, не существует ли уже такая сигара
                 var existingCigar = await _context.CigarBases
@@ -398,63 +398,38 @@ public class ImportCigarsFromCsv
                     importedCount++;
                 }
 
-                // Изображение: результат проверки хранилища выше; при наличии пары ключей — без HTTP.
+                // Изображение: те же ключи хранилища, что при загрузке из UI (SaveAsync + миниатюра).
                 if (!string.IsNullOrEmpty(cigarData.ImageUrl))
                 {
                     try
                     {
-                        if (existingImportImageInStorage != null)
+                        var imageResult = await DownloadImageAsync(cigarData.ImageUrl);
+                        if (imageResult != null)
                         {
                             var cigarImage = new CigarImage
                             {
                                 CigarBase = cigar,
                                 FileName = importImageFileName,
-                                ContentType = existingImportImageInStorage.ContentType,
-                                FileSize = existingImportImageInStorage.FileSize,
-                                StoragePath = existingImportImageInStorage.StoragePath,
-                                ThumbnailPath = existingImportImageInStorage.ThumbnailPath,
+                                ContentType = imageResult.ContentType,
                                 IsMain = true,
                                 CreatedAt = DateTime.UtcNow
                             };
 
+                            await CigarImageStorageWriter.WriteOriginalAndThumbnailAsync(
+                                cigarImage,
+                                imageResult.Data,
+                                _imageStorage,
+                                _thumbnails,
+                                _imageStorageOptions,
+                                CancellationToken.None);
+
                             _context.CigarImages.Add(cigarImage);
                             imagesCount++;
-                            imagesReusedFromStorageCount++;
-                            _logger.LogInformation(
-                                "Изображение уже в хранилище, загрузка пропущена: {Name}",
-                                cigar.Name);
                         }
                         else
                         {
-                            var imageResult = await DownloadImageAsync(cigarData.ImageUrl);
-                            if (imageResult != null)
-                            {
-                                var (storagePath, thumbPath) = await _imagePersistence.SaveImageAsync(
-                                    imageResult.Data,
-                                    importImageFileName,
-                                    cigarData.ImageUrl,
-                                    CancellationToken.None);
-
-                                var cigarImage = new CigarImage
-                                {
-                                    CigarBase = cigar,
-                                    FileName = importImageFileName,
-                                    ContentType = imageResult.ContentType,
-                                    FileSize = imageResult.Data.Length,
-                                    StoragePath = storagePath,
-                                    ThumbnailPath = thumbPath,
-                                    IsMain = true,
-                                    CreatedAt = DateTime.UtcNow
-                                };
-
-                                _context.CigarImages.Add(cigarImage);
-                                imagesCount++;
-                            }
-                            else
-                            {
-                                imagesErrorCount++;
-                                Console.WriteLine($"Не удалось загрузить изображение для {cigar.Name}: {cigarData.ImageUrl}");
-                            }
+                            imagesErrorCount++;
+                            Console.WriteLine($"Не удалось загрузить изображение для {cigar.Name}: {cigarData.ImageUrl}");
                         }
                     }
                     catch (Exception ex)
@@ -479,8 +454,7 @@ public class ImportCigarsFromCsv
         
         await _context.SaveChangesAsync();
         Console.WriteLine(
-            $"Импортировано: {importedCount} сигар, {imagesCount} изображений " +
-            $"(повторно использовано из хранилища: {imagesReusedFromStorageCount}), " +
+            $"Импортировано: {importedCount} сигар, {imagesCount} изображений, " +
             $"Пропущено: {skippedCount}, Ошибок изображений: {imagesErrorCount}");
     }
     
