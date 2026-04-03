@@ -83,6 +83,12 @@ public class Program
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
             .UseContentRoot(AppContext.BaseDirectory)
+            // User Secrets подключаются только в Development; у консоли по умолчанию Production,
+            // если не заданы DOTNET_ENVIRONMENT / ASPNETCORE_ENVIRONMENT — секреты не читались.
+            .UseEnvironment(
+                Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+                ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                ?? Environments.Development)
             .ConfigureLogging((context, logging) =>
             {
                 logging.ClearProviders();

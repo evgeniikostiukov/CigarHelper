@@ -93,6 +93,8 @@ dotnet run --project CigarHelper.Import/CigarHelper.Import.csproj -- путь\к
 
 Первый аргумент — путь к CSV, если файл существует. Иначе ищется `cigarday.csv` рядом с выходной директорией или на уровень выше; при отсутствии — интерактивный ввод пути (`CigarHelper.Import/Program.cs`).
 
+**User Secrets для строки БД:** если не заданы `DOTNET_ENVIRONMENT` / `ASPNETCORE_ENVIRONMENT`, хост по умолчанию считал бы окружение Production и **не подгружал бы** секреты. В `Program.cs` для Import явно выставляется `Development`, когда переменные не заданы; при необходимости прод-подобного запуска задайте `DOTNET_ENVIRONMENT=Production` и передайте строку через `ConnectionStrings__DefaultConnection`.
+
 ## Миграции EF Core
 
 Контекст: `AppDbContext` в проекте `CigarHelper.Data`. Типовой шаблон (из корня repo):

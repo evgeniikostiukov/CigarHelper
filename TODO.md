@@ -147,4 +147,5 @@
 - **2026-04-03** — Фикс фильтра базы сигар: `CigarBases.vue` и `ReviewForm.vue` передают в `GET .../cigars/bases/paginated` параметр `search` (как в `GetCigarBasesPaginated`), а не `name`.
 - **2026-04-03** — Плейсхолдер `ConnectionStrings:DefaultConnection` в `appsettings*.json` (API, Data, Import): `cigarhelper`/`cigarhelper` + `Port=5432`, в соответствии с `docker-compose` и `.env.example` (раньше было `cigar_helper`/`postgres`, из‑за чего при Docker локалке импорт и EF падали на несуществующей БД/пользователе).
 - **2026-04-03** — `workflow.md`: раздел «Локальный PostgreSQL (без Docker)» — строка через secrets/env под реальную роль/БД; пояснение `28P01` и что Import/API нужна та же строка.
+- **2026-04-03** — Import: `UseEnvironment` с fallback `Development`, если не заданы `DOTNET_ENVIRONMENT`/`ASPNETCORE_ENVIRONMENT` — User Secrets снова подхватываются (раньше консоль по умолчанию шла в Production); `Properties/launchSettings.json`; примечание в `workflow.md`.
 
