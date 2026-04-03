@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace CigarHelper.Api.Services;
 
 /// <summary>
-/// Оркестрирует сохранение изображений: валидация → запись в storage provider → генерация миниатюры.
+/// Оркестрирует сохранение изображений: валидация → MinIO/файлы → миниатюра WebP.
 /// </summary>
 public sealed class ImageService : IImageService
 {
@@ -51,9 +51,7 @@ public sealed class ImageService : IImageService
         };
 
         if (imageData is { Length: > 0 })
-        {
             await WriteDataAsync(image, imageData, ct);
-        }
 
         _db.CigarImages.Add(image);
         await _db.SaveChangesAsync(ct);
@@ -67,14 +65,10 @@ public sealed class ImageService : IImageService
         string? contentType,
         CancellationToken ct = default)
     {
-        // Удаляем старые файлы из внешнего хранилища
-        if (_storage.StoresExternally)
-        {
-            if (image.StoragePath is not null)
-                await _storage.DeleteAsync(image.StoragePath, ct);
-            if (image.ThumbnailPath is not null)
-                await _storage.DeleteAsync(image.ThumbnailPath, ct);
-        }
+        if (image.StoragePath is not null)
+            await _storage.DeleteAsync(image.StoragePath, ct);
+        if (image.ThumbnailPath is not null)
+            await _storage.DeleteAsync(image.ThumbnailPath, ct);
 
         if (contentType is not null)
             image.ContentType = contentType;
@@ -86,13 +80,10 @@ public sealed class ImageService : IImageService
 
     public async Task DeleteImageAsync(CigarImage image, CancellationToken ct = default)
     {
-        if (_storage.StoresExternally)
-        {
-            if (image.StoragePath is not null)
-                await _storage.DeleteAsync(image.StoragePath, ct);
-            if (image.ThumbnailPath is not null)
-                await _storage.DeleteAsync(image.ThumbnailPath, ct);
-        }
+        if (image.StoragePath is not null)
+            await _storage.DeleteAsync(image.StoragePath, ct);
+        if (image.ThumbnailPath is not null)
+            await _storage.DeleteAsync(image.ThumbnailPath, ct);
 
         _db.CigarImages.Remove(image);
         await _db.SaveChangesAsync(ct);
@@ -104,40 +95,28 @@ public sealed class ImageService : IImageService
     {
         var contentType = image.ContentType ?? "image/jpeg";
 
-        if (_storage.StoresExternally && image.StoragePath is not null)
-        {
-            var data = await _storage.ReadAsync(image.StoragePath, ct);
-            return (data, contentType);
-        }
+        if (image.StoragePath is null)
+            return (null, contentType);
 
-        return (image.ImageData, contentType);
+        var data = await _storage.ReadAsync(image.StoragePath, ct);
+        return (data, contentType);
     }
 
     public async Task<byte[]?> GetThumbnailDataAsync(CigarImage image, CancellationToken ct = default)
     {
-        if (_storage.StoresExternally && image.ThumbnailPath is not null)
-            return await _storage.ReadAsync(image.ThumbnailPath, ct);
+        if (image.ThumbnailPath is null)
+            return null;
 
-        return image.ThumbnailData;
+        return await _storage.ReadAsync(image.ThumbnailPath, ct);
     }
 
-    // Записывает бинарные данные в нужный провайдер и заполняет поля сущности.
     private async Task WriteDataAsync(CigarImage image, byte[] data, CancellationToken ct)
     {
         image.FileSize = data.Length;
 
-        if (_storage.StoresExternally)
-        {
-            image.StoragePath = await _storage.SaveAsync(data, image.FileName ?? "image", ct);
-            image.ImageData = null;
-        }
-        else
-        {
-            image.ImageData = data;
-            image.StoragePath = null;
-        }
+        image.StoragePath = await _storage.SaveAsync(data, image.FileName ?? "image", ct)
+            ?? throw new InvalidOperationException("Хранилище не вернуло ключ объекта для изображения.");
 
-        // Генерируем миниатюру
         try
         {
             var thumbData = await _thumbnails.GenerateAsync(
@@ -146,17 +125,8 @@ public sealed class ImageService : IImageService
                 _options.ThumbnailMaxHeight,
                 ct);
 
-            if (_storage.StoresExternally)
-            {
-                var thumbFileName = "thumb_" + (image.FileName ?? "image") + ".webp";
-                image.ThumbnailPath = await _storage.SaveAsync(thumbData, thumbFileName, ct);
-                image.ThumbnailData = null;
-            }
-            else
-            {
-                image.ThumbnailData = thumbData;
-                image.ThumbnailPath = null;
-            }
+            var thumbFileName = "thumb_" + (image.FileName ?? "image") + ".webp";
+            image.ThumbnailPath = await _storage.SaveAsync(thumbData, thumbFileName, ct);
         }
         catch (Exception)
         {

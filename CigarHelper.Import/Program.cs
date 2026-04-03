@@ -27,12 +27,12 @@ public class Program
         {
             var context = services.GetRequiredService<AppDbContext>();
             var logger = services.GetRequiredService<ILogger<ImportCigarsFromCsv>>();
-            
+            var imagePersistence = services.GetRequiredService<ImportImagePersistence>();
+
             // Определяем путь к CSV-файлу
             string csvFilePath = GetCsvFilePath(args);
-            
-            // Создаем экземпляр ImportCigarsFromCsv
-            var importer = new ImportCigarsFromCsv(context, logger);
+
+            var importer = new ImportCigarsFromCsv(context, imagePersistence, logger);
             
             // Запускаем импорт
             await importer.ImportAsync(csvFilePath);
@@ -98,7 +98,8 @@ public class Program
                         configuration.GetConnectionString("DefaultConnection")
                         ?? throw new InvalidOperationException(
                             "Задайте ConnectionStrings:DefaultConnection (appsettings, user-secrets или переменная ConnectionStrings__DefaultConnection).")));
-                
+
+                services.AddSingleton<ImportImagePersistence>();
                 services.AddHttpClient();
             });
 }

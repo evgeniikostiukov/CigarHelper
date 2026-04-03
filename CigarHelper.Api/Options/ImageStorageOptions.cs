@@ -7,10 +7,8 @@ public class ImageStorageOptions
 {
     public const string SectionName = "ImageStorage";
 
-    /// <summary>
-    /// Провайдер хранилища: <c>Database</c> (по умолчанию), <c>LocalFile</c> или <c>Minio</c>.
-    /// </summary>
-    public string Provider { get; set; } = "Database";
+    /// <summary>Провайдер: <c>Minio</c> (по умолчанию) или <c>LocalFile</c> (например интеграционные тесты).</summary>
+    public string Provider { get; set; } = "Minio";
 
     /// <summary>Корневая папка для LocalFile-провайдера. Может быть абсолютным или относительным путём.</summary>
     public string LocalPath { get; set; } = "uploads/images";

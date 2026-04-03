@@ -23,7 +23,7 @@
 
 - `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
 - `CigarHelper.API/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
-- `CigarHelper.API/Storage/` — **`IImageStorageProvider`** + реализации `DatabaseImageStorage`/`LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`.
+- `CigarHelper.API/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`.
 - `CigarHelper.API/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
 - `CigarHelper.API/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
 - `CigarHelper.API/Extensions/` — расширения DI/приложения.
@@ -34,11 +34,12 @@
 
 | `Provider` | Где хранятся данные | Когда использовать |
 |---|---|---|
-| `Database` (default) | `bytea` в таблице `CigarImages` | Dev / малый объём (< 1 000 изображений) |
-| `LocalFile` | Папка `ImageStorage:LocalPath` на диске | Один инстанс; требует общего тома при горизонтальном масштабировании |
-| `S3` (не реализован, заготовка) | S3/MinIO объектное хранилище | Продакшен с несколькими инстансами / большой объём |
+| `Minio` (default в `appsettings`) | Объекты в бакете (`ImageStorage:Minio`) | Основной режим API и импорта |
+| `LocalFile` | Папка `ImageStorage:LocalPath` | Интеграционные тесты API (`WebApplicationFactory`), один инстанс без MinIO |
 
-При добавлении нового провайдера — реализовать `IImageStorageProvider` и зарегистрировать в `Program.cs`.
+В таблице `CigarImages` хранятся только ключи `StoragePath` / `ThumbnailPath`, не bytea.
+
+При добавлении провайдера — реализовать `IImageStorageProvider` и зарегистрировать в `Program.cs`.
 
 ### Миниатюры
 

@@ -17,25 +17,11 @@ public class CigarImage
 
     public long? FileSize { get; set; }
 
-    /// <summary>
-    /// Бинарные данные полного изображения (Database-provider).
-    /// Null при использовании LocalFile/S3-провайдера — данные хранятся по <see cref="StoragePath"/>.
-    /// </summary>
-    [Column(TypeName = "bytea")]
-    public byte[]? ImageData { get; set; }
-
-    /// <summary>
-    /// Путь/ключ во внешнем хранилище (LocalFile или S3).
-    /// Null при Database-провайдере — данные в <see cref="ImageData"/>.
-    /// </summary>
+    /// <summary>Ключ объекта в MinIO / относительный путь при LocalFile (оригинал).</summary>
     [MaxLength(500)]
     public string? StoragePath { get; set; }
 
-    /// <summary>Бинарные данные миниатюры (Database-provider, WebP).</summary>
-    [Column(TypeName = "bytea")]
-    public byte[]? ThumbnailData { get; set; }
-
-    /// <summary>Путь/ключ миниатюры во внешнем хранилище.</summary>
+    /// <summary>Путь/ключ миниатюры во внешнем хранилище (WebP).</summary>
     [MaxLength(500)]
     public string? ThumbnailPath { get; set; }
 

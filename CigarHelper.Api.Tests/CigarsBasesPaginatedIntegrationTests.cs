@@ -48,7 +48,8 @@ public class CigarsBasesPaginatedIntegrationTests
             db.CigarImages.Add(new CigarImage
             {
                 CigarBaseId = cb.Id,
-                ImageData = new byte[] { 1, 2, 3 },
+                StoragePath = "test-object-main-1",
+                ThumbnailPath = "test-object-thumb-1",
                 FileName = "x.png",
                 ContentType = "image/png",
                 CreatedAt = DateTime.UtcNow
@@ -106,7 +107,7 @@ public class CigarsBasesPaginatedIntegrationTests
             db.CigarImages.Add(new CigarImage
             {
                 CigarBaseId = cb.Id,
-                ImageData = new byte[] { 5, 5, 5 },
+                StoragePath = "test-object-main-2",
                 FileName = "p.png",
                 ContentType = "image/png",
                 CreatedAt = DateTime.UtcNow

@@ -190,7 +190,7 @@ builder.Services.AddHealthChecks()
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
 builder.Services.Configure<ImageStorageOptions>(builder.Configuration.GetSection(ImageStorageOptions.SectionName));
 
-// Image storage provider — выбирается по ImageStorage:Provider
+// Image storage: только MinIO или локальные файлы (без bytea в БД).
 builder.Services.AddSingleton<IImageStorageProvider>(sp =>
 {
     var opts = sp.GetRequiredService<IOptions<ImageStorageOptions>>().Value;
@@ -212,7 +212,8 @@ builder.Services.AddSingleton<IImageStorageProvider>(sp =>
         return provider;
     }
 
-    return new DatabaseImageStorage();
+    throw new InvalidOperationException(
+        $"ImageStorage:Provider '{opts.Provider}' не поддерживается. Укажите Minio или LocalFile.");
 });
 
 builder.Services.AddSingleton<IThumbnailGenerator, ImageSharpThumbnailGenerator>();

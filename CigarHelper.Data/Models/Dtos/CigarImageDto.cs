@@ -15,8 +15,6 @@ public class CigarImageDto
     public DateTime CreatedAt { get; set; }
     /// <summary>True если для изображения есть миниатюра (GET /{id}/thumbnail).</summary>
     public bool HasThumbnail { get; set; }
-    [Obsolete("Используйте GET /api/cigar-images/{id}/data")]
-    public byte[]? Data { get; set; }
 }
 
 public class CreateCigarImageRequest

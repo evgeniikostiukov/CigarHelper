@@ -24,6 +24,7 @@ public class ImportCigarsFromCsv
     private readonly Dictionary<string, Brand> _brandCache = new();
     private readonly HttpClient _httpClient;
     private readonly ILogger<ImportCigarsFromCsv> _logger;
+    private readonly ImportImagePersistence _imagePersistence;
 
     // Словарь с информацией о брендах (страна и описание)
     private readonly Dictionary<string, (string Country, string Description)> _brandInfo = new()
@@ -173,9 +174,13 @@ public class ImportCigarsFromCsv
         ["Other"] = ("Неизвестно", "Бренд с неизвестным происхождением.")
     };
 
-    public ImportCigarsFromCsv(AppDbContext context, ILogger<ImportCigarsFromCsv> logger = null)
+    public ImportCigarsFromCsv(
+        AppDbContext context,
+        ImportImagePersistence imagePersistence,
+        ILogger<ImportCigarsFromCsv>? logger = null)
     {
         _context = context;
+        _imagePersistence = imagePersistence;
         _httpClient = new HttpClient();
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
         _logger = logger ?? NullLogger<ImportCigarsFromCsv>.Instance;
@@ -375,17 +380,24 @@ public class ImportCigarsFromCsv
                         var imageResult = await DownloadImageAsync(cigarData.ImageUrl);
                         if (imageResult != null)
                         {
+                            var fileName = GetFileNameFromUrl(cigarData.ImageUrl);
+                            var (storagePath, thumbPath) = await _imagePersistence.SaveImageAsync(
+                                imageResult.Data,
+                                fileName,
+                                CancellationToken.None);
+
                             var cigarImage = new CigarImage
                             {
                                 CigarBase = cigar,
-                                FileName = GetFileNameFromUrl(cigarData.ImageUrl),
+                                FileName = fileName,
                                 ContentType = imageResult.ContentType,
                                 FileSize = imageResult.Data.Length,
-                                ImageData = imageResult.Data,
+                                StoragePath = storagePath,
+                                ThumbnailPath = thumbPath,
                                 IsMain = true,
                                 CreatedAt = DateTime.UtcNow
                             };
-                            
+
                             _context.CigarImages.Add(cigarImage);
                             imagesCount++;
                         }

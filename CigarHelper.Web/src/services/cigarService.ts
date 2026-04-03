@@ -9,10 +9,6 @@ export interface CigarImage {
   hasThumbnail?: boolean;
   cigarBaseId?: number | null;
   userCigarId?: number | null;
-  /** Инлайн-байты (только DB-хранилище, при MinIO = null) */
-  imageData?: string;
-  /** Устаревшее поле: CigarImageDto.Data */
-  data?: string | number[];
 }
 
 export interface CigarBase {

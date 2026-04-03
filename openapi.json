@@ -2733,10 +2733,8 @@
             "type": "string",
             "format": "date-time"
           },
-          "data": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
+          "hasThumbnail": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

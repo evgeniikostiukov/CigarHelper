@@ -132,7 +132,7 @@ public class CigarImagesController : ControllerBase
                 CigarBaseId = ci.CigarBaseId,
                 UserCigarId = ci.UserCigarId,
                 CreatedAt = ci.CreatedAt,
-                HasThumbnail = ci.ThumbnailData != null || ci.ThumbnailPath != null
+                HasThumbnail = ci.ThumbnailPath != null
             })
             .ToListAsync(cancellationToken);
 
@@ -164,7 +164,7 @@ public class CigarImagesController : ControllerBase
             CigarBaseId = image.CigarBaseId,
             UserCigarId = image.UserCigarId,
             CreatedAt = image.CreatedAt,
-            HasThumbnail = image.ThumbnailData != null || image.ThumbnailPath != null
+            HasThumbnail = image.ThumbnailPath != null
         });
     }
 
@@ -424,7 +424,7 @@ public class CigarImagesController : ControllerBase
         CigarBaseId = image.CigarBaseId,
         UserCigarId = image.UserCigarId,
         CreatedAt = image.CreatedAt,
-        HasThumbnail = image.ThumbnailData != null || image.ThumbnailPath != null
+        HasThumbnail = image.ThumbnailPath != null
     };
 
     private static string GetFileNameFromUrl(string url)

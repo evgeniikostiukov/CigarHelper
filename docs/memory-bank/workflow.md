@@ -40,7 +40,7 @@ docker compose up -d minio
 - S3 API: `http://localhost:9000`
 - Веб-консоль: `http://localhost:9001` (логин/пароль: `minioadmin` / `minioadmin`)
 
-Для переключения API на MinIO задать через User Secrets:
+По умолчанию в репозитории `ImageStorage:Provider` = `Minio`. Секреты (`AccessKey`/`SecretKey`) и при необходимости endpoint — через User Secrets или env. Для ручной подстройки пример:
 
 ```json
 {
@@ -72,6 +72,8 @@ dotnet user-secrets set "ImageStorage:Minio:SecretKey" "minioadmin" --project Ci
 ### Security-чеклист (прод)
 
 Перед выкатом пройти применимые пункты в [security-refactor-memory-bank.md](../security-refactor-memory-bank.md): **Cors:Origins**, секреты (`Jwt:Key`, строка БД), `appsettings.Production.json`, заголовки и доверие к прокси (см. тот же документ).
+
+Консольный **Import** использует ту же секцию `ImageStorage` (`Import/appsettings.json` + user-secrets): изображения из CSV пишутся в MinIO или LocalFile, в БД — только ключи.
 
 ## Импорт CSV
 
