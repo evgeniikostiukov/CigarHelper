@@ -329,11 +329,13 @@ public class ImportCigarsFromCsv
         var imagesReusedFromStorageCount = 0;
         
         var addedCigars = new List<string>();
+        var progressTick = 0;
 
         foreach (var cigarData in cigars)
         {
             try
             {
+                progressTick++;
                 var brandName = ExtractBrandName(cigarData.Name);
                 if (string.IsNullOrEmpty(brandName) || !_brandCache.ContainsKey(brandName.ToLower()))
                 {
@@ -359,32 +361,43 @@ public class ImportCigarsFromCsv
                 var existingCigar = await _context.CigarBases
                     .FirstOrDefaultAsync(c => c.Name.ToLower() == cigarData.Name.ToLower() && c.BrandId == brand.Id);
 
+                CigarBase cigar;
                 if (existingCigar != null)
                 {
-                    skippedCount++;
-                    continue;
+                    var hasMainImage = await _context.CigarImages.AnyAsync(
+                        ci => ci.CigarBaseId == existingCigar.Id && ci.IsMain,
+                        CancellationToken.None);
+                    if (hasMainImage)
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    cigar = existingCigar;
+                }
+                else
+                {
+                    cigar = new CigarBase
+                    {
+                        Name = cigarData.Name,
+                        BrandId = brand.Id,
+                        Size = ParseSize(cigarData.Size),
+                        Country = brand.Country ?? "Неизвестно", // Используем страну бренда
+                        IsModerated = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    if (addedCigars.Contains(cigar.Name))
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    _context.CigarBases.Add(cigar);
+                    addedCigars.Add(cigar.Name);
+                    importedCount++;
                 }
 
-                var cigar = new CigarBase
-                {
-                    Name = cigarData.Name,
-                    BrandId = brand.Id,
-                    Size = ParseSize(cigarData.Size),
-                    Country = brand.Country ?? "Неизвестно", // Используем страну бренда
-                    IsModerated = true,
-                    CreatedAt = DateTime.UtcNow
-                };
-                
-                if(addedCigars.Contains(cigar.Name))
-                {
-                    skippedCount++;
-                    continue;
-                }
-
-                _context.CigarBases.Add(cigar);
-                addedCigars.Add(cigar.Name);
-                importedCount++;
-                
                 // Изображение: результат проверки хранилища выше; при наличии пары ключей — без HTTP.
                 if (!string.IsNullOrEmpty(cigarData.ImageUrl))
                 {
@@ -450,8 +463,8 @@ public class ImportCigarsFromCsv
                         Console.WriteLine($"Ошибка при загрузке изображения для {cigar.Name}: {ex.Message}");
                     }
                 }
-                
-                if (importedCount % 50 == 0)
+
+                if (progressTick % 50 == 0)
                 {
                     await _context.SaveChangesAsync();
                     Console.WriteLine($"Импортировано {importedCount} сигар, {imagesCount} изображений...");

@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-03** — Импорт: при дубликате `CigarBase` строка пропускается только если в БД уже есть главное фото (`CigarImages` + `IsMain`); иначе к существующей сигаре дозагружается картинка (хранилище/HTTP). Периодический `SaveChanges` по `progressTick`, не только по `importedCount`.
 - **2026-04-03** — Импорт: `TryGetExistingBySourceImageUrlAsync` выполняется после резолва бренда и **до** запроса дубликата сигары в БД; результат затем используется при добавлении `CigarImage` (один вызов MinIO/файлов на строку CSV).
 - **2026-04-03** — Импорт (`CigarHelper.Import`): детерминированные ключи в MinIO/LocalFile по SHA256 URL картинки (`import/{hash}{ext}`, `import/{hash}_thumb.webp`); перед сохранением `StatObject`/проверка файлов — если оригинал и миниатюра уже есть, HTTP-скачивание и Put пропускаются, в БД пишутся существующие пути; иначе скачивание и запись по тем же ключам.
 - **2026-04-03** — Форма сигары: несколько URL фото (`CreateCigarRequest.ImageUrls`, `UserCigarUpdateRequest.ImageUrlsToAdd` / `ImageIdsToRemove`), UI в `CigarForm.vue` (строки ссылок, сохранённые миниатюры, удаление); `cigarService.createCigar` / `updateCigar` с массивами.
