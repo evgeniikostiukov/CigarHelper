@@ -353,6 +353,18 @@ public class ImportCigarsFromCsv
                     continue;
                 }
 
+                // Проверка MinIO / LocalFile: по детерминированным ключам уже есть оригинал и миниатюра.
+                string importImageFileName = string.Empty;
+                ExistingImportImageInfo? existingImportImageInStorage = null;
+                if (!string.IsNullOrEmpty(cigarData.ImageUrl))
+                {
+                    importImageFileName = GetFileNameFromUrl(cigarData.ImageUrl);
+                    existingImportImageInStorage = await _imagePersistence.TryGetExistingBySourceImageUrlAsync(
+                        cigarData.ImageUrl,
+                        importImageFileName,
+                        CancellationToken.None);
+                }
+
                 var cigar = new CigarBase
                 {
                     Name = cigarData.Name,
@@ -373,27 +385,21 @@ public class ImportCigarsFromCsv
                 addedCigars.Add(cigar.Name);
                 importedCount++;
                 
-                // Изображение: при наличии пары объектов в MinIO/LocalFile — без HTTP; иначе скачать и сохранить.
+                // Изображение: результат проверки хранилища выше; при наличии пары ключей — без HTTP.
                 if (!string.IsNullOrEmpty(cigarData.ImageUrl))
                 {
                     try
                     {
-                        var fileName = GetFileNameFromUrl(cigarData.ImageUrl);
-                        var existingInStorage = await _imagePersistence.TryGetExistingBySourceImageUrlAsync(
-                            cigarData.ImageUrl,
-                            fileName,
-                            CancellationToken.None);
-
-                        if (existingInStorage != null)
+                        if (existingImportImageInStorage != null)
                         {
                             var cigarImage = new CigarImage
                             {
                                 CigarBase = cigar,
-                                FileName = fileName,
-                                ContentType = existingInStorage.ContentType,
-                                FileSize = existingInStorage.FileSize,
-                                StoragePath = existingInStorage.StoragePath,
-                                ThumbnailPath = existingInStorage.ThumbnailPath,
+                                FileName = importImageFileName,
+                                ContentType = existingImportImageInStorage.ContentType,
+                                FileSize = existingImportImageInStorage.FileSize,
+                                StoragePath = existingImportImageInStorage.StoragePath,
+                                ThumbnailPath = existingImportImageInStorage.ThumbnailPath,
                                 IsMain = true,
                                 CreatedAt = DateTime.UtcNow
                             };
@@ -412,14 +418,14 @@ public class ImportCigarsFromCsv
                             {
                                 var (storagePath, thumbPath) = await _imagePersistence.SaveImageAsync(
                                     imageResult.Data,
-                                    fileName,
+                                    importImageFileName,
                                     cigarData.ImageUrl,
                                     CancellationToken.None);
 
                                 var cigarImage = new CigarImage
                                 {
                                     CigarBase = cigar,
-                                    FileName = fileName,
+                                    FileName = importImageFileName,
                                     ContentType = imageResult.ContentType,
                                     FileSize = imageResult.Data.Length,
                                     StoragePath = storagePath,
