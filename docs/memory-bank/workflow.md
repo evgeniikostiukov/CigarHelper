@@ -27,9 +27,11 @@ dotnet run --project CigarHelper.API/CigarHelper.Api.csproj
 docker compose up -d postgres
 ```
 
-Пример строки подключения (пользователь/БД из `docker-compose.yml`):
+Имена БД и пользователя задаются в `.env` (шаблон — `.env.example`: `POSTGRES_DB` / `POSTGRES_USER` = `cigarhelper`). Плейсхолдеры в `appsettings.json` (API, Data, Import) приведены к тем же значениям; пароль должен совпадать с `POSTGRES_PASSWORD` (через User Secrets или `ConnectionStrings__DefaultConnection`).
 
-`Host=localhost;Port=5432;Database=cigarhelper;Username=cigarhelper;Password=dev`
+Пример строки подключения:
+
+`Host=localhost;Port=5432;Database=cigarhelper;Username=cigarhelper;Password=<как в .env>`
 
 ### Локальный MinIO через Docker
 
