@@ -342,18 +342,8 @@ public class ImportCigarsFromCsv
                 }
 
                 var brand = _brandCache[brandName.ToLower()];
-                
-                // Проверяем, не существует ли уже такая сигара
-                var existingCigar = await _context.CigarBases
-                    .FirstOrDefaultAsync(c => c.Name.ToLower() == cigarData.Name.ToLower() && c.BrandId == brand.Id);
-                
-                if (existingCigar != null)
-                {
-                    skippedCount++;
-                    continue;
-                }
 
-                // Проверка MinIO / LocalFile: по детерминированным ключам уже есть оригинал и миниатюра.
+                // Проверка MinIO / LocalFile до запроса БД: детерминированные ключи, оригинал + миниатюра.
                 string importImageFileName = string.Empty;
                 ExistingImportImageInfo? existingImportImageInStorage = null;
                 if (!string.IsNullOrEmpty(cigarData.ImageUrl))
@@ -363,6 +353,16 @@ public class ImportCigarsFromCsv
                         cigarData.ImageUrl,
                         importImageFileName,
                         CancellationToken.None);
+                }
+
+                // Проверяем, не существует ли уже такая сигара
+                var existingCigar = await _context.CigarBases
+                    .FirstOrDefaultAsync(c => c.Name.ToLower() == cigarData.Name.ToLower() && c.BrandId == brand.Id);
+
+                if (existingCigar != null)
+                {
+                    skippedCount++;
+                    continue;
                 }
 
                 var cigar = new CigarBase
