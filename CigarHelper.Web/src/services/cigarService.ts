@@ -273,6 +273,11 @@ const cigarService = {
     const response = await api.post('/cigarimages/upload-by-url', payload);
     return response.data;
   },
+
+  /** UserCigar / доступные пользователю изображения: снять флаг main с остальных и выставить для `id`. */
+  async setCigarImageMain(imageId: number): Promise<void> {
+    await api.patch(`/cigarimages/${imageId}/set-main`);
+  },
 };
 
 export default cigarService;

@@ -407,6 +407,20 @@
                         Главное
                       </span>
                       <Button
+                        v-if="!img.isMain"
+                        type="button"
+                        class="absolute left-0.5 top-0.5 h-8 min-h-8 w-8 min-w-8 touch-manipulation"
+                        icon="pi pi-star"
+                        text
+                        rounded
+                        severity="secondary"
+                        :loading="settingMainImageId === img.id"
+                        :disabled="settingMainImageId != null"
+                        :data-testid="`cigar-form-set-main-image-${img.id}`"
+                        aria-label="Сделать главным фото"
+                        v-tooltip.top="'Сделать главным'"
+                        @click="makePersistedImageMain(img.id)" />
+                      <Button
                         type="button"
                         class="absolute right-0.5 top-0.5 h-8 min-h-8 w-8 min-w-8 touch-manipulation"
                         icon="pi pi-times"
@@ -418,7 +432,8 @@
                     </div>
                   </div>
                   <small class="text-stone-500 dark:text-stone-400">
-                    Удалённые фото исчезнут после сохранения. Новые ссылки добавляются ниже.
+                    Звёздочка — сразу назначить главное фото (сохраняется на сервере). Удалённые фото исчезнут после
+                    сохранения формы. Новые ссылки добавляются ниже.
                   </small>
                 </div>
 
@@ -642,6 +657,9 @@
 
   const maxNewImageUrls = 12;
 
+  /** PATCH set-main для сохранённого фото коллекции. */
+  const settingMainImageId = ref<number | null>(null);
+
   const form = ref<FormData>({
     cigar: {} as Cigar,
     country: '',
@@ -769,6 +787,40 @@
   function removePersistedImage(imageId: number): void {
     if (!form.value.removedImageIds.includes(imageId)) {
       form.value.removedImageIds.push(imageId);
+    }
+  }
+
+  async function makePersistedImageMain(imageId: number): Promise<void> {
+    if (settingMainImageId.value != null) {
+      return;
+    }
+    settingMainImageId.value = imageId;
+    try {
+      await cigarService.setCigarImageMain(imageId);
+      const imgs = form.value.cigar.images;
+      if (imgs?.length) {
+        for (const im of imgs) {
+          im.isMain = im.id === imageId;
+        }
+      }
+      toast.add({
+        severity: 'success',
+        summary: 'Главное фото',
+        detail: 'Выбрано главное изображение',
+        life: 2500,
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Не удалось назначить главное фото:', error);
+      }
+      toast.add({
+        severity: 'error',
+        summary: 'Ошибка',
+        detail: 'Не удалось сделать фото главным. Попробуйте снова.',
+        life: 4000,
+      });
+    } finally {
+      settingMainImageId.value = null;
     }
   }
 
