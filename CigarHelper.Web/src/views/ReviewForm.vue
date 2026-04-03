@@ -728,7 +728,7 @@
     searchLoading.value = true;
     try {
       const [baseResult, userCigars] = await Promise.all([
-        cigarService.getCigarBasesPaginated({ name: event.query, pageSize: 10 }),
+        cigarService.getCigarBasesPaginated({ search: event.query, pageSize: 10 }),
         cigarService.getCigars({ name: event.query, pageSize: 10 }),
       ]);
 

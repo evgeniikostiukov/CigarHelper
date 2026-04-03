@@ -657,7 +657,7 @@
         pageSize: pagination.value.rows,
         sortField: sortField.value,
         sortOrder: sortOrder.value === 1 ? 'asc' : 'desc',
-        name: filters.value.search,
+        search: filters.value.search?.trim() || undefined,
         brandId: filters.value.brand,
         strength: filters.value.strength,
       };

@@ -144,3 +144,5 @@
 
 - **2026-04-03** — `CigarForm.vue`: выбор главного фото среди сохранённых изображений коллекции (кнопка-звезда, `cigarService.setCigarImageMain` → `PATCH .../cigarimages/{id}/set-main`); обновлён `docs/memory-bank/frontend/collection-list-views.md`.
 
+- **2026-04-03** — Фикс фильтра базы сигар: `CigarBases.vue` и `ReviewForm.vue` передают в `GET .../cigars/bases/paginated` параметр `search` (как в `GetCigarBasesPaginated`), а не `name`.
+
