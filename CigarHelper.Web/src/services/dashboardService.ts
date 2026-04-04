@@ -41,6 +41,8 @@ export interface DashboardSummary {
   totalCapacity: number;
   averageFillPercent: number;
   averageDaysToSmoke: number;
+  /** Средняя оценка по полю Rating у сигар коллекции (только с заполненной оценкой). */
+  averageCigarRating: number | null;
   brandBreakdown: BrandBreakdownItem[];
   recentReviews: RecentReview[];
   timeline: CigarTimelinePoint[];
@@ -54,6 +56,7 @@ function normalizeSummary(d: ApiDashboardSummary): DashboardSummary {
     totalCapacity: d.totalCapacity ?? 0,
     averageFillPercent: d.averageFillPercent ?? 0,
     averageDaysToSmoke: d.averageDaysToSmoke ?? 0,
+    averageCigarRating: d.averageCigarRating ?? null,
     brandBreakdown: (d.brandBreakdown ?? []).map((b) => ({
       brandId: b.brandId ?? 0,
       brandName: b.brandName,

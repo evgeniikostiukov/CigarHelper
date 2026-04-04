@@ -40,6 +40,15 @@ public class DashboardService : IDashboardService
             .Where(c => c.UserId == userId)
             .CountAsync();
 
+        var ratedCigarsQuery = _context.UserCigars
+            .Where(uc => uc.UserId == userId && uc.Rating.HasValue);
+        double? averageCigarRating = null;
+        if (await ratedCigarsQuery.AnyAsync())
+        {
+            var avg = await ratedCigarsQuery.AverageAsync(uc => (double)uc.Rating!.Value);
+            averageCigarRating = Math.Round(avg, 1);
+        }
+
         double averageFillPercent = 0;
         if (humidors.Count > 0)
         {
@@ -159,6 +168,7 @@ public class DashboardService : IDashboardService
             TotalCapacity = totalCapacity,
             AverageFillPercent = Math.Round(averageFillPercent, 1),
             AverageDaysToSmoke = averageDaysToSmoke,
+            AverageCigarRating = averageCigarRating,
             BrandBreakdown = brandBreakdown,
             RecentReviews = recentReviews,
             Timeline = timeline,

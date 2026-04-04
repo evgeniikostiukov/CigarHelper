@@ -473,7 +473,7 @@
         "tags": [
           "CigarImages"
         ],
-        "summary": "Скачивает изображение по URL и сохраняет как CigarImage (только staff; для UI редактирования базы).",
+        "summary": "Скачивает изображение по URL и сохраняет (только staff).",
         "requestBody": {
           "content": {
             "application/json": {
@@ -703,6 +703,54 @@
         }
       }
     },
+    "/api/CigarImages/{id}/data": {
+      "get": {
+        "tags": [
+          "CigarImages"
+        ],
+        "summary": "Отдаёт бинарные данные полного изображения. CigarBase-изображения публичны; UserCigar — только владелец или staff.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/CigarImages/{id}/thumbnail": {
+      "get": {
+        "tags": [
+          "CigarImages"
+        ],
+        "summary": "Отдаёт миниатюру изображения (WebP, 320×320 max). CigarBase-изображения публичны; UserCigar — только владелец или staff.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/CigarImages/{id}/set-main": {
       "patch": {
         "tags": [
@@ -862,19 +910,82 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/CreateCigarBaseRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCigarBaseRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCigarBaseRequest"
+                "required": [
+                  "BrandId",
+                  "Name"
+                ],
+                "type": "object",
+                "properties": {
+                  "Name": {
+                    "type": "string"
+                  },
+                  "BrandId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "Country": {
+                    "type": "string"
+                  },
+                  "Description": {
+                    "type": "string"
+                  },
+                  "Strength": {
+                    "type": "string"
+                  },
+                  "Size": {
+                    "type": "string"
+                  },
+                  "Wrapper": {
+                    "type": "string"
+                  },
+                  "Binder": {
+                    "type": "string"
+                  },
+                  "Filler": {
+                    "type": "string"
+                  },
+                  "NewImages": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/NewImageUpload"
+                    },
+                    "description": "Загружаемые файлы изображений."
+                  }
+                }
+              },
+              "encoding": {
+                "Name": {
+                  "style": "form"
+                },
+                "BrandId": {
+                  "style": "form"
+                },
+                "Country": {
+                  "style": "form"
+                },
+                "Description": {
+                  "style": "form"
+                },
+                "Strength": {
+                  "style": "form"
+                },
+                "Size": {
+                  "style": "form"
+                },
+                "Wrapper": {
+                  "style": "form"
+                },
+                "Binder": {
+                  "style": "form"
+                },
+                "Filler": {
+                  "style": "form"
+                },
+                "NewImages": {
+                  "style": "form"
+                }
               }
             }
           }
@@ -1305,22 +1416,27 @@
                   "Filler": {
                     "type": "string"
                   },
-                  "ImageUrlsToAdd": {
+                  "NewImages": {
                     "type": "array",
                     "items": {
-                      "type": "string"
-                    }
+                      "$ref": "#/components/schemas/NewImageUpload"
+                    },
+                    "description": "Новые загружаемые файлы изображений."
                   },
-                  "ImageIdsToRemove": {
+                  "ExistingImages": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ExistingImageUpdate"
+                    },
+                    "description": "Обновление IsMain для существующих изображений."
+                  },
+                  "ImageIdsToDelete": {
                     "type": "array",
                     "items": {
                       "type": "integer",
                       "format": "int32"
-                    }
-                  },
-                  "MainImageId": {
-                    "type": "integer",
-                    "format": "int32"
+                    },
+                    "description": "ID изображений для удаления (имя соответствует полю FormData на фронте)."
                   }
                 }
               },
@@ -1352,13 +1468,13 @@
                 "Filler": {
                   "style": "form"
                 },
-                "ImageUrlsToAdd": {
+                "NewImages": {
                   "style": "form"
                 },
-                "ImageIdsToRemove": {
+                "ExistingImages": {
                   "style": "form"
                 },
-                "MainImageId": {
+                "ImageIdsToDelete": {
                   "style": "form"
                 }
               }
@@ -2775,14 +2891,6 @@
             "format": "int32",
             "nullable": true
           },
-          "taste": {
-            "type": "string",
-            "nullable": true
-          },
-          "aroma": {
-            "type": "string",
-            "nullable": true
-          },
           "imageUrl": {
             "type": "string",
             "nullable": true
@@ -2844,6 +2952,14 @@
           "isSmoked": {
             "type": "boolean",
             "readOnly": true
+          },
+          "taste": {
+            "type": "string",
+            "nullable": true
+          },
+          "aroma": {
+            "type": "string",
+            "nullable": true
           },
           "images": {
             "type": "array",
@@ -2909,59 +3025,6 @@
           },
           "isModerated": {
             "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateCigarBaseRequest": {
-        "required": [
-          "brandId",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "brandId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "country": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "strength": {
-            "type": "string",
-            "nullable": true
-          },
-          "size": {
-            "type": "string",
-            "nullable": true
-          },
-          "wrapper": {
-            "type": "string",
-            "nullable": true
-          },
-          "binder": {
-            "type": "string",
-            "nullable": true
-          },
-          "filler": {
-            "type": "string",
-            "nullable": true
-          },
-          "imageUrls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3035,6 +3098,13 @@
           "aroma": {
             "maxLength": 500,
             "type": "string",
+            "nullable": true
+          },
+          "rating": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "imageUrl": {
@@ -3176,6 +3246,13 @@
             "type": "integer",
             "format": "int32"
           },
+          "averageCigarRating": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
           "brandBreakdown": {
             "type": "array",
             "items": {
@@ -3206,6 +3283,20 @@
           }
         },
         "additionalProperties": false
+      },
+      "ExistingImageUpdate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isMain": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Обновление флага IsMain для существующего изображения."
       },
       "GlobalSearchResultDto": {
         "type": "object",
@@ -3483,6 +3574,21 @@
           }
         },
         "additionalProperties": false
+      },
+      "NewImageUpload": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "nullable": true
+          },
+          "isMain": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Один загружаемый файл изображения в составе multipart-запроса."
       },
       "PagedAdminUsersResponse": {
         "type": "object",
@@ -4181,6 +4287,13 @@
           "aroma": {
             "maxLength": 500,
             "type": "string",
+            "nullable": true
+          },
+          "rating": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "imageUrl": {

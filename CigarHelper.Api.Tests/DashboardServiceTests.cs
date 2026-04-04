@@ -121,6 +121,7 @@ public class DashboardServiceTests
         Assert.Equal(0, summary.TotalCapacity);
         Assert.Equal(0, summary.AverageFillPercent);
         Assert.Equal(0, summary.AverageDaysToSmoke);
+        Assert.Null(summary.AverageCigarRating);
         Assert.Empty(summary.BrandBreakdown);
         Assert.Empty(summary.RecentReviews);
         Assert.Equal(6, summary.Timeline.Count);
@@ -171,6 +172,8 @@ public class DashboardServiceTests
         Assert.Equal(2, brand2Item.CigarCount);
         Assert.Equal(8, brand1Item.AverageRating);
         Assert.Equal(5, brand2Item.AverageRating);
+        // Среднее по всем оценённым сигарам пользователя: 7, 9, 5 (null не входит)
+        Assert.Equal(7, summary.AverageCigarRating);
     }
 
     [Fact]
@@ -199,6 +202,7 @@ public class DashboardServiceTests
         var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
 
         Assert.Equal(5, summary.RecentReviews.Count);
+        Assert.Equal(8, summary.AverageCigarRating);
         Assert.All(summary.RecentReviews, rr => Assert.Equal(user.Id, db.Reviews.Single(r => r.Id == rr.Id).UserId));
 
         var ordered = summary.RecentReviews
@@ -245,6 +249,7 @@ public class DashboardServiceTests
         var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
 
         Assert.Equal(25, summary.AverageDaysToSmoke);
+        Assert.Equal(7.5, summary.AverageCigarRating);
         Assert.Single(summary.StaleCigarReminders);
         Assert.Equal(stale.Id, summary.StaleCigarReminders[0].CigarId);
         Assert.True(summary.StaleCigarReminders[0].DaysUntouched >= 60);
@@ -274,6 +279,7 @@ public class DashboardServiceTests
         var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
 
         Assert.True(summary.Timeline.Count >= 2);
+        Assert.Null(summary.AverageCigarRating);
         Assert.Contains(summary.Timeline, x => x.Period == "2026-01" && x.PurchasedCount >= 1);
         Assert.Contains(summary.Timeline, x => x.Period == "2026-02" && x.PurchasedCount >= 1 && x.SmokedCount >= 1);
     }

@@ -51,6 +51,7 @@ describe('Dashboard.vue', () => {
       totalCapacity: 30,
       averageFillPercent: 50.1,
       averageDaysToSmoke: 17,
+      averageCigarRating: 8.3,
       brandBreakdown: [
         { brandId: 10, brandName: 'X', cigarCount: 3, averageRating: 8.2 },
         { brandId: 11, brandName: 'Y', cigarCount: 2, averageRating: null },
@@ -87,6 +88,7 @@ describe('Dashboard.vue', () => {
 
     expect(w.get('[data-testid="dashboard-content"]')).toBeTruthy();
     expect(w.get('[data-testid="dashboard-summary-total-cigars"]').text()).toContain('5');
+    expect(w.get('[data-testid="dashboard-summary-average-rating"]').text()).toContain('8.3/10');
     expect(w.get('[data-testid="dashboard-summary-aging"]').text()).toContain('17');
     expect(w.get('[data-testid="dashboard-timeline"]').text()).toContain('купил: 3');
     expect(w.get('[data-testid="dashboard-reminder-4"]').text()).toContain('Не трогали 52');
@@ -116,6 +118,7 @@ describe('Dashboard.vue', () => {
       totalCapacity: 0,
       averageFillPercent: 0,
       averageDaysToSmoke: 0,
+      averageCigarRating: null,
       brandBreakdown: [],
       recentReviews: [
         {

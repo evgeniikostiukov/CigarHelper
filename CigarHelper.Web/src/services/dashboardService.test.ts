@@ -19,6 +19,7 @@ describe('dashboardService', () => {
       totalCapacity: 25,
       averageFillPercent: 8.5,
       averageDaysToSmoke: 19,
+      averageCigarRating: 6.5,
       brandBreakdown: [],
       recentReviews: [],
       timeline: [],

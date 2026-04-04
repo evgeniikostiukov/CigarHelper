@@ -16,9 +16,9 @@
         <Skeleton
           class="max-w-md rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
           height="3rem" />
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5 sm:gap-6">
           <Skeleton
-            v-for="n in 3"
+            v-for="n in 5"
             :key="n"
             class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
             height="7rem" />
@@ -73,7 +73,7 @@
           class="dashboard-enter space-y-6 sm:space-y-8"
           data-testid="dashboard-content">
           <section
-            class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 sm:gap-6"
+            class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5 sm:gap-6"
             aria-label="Основные показатели коллекции">
             <article
               class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
@@ -86,6 +86,30 @@
               </p>
               <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
                 Учитываются все сигары, в том числе вне хьюмидоров.
+              </p>
+            </article>
+
+            <article
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+              data-testid="dashboard-summary-average-rating">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                Средняя оценка коллекции
+              </h2>
+              <p
+                v-if="summary.averageCigarRating != null"
+                class="inline-flex items-center gap-2 text-3xl font-semibold text-stone-900 dark:text-rose-50/95">
+                <i
+                  class="pi pi-star-fill text-amber-500 dark:text-amber-400"
+                  aria-hidden="true" />
+                <span>{{ summary.averageCigarRating.toFixed(1) }}/10</span>
+              </p>
+              <p
+                v-else
+                class="text-3xl font-semibold text-stone-400 dark:text-stone-500">
+                —
+              </p>
+              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
+                По полю «оценка» у сигар в коллекции; без оценок среднее не считается.
               </p>
             </article>
 
@@ -360,6 +384,7 @@
     totalCapacity: 0,
     averageFillPercent: 0,
     averageDaysToSmoke: 0,
+    averageCigarRating: null,
     brandBreakdown: [],
     recentReviews: [],
     timeline: [],

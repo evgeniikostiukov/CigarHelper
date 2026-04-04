@@ -82,6 +82,7 @@ describe('DashboardSummaryDto', () => {
     expectTypeOf<DashboardSummaryDto['totalCigars']>().toEqualTypeOf<number | undefined>();
     expectTypeOf<DashboardSummaryDto['totalCapacity']>().toEqualTypeOf<number | undefined>();
     expectTypeOf<DashboardSummaryDto['averageDaysToSmoke']>().toEqualTypeOf<number | undefined>();
+    expectTypeOf<DashboardSummaryDto['averageCigarRating']>().toEqualTypeOf<number | null | undefined>();
   });
 
   it('содержит массив brandBreakdown (nullable)', () => {

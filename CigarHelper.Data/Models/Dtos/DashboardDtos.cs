@@ -19,6 +19,10 @@ public class DashboardSummaryDto
     [Range(0, int.MaxValue)]
     public int AverageDaysToSmoke { get; set; }
 
+    /// <summary>Средняя оценка сигар в коллекции (UserCigars.Rating), только по позициям с заполненной оценкой.</summary>
+    [Range(0, 10)]
+    public double? AverageCigarRating { get; set; }
+
     public List<BrandBreakdownItemDto> BrandBreakdown { get; set; } = new();
 
     public List<RecentReviewDto> RecentReviews { get; set; } = new();

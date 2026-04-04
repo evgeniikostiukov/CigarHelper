@@ -385,7 +385,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Скачивает изображение по URL и сохраняет как CigarImage (только staff; для UI редактирования базы). */
+    /** Скачивает изображение по URL и сохраняет (только staff). */
     post: {
       parameters: {
         query?: never;
@@ -566,6 +566,78 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/CigarImages/{id}/data': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Отдаёт бинарные данные полного изображения. CigarBase-изображения публичны; UserCigar — только владелец или staff. */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/CigarImages/{id}/thumbnail': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Отдаёт миниатюру изображения (WebP, 320×320 max). CigarBase-изображения публичны; UserCigar — только владелец или staff. */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/CigarImages/{id}/set-main': {
     parameters: {
       query?: never;
@@ -706,9 +778,20 @@ export interface paths {
       };
       requestBody?: {
         content: {
-          'application/json': components['schemas']['CreateCigarBaseRequest'];
-          'text/json': components['schemas']['CreateCigarBaseRequest'];
-          'application/*+json': components['schemas']['CreateCigarBaseRequest'];
+          'multipart/form-data': {
+            Name: string;
+            /** Format: int32 */
+            BrandId: number;
+            Country?: string;
+            Description?: string;
+            Strength?: string;
+            Size?: string;
+            Wrapper?: string;
+            Binder?: string;
+            Filler?: string;
+            /** @description Загружаемые файлы изображений. */
+            NewImages?: components['schemas']['NewImageUpload'][];
+          };
         };
       };
       responses: {
@@ -999,10 +1082,12 @@ export interface paths {
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
-            ImageUrlsToAdd?: string[];
-            ImageIdsToRemove?: number[];
-            /** Format: int32 */
-            MainImageId?: number;
+            /** @description Новые загружаемые файлы изображений. */
+            NewImages?: components['schemas']['NewImageUpload'][];
+            /** @description Обновление IsMain для существующих изображений. */
+            ExistingImages?: components['schemas']['ExistingImageUpdate'][];
+            /** @description ID изображений для удаления (имя соответствует полю FormData на фронте). */
+            ImageIdsToDelete?: number[];
           };
         };
       };
@@ -2097,8 +2182,7 @@ export interface components {
       userCigarId?: number | null;
       /** Format: date-time */
       createdAt?: string;
-      /** Format: byte */
-      data?: string | null;
+      hasThumbnail?: boolean;
     };
     CigarResponseDto: {
       /** Format: int32 */
@@ -2112,8 +2196,6 @@ export interface components {
       price?: number | null;
       /** Format: int32 */
       rating?: number | null;
-      taste?: string | null;
-      aroma?: string | null;
       imageUrl?: string | null;
       country?: string | null;
       description?: string | null;
@@ -2136,6 +2218,8 @@ export interface components {
       /** Format: date-time */
       lastTouchedAt?: string;
       readonly isSmoked?: boolean;
+      taste?: string | null;
+      aroma?: string | null;
       images?: components['schemas']['CigarImageDto'][] | null;
     };
     CigarTimelinePointDto: {
@@ -2151,19 +2235,6 @@ export interface components {
       description?: string | null;
       logoUrl?: string | null;
       isModerated?: boolean;
-    };
-    CreateCigarBaseRequest: {
-      name: string;
-      /** Format: int32 */
-      brandId: number;
-      country?: string | null;
-      description?: string | null;
-      strength?: string | null;
-      size?: string | null;
-      wrapper?: string | null;
-      binder?: string | null;
-      filler?: string | null;
-      imageUrls?: string[] | null;
     };
     CreateCigarImageRequest: {
       fileName?: string | null;
@@ -2188,6 +2259,8 @@ export interface components {
       humidorId?: number | null;
       taste?: string | null;
       aroma?: string | null;
+      /** Format: int32 */
+      rating?: number | null;
       imageUrl?: string | null;
       imageUrls?: string[] | null;
     };
@@ -2227,10 +2300,18 @@ export interface components {
       averageFillPercent?: number;
       /** Format: int32 */
       averageDaysToSmoke?: number;
+      /** Format: double */
+      averageCigarRating?: number | null;
       brandBreakdown?: components['schemas']['BrandBreakdownItemDto'][] | null;
       recentReviews?: components['schemas']['RecentReviewDto'][] | null;
       timeline?: components['schemas']['CigarTimelinePointDto'][] | null;
       staleCigarReminders?: components['schemas']['StaleCigarReminderDto'][] | null;
+    };
+    /** @description Обновление флага IsMain для существующего изображения. */
+    ExistingImageUpdate: {
+      /** Format: int32 */
+      id?: number;
+      isMain?: boolean;
     };
     GlobalSearchResultDto: {
       cigars?: components['schemas']['SearchCigarDto'][] | null;
@@ -2317,6 +2398,12 @@ export interface components {
       createdAt?: string;
       /** Format: date-time */
       lastLogin?: string | null;
+    };
+    /** @description Один загружаемый файл изображения в составе multipart-запроса. */
+    NewImageUpload: {
+      /** Format: binary */
+      file?: string | null;
+      isMain?: boolean;
     };
     PagedAdminUsersResponse: {
       items?: components['schemas']['AdminUserListItemDto'][] | null;
@@ -2531,6 +2618,8 @@ export interface components {
       humidorId?: number | null;
       taste?: string | null;
       aroma?: string | null;
+      /** Format: int32 */
+      rating?: number | null;
       imageUrl?: string | null;
       imageUrlsToAdd?: string[] | null;
       imageIdsToRemove?: number[] | null;
