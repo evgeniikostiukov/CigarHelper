@@ -112,12 +112,12 @@
                 class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
                 Страна
               </label>
-              <Dropdown
-                id="brands-country"
+              <Select
+                label-id="brands-country"
                 v-model="filters.country"
                 data-testid="brands-filter-country"
                 class="w-full"
-                input-class="min-h-11"
+                label-class="min-h-11"
                 :options="countryOptions"
                 option-label="label"
                 option-value="value"
@@ -131,12 +131,12 @@
                 class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
                 Статус
               </label>
-              <Dropdown
-                id="brands-status"
+              <Select
+                label-id="brands-status"
                 v-model="filters.status"
                 data-testid="brands-filter-status"
                 class="w-full"
-                input-class="min-h-11"
+                label-class="min-h-11"
                 :options="statusOptions"
                 option-label="label"
                 option-value="value"
@@ -498,7 +498,7 @@
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
   import InputText from 'primevue/inputtext';
-  import Dropdown from 'primevue/dropdown';
+  import Select from 'primevue/select';
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import Textarea from 'primevue/textarea';

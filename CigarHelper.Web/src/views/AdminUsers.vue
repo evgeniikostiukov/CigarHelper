@@ -132,11 +132,11 @@
               header="Email" />
             <Column header="Роль">
               <template #body="{ data }">
-                <Dropdown
+                <Select
                   v-model="data.draftRole"
                   :options="roleOptions"
                   class="w-full min-w-[min(100%,12rem)]"
-                  input-class="min-h-11"
+                  label-class="min-h-11"
                   option-label="label"
                   option-value="value"
                   :data-testid="`admin-users-role-${data.id}`" />
@@ -184,7 +184,7 @@
   import Button from 'primevue/button';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
-  import Dropdown from 'primevue/dropdown';
+  import Select from 'primevue/select';
   import InputText from 'primevue/inputtext';
   import Paginator from 'primevue/paginator';
   import ConfirmDialog from 'primevue/confirmdialog';

@@ -158,11 +158,11 @@
               class="text-xs font-medium text-stone-600 dark:text-stone-400">
               Хьюмидор
             </label>
-            <Dropdown
-              id="edit-humidor"
+            <Select
+              label-id="edit-humidor"
               v-model="form.humidorId"
               class="w-full"
-              input-class="min-h-11"
+              label-class="min-h-11"
               :options="humidors"
               option-label="name"
               option-value="id"
@@ -297,7 +297,7 @@
   import type { Cigar } from '@/services/cigarService';
   import type { Humidor } from '@/services/humidorService';
   import Button from 'primevue/button';
-  import Dropdown from 'primevue/dropdown';
+  import Select from 'primevue/select';
   import InputNumber from 'primevue/inputnumber';
   import InputText from 'primevue/inputtext';
   import Rating from 'primevue/rating';

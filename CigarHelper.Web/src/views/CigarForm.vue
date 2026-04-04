@@ -276,12 +276,12 @@
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
                   Хьюмидор
                 </label>
-                <Dropdown
-                  id="humidorId"
+                <Select
+                  label-id="humidorId"
                   v-model="form.humidorId"
                   data-testid="cigar-form-humidor"
                   class="w-full"
-                  input-class="min-h-11"
+                  label-class="min-h-11"
                   :options="humidors"
                   option-label="name"
                   option-value="id"
@@ -360,7 +360,7 @@
   import InputText from 'primevue/inputtext';
   import InputNumber from 'primevue/inputnumber';
   import Rating from 'primevue/rating';
-  import Dropdown from 'primevue/dropdown';
+  import Select from 'primevue/select';
   import Button from 'primevue/button';
   import Message from 'primevue/message';
   import FormImageGallerySection, { type FormGalleryImageItem } from '@/components/FormImageGallerySection.vue';

@@ -21,7 +21,7 @@ declare module 'vue' {
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     DataTable: typeof import('primevue/datatable')['default']
     Dialog: typeof import('primevue/dialog')['default']
-    Dropdown: typeof import('primevue/dropdown')['default']
+    FormImageGallerySection: typeof import('./src/components/FormImageGallerySection.vue')['default']
     Galleria: typeof import('primevue/galleria')['default']
     GlobalSearch: typeof import('./src/components/GlobalSearch.vue')['default']
     IconField: typeof import('primevue/iconfield')['default']

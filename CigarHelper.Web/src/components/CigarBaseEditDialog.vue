@@ -40,12 +40,12 @@
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Бренд *
             </label>
-            <Dropdown
-              id="brand"
+            <Select
+              label-id="brand"
               v-model="form.brandId"
               :options="brandOptions"
-              optionLabel="name"
-              optionValue="id"
+              option-label="name"
+              option-value="id"
               placeholder="Выберите бренд"
               class="w-full"
               :class="{ 'p-invalid': errors.brandId }"
@@ -90,15 +90,15 @@
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Крепость
             </label>
-            <Dropdown
-              id="strength"
+            <Select
+              label-id="strength"
               v-model="form.strength"
               :options="strengthOptions"
-              optionLabel="label"
-              optionValue="value"
+              option-label="label"
+              option-value="value"
               placeholder="Выберите крепость"
               class="w-full"
-              :showClear="true" />
+              show-clear />
           </div>
         </div>
 
