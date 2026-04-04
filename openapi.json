@@ -2961,6 +2961,10 @@
             "type": "string",
             "nullable": true
           },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
           "images": {
             "type": "array",
             "items": {
@@ -3102,6 +3106,13 @@
           },
           "rating": {
             "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "quantity": {
+            "maximum": 9999,
             "minimum": 1,
             "type": "integer",
             "format": "int32",
@@ -4295,6 +4306,12 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "quantity": {
+            "maximum": 9999,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
           },
           "imageUrl": {
             "maxLength": 2048,

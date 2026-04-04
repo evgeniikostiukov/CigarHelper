@@ -2220,6 +2220,8 @@ export interface components {
       readonly isSmoked?: boolean;
       taste?: string | null;
       aroma?: string | null;
+      /** Format: int32 */
+      quantity?: number;
       images?: components['schemas']['CigarImageDto'][] | null;
     };
     CigarTimelinePointDto: {
@@ -2261,6 +2263,8 @@ export interface components {
       aroma?: string | null;
       /** Format: int32 */
       rating?: number | null;
+      /** Format: int32 */
+      quantity?: number | null;
       imageUrl?: string | null;
       imageUrls?: string[] | null;
     };
@@ -2620,6 +2624,8 @@ export interface components {
       aroma?: string | null;
       /** Format: int32 */
       rating?: number | null;
+      /** Format: int32 */
+      quantity?: number;
       imageUrl?: string | null;
       imageUrlsToAdd?: string[] | null;
       imageIdsToRemove?: number[] | null;

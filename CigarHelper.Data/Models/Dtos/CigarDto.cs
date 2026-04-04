@@ -55,6 +55,9 @@ public class CigarResponseDto : CigarBriefDto
     /// <summary>Заметки пользователя об аромате.</summary>
     public string? Aroma { get; set; }
 
+    /// <summary>Количество сигар (шт.) в записи коллекции.</summary>
+    public int Quantity { get; set; }
+
     /// <summary>
     /// Галерея для карточки коллекции: сначала изображения личной сигары (UserCigar), затем изображения базы (CigarBase).
     /// </summary>
@@ -77,6 +80,10 @@ public class UserCigarUpdateRequest
     /// <summary>Субъективная оценка 1–10; null — снять оценку.</summary>
     [Range(1, 10)]
     public int? Rating { get; set; }
+
+    /// <summary>Количество сигар (шт.), 1–9999.</summary>
+    [Range(1, 9999)]
+    public int Quantity { get; set; } = 1;
 
     /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки (кроме полей ниже).</summary>
     [MaxLength(2048)]

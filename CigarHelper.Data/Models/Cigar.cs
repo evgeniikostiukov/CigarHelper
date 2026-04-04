@@ -53,4 +53,7 @@ public class UserCigar
     /// <summary>Субъективный аромат (заметки пользователя в коллекции).</summary>
     [MaxLength(500)]
     public string? Aroma { get; set; }
+
+    /// <summary>Количество сигар (шт.) в этой записи коллекции.</summary>
+    public int Quantity { get; set; } = 1;
 } 

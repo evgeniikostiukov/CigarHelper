@@ -19,7 +19,7 @@
             Редактировать в коллекции
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Карточка справочника не меняется — только цена, оценка, хьюмидор, ваши заметки и личные фото.
+            Карточка справочника не меняется — только цена, количество, оценка, хьюмидор, ваши заметки и личные фото.
           </p>
         </div>
         <Button
@@ -106,6 +106,25 @@
                 :min-fraction-digits="2"
                 :max-fraction-digits="2"
                 suffix=" ₽"
+                fluid />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="edit-quantity"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Количество (шт.)
+              </label>
+              <InputNumber
+                id="edit-quantity"
+                v-model="form.quantity"
+                data-testid="cigar-edit-quantity"
+                class="flex! w-full"
+                input-class="min-h-11"
+                :min="1"
+                :max="9999"
+                :step="1"
+                show-buttons
+                button-layout="horizontal"
                 fluid />
             </div>
             <div class="flex flex-col gap-2 md:col-span-2">
@@ -321,6 +340,7 @@
 
   const form = ref({
     price: null as number | null,
+    quantity: 1,
     rating: null as number | null,
     humidorId: null as number | null,
     taste: '',
@@ -425,8 +445,11 @@
     try {
       const c = await cigarService.getCigar(id);
       cigar.value = c;
+      const q = c.quantity;
+      const quantity = q != null && Number.isFinite(q) ? Math.min(9999, Math.max(1, Math.trunc(q))) : 1;
       form.value = {
         price: c.price ?? null,
+        quantity,
         rating: c.rating ?? null,
         humidorId: c.humidorId ?? null,
         taste: c.taste ?? '',
@@ -454,6 +477,7 @@
         taste: form.value.taste,
         aroma: form.value.aroma,
         rating: form.value.rating,
+        quantity: form.value.quantity ?? 1,
         imageUrlsToAdd: newUrls.length > 0 ? newUrls : undefined,
         imageIdsToRemove: form.value.removedImageIds.length > 0 ? [...form.value.removedImageIds] : undefined,
       });

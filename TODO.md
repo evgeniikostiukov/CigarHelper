@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-04** — Количество сигар в коллекции: поле `UserCigar.Quantity` (миграция `AddUserCigarQuantity`), `CigarResponseDto` / `CreateCigarRequest` / `UserCigarUpdateRequest`, `CigarsController` create+update+map; `openapi.json` + `api.generated.ts`; фронт `cigarService` (POST/PUT), `CigarCollectionEdit.vue` (`cigar-edit-quantity`), `CigarDetail.vue` (`cigar-detail-quantity`); тест контракта `api.types.test.ts`.
 - **2026-04-04** — `CigarForm.vue`: блок фото на `FormImageGallerySection` (multi URL + файлы, до 12 кадров); сабмит собирает http(s) и data URL; пропсы `addUrlRowTestId` / `applyUrlsToGalleryTestId`; `collection-list-views.md`.
 - **2026-04-04** — `FormImageGallerySection`: режим `urlEntryMode` `multi` — несколько полей URL и кнопка «Добавить в галерею» (как строки в `CigarForm`), до `maxUrlRows` (12), пакет с `resolveUrlImport` или локальные http(s). Включено в `ReviewForm` и `CigarBaseEditDialog`; убран дублирующий success-toast из `resolveCigarBaseUrlImport`.
 - **2026-04-04** — Вынесена общая галерея загрузки изображений в `FormImageGallerySection.vue` (`FormGalleryImageItem`, v-model, подписи, лимит, URL/файлы, soft-delete; опции `section`/`bare`, `tone` review/dialog, `show-main-image-star`, `resolve-url-import`). Подключено в `ReviewForm.vue` и `CigarBaseEditDialog.vue`.

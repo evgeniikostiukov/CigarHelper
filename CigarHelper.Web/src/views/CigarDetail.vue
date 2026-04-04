@@ -202,6 +202,14 @@
                     {{ cigar.price != null ? `${cigar.price} ₽` : '—' }}
                   </p>
                 </div>
+                <div data-testid="cigar-detail-quantity">
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Количество
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ collectionQuantityLabel }}
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -423,7 +431,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted, watch } from 'vue';
+  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
@@ -445,6 +453,14 @@
   const humidor = ref<Humidor | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
+
+  const collectionQuantityLabel = computed(() => {
+    const c = cigar.value;
+    if (!c) return '—';
+    const q = c.quantity;
+    const n = q != null && Number.isFinite(q) ? Math.min(9999, Math.max(1, Math.trunc(q))) : 1;
+    return `${n} шт.`;
+  });
 
   interface GallerySlide {
     id: number;

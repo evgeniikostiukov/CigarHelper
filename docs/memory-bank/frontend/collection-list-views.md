@@ -163,7 +163,7 @@
 
 ## CigarForm.vue
 
-Только **добавление в коллекцию из модерированного справочника** (`CigarNew`). Оболочка: `cigar-form-root`, grain, подпись «Справочник → коллекция», `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`** (`cigar-form-save-error`). API: `POST /api/cigars` с телом `CreateUserCigarPayload` (`cigarBaseId`, опционально цена, хьюмидор, вкус/аромат, URL фото).
+Только **добавление в коллекцию из модерированного справочника** (`CigarNew`). Оболочка: `cigar-form-root`, grain, подпись «Справочник → коллекция», `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`** (`cigar-form-save-error`). API: `POST /api/cigars` с телом `CreateUserCigarPayload` (`cigarBaseId`, опционально цена, **количество** `quantity` — по умолчанию на сервере 1, хьюмидор, вкус/аромат, URL фото).
 
 | Пункт | Значение |
 |-------|----------|
@@ -176,12 +176,12 @@
 
 ## CigarCollectionEdit.vue
 
-Редактирование записи в коллекции (`CigarEdit`, `/cigars/:id/edit`). Название и бренд из справочника только для отображения; сохранение — `PUT /api/cigars/{id}` с личными полями и галереей UserCigar (`PatchUserCigarPayload`). Звезда на миниатюре — `setCigarImageMain`.
+Редактирование записи в коллекции (`CigarEdit`, `/cigars/:id/edit`). Название и бренд из справочника только для отображения; сохранение — `PUT /api/cigars/{id}` с личными полями (в т.ч. **количество** `quantity`, 1–9999) и галереей UserCigar (`PatchUserCigarPayload`). Звезда на миниатюре — `setCigarImageMain`.
 
 | Пункт | Значение |
 |-------|----------|
 | Файл | `src/views/CigarCollectionEdit.vue` |
-| `data-testid` | `cigar-collection-edit`, `cigar-edit-loading`, `cigar-edit-error`, `cigar-edit-back` |
+| `data-testid` | `cigar-collection-edit`, `cigar-edit-loading`, `cigar-edit-error`, `cigar-edit-back`, `cigar-edit-quantity` |
 
 ## CigarDetail.vue
 
@@ -195,8 +195,8 @@
 | Действия | «К списку», «Редактировать», «Удалить» (`useConfirm`: `rejectLabel` / `acceptLabel`, как в `HumidorList`) |
 | Изображение | `computed` `primaryImageSrc`: поля `images[0].imageData` или `.data`; префикс `data:image/jpeg;base64,` если строка без `data:`; у `<img>` `loading="lazy"`, `decoding="async"` |
 | Хранение | Если есть `humidor` — имя, вместимость `currentCount`/`capacity`, влажность `Badge` + `humidorService.getHumiditySeverity`, описание; если только `humidorId` без объекта — предупреждение и кнопка на деталь хьюмидора; если нет привязки — пустое состояние (как у списков, dashed border) + CTA в редактирование |
-| Прочее | Подписи крепости через `strengthOptions` из `utils/cigarOptions.ts`; отдельный запрос брендов на странице не выполняется |
-| `data-testid` | `cigar-detail`, `cigar-detail-loading`, `cigar-detail-error`, `cigar-detail-retry`, `cigar-detail-back`, `cigar-detail-edit`, `cigar-detail-delete`, `cigar-detail-content`, `cigar-detail-no-image`, `cigar-detail-storage`, `cigar-detail-open-humidor`, `cigar-detail-humidor-fallback`, `cigar-detail-no-humidor`, `cigar-detail-add-humidor` |
+| Прочее | Подписи крепости через `strengthOptions` из `utils/cigarOptions.ts`; **количество** в коллекции — `CigarResponseDto.quantity` (отображение «N шт.»); отдельный запрос брендов на странице не выполняется |
+| `data-testid` | `cigar-detail`, `cigar-detail-loading`, `cigar-detail-error`, `cigar-detail-retry`, `cigar-detail-back`, `cigar-detail-edit`, `cigar-detail-delete`, `cigar-detail-content`, `cigar-detail-no-image`, `cigar-detail-quantity`, `cigar-detail-storage`, `cigar-detail-open-humidor`, `cigar-detail-humidor-fallback`, `cigar-detail-no-humidor`, `cigar-detail-add-humidor` |
 | Scoped классы | `cigar-detail-root`, `cigar-detail-grain`, `cigar-detail-enter`, анимация входа с `prefers-reduced-motion` |
 
 ## CigarBases.vue

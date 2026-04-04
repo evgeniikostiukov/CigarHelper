@@ -51,6 +51,10 @@ describe('CigarResponseDto', () => {
     expectTypeOf<CigarResponseDto['purchasedAt']>().toEqualTypeOf<string | undefined>();
     expectTypeOf<CigarResponseDto['lastTouchedAt']>().toEqualTypeOf<string | undefined>();
   });
+
+  it('содержит quantity (количество в коллекции)', () => {
+    expectTypeOf<CigarResponseDto['quantity']>().toEqualTypeOf<number | undefined>();
+  });
 });
 
 // ── CigarBaseDto ───────────────────────────────────────────────────────────

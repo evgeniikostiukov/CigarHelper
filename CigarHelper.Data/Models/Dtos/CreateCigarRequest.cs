@@ -22,6 +22,10 @@ public class CreateCigarRequest
     [Range(1, 10)]
     public int? Rating { get; set; }
 
+    /// <summary>Количество сигар (шт.); null или вне диапазона — на сервере сохраняется как 1.</summary>
+    [Range(1, 9999)]
+    public int? Quantity { get; set; }
+
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }
 
