@@ -168,4 +168,5 @@
 - **2026-04-04** — `npm run typecheck` (vue-tsc): `CigarImage` — опциональные `imageData`/`data` + нормализация `null`→`undefined` в хелперах превью; удалён несуществующий в OpenAPI алиас `ApiCreateCigarBaseRequest`; `Rating` — `:model-value` / `@update:model-value` из‑за `number | undefined` у PrimeVue при `number | null` в формах.
 - **2026-04-04** — Vitest `Onboarding.test.ts`: заглушки `IconField` и `InputIcon` в `PrimeStubs` (убрано Vue warn «Failed to resolve component: InputIcon» без auto-import в тестовой среде).
 - **2026-04-04** — CI: `global.json` — SDK `10.0.100` + `rollForward: latestFeature` вместо несуществующего `10.0.0` (fix `setup-dotnet` / dotnet-install на GitHub Actions).
+- **2026-04-04** — Фронт CI: в `package.json` явно добавлены `zod`, `@tiptap/extension-placeholder`, `@tiptap/extension-character-count` (импорты в `CigarBaseEditDialog` / `TextEditor`; без них `npm ci` на Actions не подтягивал модули).
 
