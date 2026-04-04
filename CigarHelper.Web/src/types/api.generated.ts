@@ -2112,6 +2112,8 @@ export interface components {
       price?: number | null;
       /** Format: int32 */
       rating?: number | null;
+      taste?: string | null;
+      aroma?: string | null;
       imageUrl?: string | null;
       country?: string | null;
       description?: string | null;
@@ -2178,23 +2180,16 @@ export interface components {
       userCigarId?: number | null;
     };
     CreateCigarRequest: {
-      name: string;
       /** Format: int32 */
-      brandId: number;
-      country?: string | null;
-      description?: string | null;
-      strength?: string | null;
-      size?: string | null;
-      wrapper?: string | null;
-      binder?: string | null;
-      filler?: string | null;
-      imageUrl?: string | null;
+      cigarBaseId: number;
       /** Format: double */
       price?: number | null;
       /** Format: int32 */
-      rating?: number | null;
-      /** Format: int32 */
       humidorId?: number | null;
+      taste?: string | null;
+      aroma?: string | null;
+      imageUrl?: string | null;
+      imageUrls?: string[] | null;
     };
     CreateReviewImageRequest: {
       imageUrl: string;
@@ -2530,23 +2525,15 @@ export interface components {
       cigarBaseId?: number | null;
     };
     UserCigarUpdateRequest: {
-      name: string;
-      /** Format: int32 */
-      brandId: number;
-      country?: string | null;
-      description?: string | null;
-      strength?: string | null;
-      size?: string | null;
-      wrapper?: string | null;
-      binder?: string | null;
-      filler?: string | null;
       /** Format: double */
       price?: number | null;
       /** Format: int32 */
-      rating?: number | null;
-      /** Format: int32 */
       humidorId?: number | null;
+      taste?: string | null;
+      aroma?: string | null;
       imageUrl?: string | null;
+      imageUrlsToAdd?: string[] | null;
+      imageIdsToRemove?: number[] | null;
     };
   };
   responses: never;

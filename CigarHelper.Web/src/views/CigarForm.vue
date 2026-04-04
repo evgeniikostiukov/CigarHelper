@@ -11,81 +11,29 @@
         <div class="min-w-0">
           <p
             class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
-            Коллекция
+            Справочник → коллекция
           </p>
           <h1
             id="cigar-form-heading"
             class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
-            {{ isEditing ? 'Редактировать сигару' : 'Новая сигара' }}
+            Добавить из базы
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            {{
-              isEditing
-                ? 'Обновите поля и сохраните — данные останутся в вашей коллекции.'
-                : 'Выберите сигару из справочника или введите название вручную, затем уточните детали и хранение.'
-            }}
+            Выберите модерированную сигару из справочника, укажите цену, заметки о вкусе и аромате, при необходимости
+            фото и хьюмидор — запись попадёт в вашу коллекцию.
           </p>
         </div>
         <Button
           data-testid="cigar-form-back"
           class="min-h-12 w-full shrink-0 touch-manipulation sm:min-h-11 sm:w-auto"
           icon="pi pi-arrow-left"
-          label="К списку"
+          label="К списку сигар"
           severity="secondary"
           outlined
           @click="router.push({ name: 'CigarList' })" />
       </header>
 
       <div
-        v-if="isEditing && pageLoading"
-        class="min-h-[16rem] space-y-5 rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/40 sm:p-6"
-        data-testid="cigar-form-loading"
-        aria-busy="true"
-        aria-live="polite">
-        <div
-          v-for="n in 6"
-          :key="n"
-          class="flex flex-col gap-2">
-          <Skeleton
-            class="rounded-md"
-            height="1rem"
-            width="8rem" />
-          <Skeleton
-            class="rounded-xl border border-stone-200/60 dark:border-stone-600/60"
-            height="2.75rem" />
-        </div>
-      </div>
-
-      <div
-        v-else-if="isEditing && loadError"
-        class="max-w-2xl rounded-2xl border border-red-200/80 bg-white/90 p-5 dark:border-red-900/50 dark:bg-stone-900/80"
-        data-testid="cigar-form-error"
-        role="alert">
-        <Message
-          severity="error"
-          :closable="false">
-          {{ loadError }}
-        </Message>
-        <Button
-          data-testid="cigar-form-retry"
-          class="mt-4 min-h-12 w-full touch-manipulation sm:w-auto"
-          label="Повторить загрузку"
-          icon="pi pi-refresh"
-          severity="secondary"
-          outlined
-          @click="loadCigar" />
-        <Button
-          data-testid="cigar-form-error-back"
-          class="mt-3 min-h-12 w-full touch-manipulation sm:mt-4 sm:ml-0 sm:w-auto"
-          label="К списку сигар"
-          icon="pi pi-list"
-          severity="secondary"
-          outlined
-          @click="router.push({ name: 'CigarList' })" />
-      </div>
-
-      <div
-        v-else
         class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/40 sm:p-6 cigar-form-enter">
         <Message
           v-if="saveError"
@@ -102,9 +50,9 @@
           @submit.prevent="handleSubmit">
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Основная информация</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Сигара из справочника</h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 md:col-span-2">
                 <label
                   for="name"
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
@@ -113,11 +61,11 @@
                 <AutoComplete
                   id="name"
                   data-testid="cigar-form-name"
-                  :model-value="form.cigar"
+                  :model-value="selectedBase"
                   :suggestions="filteredCigars"
                   class="w-full"
                   input-class="min-h-11 w-full"
-                  :class="{ 'p-invalid': errors.name }"
+                  :class="{ 'p-invalid': errors.base }"
                   data-key="id"
                   option-label="name"
                   option-group-label="brand"
@@ -127,7 +75,7 @@
                   :loading="searchLoading"
                   :delay="300"
                   :min-length="0"
-                  placeholder="Введите или выберите название сигары"
+                  placeholder="Выберите сигару из справочника"
                   @update:model-value="onCigarAutocompleteModelUpdate"
                   @complete="searchCigars">
                   <template #optiongroup="slotProps">
@@ -157,61 +105,30 @@
                   </template>
                   <template #empty>
                     <div class="p-2 text-stone-500 dark:text-stone-400">
-                      {{ searchLoading ? 'Поиск...' : 'Сигары не найдены. Введите имя для создания новой.' }}
+                      {{ searchLoading ? 'Поиск…' : 'Сигары не найдены.' }}
                     </div>
                   </template>
                 </AutoComplete>
                 <small
-                  v-if="errors.name"
+                  v-if="errors.base"
                   class="text-sm text-red-600 dark:text-red-400"
-                  >{{ errors.name }}</small
+                  >{{ errors.base }}</small
                 >
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <label
-                  for="country"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Страна
-                </label>
-                <InputText
-                  id="country"
-                  v-model="form.country"
-                  data-testid="cigar-form-country"
-                  class="min-h-11 w-full"
-                  placeholder="Например: Куба, Доминикана" />
               </div>
 
               <div class="flex flex-col gap-2 md:col-span-2">
                 <label
-                  for="cigar-form-brand"
+                  for="cigar-form-brand-readonly"
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Бренд <span class="text-red-600 dark:text-red-400">*</span>
+                  Бренд
                 </label>
-                <Dropdown
-                  id="cigar-form-brand"
+                <InputText
+                  id="cigar-form-brand-readonly"
                   data-testid="cigar-form-brand"
-                  class="w-full"
-                  input-class="min-h-11"
-                  :model-value="form.cigar.brand?.id ?? null"
-                  :options="brands"
-                  option-label="name"
-                  option-value="id"
-                  placeholder="Выберите бренд"
-                  :filter="brands.length > 8"
-                  filter-placeholder="Поиск"
-                  show-clear
-                  :class="{ 'p-invalid': errors.brandId }"
-                  :disabled="pageLoading"
-                  @update:model-value="onBrandIdChange" />
-                <small
-                  v-if="errors.brandId"
-                  class="text-sm text-red-600 dark:text-red-400"
-                  >{{ errors.brandId }}</small
-                >
-                <small class="text-stone-500 dark:text-stone-400">
-                  Нужен для сохранения в коллекции. При выборе сигары из справочника бренд подставляется автоматически.
-                </small>
+                  class="min-h-11 w-full"
+                  readonly
+                  :model-value="selectedBase?.brand?.name ?? ''"
+                  placeholder="Появится после выбора сигары" />
               </div>
 
               <div class="flex flex-col gap-2 md:col-span-2">
@@ -232,117 +149,40 @@
                   suffix=" ₽"
                   fluid />
               </div>
-            </div>
-          </div>
 
-          <div
-            class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Структура сигары</h2>
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div class="flex flex-col gap-2">
                 <label
-                  for="wrapper"
+                  for="taste"
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Покровный лист
+                  Вкус
                 </label>
                 <InputText
-                  id="wrapper"
-                  v-model="form.wrapper"
-                  data-testid="cigar-form-wrapper"
+                  id="taste"
+                  v-model="form.taste"
+                  data-testid="cigar-form-taste"
                   class="min-h-11 w-full"
-                  placeholder="Например: Connecticut, Maduro" />
-                <small class="text-stone-500 dark:text-stone-400">Внешний лист сигары</small>
+                  placeholder="Ваши заметки о вкусе" />
               </div>
 
               <div class="flex flex-col gap-2">
                 <label
-                  for="binder"
+                  for="aroma"
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Связующий лист
+                  Аромат
                 </label>
                 <InputText
-                  id="binder"
-                  v-model="form.binder"
-                  data-testid="cigar-form-binder"
+                  id="aroma"
+                  v-model="form.aroma"
+                  data-testid="cigar-form-aroma"
                   class="min-h-11 w-full"
-                  placeholder="Например: Nicaraguan, Dominican" />
-                <small class="text-stone-500 dark:text-stone-400">Средний лист</small>
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <label
-                  for="filler"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Наполнитель
-                </label>
-                <InputText
-                  id="filler"
-                  v-model="form.filler"
-                  data-testid="cigar-form-filler"
-                  class="min-h-11 w-full"
-                  placeholder="Например: Nicaraguan, Dominican, Cuban" />
-                <small class="text-stone-500 dark:text-stone-400">Основной табак</small>
+                  placeholder="Ваши заметки об аромате" />
               </div>
             </div>
           </div>
 
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Характеристики</h2>
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <div class="flex flex-col gap-2">
-                <label
-                  for="size"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Размер
-                </label>
-                <InputText
-                  id="size"
-                  v-model="form.size"
-                  data-testid="cigar-form-size"
-                  class="min-h-11 w-full"
-                  placeholder="Например: 6x52" />
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <label
-                  for="strength"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Крепость
-                </label>
-                <Dropdown
-                  id="strength"
-                  v-model="form.strength"
-                  data-testid="cigar-form-strength"
-                  class="w-full"
-                  input-class="min-h-11"
-                  :options="strengthOptions"
-                  option-label="label"
-                  option-value="value"
-                  placeholder="Выберите крепость" />
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <label
-                  for="rating"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Оценка
-                </label>
-                <Rating
-                  id="rating"
-                  v-model="form.rating"
-                  data-testid="cigar-form-rating"
-                  :stars="10"
-                  :cancel="false"
-                  class="w-full" />
-                <small class="text-stone-500 dark:text-stone-400">От 1 до 10</small>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Описание и изображения</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Фото</h2>
             <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,14rem)_1fr] lg:items-start lg:gap-8">
               <div class="flex flex-col gap-2 lg:sticky lg:top-4">
                 <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Предпросмотр</span>
@@ -352,8 +192,8 @@
                   <div
                     class="cigar-form-image-frame-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-2">
                     <img
-                      v-if="cigarImagePreviewSrc"
-                      :src="cigarImagePreviewSrc"
+                      v-if="previewUrl"
+                      :src="previewUrl"
                       alt=""
                       loading="lazy"
                       decoding="async" />
@@ -363,84 +203,17 @@
                       <i
                         class="pi pi-image text-3xl opacity-70"
                         aria-hidden="true" />
-                      <span class="text-xs leading-snug">Добавьте ссылки или оставьте сохранённые фото</span>
+                      <span class="text-xs leading-snug">Добавьте ссылки на фото ниже</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex min-w-0 flex-col gap-6">
-                <div class="flex flex-col gap-2">
-                  <label
-                    for="description"
-                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                    Описание
-                  </label>
-                  <Textarea
-                    id="description"
-                    v-model="form.description"
-                    data-testid="cigar-form-description"
-                    class="min-h-[6rem] w-full"
-                    rows="4"
-                    placeholder="Вкус, аромат, сочетания…" />
-                </div>
-
-                <div
-                  v-if="isEditing && persistedImagesForDisplay.length > 0"
-                  class="flex flex-col gap-2"
-                  data-testid="cigar-form-saved-images">
-                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сохранённые фото</span>
-                  <div class="flex flex-wrap gap-3">
-                    <div
-                      v-for="img in persistedImagesForDisplay"
-                      :key="img.id"
-                      class="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-stone-200/90 bg-stone-100 dark:border-stone-600/80 dark:bg-stone-900/60">
-                      <img
-                        v-if="persistedThumbUrls[img.id]"
-                        :src="persistedThumbUrls[img.id]"
-                        alt=""
-                        class="h-full w-full object-contain"
-                        loading="lazy" />
-                      <span
-                        v-if="img.isMain"
-                        class="absolute bottom-1 left-1 rounded bg-stone-900/75 px-1.5 py-0.5 text-[0.65rem] font-medium text-white">
-                        Главное
-                      </span>
-                      <Button
-                        v-if="!img.isMain"
-                        type="button"
-                        class="absolute left-0.5 top-0.5 h-8 min-h-8 w-8 min-w-8 touch-manipulation"
-                        icon="pi pi-star"
-                        text
-                        rounded
-                        severity="secondary"
-                        :loading="settingMainImageId === img.id"
-                        :disabled="settingMainImageId != null"
-                        :data-testid="`cigar-form-set-main-image-${img.id}`"
-                        aria-label="Сделать главным фото"
-                        v-tooltip.top="'Сделать главным'"
-                        @click="makePersistedImageMain(img.id)" />
-                      <Button
-                        type="button"
-                        class="absolute right-0.5 top-0.5 h-8 min-h-8 w-8 min-w-8 touch-manipulation"
-                        icon="pi pi-times"
-                        text
-                        rounded
-                        severity="danger"
-                        :aria-label="`Удалить фото`"
-                        @click="removePersistedImage(img.id)" />
-                    </div>
-                  </div>
-                  <small class="text-stone-500 dark:text-stone-400">
-                    Звёздочка — сразу назначить главное фото (сохраняется на сервере). Удалённые фото исчезнут после
-                    сохранения формы. Новые ссылки добавляются ниже.
-                  </small>
-                </div>
-
+              <div class="flex min-w-0 flex-col gap-4">
                 <div
                   class="flex flex-col gap-2"
                   data-testid="cigar-form-image-urls">
-                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Ссылки на новые фото</span>
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Ссылки на фото</span>
                   <div
                     v-for="(_u, idx) in form.imageUrls"
                     :key="'img-url-' + idx"
@@ -471,8 +244,7 @@
                     :disabled="form.imageUrls.length >= maxNewImageUrls"
                     @click="addImageUrlRow" />
                   <small class="text-stone-500 dark:text-stone-400">
-                    До {{ maxNewImageUrls }} ссылок за раз. Сервер скачает каждую: при создании первый рабочий URL —
-                    главное фото; при редактировании новые фото добавляются к галерее.
+                    До {{ maxNewImageUrls }} ссылок; сервер скачает изображения, первое успешное — главное.
                   </small>
                 </div>
               </div>
@@ -483,26 +255,22 @@
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
             <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Хранение</h2>
             <div class="flex flex-col gap-4">
-              <div
-                v-if="!isEditing"
-                class="flex flex-col gap-2">
-                <div class="flex min-h-11 items-center gap-3 touch-manipulation">
-                  <Checkbox
-                    id="addToCollection"
-                    v-model="form.addToCollection"
-                    data-testid="cigar-form-add-to-collection"
-                    :binary="true"
-                    input-id="addToCollection" />
-                  <label
-                    for="addToCollection"
-                    class="cursor-pointer text-sm font-medium text-stone-800 dark:text-stone-200">
-                    Добавить сигару в мою коллекцию
-                  </label>
-                </div>
-                <small class="ml-9 text-stone-500 dark:text-stone-400 md:ml-11">
-                  Отметьте, чтобы сохранить цену, рейтинг и хьюмидор в личной коллекции.
-                </small>
+              <div class="flex min-h-11 flex-col gap-2 touch-manipulation sm:flex-row sm:items-center">
+                <Checkbox
+                  id="addToHumidor"
+                  v-model="form.addToHumidor"
+                  data-testid="cigar-form-add-to-humidor"
+                  :binary="true"
+                  input-id="addToHumidor" />
+                <label
+                  for="addToHumidor"
+                  class="cursor-pointer text-sm font-medium text-stone-800 dark:text-stone-200 sm:ml-1">
+                  Добавить в хьюмидор
+                </label>
               </div>
+              <small class="text-stone-500 dark:text-stone-400 sm:ml-9">
+                Если отмечено, выберите хьюмидор ниже. Сигара всё равно сохраняется в коллекции.
+              </small>
 
               <div class="flex flex-col gap-2">
                 <label
@@ -519,13 +287,12 @@
                   :options="humidors"
                   option-label="name"
                   option-value="id"
-                  placeholder="Выберите хьюмидор для хранения"
+                  placeholder="Выберите хьюмидор"
                   show-clear
                   :loading="humidorsLoading"
-                  :disabled="(!isEditing && !form.addToCollection) || humidorsLoading" />
-                <small class="text-stone-500 dark:text-stone-400">Оставьте пустым, если сигара не в хьюмидоре</small>
+                  :disabled="!form.addToHumidor || humidorsLoading" />
                 <p
-                  v-if="(isEditing || form.addToCollection) && !humidorsLoading && humidors.length === 0"
+                  v-if="form.addToHumidor && !humidorsLoading && humidors.length === 0"
                   class="text-sm text-rose-900/90 dark:text-rose-200/80">
                   Хьюмидоров пока нет.
                   <router-link
@@ -533,13 +300,7 @@
                     :to="{ name: 'HumidorList' }">
                     Создайте хьюмидор
                   </router-link>
-                  , затем обновите страницу или снова откройте форму.
-                </p>
-                <p
-                  v-if="!isEditing && !form.addToCollection"
-                  class="text-sm text-stone-500 dark:text-stone-400">
-                  Чтобы назначить хьюмидор, отметьте «Добавить сигару в мою коллекцию» — список загрузится
-                  автоматически.
+                  .
                 </p>
               </div>
 
@@ -577,7 +338,7 @@
               data-testid="cigar-form-submit"
               type="submit"
               class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
-              :label="isEditing ? 'Сохранить изменения' : 'Добавить сигару'"
+              label="Сохранить в коллекции"
               icon="pi pi-check"
               :loading="saving" />
           </div>
@@ -588,239 +349,90 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
-  import api from '@/services/api';
   import cigarService from '@/services/cigarService';
   import humidorService from '@/services/humidorService';
-  import type { Cigar, CigarBase, Brand, CigarImage } from '@/services/cigarService';
-  import { arrayBufferToBase64 } from '@/utils/imageUtils';
+  import type { CigarBase } from '@/services/cigarService';
   import type { Humidor } from '@/services/humidorService';
   import { strengthOptions } from '@/utils/cigarOptions';
   import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete';
   import Checkbox from 'primevue/checkbox';
   import InputText from 'primevue/inputtext';
   import InputNumber from 'primevue/inputnumber';
-  import Textarea from 'primevue/textarea';
   import Dropdown from 'primevue/dropdown';
-  import Rating from 'primevue/rating';
   import Button from 'primevue/button';
+  import Message from 'primevue/message';
 
   interface FormData {
-    cigar: Cigar;
-    country: string;
-    size: string;
-    strength: string | null;
-    rating: number;
     price: number | null;
-    description: string;
+    taste: string;
+    aroma: string;
     humidorId: number | null;
-    /** Новые URL (пустые строки отфильтровываются при сохранении). */
     imageUrls: string[];
-    /** Редактирование: id сохранённых фото, помеченных к удалению. */
-    removedImageIds: number[];
-    wrapper: string;
-    binder: string;
-    filler: string;
-    addToCollection: boolean;
+    addToHumidor: boolean;
   }
 
   interface CigarGroup {
     brand: string;
-    cigars: Cigar[];
+    cigars: CigarBase[];
   }
 
   interface FormErrors {
-    name?: string;
-    brandId?: string;
-    [key: string]: string | undefined;
+    base?: string;
   }
 
   const route = useRoute();
   const router = useRouter();
   const toast = useToast();
 
-  const pageLoading = ref(false);
   const saving = ref(false);
-  const loadError = ref<string | null>(null);
   const saveError = ref<string | null>(null);
 
   const humidors = ref<Humidor[]>([]);
   const humidorsLoading = ref(false);
-  const brands = ref<Brand[]>([]);
   const errors = ref<FormErrors>({});
   const filteredCigars = ref<CigarGroup[]>([]);
-  const selectedCigar = ref<Cigar | null>(null);
+  const selectedBase = ref<CigarBase | null>(null);
   const searchLoading = ref<boolean>(false);
   const searchCache = ref<Map<string, CigarGroup[]>>(new Map());
 
   const maxNewImageUrls = 12;
 
-  /** PATCH set-main для сохранённого фото коллекции. */
-  const settingMainImageId = ref<number | null>(null);
-
   const form = ref<FormData>({
-    cigar: {} as Cigar,
-    country: '',
-    size: '',
-    strength: null,
-    rating: 0,
     price: null,
-    description: '',
+    taste: '',
+    aroma: '',
     humidorId: null,
-    imageUrls: [],
-    removedImageIds: [],
-    wrapper: '',
-    binder: '',
-    filler: '',
-    addToCollection: false,
+    imageUrls: [''],
+    addToHumidor: false,
   });
 
-  const isEditing = computed<boolean>(() => !!route.params.id);
-
-  function cigarImageRawBytes(img: CigarImage | undefined): string | number[] | undefined {
-    if (!img) return undefined;
-    return img.imageData ?? img.data;
-  }
-
-  const persistedImagesForDisplay = computed(() => {
-    const imgs = form.value.cigar?.images ?? [];
-    const removed = new Set(form.value.removedImageIds);
-    return imgs
-      .filter((i) => !removed.has(i.id))
-      .slice()
-      .sort((a, b) => {
-        if (a.isMain !== b.isMain) {
-          return a.isMain ? -1 : 1;
-        }
-        return a.id - b.id;
-      });
-  });
-
-  const persistedThumbUrls = ref<Record<number, string>>({});
-
-  function revokeAllPersistedThumbs(): void {
-    for (const u of Object.values(persistedThumbUrls.value)) {
-      if (u.startsWith('blob:')) {
-        URL.revokeObjectURL(u);
-      }
-    }
-    persistedThumbUrls.value = {};
-  }
-
-  watch(
-    () =>
-      isEditing.value
-        ? persistedImagesForDisplay.value
-            .map((i) => i.id)
-            .sort((a, b) => a - b)
-            .join(',')
-        : '',
-    async () => {
-      revokeAllPersistedThumbs();
-      if (!isEditing.value) {
-        return;
-      }
-      const imgs = persistedImagesForDisplay.value;
-      const next: Record<number, string> = {};
-      for (const img of imgs) {
-        try {
-          const { data } = await api.get<Blob>(`cigarimages/${img.id}/thumbnail`, { responseType: 'blob' });
-          next[img.id] = URL.createObjectURL(data);
-        } catch {
-          if (import.meta.env.DEV) {
-            console.warn('Не удалось загрузить миниатюру', img.id);
-          }
-        }
-      }
-      persistedThumbUrls.value = next;
-    },
-    { flush: 'post' },
-  );
-
-  /** Превью: новые URL → миниатюра сохранённого → инлайн-байты из DTO. */
-  const cigarImagePreviewSrc = computed(() => {
+  const previewUrl = computed(() => {
     for (const raw of form.value.imageUrls) {
       const t = raw?.trim() ?? '';
-      if (!t) {
-        continue;
-      }
-      if (/^https?:\/\//i.test(t) || t.startsWith('data:')) {
+      if (t && (/^https?:\/\//i.test(t) || t.startsWith('data:'))) {
         return t;
       }
     }
-    for (const img of persistedImagesForDisplay.value) {
-      const blobUrl = persistedThumbUrls.value[img.id];
-      if (blobUrl) {
-        return blobUrl;
-      }
-    }
-    const first = persistedImagesForDisplay.value[0];
-    const bytes = cigarImageRawBytes(first);
-    if (bytes == null) {
-      return '';
-    }
-    const b64 = arrayBufferToBase64(bytes);
-    if (!b64) {
-      return '';
-    }
-    if (typeof bytes === 'string' && bytes.startsWith('data:')) {
-      return bytes;
-    }
-    const mime = (first?.contentType ?? '').trim();
-    const safeMime = mime.startsWith('image/') ? mime : 'image/jpeg';
-    return `data:${safeMime};base64,${b64}`;
+    return '';
+  });
+
+  const selectedHumidor = computed<Humidor | null>(() => {
+    if (!form.value.humidorId) return null;
+    return humidors.value.find((h) => h.id === form.value.humidorId) || null;
   });
 
   function addImageUrlRow(): void {
-    if (form.value.imageUrls.length >= maxNewImageUrls) {
-      return;
-    }
+    if (form.value.imageUrls.length >= maxNewImageUrls) return;
     form.value.imageUrls.push('');
   }
 
   function removeImageUrlRow(index: number): void {
     form.value.imageUrls.splice(index, 1);
-  }
-
-  function removePersistedImage(imageId: number): void {
-    if (!form.value.removedImageIds.includes(imageId)) {
-      form.value.removedImageIds.push(imageId);
-    }
-  }
-
-  async function makePersistedImageMain(imageId: number): Promise<void> {
-    if (settingMainImageId.value != null) {
-      return;
-    }
-    settingMainImageId.value = imageId;
-    try {
-      await cigarService.setCigarImageMain(imageId);
-      const imgs = form.value.cigar.images;
-      if (imgs?.length) {
-        for (const im of imgs) {
-          im.isMain = im.id === imageId;
-        }
-      }
-      toast.add({
-        severity: 'success',
-        summary: 'Главное фото',
-        detail: 'Выбрано главное изображение',
-        life: 2500,
-      });
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Не удалось назначить главное фото:', error);
-      }
-      toast.add({
-        severity: 'error',
-        summary: 'Ошибка',
-        detail: 'Не удалось сделать фото главным. Попробуйте снова.',
-        life: 4000,
-      });
-    } finally {
-      settingMainImageId.value = null;
+    if (form.value.imageUrls.length === 0) {
+      form.value.imageUrls.push('');
     }
   }
 
@@ -828,62 +440,11 @@
     return form.value.imageUrls.map((u) => u.trim()).filter(Boolean);
   }
 
-  const selectedHumidor = computed<Humidor | null>(() => {
-    if (!form.value.humidorId) return null;
-    return humidors.value.find((humidor) => humidor.id === form.value.humidorId) || null;
-  });
-
-  async function setInitialBrand(brandId: number) {
-    if (brands.value.length === 0) {
-      await loadBrands();
-    }
-    const foundBrand = brands.value.find((b) => b.id === brandId);
-    if (foundBrand) {
-      if (!form.value.cigar) {
-        form.value.cigar = {} as Cigar;
-      }
-      form.value.cigar.brand = foundBrand;
-    }
-  }
-
-  async function loadBrands(): Promise<void> {
-    try {
-      brands.value = await cigarService.getBrands();
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Ошибка загрузки брендов:', error);
-      }
-      toast.add({
-        severity: 'error',
-        summary: 'Ошибка',
-        detail: 'Не удалось загрузить бренды',
-        life: 3000,
-      });
-    }
-  }
-
-  function onBrandIdChange(brandId: number | null): void {
-    if (brandId == null) {
-      form.value.cigar = {
-        ...form.value.cigar,
-        brand: { id: 0, name: '', isModerated: false, createdAt: '' },
-      };
-      return;
-    }
-    const found = brands.value.find((b) => b.id === brandId);
-    if (found) {
-      form.value.cigar = { ...form.value.cigar, brand: found };
-    }
-  }
-
   async function loadHumidors(): Promise<void> {
     humidorsLoading.value = true;
     try {
       humidors.value = await humidorService.getHumidors();
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Ошибка загрузки хьюмидоров:', error);
-      }
+    } catch {
       toast.add({
         severity: 'error',
         summary: 'Ошибка',
@@ -895,146 +456,39 @@
     }
   }
 
-  async function loadCigar(): Promise<void> {
-    if (!isEditing.value) return;
-
-    pageLoading.value = true;
-    loadError.value = null;
-    try {
-      const cigar = await cigarService.getCigar(route.params.id as string);
-
-      form.value = {
-        cigar: {
-          name: cigar.name || '',
-          brand: cigar.brand,
-          id: cigar.id,
-          country: cigar.country || '',
-          size: cigar.size || '',
-          strength: cigar.strength || null,
-          price: cigar.price || null,
-          description: cigar.description || '',
-          humidorId: cigar.humidorId || null,
-          wrapper: cigar.wrapper || '',
-          binder: cigar.binder || '',
-          filler: cigar.filler || '',
-          rating: cigar.rating ?? 0,
-          images: cigar.images || [],
-        },
-        country: cigar.country || '',
-        size: cigar.size || '',
-        strength: cigar.strength || null,
-        rating: cigar.rating ?? 0,
-        price: cigar.price || null,
-        description: cigar.description || '',
-        humidorId: cigar.humidorId || null,
-        imageUrls: [],
-        removedImageIds: [],
-        wrapper: cigar.wrapper || '',
-        binder: cigar.binder || '',
-        filler: cigar.filler || '',
-        addToCollection: false,
-      };
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.error('Ошибка загрузки сигары:', err);
-      }
-      loadError.value = 'Не удалось загрузить данные сигары.';
-    } finally {
-      pageLoading.value = false;
-    }
-  }
-
   function validateForm(): boolean {
     errors.value = {};
-
-    if (!form.value.cigar?.name?.trim()) {
-      errors.value.name = 'Название обязательно для заполнения';
+    const id = selectedBase.value?.id;
+    if (id == null || id <= 0 || !selectedBase.value?.name?.trim()) {
+      errors.value.base = 'Выберите сигару из справочника (нельзя вводить произвольное название).';
     }
-
-    if (isEditing.value || form.value.addToCollection) {
-      const bid = form.value.cigar?.brand?.id;
-      if (bid == null || bid <= 0) {
-        errors.value.brandId = 'Выберите бренд из списка';
-      }
-    }
-
     return Object.keys(errors.value).length === 0;
   }
 
   async function handleSubmit(): Promise<void> {
     if (!validateForm()) return;
-
+    const base = selectedBase.value!;
     saving.value = true;
     saveError.value = null;
-
     try {
-      const cigarData: Omit<Cigar, 'id' | 'brandName'> = {
-        name: form.value.cigar.name,
-        brand: form.value.cigar.brand,
-        country: form.value.country || null,
-        description: form.value.description || null,
-        strength: form.value.strength || null,
-        size: form.value.size || null,
-        wrapper: form.value.wrapper || null,
-        binder: form.value.binder || null,
-        filler: form.value.filler || null,
-        images: form.value.cigar.images || [],
+      const urls = collectTrimmedNewImageUrls();
+      await cigarService.createCigar({
+        cigarBaseId: base.id,
         price: form.value.price,
-        rating: form.value.rating,
-        humidorId: form.value.humidorId,
-      };
-
-      const newUrls = collectTrimmedNewImageUrls();
-      if (isEditing.value) {
-        await cigarService.updateCigar(parseInt(route.params.id as string, 10), cigarData, {
-          imageUrlsToAdd: newUrls.length > 0 ? newUrls : undefined,
-          imageIdsToRemove: form.value.removedImageIds.length > 0 ? [...form.value.removedImageIds] : undefined,
-        });
-        toast.add({
-          severity: 'success',
-          summary: 'Успешно',
-          detail: 'Сигара успешно обновлена',
-          life: 3000,
-        });
-        await router.push({ name: 'CigarList' });
-      } else {
-        if (form.value.addToCollection) {
-          await cigarService.createCigar(cigarData, newUrls.length > 0 ? newUrls : null);
-          toast.add({
-            severity: 'success',
-            summary: 'Успешно',
-            detail: 'Сигара успешно добавлена в вашу коллекцию',
-            life: 3000,
-          });
-          await router.push({ name: 'CigarList' });
-        } else {
-          toast.add({
-            severity: 'info',
-            summary: 'Информация',
-            detail:
-              'Сигара добавлена только в базу данных. Для добавления в коллекцию отметьте соответствующий флажок.',
-            life: 5000,
-          });
-          await router.push({ name: 'CigarBases' });
-        }
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message === 'BRAND_REQUIRED') {
-        errors.value.brandId = 'Выберите бренд из списка';
-        saveError.value = 'Укажите бренд.';
-        toast.add({
-          severity: 'error',
-          summary: 'Ошибка',
-          detail: saveError.value,
-          life: 5000,
-        });
-        return;
-      }
-      if (import.meta.env.DEV) {
-        console.error('Ошибка сохранения сигары:', error);
-      }
-      const msg = isEditing.value ? 'Не удалось обновить сигару.' : 'Не удалось добавить сигару.';
-      saveError.value = `${msg} Проверьте данные и попробуйте снова.`;
+        humidorId: form.value.addToHumidor ? form.value.humidorId : null,
+        taste: form.value.taste || null,
+        aroma: form.value.aroma || null,
+        imageUrls: urls.length > 0 ? urls : null,
+      });
+      toast.add({
+        severity: 'success',
+        summary: 'Готово',
+        detail: 'Сигара добавлена в коллекцию',
+        life: 3000,
+      });
+      await router.push({ name: 'CigarList' });
+    } catch {
+      saveError.value = 'Не удалось добавить сигару. Проверьте данные и попробуйте снова.';
       toast.add({
         severity: 'error',
         summary: 'Ошибка',
@@ -1062,22 +516,20 @@
     };
   };
 
-  /** API ограничивает pageSize (см. CigarsController.GetCigarBasesPaginated). */
   const CIGAR_BASES_PAGE_SIZE = 100;
-
   const INITIAL_SUGGESTIONS_CACHE_KEY = '__initial__';
 
   function groupCigarBasesToOptions(items: CigarBase[]): CigarGroup[] {
-    const groupedCigars: Record<string, CigarGroup> = {};
+    const grouped: Record<string, CigarGroup> = {};
     items.forEach((cigar: CigarBase) => {
       if (!cigar || typeof cigar !== 'object') return;
       const brandName = cigar.brand?.name || 'Без бренда';
-      if (!groupedCigars[brandName]) {
-        groupedCigars[brandName] = { brand: brandName, cigars: [] };
+      if (!grouped[brandName]) {
+        grouped[brandName] = { brand: brandName, cigars: [] };
       }
-      groupedCigars[brandName].cigars.push({ ...cigar } as Cigar);
+      grouped[brandName].cigars.push({ ...cigar });
     });
-    return Object.values(groupedCigars);
+    return Object.values(grouped);
   }
 
   async function performSearch(query: string): Promise<void> {
@@ -1102,10 +554,7 @@
         const result = groupCigarBasesToOptions(response.items);
         searchCache.value.set(INITIAL_SUGGESTIONS_CACHE_KEY, result);
         filteredCigars.value = result;
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error('Ошибка при загрузке списка сигар из базы:', error);
-        }
+      } catch {
         filteredCigars.value = [];
       } finally {
         searchLoading.value = false;
@@ -1127,19 +576,14 @@
         pageSize: CIGAR_BASES_PAGE_SIZE,
         excludeBinaryMedia: true,
       });
-
       if (!response?.items) {
         filteredCigars.value = [];
         return;
       }
-
       const result = groupCigarBasesToOptions(response.items);
       searchCache.value.set(cacheKey, result);
       filteredCigars.value = result;
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Ошибка при поиске сигар:', error);
-      }
+    } catch {
       filteredCigars.value = [];
     } finally {
       searchLoading.value = false;
@@ -1152,9 +596,8 @@
     debouncedSearch(event.query);
   }
 
-  /** Плоский список сигар из текущих подсказок (группы). */
-  function flattenSuggestionCigars(): Cigar[] {
-    const out: Cigar[] = [];
+  function flattenSuggestionCigars(): CigarBase[] {
+    const out: CigarBase[] = [];
     for (const group of filteredCigars.value) {
       if (group?.cigars?.length) {
         out.push(...group.cigars);
@@ -1163,149 +606,67 @@
     return out;
   }
 
-  /** Точное совпадение по имени с подсказкой из справочника (учёт регистра и trim). */
-  function findCigarInFilteredSuggestionsByName(name: string): Cigar | null {
+  function findBaseByName(name: string): CigarBase | null {
     const n = name.trim().toLowerCase();
-    if (!n) {
-      return null;
-    }
+    if (!n) return null;
     return flattenSuggestionCigars().find((c) => (c.name || '').trim().toLowerCase() === n) ?? null;
   }
 
-  /** Заполнить форму данными из базы (новая сигара). */
-  function applyDictionaryCigarToNewForm(selectedCigarData: Cigar | CigarBase): void {
-    selectedCigar.value = selectedCigarData as Cigar;
-    form.value = {
-      cigar: selectedCigarData as Cigar,
-      country: selectedCigarData.country || '',
-      size: selectedCigarData.size || '',
-      strength: selectedCigarData.strength || null,
-      rating: 0,
-      price: null,
-      description: selectedCigarData.description || '',
-      humidorId: form.value.humidorId,
-      imageUrls: [],
-      removedImageIds: [],
-      wrapper: selectedCigarData.wrapper || '',
-      binder: selectedCigarData.binder || '',
-      filler: selectedCigarData.filler || '',
-      addToCollection: true,
-    };
-  }
-
-  /**
-   * PrimeVue AutoComplete при typeahead на каждый ввод выставляет model в строку — после выбора объекта
-   * из списка это затирает бренд. Нормализуем: строка → ищем полный объект в подсказках или сохраняем прошлый brand.
-   */
   function onCigarAutocompleteModelUpdate(val: unknown): void {
-    if (isEditing.value) {
-      if (val == null || val === '') {
-        return;
-      }
-      if (typeof val === 'string') {
-        form.value.cigar = { ...form.value.cigar, name: val } as Cigar;
-        return;
-      }
-      if (typeof val === 'object' && val !== null && 'name' in val) {
-        const o = val as Cigar;
-        const match = findCigarInFilteredSuggestionsByName((o.name || '').trim());
-        if (match?.brand) {
-          form.value.cigar = { ...form.value.cigar, name: match.name, brand: match.brand } as Cigar;
-        } else if (o.brand) {
-          form.value.cigar = { ...form.value.cigar, name: o.name, brand: o.brand } as Cigar;
-        }
-      }
-      return;
-    }
-
     if (val == null || val === '') {
-      form.value.cigar = {} as Cigar;
-      selectedCigar.value = null;
+      selectedBase.value = null;
       return;
     }
-
     if (typeof val === 'string') {
-      const resolved = findCigarInFilteredSuggestionsByName(val);
-      if (resolved) {
-        applyDictionaryCigarToNewForm(resolved);
-        return;
-      }
-      const prev = form.value.cigar && typeof form.value.cigar === 'object' ? form.value.cigar : ({} as Partial<Cigar>);
-      form.value.cigar = {
-        ...prev,
-        name: val,
-      } as Cigar;
+      const resolved = findBaseByName(val);
+      selectedBase.value = resolved;
       return;
     }
-
-    if (typeof val === 'object' && val !== null && 'name' in val) {
-      const o = val as Cigar;
-      const match = findCigarInFilteredSuggestionsByName((o.name || '').trim());
-      applyDictionaryCigarToNewForm(match ?? o);
+    if (typeof val === 'object' && val !== null && 'id' in val && 'name' in val) {
+      const o = val as CigarBase;
+      const match = findBaseByName((o.name || '').trim());
+      selectedBase.value = match ?? o;
     }
   }
 
   function getStrengthLabel(strength: string): string {
     if (!strength) return '';
-
     const option = strengthOptions.find((opt) => opt.value === strength);
     return option ? option.label : strength;
   }
 
   watch(
-    () => form.value.addToCollection,
+    () => form.value.addToHumidor,
     (on) => {
       if (on) {
         void loadHumidors();
+      } else {
+        form.value.humidorId = null;
       }
     },
   );
 
-  onUnmounted(() => {
-    revokeAllPersistedThumbs();
-  });
+  async function applyQueryCigarBase(id: number): Promise<void> {
+    try {
+      const base = await cigarService.getCigarBase(id);
+      selectedBase.value = base;
+    } catch {
+      toast.add({
+        severity: 'warn',
+        summary: 'Справочник',
+        detail: 'Не удалось подгрузить сигару по ссылке.',
+        life: 4000,
+      });
+    }
+  }
 
   onMounted(() => {
-    void loadBrands();
     void loadHumidors();
-    void loadCigar();
-
-    const initialBrandId = route.query.brandId ? parseInt(route.query.brandId as string, 10) : null;
-
-    if (!isEditing.value && Object.keys(route.query).length > 0) {
-      if (initialBrandId) {
-        void setInitialBrand(initialBrandId);
-      }
-      const cigarObj: Partial<Cigar> = {
-        name: (route.query.name as string) || '',
-      };
-
-      form.value.cigar = { ...form.value.cigar, ...cigarObj } as Cigar;
-
-      if (route.query.country) {
-        form.value.country = route.query.country as string;
-      }
-      if (route.query.size) {
-        form.value.size = route.query.size as string;
-      }
-      if (route.query.strength) {
-        form.value.strength = route.query.strength as string;
-      }
-      if (route.query.description) {
-        form.value.description = route.query.description as string;
-      }
-      if (route.query.wrapper) {
-        form.value.wrapper = route.query.wrapper as string;
-      }
-      if (route.query.binder) {
-        form.value.binder = route.query.binder as string;
-      }
-      if (route.query.filler) {
-        form.value.filler = route.query.filler as string;
-      }
-
-      if (route.query.cigarId) {
-        form.value.addToCollection = true;
+    const q = route.query.cigarBaseId as string | undefined;
+    if (q) {
+      const id = parseInt(q, 10);
+      if (!Number.isNaN(id)) {
+        void applyQueryCigarBase(id);
       }
     }
   });
@@ -1317,7 +678,6 @@
     isolation: isolate;
   }
 
-  /* Вписываем превью целиком: flex+h-full на img часто даёт обрезку; здесь явный contain + auto размеры */
   .cigar-form-image-frame img {
     display: block;
     width: auto;
@@ -1334,10 +694,6 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: multiply;
   }
-
-  /*:global(.dark) .cigar-form-grain {
-    mix-blend-mode: soft-light;
-  }*/
 
   .cigar-form-enter {
     animation: cigar-form-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;

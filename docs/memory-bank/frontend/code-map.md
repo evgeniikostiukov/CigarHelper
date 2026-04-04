@@ -16,7 +16,7 @@
 | `views/*.vue` | Страницы |
 | `views/Home.vue` | Главная `/`: тот же визуальный каркас, см. [collection-list-views.md](./collection-list-views.md) |
 | `views/Login.vue` | Вход и регистрация `/login` (`meta.public: true`), см. [collection-list-views.md](./collection-list-views.md) |
-| `views/Dashboard.vue`, `views/HumidorList.vue`, `views/HumidorDetail.vue`, `views/Profile.vue`, `views/PublicUserProfile.vue`, `views/PublicHumidorDetail.vue`, `views/HumidorForm.vue`, `views/CigarList.vue`, `views/CigarForm.vue`, `views/CigarDetail.vue`, `views/CigarBases.vue`, `views/ReviewList.vue`, `views/ReviewDetail.vue`, `views/ReviewForm.vue`, `views/Brands.vue`, `views/AdminUsers.vue` | Дашборд-сводка, коллекция, профиль, публичный профиль и публичный хьюмидор, база, обзоры, админ (бренды, пользователи): единый стиль, см. [collection-list-views.md](./collection-list-views.md) |
+| `views/Dashboard.vue`, `views/HumidorList.vue`, `views/HumidorDetail.vue`, `views/Profile.vue`, `views/PublicUserProfile.vue`, `views/PublicHumidorDetail.vue`, `views/HumidorForm.vue`, `views/CigarList.vue`, `views/CigarForm.vue`, `views/CigarCollectionEdit.vue`, `views/CigarDetail.vue`, `views/CigarBases.vue`, `views/ReviewList.vue`, `views/ReviewDetail.vue`, `views/ReviewForm.vue`, `views/Brands.vue`, `views/AdminUsers.vue` | Дашборд-сводка, коллекция (добавление из базы / правка личных полей), профиль, публичный профиль и публичный хьюмидор, база, обзоры, админ (бренды, пользователи): единый стиль, см. [collection-list-views.md](./collection-list-views.md) |
 | `components/*.vue` | Переиспользуемые блоки (диалоги, редактор, загрузка изображений) |
 | `assets/main.css` | Глобальные стили |
 

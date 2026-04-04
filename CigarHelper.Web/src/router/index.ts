@@ -89,7 +89,7 @@ const routes = [
   {
     path: '/cigars/:id/edit',
     name: 'CigarEdit',
-    component: () => import('../views/CigarForm.vue'),
+    component: () => import('../views/CigarCollectionEdit.vue'),
     meta: { requiresAuth: true, isEdit: true },
   },
   {

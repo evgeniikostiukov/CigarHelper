@@ -405,7 +405,7 @@
   import humidorService from '@/services/humidorService';
   import cigarService from '@/services/cigarService';
   import type { Humidor } from '@/services/humidorService';
-  import type { CigarBase, Cigar } from '@/services/cigarService';
+  import type { CigarBase } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
 
   const router = useRouter();
@@ -525,24 +525,6 @@
     return opt?.label ?? value;
   }
 
-  function cigarBaseToCreatePayload(base: CigarBase, humidorId: number): Omit<Cigar, 'id' | 'brandName'> {
-    return {
-      name: base.name,
-      brand: base.brand,
-      country: base.country ?? null,
-      size: base.size ?? null,
-      strength: base.strength ?? null,
-      price: null,
-      rating: null,
-      description: base.description ?? null,
-      wrapper: base.wrapper ?? null,
-      binder: base.binder ?? null,
-      filler: base.filler ?? null,
-      humidorId,
-      images: [],
-    };
-  }
-
   async function addBaseToCollection(base: CigarBase): Promise<void> {
     globalError.value = null;
     if (!createdHumidor.value?.id) return;
@@ -551,8 +533,11 @@
 
     creatingIds.add(base.id);
     try {
-      const payload = cigarBaseToCreatePayload(base, createdHumidor.value.id);
-      await cigarService.createCigar(payload, null);
+      await cigarService.createCigar({
+        cigarBaseId: base.id,
+        humidorId: createdHumidor.value.id,
+        price: null,
+      });
       selectedIds.add(base.id);
       toast.add({
         severity: 'success',

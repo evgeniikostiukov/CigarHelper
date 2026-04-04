@@ -45,4 +45,12 @@ public class UserCigar
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>Субъективный вкус (заметки пользователя в коллекции).</summary>
+    [MaxLength(500)]
+    public string? Taste { get; set; }
+
+    /// <summary>Субъективный аромат (заметки пользователя в коллекции).</summary>
+    [MaxLength(500)]
+    public string? Aroma { get; set; }
 } 

@@ -2775,6 +2775,14 @@
             "format": "int32",
             "nullable": true
           },
+          "taste": {
+            "type": "string",
+            "nullable": true
+          },
+          "aroma": {
+            "type": "string",
+            "nullable": true
+          },
           "imageUrl": {
             "type": "string",
             "nullable": true
@@ -3001,44 +3009,31 @@
       },
       "CreateCigarRequest": {
         "required": [
-          "brandId",
-          "name"
+          "cigarBaseId"
         ],
         "type": "object",
         "properties": {
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "brandId": {
+          "cigarBaseId": {
             "type": "integer",
             "format": "int32"
           },
-          "country": {
+          "price": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "humidorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "taste": {
+            "maxLength": 500,
             "type": "string",
             "nullable": true
           },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "strength": {
-            "type": "string",
-            "nullable": true
-          },
-          "size": {
-            "type": "string",
-            "nullable": true
-          },
-          "wrapper": {
-            "type": "string",
-            "nullable": true
-          },
-          "binder": {
-            "type": "string",
-            "nullable": true
-          },
-          "filler": {
+          "aroma": {
+            "maxLength": 500,
             "type": "string",
             "nullable": true
           },
@@ -3047,19 +3042,11 @@
             "type": "string",
             "nullable": true
           },
-          "price": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "rating": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "humidorId": {
-            "type": "integer",
-            "format": "int32",
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           }
         },
@@ -4174,56 +4161,11 @@
         "additionalProperties": false
       },
       "UserCigarUpdateRequest": {
-        "required": [
-          "brandId",
-          "name"
-        ],
         "type": "object",
         "properties": {
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "brandId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "country": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "strength": {
-            "type": "string",
-            "nullable": true
-          },
-          "size": {
-            "type": "string",
-            "nullable": true
-          },
-          "wrapper": {
-            "type": "string",
-            "nullable": true
-          },
-          "binder": {
-            "type": "string",
-            "nullable": true
-          },
-          "filler": {
-            "type": "string",
-            "nullable": true
-          },
           "price": {
             "type": "number",
             "format": "double",
-            "nullable": true
-          },
-          "rating": {
-            "type": "integer",
-            "format": "int32",
             "nullable": true
           },
           "humidorId": {
@@ -4231,9 +4173,34 @@
             "format": "int32",
             "nullable": true
           },
+          "taste": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "aroma": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
           "imageUrl": {
             "maxLength": 2048,
             "type": "string",
+            "nullable": true
+          },
+          "imageUrlsToAdd": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "imageIdsToRemove": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
             "nullable": true
           }
         },

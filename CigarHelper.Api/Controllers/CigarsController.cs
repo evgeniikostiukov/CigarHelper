@@ -314,56 +314,19 @@ public class CigarsController : ControllerBase
 
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        // Проверяем существование бренда
-        var brand = await _context.Brands.FindAsync(request.BrandId);
-        if (brand == null)
-        {
-            return BadRequest($"Бренд с ID {request.BrandId} не найден");
-        }
-
-        // Ищем существующую сигару в базе по названию и ID бренда
-        var existingCigarBase = await _context.CigarBases
-            .FirstOrDefaultAsync(cb => cb.Name.ToLower() == request.Name.ToLower() &&
-                                     cb.BrandId == request.BrandId);
-
-        int cigarBaseId;
-
-        if (existingCigarBase != null)
-        {
-            // Используем существующую сигару из базы
-            cigarBaseId = existingCigarBase.Id;
-        }
-        else
-        {
-            // Создаем новую сигару в базе с пометкой о том, что она не прошла модерацию
-            var newCigarBase = new CigarBase
-            {
-                Name = request.Name,
-                BrandId = request.BrandId,
-                Country = request.Country,
-                Description = request.Description,
-                Strength = request.Strength,
-                Size = request.Size,
-                Wrapper = request.Wrapper,
-                Binder = request.Binder,
-                Filler = request.Filler,
-                IsModerated = false, // Не прошла модерацию
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.CigarBases.Add(newCigarBase);
-            await _context.SaveChangesAsync();
-
-            cigarBaseId = newCigarBase.Id;
-        }
+        var cigarBaseExists = await _context.CigarBases
+            .AnyAsync(cb => cb.Id == request.CigarBaseId && cb.IsModerated, cancellationToken);
+        if (!cigarBaseExists)
+            return BadRequest("Сигара не найдена в справочнике или не прошла модерацию.");
 
         // Создаем сигару пользователя
         var userCigar = new UserCigar
         {
-            CigarBaseId = cigarBaseId,
+            CigarBaseId = request.CigarBaseId,
             Price = request.Price,
-            Rating = request.Rating,
             HumidorId = request.HumidorId,
+            Taste = request.Taste,
+            Aroma = request.Aroma,
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             PurchasedAt = DateTime.UtcNow,
@@ -411,31 +374,12 @@ public class CigarsController : ControllerBase
         if (existingUserCigar == null)
             return NotFound();
 
-        // Проверяем существование бренда
-        var brand = await _context.Brands.FindAsync(request.BrandId);
-        if (brand == null)
-        {
-            return BadRequest($"Бренд с ID {request.BrandId} не найден");
-        }
-
-        // Обновляем поля пользовательской сигары
         existingUserCigar.Price = request.Price;
-        existingUserCigar.Rating = request.Rating;
         existingUserCigar.HumidorId = request.HumidorId;
+        existingUserCigar.Taste = request.Taste;
+        existingUserCigar.Aroma = request.Aroma;
         existingUserCigar.UpdatedAt = DateTime.UtcNow;
         existingUserCigar.LastTouchedAt = DateTime.UtcNow;
-
-        // Обновляем поля базовой сигары
-        existingUserCigar.CigarBase.Name = request.Name;
-        existingUserCigar.CigarBase.BrandId = request.BrandId;
-        existingUserCigar.CigarBase.Country = request.Country;
-        existingUserCigar.CigarBase.Description = request.Description;
-        existingUserCigar.CigarBase.Strength = request.Strength;
-        existingUserCigar.CigarBase.Size = request.Size;
-        existingUserCigar.CigarBase.Wrapper = request.Wrapper;
-        existingUserCigar.CigarBase.Binder = request.Binder;
-        existingUserCigar.CigarBase.Filler = request.Filler;
-        existingUserCigar.CigarBase.UpdatedAt = DateTime.UtcNow;
 
         if (!string.IsNullOrWhiteSpace(request.ImageUrl))
         {
@@ -954,6 +898,8 @@ public class CigarsController : ControllerBase
             Strength = uc.CigarBase.Strength,
             Price = uc.Price,
             Rating = uc.Rating,
+            Taste = uc.Taste,
+            Aroma = uc.Aroma,
             Country = uc.CigarBase.Country,
             Description = uc.CigarBase.Description,
             Wrapper = uc.CigarBase.Wrapper,

@@ -698,37 +698,22 @@
       name: 'CigarNew',
       query: {
         cigarBaseId: String(cigar.id),
-        name: cigar.name,
-        brandId: String(cigar.brand.id),
-        brandName: cigar.brand.name,
-        country: cigar.country ?? '',
-        size: cigar.size ?? '',
-        strength: cigar.strength ?? '',
-        description: cigar.description ?? '',
-        wrapper: cigar.wrapper ?? '',
-        binder: cigar.binder ?? '',
-        filler: cigar.filler ?? '',
       },
     });
   }
 
   function createNewCigar(): void {
-    router.push({ name: 'CigarNew' });
+    // router.push({ name: 'CigarNew' });
+    showDetailDialog.value = false;
+    showEditDialog.value = true;
+    editingCigar.value = undefined;
   }
 
   function createSimilarCigar(cigar: CigarBase): void {
     router.push({
       name: 'CigarNew',
       query: {
-        name: cigar.name,
-        brandId: String(cigar.brand.id),
-        country: cigar.country ?? '',
-        size: cigar.size ?? '',
-        strength: cigar.strength ?? '',
-        description: cigar.description ?? '',
-        wrapper: cigar.wrapper ?? '',
-        binder: cigar.binder ?? '',
-        filler: cigar.filler ?? '',
+        cigarBaseId: String(cigar.id),
       },
     });
   }

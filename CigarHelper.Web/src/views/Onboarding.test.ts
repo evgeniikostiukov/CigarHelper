@@ -162,7 +162,11 @@ describe('Onboarding.vue', () => {
     await w.get('[data-testid="onboarding-add-101"]').trigger('click');
     await flushPromises();
 
-    expect(cigarService.createCigar).toHaveBeenCalled();
+    expect(cigarService.createCigar).toHaveBeenCalledWith({
+      cigarBaseId: 101,
+      humidorId: 7,
+      price: null,
+    });
 
     await w.get('[data-testid="onboarding-finish"]').trigger('click');
     await flushPromises();

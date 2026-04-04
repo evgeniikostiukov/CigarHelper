@@ -41,6 +41,8 @@ export interface Cigar {
   binder: string | null;
   filler: string | null;
   humidorId: number | null;
+  taste?: string | null;
+  aroma?: string | null;
   purchasedAt?: string;
   smokedAt?: string | null;
   lastTouchedAt?: string;
@@ -64,28 +66,26 @@ export interface PaginatedResult<T> {
   totalCount: number;
 }
 
-/** Тело POST/PUT /cigars: API ждёт brandId, а не вложенный brand. */
-export interface CigarWriteApiPayload {
-  name: string;
-  brandId: number;
-  country?: string | null;
-  description?: string | null;
-  strength?: string | null;
-  size?: string | null;
-  wrapper?: string | null;
-  binder?: string | null;
-  filler?: string | null;
+/** POST /api/cigars — только по CigarBaseId (модерированный справочник). */
+export interface CreateUserCigarPayload {
+  cigarBaseId: number;
   price?: number | null;
-  rating?: number | null;
   humidorId?: number | null;
-  /** Скачивается на API и сохраняется как CigarImage (UserCigar). */
+  taste?: string | null;
+  aroma?: string | null;
   imageUrl?: string | null;
-  /** Несколько URL при создании (приоритетнее одиночного imageUrl). */
   imageUrls?: string[] | null;
-  /** При обновлении: добавить по URL. */
-  imageUrlsToAdd?: string[] | null;
-  /** При обновлении: удалить по id. */
-  imageIdsToRemove?: number[] | null;
+}
+
+/** PUT /api/cigars/{id} — личные поля (все четыре обязательны в теле, чтобы не затирать вкус/аромат случайно) и опционально галерея. */
+export interface PatchUserCigarPayload {
+  price: number | null;
+  humidorId: number | null;
+  taste: string | null;
+  aroma: string | null;
+  imageUrl?: string | null;
+  imageUrlsToAdd?: string[];
+  imageIdsToRemove?: number[];
 }
 
 export interface CigarUpdateImageOptions {
@@ -94,82 +94,54 @@ export interface CigarUpdateImageOptions {
   imageIdsToRemove?: number[];
 }
 
-function resolveBrandId(brand: Brand | undefined): number {
-  const id = brand?.id;
-  return typeof id === 'number' && !Number.isNaN(id) ? id : 0;
-}
-
 function normalizeImageUrlList(urls: string[] | null | undefined): string[] {
   return (urls ?? []).map((u) => u.trim()).filter(Boolean);
 }
 
-function toCreateCigarPayload(
-  data: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>,
-  imageUrls?: string[] | null,
-  legacyImageUrl?: string | null,
-): CigarWriteApiPayload {
-  const brandId = resolveBrandId(data.brand);
-  if (brandId <= 0) {
-    throw new Error('BRAND_REQUIRED');
-  }
-  const list = normalizeImageUrlList(imageUrls ?? []);
-  const trimmedLegacy = legacyImageUrl?.trim();
-  const imagePart: Pick<CigarWriteApiPayload, 'imageUrl' | 'imageUrls'> =
-    list.length > 0 ? { imageUrls: list } : trimmedLegacy ? { imageUrl: trimmedLegacy } : {};
-  return {
-    name: data.name,
-    brandId,
-    country: data.country,
-    description: data.description,
-    strength: data.strength,
-    size: data.size,
-    wrapper: data.wrapper,
-    binder: data.binder,
-    filler: data.filler,
-    price: data.price,
-    rating: data.rating,
-    humidorId: data.humidorId ?? null,
-    ...imagePart,
+function buildCreateCigarBody(payload: CreateUserCigarPayload): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    cigarBaseId: payload.cigarBaseId,
+    price: payload.price ?? null,
+    humidorId: payload.humidorId ?? null,
+    taste: payload.taste?.trim() ? payload.taste.trim() : null,
+    aroma: payload.aroma?.trim() ? payload.aroma.trim() : null,
   };
+  const list = normalizeImageUrlList(payload.imageUrls ?? []);
+  const legacy = payload.imageUrl?.trim();
+  if (list.length > 0) {
+    body.imageUrls = list;
+  } else if (legacy) {
+    body.imageUrl = legacy;
+  }
+  return body;
 }
 
-function toUpdateCigarPayload(
-  data: Partial<Cigar>,
-  image?: CigarUpdateImageOptions | string | null,
-): CigarWriteApiPayload {
-  const brandId = resolveBrandId(data.brand);
-  if (brandId <= 0) {
-    throw new Error('BRAND_REQUIRED');
-  }
-  if (!data.name?.trim()) {
-    throw new Error('NAME_REQUIRED');
-  }
-  const opts: CigarUpdateImageOptions =
-    typeof image === 'string' || image === null || image === undefined
-      ? { imageUrl: typeof image === 'string' ? image : null }
-      : image;
-
-  const trimmedUrl = opts.imageUrl?.trim();
-  const toAdd = normalizeImageUrlList(opts.imageUrlsToAdd);
-  const toRemove = (opts.imageIdsToRemove ?? []).filter((id) => Number.isFinite(id));
-
-  return {
-    name: data.name,
-    brandId,
-    country: data.country,
-    description: data.description,
-    strength: data.strength,
-    size: data.size,
-    wrapper: data.wrapper,
-    binder: data.binder,
-    filler: data.filler,
-    price: data.price,
-    rating: data.rating,
-    humidorId: data.humidorId ?? null,
-    ...(trimmedUrl ? { imageUrl: trimmedUrl } : {}),
-    ...(toAdd.length > 0 ? { imageUrlsToAdd: toAdd } : {}),
-    ...(toRemove.length > 0 ? { imageIdsToRemove: toRemove } : {}),
+function buildPatchCigarBody(
+  fields: Pick<PatchUserCigarPayload, 'price' | 'humidorId' | 'taste' | 'aroma'>,
+  image?: CigarUpdateImageOptions,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    price: fields.price ?? null,
+    humidorId: fields.humidorId ?? null,
+    taste: fields.taste != null && fields.taste.trim() !== '' ? fields.taste.trim() : null,
+    aroma: fields.aroma != null && fields.aroma.trim() !== '' ? fields.aroma.trim() : null,
   };
+  if (!image) {
+    return body;
+  }
+  const trimmedUrl = image.imageUrl?.trim();
+  const toAdd = normalizeImageUrlList(image.imageUrlsToAdd);
+  const toRemove = (image.imageIdsToRemove ?? []).filter((id) => Number.isFinite(id));
+  if (trimmedUrl) {
+    body.imageUrl = trimmedUrl;
+  }
+  if (toAdd.length > 0) {
+    body.imageUrlsToAdd = toAdd;
+  }
+  if (toRemove.length > 0) {
+    body.imageIdsToRemove = toRemove;
+  }
+  return body;
 }
 
 const cigarService = {
@@ -183,23 +155,22 @@ const cigarService = {
     return response.data;
   },
 
-  async createCigar(
-    cigarData: Omit<Cigar, 'id' | 'brandName' | 'imageUrl'>,
-    imageUrls?: string[] | null,
-    legacyImageUrl?: string | null,
-  ): Promise<Cigar> {
-    const payload = toCreateCigarPayload(cigarData, imageUrls, legacyImageUrl);
-    const response = await api.post<Cigar>('/cigars', payload);
+  async createCigar(payload: CreateUserCigarPayload): Promise<Cigar> {
+    const response = await api.post<Cigar>('/cigars', buildCreateCigarBody(payload));
     return response.data;
   },
 
-  async updateCigar(
-    id: number,
-    cigarData: Partial<Cigar>,
-    image?: CigarUpdateImageOptions | string | null,
-  ): Promise<void> {
-    const payload = toUpdateCigarPayload(cigarData, image);
-    await api.put(`/cigars/${id}`, payload);
+  async updateCigar(id: number, payload: PatchUserCigarPayload): Promise<void> {
+    const { imageUrl, imageUrlsToAdd, imageIdsToRemove, price, humidorId, taste, aroma } = payload;
+    const hasImageOpts =
+      (imageUrl != null && imageUrl !== '') ||
+      (imageUrlsToAdd != null && imageUrlsToAdd.length > 0) ||
+      (imageIdsToRemove != null && imageIdsToRemove.length > 0);
+    const body = buildPatchCigarBody(
+      { price, humidorId, taste, aroma },
+      hasImageOpts ? { imageUrl, imageUrlsToAdd, imageIdsToRemove } : undefined,
+    );
+    await api.put(`/cigars/${id}`, body);
   },
 
   async deleteCigar(id: number): Promise<void> {
@@ -268,13 +239,12 @@ const cigarService = {
   },
 
   async uploadImageByUrl(url: string, cigarBaseId?: number | null): Promise<{ id: number }> {
-    const payload: { url: string; cigarBaseId?: number } = { url };
-    if (cigarBaseId != null) payload.cigarBaseId = cigarBaseId;
-    const response = await api.post('/cigarimages/upload-by-url', payload);
+    const p: { url: string; cigarBaseId?: number } = { url };
+    if (cigarBaseId != null) p.cigarBaseId = cigarBaseId;
+    const response = await api.post('/cigarimages/upload-by-url', p);
     return response.data;
   },
 
-  /** UserCigar / доступные пользователю изображения: снять флаг main с остальных и выставить для `id`. */
   async setCigarImageMain(imageId: number): Promise<void> {
     await api.patch(`/cigarimages/${imageId}/set-main`);
   },

@@ -48,103 +48,31 @@ public class CigarResponseDto : CigarBriefDto
     public DateTime? SmokedAt { get; set; }
     public DateTime LastTouchedAt { get; set; }
     public bool IsSmoked => SmokedAt.HasValue;
+
+    /// <summary>Заметки пользователя о вкусе (не путать с полями обзора).</summary>
+    public string? Taste { get; set; }
+
+    /// <summary>Заметки пользователя об аромате.</summary>
+    public string? Aroma { get; set; }
+
     /// <summary>
     /// Галерея для карточки коллекции: сначала изображения личной сигары (UserCigar), затем изображения базы (CigarBase).
     /// </summary>
     public List<CigarImageDto>? Images { get; set; }
 }
 
-public class CigarCreateDto
-{
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    public string Brand { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    public string? Country { get; set; }
-
-    [MaxLength(500)]
-    public string? Description { get; set; }
-
-    [MaxLength(50)]
-    public string? Strength { get; set; }
-
-    [MaxLength(50)]
-    public string? Size { get; set; }
-
-    [Range(0, 10000)]
-    public decimal? Price { get; set; }
-
-    [Range(1, 10)]
-    public int? Rating { get; set; }
-
-    [MaxLength(255)]
-    public string? ImageUrl { get; set; }
-
-    public int? HumidorId { get; set; }
-}
-
-public class CigarUpdateDto
-{
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    public string Brand { get; set; } = string.Empty;
-
-    [MaxLength(100)]
-    public string? Country { get; set; }
-
-    [MaxLength(500)]
-    public string? Description { get; set; }
-
-    [MaxLength(50)]
-    public string? Strength { get; set; }
-
-    [MaxLength(50)]
-    public string? Size { get; set; }
-
-    [Range(0, 10000)]
-    public decimal? Price { get; set; }
-
-    [Range(1, 10)]
-    public int? Rating { get; set; }
-
-    [MaxLength(255)]
-    public string? ImageUrl { get; set; }
-}
-
+/// <summary>Обновление только личных полей записи в коллекции; карточка справочника (CigarBase) не меняется.</summary>
 public class UserCigarUpdateRequest
 {
-    [Required]
-    public string Name { get; set; } = string.Empty;
-
-    [Required]
-    public int BrandId { get; set; }
-
-    public string? Country { get; set; }
-
-    public string? Description { get; set; }
-
-    public string? Strength { get; set; }
-
-    public string? Size { get; set; }
-
-    public string? Wrapper { get; set; }
-
-    public string? Binder { get; set; }
-
-    public string? Filler { get; set; }
-
     public decimal? Price { get; set; }
 
-    public int? Rating { get; set; }
-
     public int? HumidorId { get; set; }
+
+    [MaxLength(500)]
+    public string? Taste { get; set; }
+
+    [MaxLength(500)]
+    public string? Aroma { get; set; }
 
     /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки (кроме полей ниже).</summary>
     [MaxLength(2048)]

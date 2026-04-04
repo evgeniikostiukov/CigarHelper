@@ -228,6 +228,38 @@
             </section>
 
             <section
+              v-if="cigar.taste || cigar.aroma"
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+              aria-labelledby="cigar-detail-taste-heading">
+              <h2
+                id="cigar-detail-taste-heading"
+                class="mb-4 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
+                <i
+                  class="pi pi-heart text-rose-800/80 dark:text-rose-400/90"
+                  aria-hidden="true" />
+                Ваши заметки
+              </h2>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <div v-if="cigar.taste">
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Вкус
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.taste }}
+                  </p>
+                </div>
+                <div v-if="cigar.aroma">
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Аромат
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ cigar.aroma }}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section
               v-if="cigar.wrapper || cigar.binder || cigar.filler"
               class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 sm:p-6 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
               aria-labelledby="cigar-detail-blend-heading">
