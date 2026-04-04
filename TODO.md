@@ -176,4 +176,5 @@
 - **2026-04-04** — База сигар: API `GET /api/cigars/bases/paginated` — параметр `unmoderatedOnly` (только staff), в `CigarBaseDto` поле `IsModerated` (модерация записи справочника); `CigarBases.vue` — фильтр модерации (dropdown для staff), тег «На модерации», интеграционные тесты `CigarsBasesPaginatedIntegrationTests`.
 - **2026-04-04** — `CigarBases.vue`: блок полей фильтров под спойлер (`useLocalStorage` `cigar-bases-filters-expanded`), кнопка разворота, при свёрнутом виде и активных фильтрах — бейдж «Фильтры активны».
 - **2026-04-04** — `CigarList.vue`: сворачиваемый блок фильтров (`cigar-list-filters-expanded`, по умолчанию свёрнут), клиентская фильтрация по поиску/бренду/крепости/формату/хьюмидору/выкуриванию, пустое состояние «Ничего не найдено», миниатюры подгружаются для отфильтрованного списка.
+- **2026-04-04** — `docs/memory-bank/frontend/collection-list-views.md`: раздел `CigarList.vue` — фильтры, `localStorage`, `displayedCigars`/миниатюры, полный перечень `data-testid`, `cigar-smoke-{id}`.
 
