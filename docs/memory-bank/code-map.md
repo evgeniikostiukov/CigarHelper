@@ -14,7 +14,7 @@
 | `AdminUsersController` | Админ-операции с пользователями |
 | `PublicUsersController` | Публичные данные пользователей |
 | `BrandsController` | Бренды |
-| `CigarsController` | Каталог / сигары; `CigarResponseDto.Images` для коллекции — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
+| `CigarsController` | Каталог / сигары; `GET .../cigars/bases/paginated` — по умолчанию только `CigarBase.IsModerated`; `unmoderatedOnly=true` только для JWT Admin/Moderator; `CigarResponseDto.Images` для коллекции — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Отзывы |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |

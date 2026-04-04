@@ -17,6 +17,8 @@ export interface CigarImage {
 export interface CigarBase {
   id: number;
   name: string;
+  /** Модерация записи справочника CigarBase (не путать с brand.isModerated). */
+  isModerated?: boolean;
   brand: Brand;
   country: string;
   strength: string;

@@ -67,6 +67,7 @@ public class CigarsController : ControllerBase
             {
                 Id = cb.Id,
                 Name = cb.Name,
+                IsModerated = cb.IsModerated,
                 Brand = new BrandDto
                 {
                     Id = cb.BrandId,
@@ -117,13 +118,18 @@ public class CigarsController : ControllerBase
         [FromQuery] string? search = null,
         [FromQuery] int? brandId = null,
         [FromQuery] string? strength = null,
-        [FromQuery] bool excludeBinaryMedia = false)
+        [FromQuery] bool excludeBinaryMedia = false,
+        [FromQuery] bool unmoderatedOnly = false)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
-        var query = _context.CigarBases
-            .Where(cb => cb.IsModerated); // Только проверенные сигары
+        var canListUnmoderated = User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator));
+        var query = _context.CigarBases.AsQueryable();
+        if (unmoderatedOnly && canListUnmoderated)
+            query = query.Where(cb => !cb.IsModerated);
+        else
+            query = query.Where(cb => cb.IsModerated);
 
         // Применяем фильтры
         if (!string.IsNullOrWhiteSpace(search))
@@ -171,6 +177,7 @@ public class CigarsController : ControllerBase
                 {
                     Id = cb.Id,
                     Name = cb.Name,
+                    IsModerated = cb.IsModerated,
                     Brand = new BrandDto
                     {
                         Id = cb.BrandId,
@@ -215,6 +222,7 @@ public class CigarsController : ControllerBase
                 {
                     Id = cb.Id,
                     Name = cb.Name,
+                    IsModerated = cb.IsModerated,
                     Brand = new BrandDto
                     {
                         Id = cb.BrandId,
@@ -648,6 +656,7 @@ public class CigarsController : ControllerBase
             {
                 Id = cb.Id,
                 Name = cb.Name,
+                IsModerated = cb.IsModerated,
                 Brand = new BrandDto
                 {
                     Id = cb.BrandId,
@@ -699,6 +708,7 @@ public class CigarsController : ControllerBase
             {
                 Id = cb.Id,
                 Name = cb.Name,
+                IsModerated = cb.IsModerated,
                 Brand = new BrandDto
                 {
                     Id = cb.BrandId,
@@ -841,6 +851,7 @@ public class CigarsController : ControllerBase
             {
                 Id = cb.Id,
                 Name = cb.Name,
+                IsModerated = cb.IsModerated,
                 Brand = new BrandDto
                 {
                     Id = cb.BrandId,

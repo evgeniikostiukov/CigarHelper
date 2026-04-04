@@ -173,4 +173,5 @@
 - **2026-04-04** — CI: `global.json` — SDK `10.0.100` + `rollForward: latestFeature` вместо несуществующего `10.0.0` (fix `setup-dotnet` / dotnet-install на GitHub Actions).
 - **2026-04-04** — Фронт CI: в `package.json` явно добавлены `zod`, `@tiptap/extension-placeholder`, `@tiptap/extension-character-count` (импорты в `CigarBaseEditDialog` / `TextEditor`; без них `npm ci` на Actions не подтягивал модули).
 - **2026-04-04** — CI dotnet-test: `CigarHelper.Api.Tests.csproj` — `ProjectReference` на `..\CigarHelper.Api\` вместо `..\CigarHelper.API\` (регистр как в git; на Linux иначе ссылка не находилась → CS0234). Документы: пути `CigarHelper.Api/` в memory bank, e2e, docker-compose.
+- **2026-04-04** — База сигар: API `GET /api/cigars/bases/paginated` — параметр `unmoderatedOnly` (только staff), в `CigarBaseDto` поле `IsModerated` (модерация записи справочника); `CigarBases.vue` — чекбокс «Только не промодерированные», тег «На модерации», интеграционные тесты `CigarsBasesPaginatedIntegrationTests`.
 

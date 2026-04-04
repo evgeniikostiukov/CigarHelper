@@ -19,6 +19,8 @@ public class CigarBaseDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    /// <summary>Промодерирована ли запись справочника CigarBase (не путать с BrandDto.IsModerated).</summary>
+    public bool IsModerated { get; set; }
     public BrandDto Brand { get; set; } = new BrandDto();
     public string? Size { get; set; }
     public string? Strength { get; set; }
