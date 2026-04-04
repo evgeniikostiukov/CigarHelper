@@ -30,12 +30,12 @@
           @click="createNewCigar" />
       </header>
 
-      <!-- Поиск и фильтры — тот же каркас, что hero на главной (Home.vue) -->
+      <!-- Поиск и фильтры — тот же каркас, что hero на главной (Home.vue); тело под спойлер -->
       <div
         class="mb-8 rounded-2xl border border-stone-200/90 bg-white/95 p-6 shadow-md shadow-stone-900/5 sm:mb-10 sm:p-8 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
         data-testid="cigar-bases-filters">
-        <div class="flex flex-col gap-6 sm:gap-8">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div class="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
             <span
               class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100 sm:h-14 sm:w-14"
               aria-hidden="true">
@@ -54,107 +54,139 @@
               </p>
             </div>
           </div>
-
-          <form
-            role="search"
-            class="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-end"
-            aria-labelledby="cigar-bases-filters-heading"
-            @submit.prevent>
-            <div class="min-w-0 lg:col-span-5">
-              <label
-                for="cigar-bases-search"
-                class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
-                Поиск
-              </label>
-              <IconField class="w-full">
-                <InputIcon
-                  class="pi pi-search text-stone-400"
-                  aria-hidden="true" />
-                <InputText
-                  id="cigar-bases-search"
-                  v-model="filters.search"
-                  placeholder="Название или бренд..."
-                  class="w-full min-h-12 sm:min-h-11"
-                  data-testid="cigar-bases-search"
-                  autocomplete="off"
-                  @input="onSearch" />
-              </IconField>
-            </div>
-            <div
-              class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7 lg:gap-6"
-              :class="canFilterUnmoderated ? 'lg:grid-cols-3' : 'lg:grid-cols-2'">
-              <div class="min-w-0">
-                <label
-                  for="cigar-bases-filter-brand-input"
-                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Бренд
-                </label>
-                <Select
-                  v-model="filters.brand"
-                  data-testid="cigar-bases-filter-brand"
-                  :options="brandOptions"
-                  option-label="label"
-                  option-value="value"
-                  placeholder="Все бренды"
-                  class="w-full min-h-12 sm:min-h-11"
-                  label-id="cigar-bases-filter-brand-input"
-                  :show-clear="true"
-                  @change="onFilterChange" />
-              </div>
-              <div class="min-w-0">
-                <label
-                  for="cigar-bases-filter-strength-input"
-                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Крепость
-                </label>
-                <Select
-                  v-model="filters.strength"
-                  data-testid="cigar-bases-filter-strength"
-                  :options="strengthOptions"
-                  option-label="label"
-                  option-value="value"
-                  placeholder="Все"
-                  class="w-full min-h-12 sm:min-h-11"
-                  label-id="cigar-bases-filter-strength-input"
-                  :show-clear="true"
-                  @change="onFilterChange" />
-              </div>
-              <div
-                v-if="canFilterUnmoderated"
-                class="min-w-0">
-                <label
-                  for="cigar-bases-filter-moderation-input"
-                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Модерация (справочник)
-                </label>
-                <Select
-                  v-model="filters.moderationFilter"
-                  data-testid="cigar-bases-filter-moderation"
-                  :options="moderationFilterOptions"
-                  option-label="label"
-                  option-value="value"
-                  class="w-full min-h-12 sm:min-h-11"
-                  label-id="cigar-bases-filter-moderation-input"
-                  @change="onFilterChange" />
-              </div>
-            </div>
-          </form>
-
           <div
-            v-if="filtersActive"
-            class="flex flex-col items-stretch gap-3 border-t border-stone-100 pt-6 dark:border-stone-700/80 sm:flex-row sm:flex-wrap sm:items-center"
-            data-testid="cigar-bases-filter-actions">
+            class="flex shrink-0 flex-col gap-2 sm:items-end"
+            data-testid="cigar-bases-filters-toggle-wrap">
+            <Badge
+              v-if="!filtersExpanded && filtersActive"
+              value="Фильтры активны"
+              severity="warn"
+              class="w-fit"
+              data-testid="cigar-bases-filters-collapsed-hint" />
             <Button
-              data-testid="cigar-bases-filter-reset"
-              class="min-h-12 w-full touch-manipulation sm:w-auto sm:min-h-11"
-              label="Сбросить фильтры"
-              icon="pi pi-filter-slash"
+              type="button"
+              data-testid="cigar-bases-filters-toggle"
+              :aria-expanded="filtersExpanded"
+              aria-controls="cigar-bases-filters-panel"
+              :label="filtersExpanded ? 'Свернуть фильтры' : 'Развернуть фильтры'"
+              :icon="filtersExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              icon-pos="right"
               severity="secondary"
               outlined
-              type="button"
-              @click="resetFilters" />
+              class="min-h-12 w-full touch-manipulation sm:min-h-11 sm:w-auto"
+              :aria-label="filtersExpanded ? 'Свернуть блок фильтров' : 'Развернуть блок фильтров'"
+              @click="filtersExpanded = !filtersExpanded" />
           </div>
         </div>
+
+        <Transition name="cb-filters-panel">
+          <div
+            v-show="filtersExpanded"
+            id="cigar-bases-filters-panel"
+            class="mt-6 flex flex-col gap-6 border-t border-stone-100 pt-6 dark:border-stone-700/80 sm:mt-8 sm:gap-8 sm:pt-8"
+            role="region"
+            aria-labelledby="cigar-bases-filters-heading">
+            <form
+              role="search"
+              class="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-end"
+              aria-labelledby="cigar-bases-filters-heading"
+              @submit.prevent>
+              <div class="min-w-0 lg:col-span-5">
+                <label
+                  for="cigar-bases-search"
+                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Поиск
+                </label>
+                <IconField class="w-full">
+                  <InputIcon
+                    class="pi pi-search text-stone-400"
+                    aria-hidden="true" />
+                  <InputText
+                    id="cigar-bases-search"
+                    v-model="filters.search"
+                    placeholder="Название или бренд..."
+                    class="w-full min-h-12 sm:min-h-11"
+                    data-testid="cigar-bases-search"
+                    autocomplete="off"
+                    @input="onSearch" />
+                </IconField>
+              </div>
+              <div
+                class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7 lg:gap-6"
+                :class="canFilterUnmoderated ? 'lg:grid-cols-3' : 'lg:grid-cols-2'">
+                <div class="min-w-0">
+                  <label
+                    for="cigar-bases-filter-brand-input"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Бренд
+                  </label>
+                  <Select
+                    v-model="filters.brand"
+                    data-testid="cigar-bases-filter-brand"
+                    :options="brandOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Все бренды"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-bases-filter-brand-input"
+                    :show-clear="true"
+                    @change="onFilterChange" />
+                </div>
+                <div class="min-w-0">
+                  <label
+                    for="cigar-bases-filter-strength-input"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Крепость
+                  </label>
+                  <Select
+                    v-model="filters.strength"
+                    data-testid="cigar-bases-filter-strength"
+                    :options="strengthOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Все"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-bases-filter-strength-input"
+                    :show-clear="true"
+                    @change="onFilterChange" />
+                </div>
+                <div
+                  v-if="canFilterUnmoderated"
+                  class="min-w-0">
+                  <label
+                    for="cigar-bases-filter-moderation-input"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Модерация (справочник)
+                  </label>
+                  <Select
+                    v-model="filters.moderationFilter"
+                    data-testid="cigar-bases-filter-moderation"
+                    :options="moderationFilterOptions"
+                    option-label="label"
+                    option-value="value"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-bases-filter-moderation-input"
+                    @change="onFilterChange" />
+                </div>
+              </div>
+            </form>
+
+            <div
+              v-if="filtersActive"
+              class="flex flex-col items-stretch gap-3 border-t border-stone-100 pt-6 dark:border-stone-700/80 sm:flex-row sm:flex-wrap sm:items-center"
+              data-testid="cigar-bases-filter-actions">
+              <Button
+                data-testid="cigar-bases-filter-reset"
+                class="min-h-12 w-full touch-manipulation sm:w-auto sm:min-h-11"
+                label="Сбросить фильтры"
+                icon="pi pi-filter-slash"
+                severity="secondary"
+                outlined
+                type="button"
+                @click="resetFilters" />
+            </div>
+          </div>
+        </Transition>
       </div>
 
       <div
@@ -562,6 +594,7 @@
 <script setup lang="ts">
   import { ref, computed, onMounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
+  import { useLocalStorage } from '@vueuse/core';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
   import { useAuth } from '@/services/useAuth';
@@ -605,6 +638,9 @@
   const { user } = useAuth();
 
   const canFilterUnmoderated = computed(() => hasAnyRole(user.value, ['Admin', 'Moderator']));
+
+  /** Состояние спойлера фильтров запоминается в браузере. */
+  const filtersExpanded = useLocalStorage('cigar-bases-filters-expanded', true);
 
   const loading = ref<boolean>(true);
   const error = ref<string | null>(null);
@@ -677,7 +713,7 @@
     return img.id ? `/api/cigarimages/${img.id}/thumbnail` : '';
   }
 
-  function memoKey(cigar: CigarBase): (string | number | null | undefined)[] {
+  function memoKey(cigar: CigarBase): (string | number | boolean | null | undefined)[] {
     const img = primaryCigarBaseImage(cigar);
     const imgKey = img?.id ?? 0;
     const imgFailed = img?.id ? (failedImageIds.value.has(img.id) ? 1 : 0) : 0;
@@ -971,6 +1007,31 @@
   @media (prefers-reduced-motion: reduce) {
     .cigar-base-card-enter {
       animation: none;
+    }
+  }
+
+  .cb-filters-panel-enter-active,
+  .cb-filters-panel-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .cb-filters-panel-enter-from,
+  .cb-filters-panel-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cb-filters-panel-enter-active,
+    .cb-filters-panel-leave-active {
+      transition: none;
+    }
+
+    .cb-filters-panel-enter-from,
+    .cb-filters-panel-leave-to {
+      transform: none;
     }
   }
 </style>

@@ -174,4 +174,5 @@
 - **2026-04-04** — Фронт CI: в `package.json` явно добавлены `zod`, `@tiptap/extension-placeholder`, `@tiptap/extension-character-count` (импорты в `CigarBaseEditDialog` / `TextEditor`; без них `npm ci` на Actions не подтягивал модули).
 - **2026-04-04** — CI dotnet-test: `CigarHelper.Api.Tests.csproj` — `ProjectReference` на `..\CigarHelper.Api\` вместо `..\CigarHelper.API\` (регистр как в git; на Linux иначе ссылка не находилась → CS0234). Документы: пути `CigarHelper.Api/` в memory bank, e2e, docker-compose.
 - **2026-04-04** — База сигар: API `GET /api/cigars/bases/paginated` — параметр `unmoderatedOnly` (только staff), в `CigarBaseDto` поле `IsModerated` (модерация записи справочника); `CigarBases.vue` — фильтр модерации (dropdown для staff), тег «На модерации», интеграционные тесты `CigarsBasesPaginatedIntegrationTests`.
+- **2026-04-04** — `CigarBases.vue`: блок полей фильтров под спойлер (`useLocalStorage` `cigar-bases-filters-expanded`), кнопка разворота, при свёрнутом виде и активных фильтрах — бейдж «Фильтры активны».
 
