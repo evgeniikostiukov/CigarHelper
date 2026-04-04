@@ -121,18 +121,21 @@
               </div>
               <div
                 v-if="canFilterUnmoderated"
-                class="flex min-h-12 items-center gap-3 sm:min-h-11 lg:col-span-1">
-                <Checkbox
-                  v-model="filters.unmoderatedOnly"
-                  input-id="cigar-bases-filter-unmoderated"
-                  binary
-                  data-testid="cigar-bases-filter-unmoderated"
-                  @update:model-value="onUnmoderatedFilterChange" />
+                class="min-w-0">
                 <label
-                  for="cigar-bases-filter-unmoderated"
-                  class="cursor-pointer text-sm text-stone-700 dark:text-stone-300">
-                  Только не промодерированные
+                  for="cigar-bases-filter-moderation-input"
+                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Модерация (справочник)
                 </label>
+                <Select
+                  v-model="filters.moderationFilter"
+                  data-testid="cigar-bases-filter-moderation"
+                  :options="moderationFilterOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="w-full min-h-12 sm:min-h-11"
+                  label-id="cigar-bases-filter-moderation-input"
+                  @change="onFilterChange" />
               </div>
             </div>
           </form>
@@ -560,7 +563,6 @@
   import { ref, computed, onMounted, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
-  import Checkbox from 'primevue/checkbox';
   import cigarService from '@/services/cigarService';
   import { useAuth } from '@/services/useAuth';
   import { hasAnyRole } from '@/utils/roles';
@@ -572,11 +574,13 @@
   import { strengthOptions } from '@/utils/cigarOptions';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
 
+  type ModerationFilterValue = 'moderated' | 'unmoderated';
+
   interface Filters {
     search: string;
     brand: number | null;
     strength: string | null;
-    unmoderatedOnly: boolean;
+    moderationFilter: ModerationFilterValue;
   }
 
   interface Pagination {
@@ -589,6 +593,11 @@
     label: string;
     value: string | number;
   }
+
+  const moderationFilterOptions: { label: string; value: ModerationFilterValue }[] = [
+    { label: 'Только промодерированные', value: 'moderated' },
+    { label: 'Только не промодерированные', value: 'unmoderated' },
+  ];
 
   const router = useRouter();
   const route = useRoute();
@@ -610,7 +619,7 @@
     search: '',
     brand: null,
     strength: null,
-    unmoderatedOnly: false,
+    moderationFilter: 'moderated',
   });
 
   const sortField = ref<string>('name');
@@ -628,7 +637,7 @@
 
   const filtersActive = computed(() => {
     const f = filters.value;
-    return Boolean(f.search?.trim()) || f.brand != null || f.strength != null || Boolean(f.unmoderatedOnly);
+    return Boolean(f.search?.trim()) || f.brand != null || f.strength != null || f.moderationFilter === 'unmoderated';
   });
 
   /** Байты изображения из инлайн-полей (только DB-хранилище, MinIO не заполняет их). */
@@ -686,7 +695,12 @@
   }
 
   function resetFilters(): void {
-    filters.value = { search: '', brand: null, strength: null, unmoderatedOnly: false };
+    filters.value = {
+      search: '',
+      brand: null,
+      strength: null,
+      moderationFilter: 'moderated',
+    };
     pagination.value.first = 0;
     if (searchTimeout) {
       clearTimeout(searchTimeout);
@@ -708,7 +722,7 @@
         brandId: filters.value.brand,
         strength: filters.value.strength,
       };
-      if (canFilterUnmoderated.value && filters.value.unmoderatedOnly) {
+      if (canFilterUnmoderated.value && filters.value.moderationFilter === 'unmoderated') {
         params.unmoderatedOnly = true;
       }
       const result: PaginatedResult<CigarBase> = await cigarService.getCigarBasesPaginated(params);
@@ -814,11 +828,6 @@
     loadCigars();
   }
 
-  function onUnmoderatedFilterChange(): void {
-    pagination.value.first = 0;
-    loadCigars();
-  }
-
   function onPage(event: DataTablePageEvent | PageState): void {
     pagination.value.first = event.first;
     pagination.value.rows = event.rows;
@@ -914,8 +923,8 @@
   );
 
   watch(canFilterUnmoderated, (allowed) => {
-    if (!allowed && filters.value.unmoderatedOnly) {
-      filters.value.unmoderatedOnly = false;
+    if (!allowed && filters.value.moderationFilter === 'unmoderated') {
+      filters.value.moderationFilter = 'moderated';
       pagination.value.first = 0;
       void loadCigars();
     }
