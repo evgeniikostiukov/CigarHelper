@@ -65,11 +65,11 @@ npm run ci          # typecheck + lint + test + build
 
 ```bash
 # 1. Сборка API
-dotnet build CigarHelper.API/CigarHelper.Api.csproj -c Debug
+dotnet build CigarHelper.Api/CigarHelper.Api.csproj -c Debug
 
 # 2. Генерация спецификации (в корне репозитория)
 dotnet tool run swagger tofile --output openapi.json \
-  "CigarHelper.API/bin/Debug/net10.0/CigarHelper.Api.dll" v1
+  "CigarHelper.Api/bin/Debug/net10.0/CigarHelper.Api.dll" v1
 # PowerShell: установить $env:ASPNETCORE_ENVIRONMENT = "Development" перед командой
 
 # 3. Генерация TypeScript-типов (из CigarHelper.Web)

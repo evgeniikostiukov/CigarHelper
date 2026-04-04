@@ -16,7 +16,7 @@
 Из корня репозитория:
 
 ```bash
-dotnet run --project CigarHelper.API/CigarHelper.Api.csproj
+dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj
 ```
 
 Убедиться, что задана строка подключения к PostgreSQL и параметры JWT для выдачи токенов.
@@ -67,9 +67,9 @@ docker compose up -d minio
 Команда для User Secrets:
 
 ```bash
-dotnet user-secrets set "ImageStorage:Provider" "Minio" --project CigarHelper.API/CigarHelper.Api.csproj
-dotnet user-secrets set "ImageStorage:Minio:AccessKey" "minioadmin" --project CigarHelper.API/CigarHelper.Api.csproj
-dotnet user-secrets set "ImageStorage:Minio:SecretKey" "minioadmin" --project CigarHelper.API/CigarHelper.Api.csproj
+dotnet user-secrets set "ImageStorage:Provider" "Minio" --project CigarHelper.Api/CigarHelper.Api.csproj
+dotnet user-secrets set "ImageStorage:Minio:AccessKey" "minioadmin" --project CigarHelper.Api/CigarHelper.Api.csproj
+dotnet user-secrets set "ImageStorage:Minio:SecretKey" "minioadmin" --project CigarHelper.Api/CigarHelper.Api.csproj
 ```
 
 Бакет `cigar-images` создаётся автоматически при старте API (если не существует).
@@ -100,8 +100,8 @@ dotnet run --project CigarHelper.Import/CigarHelper.Import.csproj -- путь\к
 Контекст: `AppDbContext` в проекте `CigarHelper.Data`. Типовой шаблон (из корня repo):
 
 ```bash
-dotnet ef migrations add ИмяМиграции --project CigarHelper.Data/CigarHelper.Data.csproj --startup-project CigarHelper.API/CigarHelper.Api.csproj
-dotnet ef database update --project CigarHelper.Data/CigarHelper.Data.csproj --startup-project CigarHelper.API/CigarHelper.Api.csproj
+dotnet ef migrations add ИмяМиграции --project CigarHelper.Data/CigarHelper.Data.csproj --startup-project CigarHelper.Api/CigarHelper.Api.csproj
+dotnet ef database update --project CigarHelper.Data/CigarHelper.Data.csproj --startup-project CigarHelper.Api/CigarHelper.Api.csproj
 ```
 
 ## Тесты
@@ -119,7 +119,7 @@ dotnet test CigarHelper.sln
 **Порядок для локального прогона:**
 
 1. PostgreSQL (локально или `docker compose up -d postgres` из корня — см. выше).
-2. API: `dotnet run --project CigarHelper.API/CigarHelper.Api.csproj` — Kestrel должен совпадать с прокси Vite (**по умолчанию `http://localhost:5184`**).
+2. API: `dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj` — Kestrel должен совпадать с прокси Vite (**по умолчанию `http://localhost:5184`**).
 3. Фронт: из `CigarHelper.Web` — `npm run dev` (**порт 3000**).
 4. В `e2e/`: `npm ci`, `npx playwright install chromium`, затем `npm test`.
 

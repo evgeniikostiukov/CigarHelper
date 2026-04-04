@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CigarHelper.API\CigarHelper.Api.csproj" />
+    <ProjectReference Include="..\CigarHelper.Api\CigarHelper.Api.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,10 +2,10 @@
 
 ## Точки входа
 
-- API: `CigarHelper.API/Program.cs` (+ `ProgramPartial.cs` для интеграционных тестов).
+- API: `CigarHelper.Api/Program.cs` (+ `ProgramPartial.cs` для интеграционных тестов).
 - Import: `CigarHelper.Import/Program.cs` → `ImportCigarsFromCsv`; картинки CSV — `CigarImageStorageWriter` + `IImageStorageProvider` / `IThumbnailGenerator` (те же ключи `StoragePath` / `ThumbnailPath`, что при загрузке из UI).
 
-## API — контроллеры (`CigarHelper.API/Controllers/`)
+## API — контроллеры (`CigarHelper.Api/Controllers/`)
 
 | Контроллер | Назначение |
 |------------|------------|
@@ -22,11 +22,11 @@
 ## API — сервисы и прочее
 
 - `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
-- `CigarHelper.API/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
-- `CigarHelper.API/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`; **`CigarImageStorageWriter`** — общая запись оригинала + миниатюры (API и CSV-импорт).
-- `CigarHelper.API/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
-- `CigarHelper.API/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
-- `CigarHelper.API/Extensions/` — расширения DI/приложения.
+- `CigarHelper.Api/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
+- `CigarHelper.Api/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`; **`CigarImageStorageWriter`** — общая запись оригинала + миниатюры (API и CSV-импорт).
+- `CigarHelper.Api/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
+- `CigarHelper.Api/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
+- `CigarHelper.Api/Extensions/` — расширения DI/приложения.
 
 ### Политика хранения изображений
 
@@ -71,5 +71,5 @@
 
 ## Конфигурация API
 
-- `CigarHelper.API/appsettings.json`, окружения, `appsettings.Production.json` (плейсхолдеры для выката).
+- `CigarHelper.Api/appsettings.json`, окружения, `appsettings.Production.json` (плейсхолдеры для выката).
 - Секреты: User Secrets / переменные окружения (не коммитить реальные значения).

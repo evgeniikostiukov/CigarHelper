@@ -20,7 +20,7 @@ Backend **Cigar Helper** — ASP.NET Core Web API для учёта сигар, 
 | `CigarHelper.Import` | Импорт CSV → БД |
 | `CigarHelper.Api.Tests` | Тесты |
 
-Папка на диске API: `CigarHelper.API` (имя сборки/`.csproj`: `CigarHelper.Api`).
+Папка на диске API: `CigarHelper.Api` (имя сборки/`.csproj`: `CigarHelper.Api`; на Linux регистр пути должен совпадать с git).
 
 **Фронтенд** в solution не входит: каталог **`CigarHelper.Web`** (Vue 3 + Vite). Контекст: [memory-bank/frontend/README.md](./frontend/README.md).
 

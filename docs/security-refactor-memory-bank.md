@@ -120,14 +120,14 @@
 
 | Область | Пути |
 |--------|------|
-| JWT / auth | `CigarHelper.API/Services/JwtService.cs`, `IJwtService.cs`, `AuthService.cs`, `Controllers/AuthController.cs` |
-| Rate limit | `CigarHelper.API/Program.cs` |
-| Изображения | `CigarHelper.API/Controllers/CigarImagesController.cs` |
+| JWT / auth | `CigarHelper.Api/Services/JwtService.cs`, `IJwtService.cs`, `AuthService.cs`, `Controllers/AuthController.cs` |
+| Rate limit | `CigarHelper.Api/Program.cs` |
+| Изображения | `CigarHelper.Api/Controllers/CigarImagesController.cs` |
 | Тесты unit | `CigarHelper.Api.Tests/AuthServiceTests.cs`, `JwtServiceTests.cs`, … |
 | Тесты integration | `CigarHelper.Api.Tests/AuthIntegrationWebAppFactory.cs`, `AuthStep4IntegrationTests.cs` |
-| Program / Testing | `CigarHelper.API/Program.cs`, `ProgramPartial.cs` |
-| Security headers / HSTS | `CigarHelper.API/Extensions/SecurityHeadersMiddlewareExtensions.cs`, `Program.cs` (пайплайн) |
-| Forwarded headers | `CigarHelper.API/Extensions/ForwardedHeadersConfigurationExtensions.cs`, `Options/ReverseProxyForwardedHeadersOptions.cs`, `Program.cs` |
+| Program / Testing | `CigarHelper.Api/Program.cs`, `ProgramPartial.cs` |
+| Security headers / HSTS | `CigarHelper.Api/Extensions/SecurityHeadersMiddlewareExtensions.cs`, `Program.cs` (пайплайн) |
+| Forwarded headers | `CigarHelper.Api/Extensions/ForwardedHeadersConfigurationExtensions.cs`, `Options/ReverseProxyForwardedHeadersOptions.cs`, `Program.cs` |
 | Прод конфиг API | `CigarHelper.Api/appsettings.Production.json` |
 
 ---

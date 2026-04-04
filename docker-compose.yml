@@ -1,6 +1,6 @@
 # Локальная инфраструктура для разработки (Postgres + MinIO).
 # Секреты задаются в файле .env (из .env.example; в git не попадает).
-# API: `dotnet run --project CigarHelper.API/CigarHelper.Api.csproj`
+# API: `dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj`
 # (см. docs/memory-bank/workflow.md)
 services:
   postgres:
