@@ -31,6 +31,185 @@
       </header>
 
       <div
+        class="mb-8 rounded-2xl border border-stone-200/90 bg-white/95 p-6 shadow-md shadow-stone-900/5 sm:mb-10 sm:p-8 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+        data-testid="cigar-list-filters">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div class="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+            <span
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-900 dark:bg-rose-900/40 dark:text-rose-100 sm:h-14 sm:w-14"
+              aria-hidden="true">
+              <i class="pi pi-filter-slash text-2xl" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <h2
+                id="cigar-list-filters-heading"
+                class="text-lg font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-xl">
+                Фильтры
+              </h2>
+              <p
+                class="mt-1.5 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 dark:text-stone-300 sm:text-base">
+                Сузьте список по названию, бренду, формату и статусу в коллекции. Блок можно свернуть, чтобы освободить
+                место на экране.
+              </p>
+            </div>
+          </div>
+          <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+            <Badge
+              v-if="!filtersExpanded && filtersActive"
+              value="Фильтры активны"
+              severity="warn"
+              class="w-fit"
+              data-testid="cigar-list-filters-collapsed-hint" />
+            <Button
+              type="button"
+              data-testid="cigar-list-filters-toggle"
+              :aria-expanded="filtersExpanded"
+              aria-controls="cigar-list-filters-panel"
+              :label="filtersExpanded ? 'Свернуть фильтры' : 'Развернуть фильтры'"
+              :icon="filtersExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+              icon-pos="right"
+              severity="secondary"
+              outlined
+              class="min-h-12 w-full touch-manipulation sm:min-h-11 sm:w-auto"
+              :aria-label="filtersExpanded ? 'Свернуть блок фильтров' : 'Развернуть блок фильтров'"
+              @click="filtersExpanded = !filtersExpanded" />
+          </div>
+        </div>
+
+        <Transition name="cl-list-filters-panel">
+          <div
+            v-show="filtersExpanded"
+            id="cigar-list-filters-panel"
+            class="mt-6 flex flex-col gap-6 border-t border-stone-100 pt-6 dark:border-stone-700/80 sm:mt-8 sm:gap-8 sm:pt-8"
+            role="region"
+            aria-labelledby="cigar-list-filters-heading">
+            <form
+              role="search"
+              class="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-end"
+              @submit.prevent>
+              <div class="min-w-0 lg:col-span-4">
+                <label
+                  for="cigar-list-search"
+                  class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Поиск
+                </label>
+                <IconField class="w-full">
+                  <InputIcon
+                    class="pi pi-search text-stone-400"
+                    aria-hidden="true" />
+                  <InputText
+                    id="cigar-list-search"
+                    v-model="filters.search"
+                    placeholder="Название или бренд..."
+                    class="w-full min-h-12 sm:min-h-11"
+                    data-testid="cigar-list-search"
+                    autocomplete="off" />
+                </IconField>
+              </div>
+              <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8 lg:grid-cols-4 lg:gap-6">
+                <div class="min-w-0">
+                  <label
+                    for="cigar-list-filter-brand"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Бренд
+                  </label>
+                  <Select
+                    v-model="filters.brandId"
+                    data-testid="cigar-list-filter-brand"
+                    :options="brandOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Все бренды"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-list-filter-brand"
+                    :show-clear="true" />
+                </div>
+                <div class="min-w-0">
+                  <label
+                    for="cigar-list-filter-strength"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Крепость
+                  </label>
+                  <Select
+                    v-model="filters.strength"
+                    data-testid="cigar-list-filter-strength"
+                    :options="strengthOptionsFromData"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Все"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-list-filter-strength"
+                    :show-clear="true" />
+                </div>
+                <div class="min-w-0">
+                  <label
+                    for="cigar-list-filter-size"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Формат
+                  </label>
+                  <Select
+                    v-model="filters.size"
+                    data-testid="cigar-list-filter-size"
+                    :options="sizeOptionsFromData"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Все"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-list-filter-size"
+                    :show-clear="true" />
+                </div>
+                <div class="min-w-0">
+                  <label
+                    for="cigar-list-filter-humidor"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Хьюмидор
+                  </label>
+                  <Select
+                    v-model="filters.humidor"
+                    data-testid="cigar-list-filter-humidor"
+                    :options="humidorFilterOptions"
+                    option-label="label"
+                    option-value="value"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-list-filter-humidor" />
+                </div>
+                <div class="min-w-0 sm:col-span-2 lg:col-span-2">
+                  <label
+                    for="cigar-list-filter-smoked"
+                    class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Выкурена
+                  </label>
+                  <Select
+                    v-model="filters.smoked"
+                    data-testid="cigar-list-filter-smoked"
+                    :options="smokedFilterOptions"
+                    option-label="label"
+                    option-value="value"
+                    class="w-full min-h-12 sm:min-h-11"
+                    label-id="cigar-list-filter-smoked" />
+                </div>
+              </div>
+            </form>
+
+            <div
+              v-if="filtersActive"
+              class="flex flex-col items-stretch gap-3 border-t border-stone-100 pt-6 dark:border-stone-700/80 sm:flex-row sm:flex-wrap sm:items-center"
+              data-testid="cigar-list-filter-actions">
+              <Button
+                data-testid="cigar-list-filter-reset"
+                class="min-h-12 w-full touch-manipulation sm:w-auto sm:min-h-11"
+                label="Сбросить фильтры"
+                icon="pi pi-filter-slash"
+                severity="secondary"
+                outlined
+                type="button"
+                @click="resetFilters" />
+            </div>
+          </div>
+        </Transition>
+      </div>
+
+      <div
         v-if="loading"
         data-testid="cigar-list-loading"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 min-h-[20rem]"
@@ -61,6 +240,27 @@
       </div>
 
       <div
+        v-else-if="cigars.length > 0 && displayedCigars.length === 0"
+        class="text-center rounded-2xl border border-dashed border-amber-700/30 bg-white/80 px-5 py-12 dark:border-amber-200/20 dark:bg-stone-900/60 max-w-xl mx-auto"
+        data-testid="cigar-list-filter-empty">
+        <span
+          class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+          aria-hidden="true">
+          <i class="pi pi-search-minus text-2xl" />
+        </span>
+        <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Ничего не найдено</h2>
+        <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">Попробуйте изменить фильтры или сбросить их.</p>
+        <Button
+          data-testid="cigar-list-filter-empty-reset"
+          class="min-h-12 px-6 touch-manipulation"
+          label="Сбросить фильтры"
+          icon="pi pi-filter-slash"
+          severity="secondary"
+          outlined
+          @click="resetFilters" />
+      </div>
+
+      <div
         v-else-if="cigars.length === 0"
         class="text-center rounded-2xl border border-dashed border-rose-800/25 bg-white/80 px-5 py-12 dark:border-rose-200/15 dark:bg-stone-900/60 max-w-xl mx-auto"
         data-testid="cigar-list-empty">
@@ -86,7 +286,7 @@
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
         data-testid="cigar-list-grid">
         <article
-          v-for="(cigar, index) in cigars"
+          v-for="(cigar, index) in displayedCigars"
           :key="cigar.id"
           v-memo="memoKey(cigar)"
           :data-testid="`cigar-card-${cigar.id}`"
@@ -247,8 +447,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, onUnmounted, watch } from 'vue';
+  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useRouter } from 'vue-router';
+  import { useLocalStorage } from '@vueuse/core';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import api from '@/services/api';
@@ -256,9 +457,50 @@
   import type { Cigar, CigarImage } from '../services/cigarService';
   import { cigarImageInlineDataSrc, orderUserCigarGalleryImages } from '@/utils/cigarImageDisplay';
 
+  type HumidorFilterValue = 'all' | 'in_humidor' | 'outside';
+  type SmokedFilterValue = 'all' | 'not_smoked' | 'smoked';
+
+  interface ListFilters {
+    search: string;
+    brandId: number | null;
+    strength: string | null;
+    size: string | null;
+    humidor: HumidorFilterValue;
+    smoked: SmokedFilterValue;
+  }
+
+  interface SelectOption {
+    label: string;
+    value: string | number;
+  }
+
   const router = useRouter();
   const confirm = useConfirm();
   const toast = useToast();
+
+  /** По умолчанию свёрнуто — фильтры не занимают место до явного разворачивания. */
+  const filtersExpanded = useLocalStorage('cigar-list-filters-expanded', false);
+
+  const filters = ref<ListFilters>({
+    search: '',
+    brandId: null,
+    strength: null,
+    size: null,
+    humidor: 'all',
+    smoked: 'all',
+  });
+
+  const humidorFilterOptions: { label: string; value: HumidorFilterValue }[] = [
+    { label: 'Все', value: 'all' },
+    { label: 'В хьюмидоре', value: 'in_humidor' },
+    { label: 'Вне хьюмидора', value: 'outside' },
+  ];
+
+  const smokedFilterOptions: { label: string; value: SmokedFilterValue }[] = [
+    { label: 'Все', value: 'all' },
+    { label: 'Только не выкуренные', value: 'not_smoked' },
+    { label: 'Только выкуренные', value: 'smoked' },
+  ];
 
   const loading = ref(true);
   const error = ref<string | null>(null);
@@ -276,15 +518,104 @@
     }
   }
 
+  const filtersActive = computed(() => {
+    const f = filters.value;
+    return (
+      Boolean(f.search?.trim()) ||
+      f.brandId != null ||
+      f.strength != null ||
+      f.size != null ||
+      f.humidor !== 'all' ||
+      f.smoked !== 'all'
+    );
+  });
+
+  const brandOptions = computed<SelectOption[]>(() => {
+    const map = new Map<number, string>();
+    for (const c of cigars.value) {
+      const id = c.brand?.id;
+      const name = c.brand?.name?.trim();
+      if (id != null && name) {
+        map.set(id, name);
+      }
+    }
+    return [...map.entries()]
+      .sort((a, b) => a[1].localeCompare(b[1], 'ru'))
+      .map(([value, label]) => ({ value, label }));
+  });
+
+  function uniqueStringOptions(values: (string | null | undefined)[]): SelectOption[] {
+    const set = new Set<string>();
+    for (const v of values) {
+      const t = v?.trim();
+      if (t) {
+        set.add(t);
+      }
+    }
+    return [...set].sort((a, b) => a.localeCompare(b, 'ru')).map((value) => ({ value, label: value }));
+  }
+
+  const strengthOptionsFromData = computed(() => uniqueStringOptions(cigars.value.map((c) => c.strength)));
+
+  const sizeOptionsFromData = computed(() => uniqueStringOptions(cigars.value.map((c) => c.size)));
+
+  function matchesFilters(cigar: Cigar): boolean {
+    const f = filters.value;
+    const q = f.search.trim().toLowerCase();
+    if (q) {
+      const name = (cigar.name ?? '').toLowerCase();
+      const brand = (cigar.brand?.name ?? '').toLowerCase();
+      if (!name.includes(q) && !brand.includes(q)) {
+        return false;
+      }
+    }
+    if (f.brandId != null && cigar.brand?.id !== f.brandId) {
+      return false;
+    }
+    if (f.strength != null && (cigar.strength?.trim() ?? '') !== f.strength) {
+      return false;
+    }
+    if (f.size != null && (cigar.size?.trim() ?? '') !== f.size) {
+      return false;
+    }
+    if (f.humidor === 'in_humidor' && cigar.humidorId == null) {
+      return false;
+    }
+    if (f.humidor === 'outside' && cigar.humidorId != null) {
+      return false;
+    }
+    const smoked = Boolean(cigar.isSmoked);
+    if (f.smoked === 'not_smoked' && smoked) {
+      return false;
+    }
+    if (f.smoked === 'smoked' && !smoked) {
+      return false;
+    }
+    return true;
+  }
+
+  const displayedCigars = computed(() => cigars.value.filter(matchesFilters));
+
+  function resetFilters(): void {
+    filters.value = {
+      search: '',
+      brandId: null,
+      strength: null,
+      size: null,
+      humidor: 'all',
+      smoked: 'all',
+    };
+  }
+
   watch(
-    cigars,
+    displayedCigars,
     async () => {
       const gen = ++listThumbLoadGen;
       revokeListThumbBlobs(listThumbByImageId.value);
       const inline: Record<number, string> = {};
       const idsToFetchSet = new Set<number>();
 
-      for (const c of cigars.value) {
+      for (const c of displayedCigars.value) {
         for (const img of c.images ?? []) {
           const local = cigarImageInlineDataSrc(img);
           if (local) {
@@ -555,6 +886,31 @@
   @media (prefers-reduced-motion: reduce) {
     .cigar-card-enter {
       animation: none;
+    }
+  }
+
+  .cl-list-filters-panel-enter-active,
+  .cl-list-filters-panel-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .cl-list-filters-panel-enter-from,
+  .cl-list-filters-panel-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cl-list-filters-panel-enter-active,
+    .cl-list-filters-panel-leave-active {
+      transition: none;
+    }
+
+    .cl-list-filters-panel-enter-from,
+    .cl-list-filters-panel-leave-to {
+      transform: none;
     }
   }
 </style>
