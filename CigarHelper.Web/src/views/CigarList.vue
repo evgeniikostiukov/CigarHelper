@@ -456,6 +456,7 @@
   import cigarService from '../services/cigarService';
   import type { Cigar, CigarImage } from '../services/cigarService';
   import { cigarImageInlineDataSrc, orderUserCigarGalleryImages } from '@/utils/cigarImageDisplay';
+  import { strengthOptions } from '@/utils/cigarOptions';
 
   type HumidorFilterValue = 'all' | 'in_humidor' | 'outside';
   type SmokedFilterValue = 'all' | 'not_smoked' | 'smoked';
@@ -555,7 +556,22 @@
     return [...set].sort((a, b) => a.localeCompare(b, 'ru')).map((value) => ({ value, label: value }));
   }
 
-  const strengthOptionsFromData = computed(() => uniqueStringOptions(cigars.value.map((c) => c.strength)));
+  const strengthOptionsFromData = computed((): SelectOption[] => {
+    const present = new Set<string>();
+    for (const c of cigars.value) {
+      const t = c.strength?.trim();
+      if (t) {
+        present.add(t);
+      }
+    }
+    const knownValues = new Set(strengthOptions.map((o) => o.value));
+    const fromCatalog = strengthOptions.filter((o) => present.has(o.value));
+    const extras = [...present]
+      .filter((v) => !knownValues.has(v))
+      .sort((a, b) => a.localeCompare(b, 'ru'))
+      .map((value) => ({ value, label: value }));
+    return [...fromCatalog, ...extras];
+  });
 
   const sizeOptionsFromData = computed(() => uniqueStringOptions(cigars.value.map((c) => c.size)));
 
