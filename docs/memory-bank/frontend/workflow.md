@@ -44,7 +44,7 @@ npm run test        # Vitest + happy-dom; unit (*.test.ts), компоненты
 npm run ci          # typecheck + lint + test + build
 ```
 
-В корне репозитория workflow **GitHub Actions** (`.github/workflows/ci.yml`): `dotnet test CigarHelper.sln` и шаги фронта выше.
+В корне репозитория workflow **GitHub Actions** (`.github/workflows/ci.yml`): `dotnet test CigarHelper.sln` и шаги фронта выше. Версия **.NET SDK** для CI задаётся **`global.json`** в корне (`setup-dotnet` с `global-json-file`): указывайте реальный номер SDK вида `10.0.100`, а не `10.0.0` — иначе установщик на раннере не найдёт пакет.
 
 ## Линтинг
 
