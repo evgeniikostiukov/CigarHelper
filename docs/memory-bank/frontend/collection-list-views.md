@@ -170,8 +170,8 @@
 | Файл | `src/views/CigarForm.vue` |
 | Данные | Хьюмидоры: `humidorService.getHumidors()`; поиск/выбор сигары — `getCigarBasesPaginated` + debounce 300 ms; префилл по `?cigarBaseId=` — `getCigarBase(id)` |
 | Маршруты | `CigarNew`; успех / отмена / «К списку» → `CigarList` |
-| UI | `AutoComplete` с группировкой по бренду; бренд только для чтения после выбора; поля: название (только из подсказок), цена, вкус, аромат, ссылки на фото; чекбокс **«Добавить в хьюмидор»** — при включении доступен `Dropdown` хьюмидора |
-| `data-testid` | `cigar-form`, `cigar-form-back`, `cigar-form-save-error`, `cigar-form-fields`, `cigar-form-name`, `cigar-form-brand`, `cigar-form-price`, `cigar-form-taste`, `cigar-form-aroma`, `cigar-form-image-preview`, `cigar-form-image-urls`, `cigar-form-image-url`, `cigar-form-add-image-url`, `cigar-form-add-to-humidor`, `cigar-form-humidor`, `cigar-form-cancel`, `cigar-form-submit` |
+| UI | `AutoComplete` с группировкой по бренду; бренд только для чтения после выбора; поля: название (только из подсказок), цена, оценка (`Rating`), вкус, аромат; фото — **`FormImageGallerySection`** (ссылки + файлы, превью слева); чекбокс **«Добавить в хьюмидор»** — при включении доступен `Dropdown` хьюмидора |
+| `data-testid` | `cigar-form`, `cigar-form-back`, `cigar-form-save-error`, `cigar-form-fields`, `cigar-form-name`, `cigar-form-brand`, `cigar-form-price`, `cigar-form-rating`, `cigar-form-taste`, `cigar-form-aroma`, `cigar-form-image-preview`, `cigar-form-image-gallery`, `cigar-form-image-urls`, `cigar-form-image-url`, `cigar-form-add-image-url`, `cigar-form-apply-image-gallery`, `cigar-form-add-to-humidor`, `cigar-form-humidor`, `cigar-form-cancel`, `cigar-form-submit` |
 | Scoped классы | `cigar-form-root`, `cigar-form-grain`, `cigar-form-enter`, `prefers-reduced-motion` |
 
 ## CigarCollectionEdit.vue

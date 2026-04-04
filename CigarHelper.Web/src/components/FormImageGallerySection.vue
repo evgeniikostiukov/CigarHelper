@@ -45,6 +45,8 @@
       addUrlRowButtonLabel?: string;
       applyUrlsToGalleryButtonLabel?: string;
       urlRowsTestId?: string;
+      addUrlRowTestId?: string;
+      applyUrlsToGalleryTestId?: string;
     }>(),
     {
       maxFiles: 5,
@@ -64,6 +66,8 @@
       addUrlRowButtonLabel: 'Добавить ссылку',
       applyUrlsToGalleryButtonLabel: 'Добавить в галерею',
       urlRowsTestId: 'form-gallery-multi-urls',
+      addUrlRowTestId: 'form-gallery-add-url-row',
+      applyUrlsToGalleryTestId: 'form-gallery-apply-urls',
     },
   );
 
@@ -474,7 +478,7 @@
               icon="pi pi-plus"
               severity="secondary"
               outlined
-              data-testid="form-gallery-add-url-row"
+              :data-testid="addUrlRowTestId"
               :disabled="pendingUrls.length >= maxUrlRows || urlImportBusy"
               @click="addPendingUrlRow" />
             <Button
@@ -485,7 +489,7 @@
               severity="success"
               :class="tone === 'dialog' ? undefined : 'sm:ml-0'"
               :loading="urlImportBusy"
-              data-testid="form-gallery-apply-urls"
+              :data-testid="applyUrlsToGalleryTestId"
               :disabled="!hasAnyPendingUrl || urlImportBusy || activeCount >= maxFiles"
               @click="addAllPendingUrlsToGallery" />
           </div>

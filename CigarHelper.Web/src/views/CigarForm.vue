@@ -224,51 +224,28 @@
                       <i
                         class="pi pi-image text-3xl opacity-70"
                         aria-hidden="true" />
-                      <span class="text-xs leading-snug">Добавьте ссылки на фото ниже</span>
+                      <span class="text-xs leading-snug">Добавьте фото справа — превью первого кадра</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="flex min-w-0 flex-col gap-4">
-                <div
-                  class="flex flex-col gap-2"
-                  data-testid="cigar-form-image-urls">
-                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Ссылки на фото</span>
-                  <div
-                    v-for="(_u, idx) in form.imageUrls"
-                    :key="'img-url-' + idx"
-                    class="flex items-center gap-2">
-                    <InputText
-                      v-model="form.imageUrls[idx]"
-                      class="min-h-11 min-w-0 flex-1"
-                      :data-testid="idx === 0 ? 'cigar-form-image-url' : `cigar-form-image-url-${idx}`"
-                      placeholder="https://example.com/cigar.jpg" />
-                    <Button
-                      type="button"
-                      class="min-h-11 min-w-11 shrink-0 touch-manipulation"
-                      icon="pi pi-trash"
-                      text
-                      rounded
-                      severity="secondary"
-                      aria-label="Удалить строку"
-                      @click="removeImageUrlRow(idx)" />
-                  </div>
-                  <Button
-                    type="button"
-                    class="min-h-11 w-full touch-manipulation sm:w-auto"
-                    label="Добавить ссылку"
-                    icon="pi pi-plus"
-                    severity="secondary"
-                    outlined
-                    data-testid="cigar-form-add-image-url"
-                    :disabled="form.imageUrls.length >= maxNewImageUrls"
-                    @click="addImageUrlRow" />
-                  <small class="text-stone-500 dark:text-stone-400">
-                    До {{ maxNewImageUrls }} ссылок; сервер скачает изображения, первое успешное — главное.
-                  </small>
-                </div>
-              </div>
+              <FormImageGallerySection
+                v-model="cigarFormImages"
+                variant="bare"
+                tone="review"
+                url-entry-mode="multi"
+                :max-files="maxNewImageUrls"
+                :max-url-rows="maxNewImageUrls"
+                test-id="cigar-form-image-gallery"
+                url-input-id="cigar-form-gallery-url"
+                url-field-test-id="cigar-form-image-url"
+                url-rows-test-id="cigar-form-image-urls"
+                add-url-row-test-id="cigar-form-add-image-url"
+                apply-urls-to-gallery-test-id="cigar-form-apply-image-gallery"
+                url-placeholder="https://example.com/cigar.jpg"
+                url-help-text="До 12 кадров: укажите ссылки или выберите файлы, добавьте в галерею; при сохранении сервер примет URL и data URL. Порядок в галерее — порядок отправки, первое успешное фото — главное."
+                grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4" />
             </div>
           </div>
 
@@ -386,6 +363,7 @@
   import Dropdown from 'primevue/dropdown';
   import Button from 'primevue/button';
   import Message from 'primevue/message';
+  import FormImageGallerySection, { type FormGalleryImageItem } from '@/components/FormImageGallerySection.vue';
 
   interface FormData {
     price: number | null;
@@ -393,7 +371,6 @@
     taste: string;
     aroma: string;
     humidorId: number | null;
-    imageUrls: string[];
     addToHumidor: boolean;
   }
 
@@ -423,21 +400,23 @@
 
   const maxNewImageUrls = 12;
 
+  const cigarFormImages = ref<FormGalleryImageItem[]>([]);
+
   const form = ref<FormData>({
     price: null,
     rating: null,
     taste: '',
     aroma: '',
     humidorId: null,
-    imageUrls: [''],
     addToHumidor: false,
   });
 
   const previewUrl = computed(() => {
-    for (const raw of form.value.imageUrls) {
-      const t = raw?.trim() ?? '';
-      if (t && (/^https?:\/\//i.test(t) || t.startsWith('data:'))) {
-        return t;
+    for (const img of cigarFormImages.value) {
+      if (img.markedForDeletion) continue;
+      const p = img.preview?.trim() ?? '';
+      if (p && (/^https?:\/\//i.test(p) || p.startsWith('data:') || p.startsWith('blob:'))) {
+        return p;
       }
     }
     return '';
@@ -448,20 +427,28 @@
     return humidors.value.find((h) => h.id === form.value.humidorId) || null;
   });
 
-  function addImageUrlRow(): void {
-    if (form.value.imageUrls.length >= maxNewImageUrls) return;
-    form.value.imageUrls.push('');
+  function readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error ?? new Error('FileReader'));
+      reader.readAsDataURL(file);
+    });
   }
 
-  function removeImageUrlRow(index: number): void {
-    form.value.imageUrls.splice(index, 1);
-    if (form.value.imageUrls.length === 0) {
-      form.value.imageUrls.push('');
+  async function collectImagePayloadUrls(): Promise<string[]> {
+    const out: string[] = [];
+    for (const img of cigarFormImages.value) {
+      if (img.markedForDeletion) continue;
+      let url = img.imageUrl?.trim();
+      if (img.file) {
+        url = await readFileAsDataUrl(img.file);
+      }
+      if (url) {
+        out.push(url);
+      }
     }
-  }
-
-  function collectTrimmedNewImageUrls(): string[] {
-    return form.value.imageUrls.map((u) => u.trim()).filter(Boolean);
+    return out;
   }
 
   async function loadHumidors(): Promise<void> {
@@ -495,7 +482,7 @@
     saving.value = true;
     saveError.value = null;
     try {
-      const urls = collectTrimmedNewImageUrls();
+      const urls = await collectImagePayloadUrls();
       await cigarService.createCigar({
         cigarBaseId: base.id,
         price: form.value.price,

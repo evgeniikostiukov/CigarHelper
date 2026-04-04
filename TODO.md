@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-04** — `CigarForm.vue`: блок фото на `FormImageGallerySection` (multi URL + файлы, до 12 кадров); сабмит собирает http(s) и data URL; пропсы `addUrlRowTestId` / `applyUrlsToGalleryTestId`; `collection-list-views.md`.
 - **2026-04-04** — `FormImageGallerySection`: режим `urlEntryMode` `multi` — несколько полей URL и кнопка «Добавить в галерею» (как строки в `CigarForm`), до `maxUrlRows` (12), пакет с `resolveUrlImport` или локальные http(s). Включено в `ReviewForm` и `CigarBaseEditDialog`; убран дублирующий success-toast из `resolveCigarBaseUrlImport`.
 - **2026-04-04** — Вынесена общая галерея загрузки изображений в `FormImageGallerySection.vue` (`FormGalleryImageItem`, v-model, подписи, лимит, URL/файлы, soft-delete; опции `section`/`bare`, `tone` review/dialog, `show-main-image-star`, `resolve-url-import`). Подключено в `ReviewForm.vue` и `CigarBaseEditDialog.vue`.
 - **2026-04-04** — `ReviewForm.vue`: блок фото как у `CigarBaseEditDialog` — скрытый `ImageUploader`, кнопка выбора файлов, добавление по HTTP(S)-ссылке, сетка превью, удаление с пометкой «будет удалено» и откат, подписи к кадрам; при сохранении файлы уходят как data URL; загрузка черновика обзора — превью из `imageBytes` (API). `ImageDownloader`: поддержка `data:image/...;base64,...` для тех же пайплайнов скачивания.
