@@ -5,7 +5,8 @@ export function cigarImageRawBytes(img: CigarImage | undefined): string | number
   if (!img) {
     return undefined;
   }
-  return img.imageData ?? img.data;
+  const raw = img.imageData ?? img.data;
+  return raw ?? undefined;
 }
 
 /** Data-URL из полей DTO (без запроса к API). */

@@ -9,6 +9,9 @@ export interface CigarImage {
   hasThumbnail?: boolean;
   cigarBaseId?: number | null;
   userCigarId?: number | null;
+  /** Base64 или сырой массив байт, если DTO пришёл с вложенными данными (не в схеме OpenAPI). */
+  imageData?: string | null;
+  data?: string | number[] | null;
 }
 
 export interface CigarBase {

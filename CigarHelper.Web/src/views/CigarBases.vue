@@ -600,7 +600,8 @@
     if (!img) {
       return undefined;
     }
-    return img.imageData ?? img.data;
+    const raw = img.imageData ?? img.data;
+    return raw ?? undefined;
   }
 
   /** Находит лучшее изображение для отображения: с байтами или по id (MinIO). */

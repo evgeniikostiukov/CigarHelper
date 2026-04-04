@@ -8,7 +8,7 @@
  *   1. npm run generate:spec   — скачивает свежий openapi.json (нужен запущенный API)
  *      или dotnet swagger tofile с env Development (см. docs/memory-bank/workflow.md)
  *   2. npm run generate:api    — перегенерирует api.generated.ts
- *   3. При TypeScript-ошибках — поправить алиасы ниже и тест api.types.test.ts
+ *   3. При TypeScript-ошибках — поправить алиасы ниже и тест api.types.test.ts (схемы без JSON-тела, например multipart create базы, в алиасы не выносятся)
  */
 
 // ── Сырой интерфейс сгенерированных схем (для сложных случаев) ────────────
@@ -46,7 +46,7 @@ export type ApiPublicProfile = import('./api.generated').components['schemas']['
 
 // ── Request-тела (входящие DTO) ────────────────────────────────────────────
 export type ApiMarkCigarSmokedRequest = import('./api.generated').components['schemas']['MarkCigarSmokedRequest'];
-export type ApiCreateCigarBaseRequest = import('./api.generated').components['schemas']['CreateCigarBaseRequest'];
+/** Создание базы каталога — multipart (`POST /api/Cigars/bases`), отдельной JSON-схемы в OpenAPI нет. */
 export type ApiUserCigarUpdateRequest = import('./api.generated').components['schemas']['UserCigarUpdateRequest'];
 export type ApiCreateReviewRequest = import('./api.generated').components['schemas']['CreateReviewRequest'];
 export type ApiUpdateReviewRequest = import('./api.generated').components['schemas']['UpdateReviewRequest'];

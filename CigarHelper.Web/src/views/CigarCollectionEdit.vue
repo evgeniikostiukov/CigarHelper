@@ -117,9 +117,10 @@
               <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <Rating
                   id="edit-rating"
-                  v-model="form.rating"
+                  :model-value="form.rating ?? undefined"
                   data-testid="cigar-edit-rating"
-                  :stars="10" />
+                  :stars="10"
+                  @update:model-value="(v) => (form.rating = v ?? null)" />
                 <span class="text-sm text-stone-600 dark:text-stone-400">
                   {{ form.rating != null ? `${form.rating}/10` : 'Без оценки' }}
                 </span>

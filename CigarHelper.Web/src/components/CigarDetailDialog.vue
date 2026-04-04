@@ -38,7 +38,8 @@
 
   /** Как на CigarBases: API отдаёт байты в `data`, не URL; GET /api/cigarimages/{id} — JSON, не картинка. */
   function cigarImageBytes(img: CigarImage): string | number[] | undefined {
-    return img.imageData ?? img.data;
+    const raw = img.imageData ?? img.data;
+    return raw ?? undefined;
   }
 
   function cigarImagePreviewSrc(img: CigarImage): string {
