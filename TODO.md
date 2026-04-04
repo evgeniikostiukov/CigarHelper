@@ -166,4 +166,5 @@
 - **2026-04-04** — Оценка коллекции (1–10): `Rating` в `CreateCigarRequest` и `UserCigarUpdateRequest`, запись в `CreateCigar`/`UpdateCigar`; `cigarService` шлёт `rating` в POST/PUT; `CigarForm.vue` и `CigarCollectionEdit.vue` — PrimeVue `Rating` (:stars=10), сброс повторным кликом по звезде.
 - **2026-04-04** — PrimeVue v4: заменён устаревший `Dropdown` на `Select` в `CigarForm`, `CigarCollectionEdit`, `CigarBases`, `Brands`, `AdminUsers`, `CigarBaseEditDialog`; `label-id` / `label-class` вместо `input-id` / `input-class`; пересобран `components.d.ts` (unplugin-vue-components).
 - **2026-04-04** — `npm run typecheck` (vue-tsc): `CigarImage` — опциональные `imageData`/`data` + нормализация `null`→`undefined` в хелперах превью; удалён несуществующий в OpenAPI алиас `ApiCreateCigarBaseRequest`; `Rating` — `:model-value` / `@update:model-value` из‑за `number | undefined` у PrimeVue при `number | null` в формах.
+- **2026-04-04** — Vitest `Onboarding.test.ts`: заглушки `IconField` и `InputIcon` в `PrimeStubs` (убрано Vue warn «Failed to resolve component: InputIcon» без auto-import в тестовой среде).
 

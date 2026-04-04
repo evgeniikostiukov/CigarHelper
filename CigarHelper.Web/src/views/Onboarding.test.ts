@@ -68,6 +68,12 @@ const PrimeStubs = {
     props: ['value'],
     template: '<span data-stub="tag">{{ value }}</span>',
   },
+  IconField: {
+    template: '<div class="icon-field-stub"><slot /></div>',
+  },
+  InputIcon: {
+    template: '<span class="input-icon-stub"><slot /></span>',
+  },
 };
 
 describe('Onboarding.vue', () => {
