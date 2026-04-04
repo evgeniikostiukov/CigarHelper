@@ -206,7 +206,7 @@
           <div
             v-for="(image, index) in form.images"
             :key="image.id || image.preview"
-            class="relative group aspect-square">
+            class="relative group aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800/80">
             <div
               v-if="image.markedForDeletion"
               class="absolute inset-0 flex flex-col items-center justify-center rounded-lg z-10 bg-red-500/70">
@@ -221,7 +221,7 @@
             <img
               :src="image.preview"
               :alt="`Изображение ${index + 1}`"
-              class="w-full h-full object-cover rounded-lg transition-transform duration-300"
+              class="w-full h-full object-contain object-center transition-transform duration-300"
               :class="{ 'opacity-30': image.markedForDeletion }" />
             <div
               v-if="!image.markedForDeletion"
