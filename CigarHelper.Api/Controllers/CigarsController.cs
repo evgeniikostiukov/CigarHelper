@@ -4,6 +4,7 @@ using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
+using CigarHelper.Data.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -662,7 +663,7 @@ public class CigarsController : ControllerBase
             Wrapper = request.Wrapper,
             Binder = request.Binder,
             Filler = request.Filler,
-            IsModerated = true, // Созданные через API считаются проверенными
+            IsModerated = User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator)),
             CreatedAt = DateTime.UtcNow
         };
 
