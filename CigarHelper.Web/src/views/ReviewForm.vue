@@ -397,10 +397,121 @@
               Изображения
             </h2>
             <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">
-              До нескольких кадров — читателям проще представить формат и цвет золы.
+              До пяти кадров: с устройства или по ссылке — как в редакторе базовой сигары; подпись к кадру по желанию.
             </p>
-            <div data-testid="review-form-images">
-              <ImageUploader v-model="form.images" />
+            <div
+              data-testid="review-form-images"
+              class="space-y-4">
+              <ImageUploader
+                ref="imageUploaderRef"
+                :max-files="maxReviewImages"
+                :current-file-count="activeImageCount"
+                @files-selected="handleReviewImagesSelected" />
+
+              <div class="space-y-2">
+                <label
+                  for="review-image-url"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Добавить изображение по ссылке
+                </label>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                  <InputText
+                    id="review-image-url"
+                    v-model="newImageUrl"
+                    data-testid="review-form-image-url"
+                    placeholder="https://…"
+                    class="min-h-11 w-full flex-1"
+                    :disabled="addingImageByUrl" />
+                  <Button
+                    label="Добавить"
+                    icon="pi pi-link"
+                    severity="success"
+                    class="min-h-11 w-full shrink-0 sm:w-auto"
+                    :loading="addingImageByUrl"
+                    :disabled="!newImageUrl.trim() || addingImageByUrl || activeImageCount >= maxReviewImages"
+                    type="button"
+                    @click="addReviewImageByUrl" />
+                </div>
+                <p class="text-xs text-stone-500 dark:text-stone-500">
+                  Сервер скачает изображение по HTTP(S); загрузка с устройства уходит как data URL (JPEG, PNG, GIF,
+                  WebP).
+                </p>
+              </div>
+
+              <Button
+                label="Выбрать файлы для загрузки"
+                icon="pi pi-upload"
+                severity="secondary"
+                outlined
+                class="min-h-11 w-full sm:w-auto"
+                type="button"
+                :disabled="activeImageCount >= maxReviewImages"
+                @click="openReviewImagePicker" />
+
+              <div
+                v-if="form.images.length > 0"
+                class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
+                <div
+                  v-for="(image, index) in form.images"
+                  :key="image.id ?? image.preview"
+                  class="group relative flex flex-col gap-2">
+                  <div
+                    class="relative aspect-square overflow-hidden rounded-xl border border-stone-200/80 bg-stone-100 dark:border-stone-600/80 dark:bg-stone-900/60">
+                    <div
+                      v-if="image.markedForDeletion"
+                      class="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-[inherit] bg-red-600/75 p-2 text-center">
+                      <i
+                        class="pi pi-trash mb-1 text-2xl text-white"
+                        aria-hidden="true" />
+                      <p class="text-xs font-semibold text-white">Будет удалено</p>
+                      <Button
+                        icon="pi pi-undo"
+                        rounded
+                        text
+                        class="mt-1 text-white"
+                        type="button"
+                        v-tooltip.top="'Восстановить'"
+                        @click="restoreReviewImage(index)" />
+                    </div>
+                    <img
+                      :src="image.preview"
+                      :alt="`Фото ${index + 1}`"
+                      class="h-full w-full object-contain object-center transition-opacity duration-200"
+                      :class="{ 'opacity-35': image.markedForDeletion }"
+                      loading="lazy"
+                      decoding="async" />
+                    <div
+                      v-if="!image.markedForDeletion"
+                      class="absolute inset-0 flex items-center justify-center rounded-[inherit] bg-black/0 transition-colors duration-200 group-hover:bg-black/45">
+                      <div class="flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <Button
+                          icon="pi pi-times"
+                          rounded
+                          severity="danger"
+                          class="!h-9 !w-9"
+                          type="button"
+                          v-tooltip.top="'Удалить'"
+                          @click.stop="removeReviewImage(index)" />
+                      </div>
+                    </div>
+                  </div>
+                  <InputText
+                    v-model="image.caption"
+                    :data-testid="`review-form-image-caption-${index}`"
+                    placeholder="Подпись (необязательно)"
+                    class="min-h-9 w-full text-xs"
+                    :disabled="image.markedForDeletion"
+                    maxlength="200" />
+                </div>
+              </div>
+              <div
+                v-else
+                class="rounded-xl border-2 border-dashed border-stone-300/90 py-10 text-center dark:border-stone-600/80">
+                <i
+                  class="pi pi-image mb-2 text-4xl text-stone-400 dark:text-stone-500"
+                  aria-hidden="true" />
+                <p class="text-sm text-stone-500 dark:text-stone-400">Нет добавленных изображений</p>
+              </div>
             </div>
           </div>
 
@@ -430,7 +541,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, watch, onMounted } from 'vue';
+  import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import api from '../services/api';
   import TextEditor from '../components/TextEditor.vue';
@@ -441,6 +552,7 @@
   } from 'primevue/autocomplete';
   import Slider from 'primevue/slider';
   import Calendar from 'primevue/calendar';
+  import InputText from 'primevue/inputtext';
   import Button from 'primevue/button';
   import Toast from 'primevue/toast';
   import { useToast } from 'primevue/usetoast';
@@ -450,10 +562,17 @@
   /** Сигара в поле выбора: из API или временный объект из query — с displayName для AutoComplete */
   type ReviewCigarOption = (Cigar | CigarBase) & { displayName: string; isUserCigar?: boolean };
 
-  interface Image {
-    id?: number | string;
-    imageUrl: string;
-    caption?: string;
+  const maxReviewImages = 5;
+
+  interface ReviewFormImage {
+    id?: number;
+    file?: File;
+    preview: string;
+    /** HTTP(S) или уже готовый data URL для новых кадров без файла */
+    imageUrl?: string;
+    caption: string;
+    isExisting: boolean;
+    markedForDeletion: boolean;
   }
 
   interface ReviewFormModel {
@@ -469,7 +588,7 @@
     draw: number;
     venue: string;
     smokingDate: Date | null;
-    images: Image[];
+    images: ReviewFormImage[];
   }
 
   interface GroupedCigar {
@@ -479,6 +598,13 @@
 
   interface ValidationErrors {
     [key: string]: string;
+  }
+
+  interface ReviewImageApiDto {
+    id: number;
+    /** Base64 от ASP.NET для byte[] */
+    imageBytes?: string;
+    caption?: string;
   }
 
   interface ReviewResponse {
@@ -496,7 +622,7 @@
     draw?: number;
     venue?: string;
     smokingDate?: string;
-    images: Image[];
+    images: ReviewImageApiDto[];
   }
 
   const route = useRoute();
@@ -512,6 +638,9 @@
   const filteredCigars = ref<GroupedCigar[]>([]);
   const selectedCigar = ref<ReviewCigarOption | null>(null);
   const searchLoading = ref(false);
+  const imageUploaderRef = ref<InstanceType<typeof ImageUploader> | null>(null);
+  const newImageUrl = ref('');
+  const addingImageByUrl = ref(false);
 
   const form = reactive<ReviewFormModel>({
     cigarId: null,
@@ -528,6 +657,8 @@
     smokingDate: new Date(),
     images: [],
   });
+
+  const activeImageCount = computed(() => form.images.filter((img) => !img.markedForDeletion).length);
 
   const handleQueryParameters = (): void => {
     const query = route.query;
@@ -617,11 +748,16 @@
       form.draw = review.draw || 3;
       form.venue = review.venue || '';
       form.smokingDate = review.smokingDate ? new Date(review.smokingDate) : null;
-      form.images = review.images.map((img) => ({
-        id: img.id,
-        imageUrl: img.imageUrl,
-        caption: img.caption || '',
-      }));
+      form.images = review.images.map((img) => {
+        const b64 = img.imageBytes?.trim() ?? '';
+        return {
+          id: img.id,
+          preview: b64 ? `data:image/jpeg;base64,${b64}` : '',
+          caption: img.caption ?? '',
+          isExisting: true,
+          markedForDeletion: false,
+        };
+      });
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Ошибка при загрузке обзора:', err);
@@ -631,6 +767,158 @@
       loading.value = false;
     }
   };
+
+  function revokeReviewImagePreview(preview: string): void {
+    if (preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview);
+    }
+  }
+
+  function readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error ?? new Error('FileReader'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function buildImagePayloadsForCreate(
+    items: ReviewFormImage[],
+  ): Promise<{ imageUrl: string; caption: string }[]> {
+    const out: { imageUrl: string; caption: string }[] = [];
+    for (const img of items) {
+      if (img.markedForDeletion) continue;
+      let url = img.imageUrl?.trim();
+      if (img.file) {
+        url = await readFileAsDataUrl(img.file);
+      }
+      if (!url) continue;
+      out.push({ imageUrl: url, caption: img.caption.trim() || '' });
+    }
+    return out;
+  }
+
+  async function buildImagesToAddForUpdate(items: ReviewFormImage[]): Promise<{ imageUrl: string; caption: string }[]> {
+    const out: { imageUrl: string; caption: string }[] = [];
+    for (const img of items) {
+      if (img.markedForDeletion || img.isExisting) continue;
+      let url = img.imageUrl?.trim();
+      if (img.file) {
+        url = await readFileAsDataUrl(img.file);
+      }
+      if (!url) continue;
+      out.push({ imageUrl: url, caption: img.caption.trim() || '' });
+    }
+    return out;
+  }
+
+  function openReviewImagePicker(): void {
+    imageUploaderRef.value?.open();
+  }
+
+  function handleReviewImagesSelected(files: File[]): void {
+    const remaining = maxReviewImages - activeImageCount.value;
+    if (remaining <= 0) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Лимит изображений',
+        detail: `Можно не более ${maxReviewImages} изображений.`,
+        life: 4000,
+      });
+      return;
+    }
+    const slice = files.slice(0, remaining);
+    slice.forEach((file) => {
+      form.images.push({
+        file,
+        preview: URL.createObjectURL(file),
+        caption: '',
+        isExisting: false,
+        markedForDeletion: false,
+      });
+    });
+    if (files.length > remaining) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Лимит изображений',
+        detail: `Добавлено ${slice.length} из ${files.length} файлов (лимит ${maxReviewImages}).`,
+        life: 4000,
+      });
+    }
+  }
+
+  async function addReviewImageByUrl(): Promise<void> {
+    const raw = newImageUrl.value.trim();
+    if (!raw) return;
+    if (activeImageCount.value >= maxReviewImages) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Лимит',
+        detail: `Не более ${maxReviewImages} изображений.`,
+        life: 3000,
+      });
+      return;
+    }
+    try {
+      const parsed = new URL(raw);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        toast.add({
+          severity: 'warn',
+          summary: 'Ссылка',
+          detail: 'Укажите адрес с протоколом http или https.',
+          life: 4000,
+        });
+        return;
+      }
+    } catch {
+      toast.add({
+        severity: 'warn',
+        summary: 'Ссылка',
+        detail: 'Некорректный URL изображения.',
+        life: 4000,
+      });
+      return;
+    }
+
+    addingImageByUrl.value = true;
+    try {
+      form.images.push({
+        preview: raw,
+        imageUrl: raw,
+        caption: '',
+        isExisting: false,
+        markedForDeletion: false,
+      });
+      newImageUrl.value = '';
+      toast.add({
+        severity: 'success',
+        summary: 'Добавлено',
+        detail: 'Изображение будет сохранено при отправке формы.',
+        life: 2500,
+      });
+    } finally {
+      addingImageByUrl.value = false;
+    }
+  }
+
+  function removeReviewImage(index: number): void {
+    const image = form.images[index];
+    if (!image) return;
+    if (image.isExisting) {
+      image.markedForDeletion = true;
+    } else {
+      revokeReviewImagePreview(image.preview);
+      form.images.splice(index, 1);
+    }
+  }
+
+  function restoreReviewImage(index: number): void {
+    const image = form.images[index];
+    if (image?.markedForDeletion) {
+      image.markedForDeletion = false;
+    }
+  }
 
   const validateForm = (): boolean => {
     Object.keys(validationErrors).forEach((key) => delete validationErrors[key]);
@@ -686,25 +974,23 @@
       if (isEditing.value && route.params.id) {
         const reviewId = route.params.id as string;
 
-        const existingImageIds = form.images.filter((img) => typeof img.id === 'number').map((img) => img.id as number);
+        const keptImageIds = form.images
+          .filter((img) => img.isExisting && !img.markedForDeletion && typeof img.id === 'number')
+          .map((img) => img.id as number);
 
-        const imagesToAdd = form.images
-          .filter((img) => !img.id || typeof img.id === 'string')
-          .map((img) => ({ imageUrl: img.imageUrl, caption: img.caption || '' }));
+        const imagesToAdd = await buildImagesToAddForUpdate(form.images);
 
         const { data: originalReview } = await api.get<ReviewResponse>(`/reviews/${reviewId}`);
         const imageIdsToRemove = originalReview.images
-          .filter((img) => !existingImageIds.includes(img.id as number))
-          .map((img) => img.id as number);
+          .filter((img) => !keptImageIds.includes(img.id))
+          .map((img) => img.id);
 
         const updateData = { ...reviewData, imagesToAdd, imageIdsToRemove };
         await api.put(`/reviews/${reviewId}`, updateData);
         await router.push({ name: 'ReviewDetail', params: { id: reviewId } });
       } else {
-        const newReviewData = {
-          ...reviewData,
-          images: form.images.map((img) => ({ imageUrl: img.imageUrl, caption: img.caption || '' })),
-        };
+        const images = await buildImagePayloadsForCreate(form.images);
+        const newReviewData = { ...reviewData, images };
         const response = await api.post<{ id: number }>('/reviews', newReviewData);
         await router.push({ name: 'ReviewDetail', params: { id: String(response.data.id) } });
       }
@@ -818,6 +1104,10 @@
       loading.value = false;
       handleQueryParameters();
     }
+  });
+
+  onUnmounted(() => {
+    form.images.forEach((img) => revokeReviewImagePreview(img.preview));
   });
 </script>
 

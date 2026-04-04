@@ -11,7 +11,11 @@ public static class ImageDownloader
     {
         if (string.IsNullOrWhiteSpace(imageUrl))
             return null;
-            
+
+        var fromDataUri = TryDecodeDataImageUri(imageUrl);
+        if (fromDataUri != null)
+            return fromDataUri;
+
         try
         {
             // Устанавливаем User-Agent для избежания блокировки некоторыми сайтами
@@ -35,5 +39,28 @@ public static class ImageDownloader
         }
 
         return null;
+    }
+
+    /// <summary>Декодирует data:image/...;base64,... в байты после проверки сигнатуры (локальные файлы с формы).</summary>
+    private static byte[]? TryDecodeDataImageUri(string imageUrl)
+    {
+        if (!imageUrl.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        const string base64Marker = ";base64,";
+        var idx = imageUrl.IndexOf(base64Marker, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0)
+            return null;
+
+        try
+        {
+            var base64 = imageUrl[(idx + base64Marker.Length)..].Trim();
+            var bytes = Convert.FromBase64String(base64);
+            return ImageBinaryValidator.IsRecognizedImage(bytes) ? bytes : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 } 
