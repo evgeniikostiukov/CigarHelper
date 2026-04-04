@@ -73,6 +73,11 @@
 
   const images = defineModel<FormGalleryImageItem[]>({ required: true });
 
+  const emit = defineEmits<{
+    /** Сохранённое на сервере фото: родитель может вызвать API «сделать главным» сразу. */
+    existingMainSet: [imageId: number];
+  }>();
+
   const toast = useToast();
   const uploaderRef = ref<InstanceType<typeof ImageUploader> | null>(null);
   const newImageUrl = ref('');
@@ -367,9 +372,15 @@
 
   function setMainAt(index: number): void {
     if (!props.showMainImageStar) return;
+    const prevMainExistingId = images.value.find((img) => img.isMain && img.isExisting)?.id;
     images.value.forEach((img, i) => {
       img.isMain = i === index;
     });
+    const main = images.value[index];
+    if (!main || main.markedForDeletion) return;
+    if (main.id != null && main.isExisting && main.id !== prevMainExistingId) {
+      emit('existingMainSet', main.id);
+    }
   }
 
   function showStarButton(image: FormGalleryImageItem): boolean {

@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-04** — `CigarCollectionEdit.vue`: галерея фото на `FormImageGallerySection` (файлы + multi URL, главное для существующих через `existingMainSet` → `setCigarImageMain`); emit `existingMainSet` в `FormImageGallerySection.vue`; `collection-list-views.md`.
 - **2026-04-04** — Количество в UI коллекции: `CigarForm.vue` — поле «Количество (шт.)» (`cigar-form-quantity`) в `createCigar`; `CigarList.vue` — «N шт.» на карточке (`cigar-card-quantity-{id}`), `memoKey` учитывает `quantity`; `collection-list-views.md`.
 - **2026-04-04** — Количество сигар в коллекции: поле `UserCigar.Quantity` (миграция `AddUserCigarQuantity`), `CigarResponseDto` / `CreateCigarRequest` / `UserCigarUpdateRequest`, `CigarsController` create+update+map; `openapi.json` + `api.generated.ts`; фронт `cigarService` (POST/PUT), `CigarCollectionEdit.vue` (`cigar-edit-quantity`), `CigarDetail.vue` (`cigar-detail-quantity`); тест контракта `api.types.test.ts`.
 - **2026-04-04** — `CigarForm.vue`: блок фото на `FormImageGallerySection` (multi URL + файлы, до 12 кадров); сабмит собирает http(s) и data URL; пропсы `addUrlRowTestId` / `applyUrlsToGalleryTestId`; `collection-list-views.md`.

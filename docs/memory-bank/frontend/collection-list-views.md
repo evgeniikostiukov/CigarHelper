@@ -176,12 +176,12 @@
 
 ## CigarCollectionEdit.vue
 
-Редактирование записи в коллекции (`CigarEdit`, `/cigars/:id/edit`). Название и бренд из справочника только для отображения; сохранение — `PUT /api/cigars/{id}` с личными полями (в т.ч. **количество** `quantity`, 1–9999) и галереей UserCigar (`PatchUserCigarPayload`). Звезда на миниатюре — `setCigarImageMain`.
+Редактирование записи в коллекции (`CigarEdit`, `/cigars/:id/edit`). Название и бренд из справочника только для отображения; сохранение — `PUT /api/cigars/{id}` с личными полями (в т.ч. **количество** `quantity`, 1–9999) и галереей UserCigar (`PatchUserCigarPayload`). Блок фото — **`FormImageGallerySection`** (как у `CigarForm`): превью слева, файлы + multi-URL, до 12 кадров, `showMainImageStar`; для сохранённых фото событие `existingMainSet` → `setCigarImageMain` (как раньше сразу на сервере).
 
 | Пункт | Значение |
 |-------|----------|
 | Файл | `src/views/CigarCollectionEdit.vue` |
-| `data-testid` | `cigar-collection-edit`, `cigar-edit-loading`, `cigar-edit-error`, `cigar-edit-back`, `cigar-edit-quantity` |
+| `data-testid` | `cigar-collection-edit`, `cigar-edit-loading`, `cigar-edit-error`, `cigar-edit-back`, `cigar-edit-quantity`, `cigar-edit-image-preview`, `cigar-edit-image-gallery`, `cigar-edit-image-urls`, `cigar-edit-image-url`, `cigar-edit-add-image-url`, `cigar-edit-apply-image-gallery` |
 
 ## CigarDetail.vue
 
