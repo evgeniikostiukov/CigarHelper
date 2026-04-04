@@ -53,4 +53,5 @@ Guards: неавторизованный → `/login?redirect=…`; автори
 
 - **CigarDetailDialog**, **CigarBaseEditDialog** — работа с данными сигар/каталога.
 - **TextEditor** — TipTap.
-- **ImageUploader** — загрузка изображений в связке с API.
+- **ImageUploader** — скрытый `input` файлов; обычно используется внутри **FormImageGallerySection**.
+- **FormImageGallerySection** — общая секция галереи (файлы + URL, превью, лимит, soft-delete, опционально подписи и «главное» фото); `ReviewForm`, `CigarBaseEditDialog`.

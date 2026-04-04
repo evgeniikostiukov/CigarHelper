@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-04** — Вынесена общая галерея загрузки изображений в `FormImageGallerySection.vue` (`FormGalleryImageItem`, v-model, подписи, лимит, URL/файлы, soft-delete; опции `section`/`bare`, `tone` review/dialog, `show-main-image-star`, `resolve-url-import`). Подключено в `ReviewForm.vue` и `CigarBaseEditDialog.vue`.
 - **2026-04-04** — `ReviewForm.vue`: блок фото как у `CigarBaseEditDialog` — скрытый `ImageUploader`, кнопка выбора файлов, добавление по HTTP(S)-ссылке, сетка превью, удаление с пометкой «будет удалено» и откат, подписи к кадрам; при сохранении файлы уходят как data URL; загрузка черновика обзора — превью из `imageBytes` (API). `ImageDownloader`: поддержка `data:image/...;base64,...` для тех же пайплайнов скачивания.
 - **2026-04-04** — Дашборд: средняя оценка коллекции по полю `Rating` у `UserCigar` (`GET /api/dashboard/summary` → `averageCigarRating`, только сигары с заполненной оценкой); карточка на `Dashboard.vue` (`dashboard-summary-average-rating`); обновлены `openapi.json`, `api.generated.ts`, тесты `DashboardServiceTests`, `Dashboard.test.ts`, `dashboardService.test.ts`, `api.types.test.ts`; `collection-list-views.md`.
 - **2026-04-04** — `useGlobalSearch.ts`: в `onKeydown` для шортката Ctrl+K используется `e.key?.toLowerCase()` — у некоторых событий `key` бывает `undefined`, из‑за чего падал `toLowerCase`.
