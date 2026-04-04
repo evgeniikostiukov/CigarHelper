@@ -74,6 +74,10 @@ public class UserCigarUpdateRequest
     [MaxLength(500)]
     public string? Aroma { get; set; }
 
+    /// <summary>Субъективная оценка 1–10; null — снять оценку.</summary>
+    [Range(1, 10)]
+    public int? Rating { get; set; }
+
     /// <summary>Не пустой URL — скачать и заменить изображения этой сигары. Пустое/отсутствие — не менять картинки (кроме полей ниже).</summary>
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }

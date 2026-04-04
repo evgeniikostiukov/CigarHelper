@@ -327,6 +327,7 @@ public class CigarsController : ControllerBase
             HumidorId = request.HumidorId,
             Taste = request.Taste,
             Aroma = request.Aroma,
+            Rating = request.Rating,
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             PurchasedAt = DateTime.UtcNow,
@@ -378,6 +379,7 @@ public class CigarsController : ControllerBase
         existingUserCigar.HumidorId = request.HumidorId;
         existingUserCigar.Taste = request.Taste;
         existingUserCigar.Aroma = request.Aroma;
+        existingUserCigar.Rating = request.Rating;
         existingUserCigar.UpdatedAt = DateTime.UtcNow;
         existingUserCigar.LastTouchedAt = DateTime.UtcNow;
 

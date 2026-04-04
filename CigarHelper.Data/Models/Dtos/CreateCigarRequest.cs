@@ -18,6 +18,10 @@ public class CreateCigarRequest
     [MaxLength(500)]
     public string? Aroma { get; set; }
 
+    /// <summary>Субъективная оценка 1–10; null — без оценки.</summary>
+    [Range(1, 10)]
+    public int? Rating { get; set; }
+
     [MaxLength(2048)]
     public string? ImageUrl { get; set; }
 

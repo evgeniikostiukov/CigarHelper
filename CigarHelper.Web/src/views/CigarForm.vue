@@ -19,8 +19,8 @@
             Добавить из базы
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Выберите модерированную сигару из справочника, укажите цену, заметки о вкусе и аромате, при необходимости
-            фото и хьюмидор — запись попадёт в вашу коллекцию.
+            Выберите модерированную сигару из справочника, укажите цену, оценку, заметки о вкусе и аромате, при
+            необходимости фото и хьюмидор — запись попадёт в вашу коллекцию.
           </p>
         </div>
         <Button
@@ -148,6 +148,27 @@
                   placeholder="0.00"
                   suffix=" ₽"
                   fluid />
+              </div>
+
+              <div class="flex flex-col gap-2 md:col-span-2">
+                <label
+                  for="cigar-form-rating"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Оценка
+                </label>
+                <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                  <Rating
+                    id="cigar-form-rating"
+                    v-model="form.rating"
+                    data-testid="cigar-form-rating"
+                    :stars="10" />
+                  <span class="text-sm text-stone-600 dark:text-stone-400">
+                    {{ form.rating != null ? `${form.rating}/10` : 'Без оценки' }}
+                  </span>
+                </div>
+                <small class="text-stone-500 dark:text-stone-400">
+                  Повторный клик по выбранной звезде снимает оценку.
+                </small>
               </div>
 
               <div class="flex flex-col gap-2">
@@ -361,12 +382,14 @@
   import Checkbox from 'primevue/checkbox';
   import InputText from 'primevue/inputtext';
   import InputNumber from 'primevue/inputnumber';
+  import Rating from 'primevue/rating';
   import Dropdown from 'primevue/dropdown';
   import Button from 'primevue/button';
   import Message from 'primevue/message';
 
   interface FormData {
     price: number | null;
+    rating: number | null;
     taste: string;
     aroma: string;
     humidorId: number | null;
@@ -402,6 +425,7 @@
 
   const form = ref<FormData>({
     price: null,
+    rating: null,
     taste: '',
     aroma: '',
     humidorId: null,
@@ -478,6 +502,7 @@
         humidorId: form.value.addToHumidor ? form.value.humidorId : null,
         taste: form.value.taste || null,
         aroma: form.value.aroma || null,
+        rating: form.value.rating,
         imageUrls: urls.length > 0 ? urls : null,
       });
       toast.add({

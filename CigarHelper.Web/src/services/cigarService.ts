@@ -73,6 +73,7 @@ export interface CreateUserCigarPayload {
   humidorId?: number | null;
   taste?: string | null;
   aroma?: string | null;
+  rating?: number | null;
   imageUrl?: string | null;
   imageUrls?: string[] | null;
 }
@@ -83,6 +84,7 @@ export interface PatchUserCigarPayload {
   humidorId: number | null;
   taste: string | null;
   aroma: string | null;
+  rating: number | null;
   imageUrl?: string | null;
   imageUrlsToAdd?: string[];
   imageIdsToRemove?: number[];
@@ -105,6 +107,7 @@ function buildCreateCigarBody(payload: CreateUserCigarPayload): Record<string, u
     humidorId: payload.humidorId ?? null,
     taste: payload.taste?.trim() ? payload.taste.trim() : null,
     aroma: payload.aroma?.trim() ? payload.aroma.trim() : null,
+    rating: payload.rating != null && payload.rating >= 1 && payload.rating <= 10 ? payload.rating : null,
   };
   const list = normalizeImageUrlList(payload.imageUrls ?? []);
   const legacy = payload.imageUrl?.trim();
@@ -117,7 +120,7 @@ function buildCreateCigarBody(payload: CreateUserCigarPayload): Record<string, u
 }
 
 function buildPatchCigarBody(
-  fields: Pick<PatchUserCigarPayload, 'price' | 'humidorId' | 'taste' | 'aroma'>,
+  fields: Pick<PatchUserCigarPayload, 'price' | 'humidorId' | 'taste' | 'aroma' | 'rating'>,
   image?: CigarUpdateImageOptions,
 ): Record<string, unknown> {
   const body: Record<string, unknown> = {
@@ -125,6 +128,7 @@ function buildPatchCigarBody(
     humidorId: fields.humidorId ?? null,
     taste: fields.taste != null && fields.taste.trim() !== '' ? fields.taste.trim() : null,
     aroma: fields.aroma != null && fields.aroma.trim() !== '' ? fields.aroma.trim() : null,
+    rating: fields.rating != null && fields.rating >= 1 && fields.rating <= 10 ? fields.rating : null,
   };
   if (!image) {
     return body;
@@ -161,13 +165,13 @@ const cigarService = {
   },
 
   async updateCigar(id: number, payload: PatchUserCigarPayload): Promise<void> {
-    const { imageUrl, imageUrlsToAdd, imageIdsToRemove, price, humidorId, taste, aroma } = payload;
+    const { imageUrl, imageUrlsToAdd, imageIdsToRemove, price, humidorId, taste, aroma, rating } = payload;
     const hasImageOpts =
       (imageUrl != null && imageUrl !== '') ||
       (imageUrlsToAdd != null && imageUrlsToAdd.length > 0) ||
       (imageIdsToRemove != null && imageIdsToRemove.length > 0);
     const body = buildPatchCigarBody(
-      { price, humidorId, taste, aroma },
+      { price, humidorId, taste, aroma, rating },
       hasImageOpts ? { imageUrl, imageUrlsToAdd, imageIdsToRemove } : undefined,
     );
     await api.put(`/cigars/${id}`, body);

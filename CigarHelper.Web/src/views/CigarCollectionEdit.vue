@@ -19,7 +19,7 @@
             Редактировать в коллекции
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Карточка справочника не меняется — только цена, хьюмидор, ваши заметки и личные фото.
+            Карточка справочника не меняется — только цена, оценка, хьюмидор, ваши заметки и личные фото.
           </p>
         </div>
         <Button
@@ -107,6 +107,26 @@
                 :max-fraction-digits="2"
                 suffix=" ₽"
                 fluid />
+            </div>
+            <div class="flex flex-col gap-2 md:col-span-2">
+              <label
+                for="edit-rating"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Оценка
+              </label>
+              <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                <Rating
+                  id="edit-rating"
+                  v-model="form.rating"
+                  data-testid="cigar-edit-rating"
+                  :stars="10" />
+                <span class="text-sm text-stone-600 dark:text-stone-400">
+                  {{ form.rating != null ? `${form.rating}/10` : 'Без оценки' }}
+                </span>
+              </div>
+              <small class="text-stone-500 dark:text-stone-400">
+                Повторный клик по выбранной звезде снимает оценку.
+              </small>
             </div>
             <div class="flex flex-col gap-2">
               <label
@@ -280,6 +300,7 @@
   import Dropdown from 'primevue/dropdown';
   import InputNumber from 'primevue/inputnumber';
   import InputText from 'primevue/inputtext';
+  import Rating from 'primevue/rating';
   import Message from 'primevue/message';
   import Skeleton from 'primevue/skeleton';
 
@@ -299,6 +320,7 @@
 
   const form = ref({
     price: null as number | null,
+    rating: null as number | null,
     humidorId: null as number | null,
     taste: '',
     aroma: '',
@@ -404,6 +426,7 @@
       cigar.value = c;
       form.value = {
         price: c.price ?? null,
+        rating: c.rating ?? null,
         humidorId: c.humidorId ?? null,
         taste: c.taste ?? '',
         aroma: c.aroma ?? '',
@@ -429,6 +452,7 @@
         humidorId: form.value.humidorId,
         taste: form.value.taste,
         aroma: form.value.aroma,
+        rating: form.value.rating,
         imageUrlsToAdd: newUrls.length > 0 ? newUrls : undefined,
         imageIdsToRemove: form.value.removedImageIds.length > 0 ? [...form.value.removedImageIds] : undefined,
       });
