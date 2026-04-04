@@ -26,74 +26,20 @@ public class CigarsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CigarResponseDto>>> GetCigars()
+    public async Task<ActionResult<IEnumerable<CigarResponseDto>>> GetCigars(CancellationToken cancellationToken)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var cigars = await _context.UserCigars
+        var ucs = await _context.UserCigars
+            .AsNoTracking()
             .Include(uc => uc.CigarBase)
             .ThenInclude(cb => cb.Brand)
             .Include(uc => uc.Humidor)
             .Where(uc => uc.UserId == userId)
-            .Select(uc => new CigarResponseDto
-            {
-                Id = uc.Id,
-                Name = uc.CigarBase.Name,
-                Brand = new BrandDto()
-                {
-                    Id = uc.CigarBase.Brand.Id,
-                    Name = uc.CigarBase.Brand.Name,
-                    Description = uc.CigarBase.Brand.Description,
-                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
-                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
-                    Country = uc.CigarBase.Brand.Country,
-                    IsModerated = uc.CigarBase.Brand.IsModerated,
-                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
-                },
-                BrandName = uc.CigarBase.Brand.Name,
-                Size = uc.CigarBase.Size,
-                Strength = uc.CigarBase.Strength,
-                Price = uc.Price,
-                Rating = uc.Rating,
-                Country = uc.CigarBase.Country,
-                Description = uc.CigarBase.Description,
-                Wrapper = uc.CigarBase.Wrapper,
-                Binder = uc.CigarBase.Binder,
-                Filler = uc.CigarBase.Filler,
-                HumidorId = uc.HumidorId,
-                Humidor = uc.Humidor != null ? new HumidorDto
-                {
-                    Id = uc.Humidor.Id,
-                    Name = uc.Humidor.Name,
-                    Description = uc.Humidor.Description,
-                    Capacity = uc.Humidor.Capacity,
-                    CreatedAt = uc.Humidor.CreatedAt,
-                    UpdatedAt = uc.Humidor.UpdatedAt
-                } : null,
-                Images = _context.CigarImages
-                    .Where(img => img.UserCigarId == uc.Id && (img.StoragePath != null))
-                    .OrderByDescending(img => img.IsMain)
-                    .ThenBy(img => img.Id)
-                    .Select(img => new CigarImageDto
-                    {
-                        Id = img.Id,
-                        FileName = img.FileName,
-                        ContentType = img.ContentType,
-                        FileSize = img.FileSize,
-                        Description = img.Description,
-                        IsMain = img.IsMain,
-                        CigarBaseId = img.CigarBaseId,
-                        UserCigarId = img.UserCigarId,
-                        CreatedAt = img.CreatedAt,
-                        HasThumbnail = img.ThumbnailPath != null
-                    }).ToList(),
-                UserId = uc.UserId,
-                CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt,
-                PurchasedAt = uc.PurchasedAt,
-                SmokedAt = uc.SmokedAt,
-                LastTouchedAt = uc.LastTouchedAt
-            })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
+
+        var pairs = ucs.Select(uc => (uc.Id, uc.CigarBaseId)).ToList();
+        var galleries = await LoadMergedUserCigarGalleriesAsync(pairs, cancellationToken);
+        var cigars = ucs.Select(uc => MapUserCigarToResponseDto(uc, galleries[uc.Id])).ToList();
 
         return Ok(cigars);
     }
@@ -319,79 +265,21 @@ public class CigarsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CigarResponseDto>> GetCigar(int id)
+    public async Task<ActionResult<CigarResponseDto>> GetCigar(int id, CancellationToken cancellationToken)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var cigar = await _context.UserCigars
-            .Include(uc => uc.CigarBase)
+        var uc = await _context.UserCigars
+            .AsNoTracking()
+            .Include(x => x.CigarBase)
             .ThenInclude(cb => cb.Brand)
-            .Include(uc => uc.Humidor)
-            .Where(uc => uc.Id == id && uc.UserId == userId)
-            .Select(uc => new CigarResponseDto
-            {
-                Id = uc.Id,
-                Name = uc.CigarBase.Name,
-                Brand = new BrandDto()
-                {
-                    Id = uc.CigarBase.Brand.Id,
-                    Name = uc.CigarBase.Brand.Name,
-                    Description = uc.CigarBase.Brand.Description,
-                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
-                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
-                    Country = uc.CigarBase.Brand.Country,
-                    IsModerated = uc.CigarBase.Brand.IsModerated,
-                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
-                },
-                BrandName = uc.CigarBase.Brand.Name,
-                Size = uc.CigarBase.Size,
-                Strength = uc.CigarBase.Strength,
-                Price = uc.Price,
-                Rating = uc.Rating,
-                Country = uc.CigarBase.Country,
-                Description = uc.CigarBase.Description,
-                Wrapper = uc.CigarBase.Wrapper,
-                Binder = uc.CigarBase.Binder,
-                Filler = uc.CigarBase.Filler,
-                HumidorId = uc.HumidorId,
-                Humidor = uc.Humidor != null ? new HumidorDto
-                {
-                    Id = uc.Humidor.Id,
-                    Name = uc.Humidor.Name,
-                    Description = uc.Humidor.Description,
-                    Capacity = uc.Humidor.Capacity,
-                    CreatedAt = uc.Humidor.CreatedAt,
-                    UpdatedAt = uc.Humidor.UpdatedAt
-                } : null,
-                Images = _context.CigarImages
-                    .Where(img => img.UserCigarId == uc.Id && (img.StoragePath != null))
-                    .OrderByDescending(img => img.IsMain)
-                    .ThenBy(img => img.Id)
-                    .Select(img => new CigarImageDto
-                    {
-                        Id = img.Id,
-                        FileName = img.FileName,
-                        ContentType = img.ContentType,
-                        FileSize = img.FileSize,
-                        Description = img.Description,
-                        IsMain = img.IsMain,
-                        CigarBaseId = img.CigarBaseId,
-                        UserCigarId = img.UserCigarId,
-                        CreatedAt = img.CreatedAt,
-                        HasThumbnail = img.ThumbnailPath != null
-                    }).ToList(),
-                UserId = uc.UserId,
-                CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt,
-                PurchasedAt = uc.PurchasedAt,
-                SmokedAt = uc.SmokedAt,
-                LastTouchedAt = uc.LastTouchedAt
-            })
-            .FirstOrDefaultAsync();
+            .Include(x => x.Humidor)
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
 
-        if (cigar == null)
+        if (uc == null)
             return NotFound();
 
-        return Ok(cigar);
+        var galleries = await LoadMergedUserCigarGalleriesAsync([(uc.Id, uc.CigarBaseId)], cancellationToken);
+        return Ok(MapUserCigarToResponseDto(uc, galleries[uc.Id]));
     }
 
     [HttpGet("brands")]
@@ -416,7 +304,9 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CigarResponseDto>> CreateCigar(CreateCigarRequest request)
+    public async Task<ActionResult<CigarResponseDto>> CreateCigar(
+        CreateCigarRequest request,
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -487,78 +377,26 @@ public class CigarsController : ControllerBase
         else
             await TryAddUserCigarImageFromUrlAsync(userCigar.Id, request.ImageUrl);
 
-        // Возвращаем созданную сигару пользователя с данными из базы
-        var createdCigar = await _context.UserCigars
+        var createdEntity = await _context.UserCigars
+            .AsNoTracking()
             .Include(uc => uc.CigarBase)
             .ThenInclude(cb => cb.Brand)
             .Include(uc => uc.Humidor)
-            .Where(uc => uc.Id == userCigar.Id)
-            .Select(uc => new CigarResponseDto
-            {
-                Id = uc.Id,
-                Name = uc.CigarBase.Name,
-                Brand = new BrandDto()
-                {
-                    Id = uc.CigarBase.Brand.Id,
-                    Name = uc.CigarBase.Brand.Name,
-                    Description = uc.CigarBase.Brand.Description,
-                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
-                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
-                    Country = uc.CigarBase.Brand.Country,
-                    IsModerated = uc.CigarBase.Brand.IsModerated,
-                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
-                },
-                BrandName = uc.CigarBase.Brand.Name,
-                Size = uc.CigarBase.Size,
-                Strength = uc.CigarBase.Strength,
-                Price = uc.Price,
-                Rating = uc.Rating,
-                Country = uc.CigarBase.Country,
-                Description = uc.CigarBase.Description,
-                Wrapper = uc.CigarBase.Wrapper,
-                Binder = uc.CigarBase.Binder,
-                Filler = uc.CigarBase.Filler,
-                HumidorId = uc.HumidorId,
-                Humidor = uc.Humidor != null ? new HumidorDto
-                {
-                    Id = uc.Humidor.Id,
-                    Name = uc.Humidor.Name,
-                    Description = uc.Humidor.Description,
-                    Capacity = uc.Humidor.Capacity,
-                    CreatedAt = uc.Humidor.CreatedAt,
-                    UpdatedAt = uc.Humidor.UpdatedAt
-                } : null,
-                Images = _context.CigarImages
-                    .Where(img => img.UserCigarId == uc.Id && (img.StoragePath != null))
-                    .OrderByDescending(img => img.IsMain)
-                    .ThenBy(img => img.Id)
-                    .Select(img => new CigarImageDto
-                    {
-                        Id = img.Id,
-                        FileName = img.FileName,
-                        ContentType = img.ContentType,
-                        FileSize = img.FileSize,
-                        Description = img.Description,
-                        IsMain = img.IsMain,
-                        CigarBaseId = img.CigarBaseId,
-                        UserCigarId = img.UserCigarId,
-                        CreatedAt = img.CreatedAt,
-                        HasThumbnail = img.ThumbnailPath != null
-                    }).ToList(),
-                UserId = uc.UserId,
-                CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt,
-                PurchasedAt = uc.PurchasedAt,
-                SmokedAt = uc.SmokedAt,
-                LastTouchedAt = uc.LastTouchedAt
-            })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(uc => uc.Id == userCigar.Id, cancellationToken);
+
+        var galleries = await LoadMergedUserCigarGalleriesAsync(
+            [(userCigar.Id, userCigar.CigarBaseId)],
+            cancellationToken);
+        var createdCigar = MapUserCigarToResponseDto(createdEntity!, galleries[userCigar.Id]);
 
         return CreatedAtAction(nameof(GetCigar), new { id = userCigar.Id }, createdCigar);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<CigarResponseDto>> UpdateCigar(int id, UserCigarUpdateRequest request)
+    public async Task<ActionResult<CigarResponseDto>> UpdateCigar(
+        int id,
+        UserCigarUpdateRequest request,
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -638,74 +476,15 @@ public class CigarsController : ControllerBase
                 throw;
         }
 
-        // Возвращаем обновленную сигару
-        var updatedCigar = await _context.UserCigars
+        var updatedEntity = await _context.UserCigars
+            .AsNoTracking()
             .Include(uc => uc.CigarBase)
             .ThenInclude(cb => cb.Brand)
             .Include(uc => uc.Humidor)
-            .Where(uc => uc.Id == id)
-            .Select(uc => new CigarResponseDto
-            {
-                Id = uc.Id,
-                Name = uc.CigarBase.Name,
-                Brand = new BrandDto()
-                {
-                    Id = uc.CigarBase.Brand.Id,
-                    Name = uc.CigarBase.Brand.Name,
-                    Description = uc.CigarBase.Brand.Description,
-                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
-                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
-                    Country = uc.CigarBase.Brand.Country,
-                    IsModerated = uc.CigarBase.Brand.IsModerated,
-                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
-                },
-                BrandName = uc.CigarBase.Brand.Name,
-                Size = uc.CigarBase.Size,
-                Strength = uc.CigarBase.Strength,
-                Price = uc.Price,
-                Rating = uc.Rating,
-                Country = uc.CigarBase.Country,
-                Description = uc.CigarBase.Description,
-                Wrapper = uc.CigarBase.Wrapper,
-                Binder = uc.CigarBase.Binder,
-                Filler = uc.CigarBase.Filler,
-                HumidorId = uc.HumidorId,
-                Humidor = uc.Humidor != null ? new HumidorDto
-                {
-                    Id = uc.Humidor.Id,
-                    Name = uc.Humidor.Name,
-                    Description = uc.Humidor.Description,
-                    Capacity = uc.Humidor.Capacity,
-                    CreatedAt = uc.Humidor.CreatedAt,
-                    UpdatedAt = uc.Humidor.UpdatedAt
-                } : null,
-                Images = _context.CigarImages
-                    .Where(img => img.UserCigarId == uc.Id && (img.StoragePath != null))
-                    .OrderByDescending(img => img.IsMain)
-                    .ThenBy(img => img.Id)
-                    .Select(img => new CigarImageDto
-                    {
-                        Id = img.Id,
-                        FileName = img.FileName,
-                        ContentType = img.ContentType,
-                        FileSize = img.FileSize,
-                        Description = img.Description,
-                        IsMain = img.IsMain,
-                        CigarBaseId = img.CigarBaseId,
-                        UserCigarId = img.UserCigarId,
-                        CreatedAt = img.CreatedAt,
-                        HasThumbnail = img.ThumbnailPath != null
-                    }).ToList(),
-                UserId = uc.UserId,
-                CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt,
-                PurchasedAt = uc.PurchasedAt,
-                SmokedAt = uc.SmokedAt,
-                LastTouchedAt = uc.LastTouchedAt
-            })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(uc => uc.Id == id, cancellationToken);
 
-        return Ok(updatedCigar);
+        var galleries = await LoadMergedUserCigarGalleriesAsync([(id, updatedEntity!.CigarBaseId)], cancellationToken);
+        return Ok(MapUserCigarToResponseDto(updatedEntity, galleries[id]));
     }
 
     /// <summary>Скачивает одно или несколько изображений по URL; первое успешно загруженное — главное.</summary>
@@ -793,7 +572,10 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPost("{id}/smoked")]
-    public async Task<ActionResult<CigarResponseDto>> MarkCigarAsSmoked(int id, [FromBody] MarkCigarSmokedRequest? request)
+    public async Task<ActionResult<CigarResponseDto>> MarkCigarAsSmoked(
+        int id,
+        [FromBody] MarkCigarSmokedRequest? request,
+        CancellationToken cancellationToken)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var cigar = await _context.UserCigars
@@ -811,75 +593,17 @@ public class CigarsController : ControllerBase
         cigar.UpdatedAt = DateTime.UtcNow;
         cigar.HumidorId = null;
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
-        var updatedCigar = await _context.UserCigars
-            .Include(uc => uc.CigarBase)
+        var uc = await _context.UserCigars
+            .AsNoTracking()
+            .Include(x => x.CigarBase)
             .ThenInclude(cb => cb.Brand)
-            .Include(uc => uc.Humidor)
-            .Where(uc => uc.Id == id && uc.UserId == userId)
-            .Select(uc => new CigarResponseDto
-            {
-                Id = uc.Id,
-                Name = uc.CigarBase.Name,
-                Brand = new BrandDto()
-                {
-                    Id = uc.CigarBase.Brand.Id,
-                    Name = uc.CigarBase.Brand.Name,
-                    Description = uc.CigarBase.Brand.Description,
-                    UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
-                    CreatedAt = uc.CigarBase.Brand.CreatedAt,
-                    Country = uc.CigarBase.Brand.Country,
-                    IsModerated = uc.CigarBase.Brand.IsModerated,
-                    LogoBytes = uc.CigarBase.Brand.LogoBytes,
-                },
-                BrandName = uc.CigarBase.Brand.Name,
-                Size = uc.CigarBase.Size,
-                Strength = uc.CigarBase.Strength,
-                Price = uc.Price,
-                Rating = uc.Rating,
-                Country = uc.CigarBase.Country,
-                Description = uc.CigarBase.Description,
-                Wrapper = uc.CigarBase.Wrapper,
-                Binder = uc.CigarBase.Binder,
-                Filler = uc.CigarBase.Filler,
-                HumidorId = uc.HumidorId,
-                Humidor = uc.Humidor != null ? new HumidorDto
-                {
-                    Id = uc.Humidor.Id,
-                    Name = uc.Humidor.Name,
-                    Description = uc.Humidor.Description,
-                    Capacity = uc.Humidor.Capacity,
-                    CreatedAt = uc.Humidor.CreatedAt,
-                    UpdatedAt = uc.Humidor.UpdatedAt
-                } : null,
-                Images = _context.CigarImages
-                    .Where(img => img.UserCigarId == uc.Id && (img.StoragePath != null))
-                    .OrderByDescending(img => img.IsMain)
-                    .ThenBy(img => img.Id)
-                    .Select(img => new CigarImageDto
-                    {
-                        Id = img.Id,
-                        FileName = img.FileName,
-                        ContentType = img.ContentType,
-                        FileSize = img.FileSize,
-                        Description = img.Description,
-                        IsMain = img.IsMain,
-                        CigarBaseId = img.CigarBaseId,
-                        UserCigarId = img.UserCigarId,
-                        CreatedAt = img.CreatedAt,
-                        HasThumbnail = img.ThumbnailPath != null
-                    }).ToList(),
-                UserId = uc.UserId,
-                CreatedAt = uc.CreatedAt,
-                UpdatedAt = uc.UpdatedAt,
-                PurchasedAt = uc.PurchasedAt,
-                SmokedAt = uc.SmokedAt,
-                LastTouchedAt = uc.LastTouchedAt
-            })
-            .FirstOrDefaultAsync();
+            .Include(x => x.Humidor)
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
 
-        return Ok(updatedCigar);
+        var galleries = await LoadMergedUserCigarGalleriesAsync([(id, uc!.CigarBaseId)], cancellationToken);
+        return Ok(MapUserCigarToResponseDto(uc, galleries[id]));
     }
 
     [HttpDelete("{id}")]
@@ -1206,6 +930,128 @@ public class CigarsController : ControllerBase
             .FirstOrDefaultAsync();
 
         return Ok(updatedCigar);
+    }
+
+    private static CigarResponseDto MapUserCigarToResponseDto(UserCigar uc, List<CigarImageDto> images) =>
+        new()
+        {
+            Id = uc.Id,
+            Name = uc.CigarBase.Name,
+            Brand = new BrandDto
+            {
+                Id = uc.CigarBase.Brand.Id,
+                Name = uc.CigarBase.Brand.Name,
+                Description = uc.CigarBase.Brand.Description,
+                UpdatedAt = uc.CigarBase.Brand.UpdatedAt,
+                CreatedAt = uc.CigarBase.Brand.CreatedAt,
+                Country = uc.CigarBase.Brand.Country,
+                IsModerated = uc.CigarBase.Brand.IsModerated,
+                LogoBytes = uc.CigarBase.Brand.LogoBytes,
+            },
+            BrandName = uc.CigarBase.Brand.Name,
+            Size = uc.CigarBase.Size,
+            Strength = uc.CigarBase.Strength,
+            Price = uc.Price,
+            Rating = uc.Rating,
+            Country = uc.CigarBase.Country,
+            Description = uc.CigarBase.Description,
+            Wrapper = uc.CigarBase.Wrapper,
+            Binder = uc.CigarBase.Binder,
+            Filler = uc.CigarBase.Filler,
+            HumidorId = uc.HumidorId,
+            Humidor = uc.Humidor == null
+                ? null
+                : new HumidorDto
+                {
+                    Id = uc.Humidor.Id,
+                    Name = uc.Humidor.Name,
+                    Description = uc.Humidor.Description,
+                    Capacity = uc.Humidor.Capacity,
+                    CreatedAt = uc.Humidor.CreatedAt,
+                    UpdatedAt = uc.Humidor.UpdatedAt
+                },
+            Images = images,
+            UserId = uc.UserId,
+            CreatedAt = uc.CreatedAt,
+            UpdatedAt = uc.UpdatedAt,
+            PurchasedAt = uc.PurchasedAt,
+            SmokedAt = uc.SmokedAt,
+            LastTouchedAt = uc.LastTouchedAt
+        };
+
+    /// <summary>
+    /// Галерея для личной сигары: сначала фото UserCigar, затем фото CigarBase (без привязки к UserCigar).
+    /// </summary>
+    private async Task<Dictionary<int, List<CigarImageDto>>> LoadMergedUserCigarGalleriesAsync(
+        IReadOnlyCollection<(int UserCigarId, int CigarBaseId)> pairs,
+        CancellationToken cancellationToken)
+    {
+        var result = new Dictionary<int, List<CigarImageDto>>();
+        if (pairs.Count == 0)
+            return result;
+
+        var ucIds = pairs.Select(p => p.UserCigarId).Distinct().ToList();
+        var cbIds = pairs.Select(p => p.CigarBaseId).Distinct().ToList();
+
+        var userImgs = await _context.CigarImages.AsNoTracking()
+            .Where(img => img.UserCigarId != null && ucIds.Contains(img.UserCigarId.Value) && img.StoragePath != null)
+            .Select(img => new CigarImageDto
+            {
+                Id = img.Id,
+                FileName = img.FileName,
+                ContentType = img.ContentType,
+                FileSize = img.FileSize,
+                Description = img.Description,
+                IsMain = img.IsMain,
+                CigarBaseId = img.CigarBaseId,
+                UserCigarId = img.UserCigarId,
+                CreatedAt = img.CreatedAt,
+                HasThumbnail = img.ThumbnailPath != null
+            })
+            .ToListAsync(cancellationToken);
+
+        var baseImgs = await _context.CigarImages.AsNoTracking()
+            .Where(img => img.CigarBaseId != null
+                          && cbIds.Contains(img.CigarBaseId.Value)
+                          && img.UserCigarId == null
+                          && img.StoragePath != null)
+            .Select(img => new CigarImageDto
+            {
+                Id = img.Id,
+                FileName = img.FileName,
+                ContentType = img.ContentType,
+                FileSize = img.FileSize,
+                Description = img.Description,
+                IsMain = img.IsMain,
+                CigarBaseId = img.CigarBaseId,
+                UserCigarId = img.UserCigarId,
+                CreatedAt = img.CreatedAt,
+                HasThumbnail = img.ThumbnailPath != null
+            })
+            .ToListAsync(cancellationToken);
+
+        var userGrouped = userImgs
+            .Where(i => i.UserCigarId.HasValue)
+            .GroupBy(i => i.UserCigarId!.Value)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.IsMain).ThenBy(x => x.Id).ToList());
+
+        var baseGrouped = baseImgs
+            .Where(i => i.CigarBaseId.HasValue)
+            .GroupBy(i => i.CigarBaseId!.Value)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.IsMain).ThenBy(x => x.Id).ToList());
+
+        foreach (var p in pairs)
+        {
+            var u = userGrouped.GetValueOrDefault(p.UserCigarId) ?? [];
+            var b = baseGrouped.GetValueOrDefault(p.CigarBaseId) ?? [];
+            result[p.UserCigarId] = u.Concat(b).ToList();
+        }
+
+        return result;
     }
 
     private string GetFileNameFromUrl(string url)

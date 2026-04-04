@@ -155,7 +155,7 @@
 | Данные | `cigarService.getCigars()`, тип `Cigar` из `cigarService` |
 | Маршруты | Список: `CigarList`; добавление: `CigarNew`; деталь: `CigarDetail` (`id` как строка в `params`); правка: `CigarEdit` |
 | Карточка | **Карусель** (`Carousel`, PrimeVue, автоимпорт) вверху z-20, фикс. высота ~192px; клик по слайду/заглушке ведёт в деталь через `router.push`. Ниже — `router-link` на текстовый блок (рейтинг, цена, «В хьюмидоре»). Футер: правка + удаление (`cigarService.deleteCigar`, confirm + toast) |
-| Изображения | `imageData` в API: строка base64 или массив байт — через `arrayBufferToBase64` в `utils/imageUtils.ts`, префикс `data:image/jpeg;base64,` |
+| Изображения | `GET /api/cigars` отдаёт объединённую галерею: фото UserCigar, затем фото CigarBase; миниатюры — `GET /api/cigarimages/{id}/thumbnail` (blob URL). Порядок слайдов: `orderUserCigarGalleryImages` в `cigarImageDisplay.ts`. Устаревший inline: `imageData` / base64 через `cigarImageInlineDataSrc` |
 | Рейтинг | Шкала 0–10; 5 звёзд: звезда `i` активна, если `(rating ?? 0) >= i * 2 - 1` |
 | Производительность | `v-memo` через `memoKey(cigar)` (идентификаторы и метаданные без полного base64 в ключе); у `<img>` `loading="lazy"`, `decoding="async"`, заданные `width`/`height` под контейнер |
 | `data-testid` | `cigar-list`, `cigar-list-loading`, `cigar-list-skeleton`, `cigar-list-error`, `cigar-list-retry`, `cigar-list-empty`, `cigar-list-empty-add`, `cigar-list-add`, `cigar-list-grid`, `cigar-card-{id}`, `cigar-edit-{id}`, `cigar-delete-{id}` |

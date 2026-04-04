@@ -48,7 +48,9 @@ public class CigarResponseDto : CigarBriefDto
     public DateTime? SmokedAt { get; set; }
     public DateTime LastTouchedAt { get; set; }
     public bool IsSmoked => SmokedAt.HasValue;
-    /// <summary>Изображения личной сигары (UserCigar), не путать с фото базы CigarBase.</summary>
+    /// <summary>
+    /// Галерея для карточки коллекции: сначала изображения личной сигары (UserCigar), затем изображения базы (CigarBase).
+    /// </summary>
     public List<CigarImageDto>? Images { get; set; }
 }
 

@@ -14,7 +14,7 @@
 | `AdminUsersController` | Админ-операции с пользователями |
 | `PublicUsersController` | Публичные данные пользователей |
 | `BrandsController` | Бренды |
-| `CigarsController` | Каталог / сигары |
+| `CigarsController` | Каталог / сигары; `CigarResponseDto.Images` для коллекции — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Отзывы |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |

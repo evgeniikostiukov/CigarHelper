@@ -37,13 +37,20 @@ export function cigarImageInlineDataSrc(img: CigarImage | undefined): string {
   return '';
 }
 
-/** Главное первым, затем по id (для карусели коллекции). */
+function sortGalleryByMainThenId(a: CigarImage, b: CigarImage): number {
+  if (a.isMain !== b.isMain) {
+    return a.isMain ? -1 : 1;
+  }
+  return a.id - b.id;
+}
+
+/**
+ * Порядок для карусели коллекции: сначала фото личной сигары (есть userCigarId),
+ * затем фото базы каталога (без userCigarId), внутри групп — главное, затем по id.
+ */
 export function orderUserCigarGalleryImages(images: CigarImage[] | undefined | null): CigarImage[] {
   const list = images?.length ? [...images] : [];
-  return list.sort((a, b) => {
-    if (a.isMain !== b.isMain) {
-      return a.isMain ? -1 : 1;
-    }
-    return a.id - b.id;
-  });
+  const mine = list.filter((i) => i.userCigarId != null).sort(sortGalleryByMainThenId);
+  const fromCatalog = list.filter((i) => i.userCigarId == null).sort(sortGalleryByMainThenId);
+  return [...mine, ...fromCatalog];
 }
