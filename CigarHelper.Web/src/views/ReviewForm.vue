@@ -394,11 +394,13 @@
             title="Изображения"
             description="До пяти кадров: с устройства или по ссылке — как в редакторе базовой сигары; подпись к кадру по желанию."
             show-captions
+            url-entry-mode="multi"
+            url-rows-test-id="review-form-image-urls"
             test-id="review-form-images"
             url-input-id="review-image-url"
             url-field-test-id="review-form-image-url"
             caption-test-id-prefix="review-form"
-            url-help-text="Сервер скачает изображение по HTTP(S); загрузка с устройства уходит как data URL (JPEG, PNG, GIF, WebP)."
+            url-help-text="До 12 полей со ссылками: заполните и нажмите «Добавить в галерею» (в галерее не более 5 кадров). Сервер скачает по HTTP(S); файлы с устройства — как data URL (JPEG, PNG, GIF, WebP)."
             grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4" />
 
           <div

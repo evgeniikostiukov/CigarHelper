@@ -38,6 +38,13 @@
       resolveUrlImport?: (url: string) => Promise<FormGalleryImageItem | null>;
       gridClass?: string;
       tone?: 'review' | 'dialog';
+      /** Одно поле URL или несколько строк как в CigarForm */
+      urlEntryMode?: 'single' | 'multi';
+      maxUrlRows?: number;
+      multiUrlLabel?: string;
+      addUrlRowButtonLabel?: string;
+      applyUrlsToGalleryButtonLabel?: string;
+      urlRowsTestId?: string;
     }>(),
     {
       maxFiles: 5,
@@ -51,6 +58,12 @@
       captionTestIdPrefix: 'form-gallery',
       gridClass: 'grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5',
       tone: 'review',
+      urlEntryMode: 'single',
+      maxUrlRows: 12,
+      multiUrlLabel: 'Ссылки на изображения',
+      addUrlRowButtonLabel: 'Добавить ссылку',
+      applyUrlsToGalleryButtonLabel: 'Добавить в галерею',
+      urlRowsTestId: 'form-gallery-multi-urls',
     },
   );
 
@@ -59,9 +72,13 @@
   const toast = useToast();
   const uploaderRef = ref<InstanceType<typeof ImageUploader> | null>(null);
   const newImageUrl = ref('');
-  const addingImageByUrl = ref(false);
+  const urlImportBusy = ref(false);
+  /** Черновые строки URL (режим multi) */
+  const pendingUrls = ref<string[]>(['']);
 
   const activeCount = computed(() => images.value.filter((img) => !img.markedForDeletion).length);
+
+  const hasAnyPendingUrl = computed(() => pendingUrls.value.some((u) => u.trim().length > 0));
 
   const labelClass = computed(() =>
     props.tone === 'dialog'
@@ -150,6 +167,34 @@
     }
   }
 
+  function isUrlAlreadyInGallery(url: string): boolean {
+    const t = url.trim();
+    return images.value.some(
+      (img) => !img.markedForDeletion && (img.imageUrl === t || (!img.file && img.preview === t)),
+    );
+  }
+
+  function addPendingUrlRow(): void {
+    if (pendingUrls.value.length >= props.maxUrlRows) return;
+    pendingUrls.value.push('');
+  }
+
+  function removePendingUrlRow(index: number): void {
+    pendingUrls.value.splice(index, 1);
+    if (pendingUrls.value.length === 0) {
+      pendingUrls.value.push('');
+    }
+  }
+
+  function isValidHttpUrl(raw: string): boolean {
+    try {
+      const parsed = new URL(raw.trim());
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
   async function addByUrl(): Promise<void> {
     const raw = newImageUrl.value.trim();
     if (!raw) return;
@@ -164,7 +209,7 @@
     }
 
     if (props.resolveUrlImport) {
-      addingImageByUrl.value = true;
+      urlImportBusy.value = true;
       try {
         const item = await props.resolveUrlImport(raw);
         if (item) {
@@ -172,33 +217,22 @@
           newImageUrl.value = '';
         }
       } finally {
-        addingImageByUrl.value = false;
+        urlImportBusy.value = false;
       }
       return;
     }
 
-    try {
-      const parsed = new URL(raw);
-      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        toast.add({
-          severity: 'warn',
-          summary: 'Ссылка',
-          detail: 'Укажите адрес с протоколом http или https.',
-          life: 4000,
-        });
-        return;
-      }
-    } catch {
+    if (!isValidHttpUrl(raw)) {
       toast.add({
         severity: 'warn',
         summary: 'Ссылка',
-        detail: 'Некорректный URL изображения.',
+        detail: 'Укажите корректный адрес с протоколом http или https.',
         life: 4000,
       });
       return;
     }
 
-    addingImageByUrl.value = true;
+    urlImportBusy.value = true;
     try {
       images.value.push({
         preview: raw,
@@ -215,7 +249,86 @@
         life: 2500,
       });
     } finally {
-      addingImageByUrl.value = false;
+      urlImportBusy.value = false;
+    }
+  }
+
+  async function addAllPendingUrlsToGallery(): Promise<void> {
+    const candidates = pendingUrls.value.map((u) => u.trim()).filter(Boolean);
+    if (candidates.length === 0) return;
+
+    urlImportBusy.value = true;
+    let added = 0;
+    let skipped = 0;
+    let stoppedByLimit = false;
+
+    try {
+      for (const raw of candidates) {
+        if (activeCount.value >= props.maxFiles) {
+          stoppedByLimit = true;
+          break;
+        }
+        if (isUrlAlreadyInGallery(raw)) {
+          skipped++;
+          continue;
+        }
+
+        if (props.resolveUrlImport) {
+          const item = await props.resolveUrlImport(raw);
+          if (item) {
+            images.value.push(item);
+            added++;
+          } else {
+            skipped++;
+          }
+        } else if (isValidHttpUrl(raw)) {
+          images.value.push({
+            preview: raw,
+            imageUrl: raw,
+            caption: '',
+            isExisting: false,
+            markedForDeletion: false,
+          });
+          added++;
+        } else {
+          skipped++;
+        }
+      }
+
+      if (added > 0) {
+        pendingUrls.value = [''];
+        toast.add({
+          severity: 'success',
+          summary: 'Добавлено',
+          detail: added === 1 ? 'В галерею добавлено 1 изображение.' : `В галерею добавлено изображений: ${added}.`,
+          life: 2500,
+        });
+      }
+
+      if (stoppedByLimit) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Лимит',
+          detail: `В галерее не более ${props.maxFiles} изображений. Остальные ссылки не добавлены.`,
+          life: 4500,
+        });
+      } else if (added === 0 && skipped > 0) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Ссылки',
+          detail: 'Не удалось добавить ни одной ссылки. Проверьте формат (http/https) и дубликаты.',
+          life: 4000,
+        });
+      } else if (skipped > 0 && added > 0) {
+        toast.add({
+          severity: 'info',
+          summary: 'Часть ссылок пропущена',
+          detail: 'Пропущены неверные, повторяющиеся или уже добавленные адреса.',
+          life: 3500,
+        });
+      }
+    } finally {
+      urlImportBusy.value = false;
     }
   }
 
@@ -294,7 +407,9 @@
         :current-file-count="activeCount"
         @files-selected="handleFilesSelected" />
 
-      <div class="space-y-2">
+      <div
+        v-if="urlEntryMode === 'single'"
+        class="space-y-2">
         <label
           :for="urlInputId"
           :class="labelClass">
@@ -307,16 +422,73 @@
             :data-testid="urlFieldTestId"
             :placeholder="urlPlaceholder"
             :class="urlInputClass"
-            :disabled="addingImageByUrl" />
+            :disabled="urlImportBusy" />
           <Button
             label="Добавить"
             icon="pi pi-link"
             severity="success"
             :class="tone === 'dialog' ? undefined : 'min-h-11 w-full shrink-0 sm:w-auto'"
-            :loading="addingImageByUrl"
-            :disabled="!newImageUrl.trim() || addingImageByUrl || activeCount >= maxFiles"
+            :loading="urlImportBusy"
+            :disabled="!newImageUrl.trim() || urlImportBusy || activeCount >= maxFiles"
             type="button"
             @click="addByUrl" />
+        </div>
+        <p :class="helpTextClass">
+          {{ urlHelpText }}
+        </p>
+      </div>
+
+      <div
+        v-else
+        class="space-y-2">
+        <span :class="labelClass">{{ multiUrlLabel }}</span>
+        <div
+          class="flex flex-col gap-2"
+          :data-testid="urlRowsTestId">
+          <div
+            v-for="(_u, idx) in pendingUrls"
+            :key="'gallery-pending-url-' + idx"
+            class="flex items-center gap-2">
+            <InputText
+              v-model="pendingUrls[idx]"
+              class="min-h-11 min-w-0 flex-1"
+              :placeholder="urlPlaceholder"
+              :data-testid="idx === 0 ? urlFieldTestId : `${urlFieldTestId}-${idx}`"
+              :disabled="urlImportBusy" />
+            <Button
+              type="button"
+              class="min-h-11 min-w-11 shrink-0 touch-manipulation"
+              icon="pi pi-trash"
+              text
+              rounded
+              severity="secondary"
+              aria-label="Удалить строку"
+              :disabled="urlImportBusy"
+              @click="removePendingUrlRow(idx)" />
+          </div>
+          <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <Button
+              type="button"
+              class="min-h-11 w-full touch-manipulation sm:w-auto"
+              :label="addUrlRowButtonLabel"
+              icon="pi pi-plus"
+              severity="secondary"
+              outlined
+              data-testid="form-gallery-add-url-row"
+              :disabled="pendingUrls.length >= maxUrlRows || urlImportBusy"
+              @click="addPendingUrlRow" />
+            <Button
+              type="button"
+              class="min-h-11 w-full touch-manipulation sm:w-auto"
+              :label="applyUrlsToGalleryButtonLabel"
+              icon="pi pi-images"
+              severity="success"
+              :class="tone === 'dialog' ? undefined : 'sm:ml-0'"
+              :loading="urlImportBusy"
+              data-testid="form-gallery-apply-urls"
+              :disabled="!hasAnyPendingUrl || urlImportBusy || activeCount >= maxFiles"
+              @click="addAllPendingUrlsToGallery" />
+          </div>
         </div>
         <p :class="helpTextClass">
           {{ urlHelpText }}

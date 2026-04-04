@@ -169,8 +169,10 @@
           variant="bare"
           tone="dialog"
           show-main-image-star
+          url-entry-mode="multi"
+          url-rows-test-id="cigar-base-image-urls"
           :resolve-url-import="resolveCigarBaseUrlImport"
-          url-help-text="Изображение будет автоматически скачано и сохранено на сервере."
+          url-help-text="До 12 ссылок: добавьте строки и нажмите «Добавить в галерею» — файлы скачаются на сервер (в галерее не более 5)."
           url-placeholder="Введите URL изображения"
           url-input-id="cigar-base-gallery-url"
           test-id="cigar-base-form-images" />
@@ -444,12 +446,6 @@
       const response = await cigarService.uploadImageByUrl(url, form.id);
       const active = form.images.filter((img) => !img.markedForDeletion);
       const isFirst = active.length === 0;
-      toast.add({
-        severity: 'success',
-        summary: 'Успех',
-        detail: 'Изображение добавлено по ссылке.',
-        life: 3000,
-      });
       return {
         id: response.id,
         preview: `/api/cigarimages/${response.id}`,
