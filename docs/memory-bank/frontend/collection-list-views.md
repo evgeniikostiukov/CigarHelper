@@ -154,11 +154,11 @@
 | Файл | `src/views/CigarList.vue` |
 | Данные | `cigarService.getCigars()`, тип `Cigar` из `cigarService` |
 | Маршруты | Список: `CigarList`; добавление: `CigarNew`; деталь: `CigarDetail` (`id` как строка в `params`); правка: `CigarEdit` |
-| Карточка | **Карусель** (`Carousel`, PrimeVue, автоимпорт) вверху z-20, фикс. высота ~192px; клик по слайду/заглушке ведёт в деталь через `router.push`. Ниже — `router-link` на текстовый блок (рейтинг, цена, «В хьюмидоре»). Футер: правка + удаление (`cigarService.deleteCigar`, confirm + toast) |
+| Карточка | **Карусель** (`Carousel`, PrimeVue, автоимпорт) вверху z-20, фикс. высота ~192px; клик по слайду/заглушке ведёт в деталь через `router.push`. Ниже — `router-link` на текстовый блок (размер/крепость/**количество** «N шт.», рейтинг, цена, «В хьюмидоре»). Футер: правка + удаление (`cigarService.deleteCigar`, confirm + toast) |
 | Изображения | `GET /api/cigars` отдаёт объединённую галерею: фото UserCigar, затем фото CigarBase; миниатюры — `GET /api/cigarimages/{id}/thumbnail` (blob URL). Порядок слайдов: `orderUserCigarGalleryImages` в `cigarImageDisplay.ts`. Устаревший inline: `imageData` / base64 через `cigarImageInlineDataSrc` |
 | Рейтинг | Шкала 0–10; 5 звёзд: звезда `i` активна, если `(rating ?? 0) >= i * 2 - 1` |
 | Производительность | `v-memo` через `memoKey(cigar)` (идентификаторы и метаданные без полного base64 в ключе); у `<img>` `loading="lazy"`, `decoding="async"`, заданные `width`/`height` под контейнер |
-| `data-testid` | `cigar-list`, `cigar-list-loading`, `cigar-list-skeleton`, `cigar-list-error`, `cigar-list-retry`, `cigar-list-empty`, `cigar-list-empty-add`, `cigar-list-add`, `cigar-list-grid`, `cigar-card-{id}`, `cigar-edit-{id}`, `cigar-delete-{id}` |
+| `data-testid` | `cigar-list`, `cigar-list-loading`, `cigar-list-skeleton`, `cigar-list-error`, `cigar-list-retry`, `cigar-list-empty`, `cigar-list-empty-add`, `cigar-list-add`, `cigar-list-grid`, `cigar-card-{id}`, `cigar-card-quantity-{id}`, `cigar-edit-{id}`, `cigar-delete-{id}` |
 | Scoped классы | `cigar-list-root`, `cigar-list-grain`, `cigar-card-enter`, `:deep` для мин. размера стрелок карусели |
 
 ## CigarForm.vue
@@ -170,8 +170,8 @@
 | Файл | `src/views/CigarForm.vue` |
 | Данные | Хьюмидоры: `humidorService.getHumidors()`; поиск/выбор сигары — `getCigarBasesPaginated` + debounce 300 ms; префилл по `?cigarBaseId=` — `getCigarBase(id)` |
 | Маршруты | `CigarNew`; успех / отмена / «К списку» → `CigarList` |
-| UI | `AutoComplete` с группировкой по бренду; бренд только для чтения после выбора; поля: название (только из подсказок), цена, оценка (`Rating`), вкус, аромат; фото — **`FormImageGallerySection`** (ссылки + файлы, превью слева); чекбокс **«Добавить в хьюмидор»** — при включении доступен `Dropdown` хьюмидора |
-| `data-testid` | `cigar-form`, `cigar-form-back`, `cigar-form-save-error`, `cigar-form-fields`, `cigar-form-name`, `cigar-form-brand`, `cigar-form-price`, `cigar-form-rating`, `cigar-form-taste`, `cigar-form-aroma`, `cigar-form-image-preview`, `cigar-form-image-gallery`, `cigar-form-image-urls`, `cigar-form-image-url`, `cigar-form-add-image-url`, `cigar-form-apply-image-gallery`, `cigar-form-add-to-humidor`, `cigar-form-humidor`, `cigar-form-cancel`, `cigar-form-submit` |
+| UI | `AutoComplete` с группировкой по бренду; бренд только для чтения после выбора; поля: название (только из подсказок), цена, **количество** (`InputNumber` 1–9999), оценка (`Rating`), вкус, аромат; фото — **`FormImageGallerySection`** (ссылки + файлы, превью слева); чекбокс **«Добавить в хьюмидор»** — при включении доступен `Select` хьюмидора |
+| `data-testid` | `cigar-form`, `cigar-form-back`, `cigar-form-save-error`, `cigar-form-fields`, `cigar-form-name`, `cigar-form-brand`, `cigar-form-price`, `cigar-form-quantity`, `cigar-form-rating`, `cigar-form-taste`, `cigar-form-aroma`, `cigar-form-image-preview`, `cigar-form-image-gallery`, `cigar-form-image-urls`, `cigar-form-image-url`, `cigar-form-add-image-url`, `cigar-form-apply-image-gallery`, `cigar-form-add-to-humidor`, `cigar-form-humidor`, `cigar-form-cancel`, `cigar-form-submit` |
 | Scoped классы | `cigar-form-root`, `cigar-form-grain`, `cigar-form-enter`, `prefers-reduced-motion` |
 
 ## CigarCollectionEdit.vue

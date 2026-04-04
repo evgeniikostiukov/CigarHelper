@@ -153,6 +153,11 @@
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-600 dark:text-stone-400">
               <span v-if="cigar.size">{{ cigar.size }}</span>
               <span v-if="cigar.strength">{{ cigar.strength }}</span>
+              <span
+                :data-testid="`cigar-card-quantity-${cigar.id}`"
+                class="font-medium text-stone-700 dark:text-stone-300">
+                {{ collectionQuantityShort(cigar) }}
+              </span>
             </div>
             <div
               class="flex flex-wrap items-center justify-between gap-2 mt-auto pt-2 border-t border-stone-100 dark:border-stone-700/80">
@@ -338,6 +343,7 @@
       cigar.brand?.name,
       cigar.size,
       cigar.strength,
+      cigar.quantity,
       cigar.rating,
       cigar.price,
       cigar.humidorId,
@@ -378,6 +384,12 @@
       style: 'currency',
       currency: 'RUB',
     }).format(price);
+  }
+
+  function collectionQuantityShort(cigar: Cigar): string {
+    const q = cigar.quantity;
+    const n = q != null && Number.isFinite(q) ? Math.min(9999, Math.max(1, Math.trunc(q))) : 1;
+    return `${n} шт.`;
   }
 
   function confirmDelete(cigar: Cigar): void {

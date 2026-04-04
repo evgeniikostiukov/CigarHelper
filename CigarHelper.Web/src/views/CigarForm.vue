@@ -19,8 +19,8 @@
             Добавить из базы
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Выберите модерированную сигару из справочника, укажите цену, оценку, заметки о вкусе и аромате, при
-            необходимости фото и хьюмидор — запись попадёт в вашу коллекцию.
+            Выберите модерированную сигару из справочника, укажите цену, количество, оценку, заметки о вкусе и аромате,
+            при необходимости фото и хьюмидор — запись попадёт в вашу коллекцию.
           </p>
         </div>
         <Button
@@ -147,6 +147,26 @@
                   :max-fraction-digits="2"
                   placeholder="0.00"
                   suffix=" ₽"
+                  fluid />
+              </div>
+
+              <div class="flex flex-col gap-2 md:col-span-2">
+                <label
+                  for="cigar-form-quantity"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Количество (шт.)
+                </label>
+                <InputNumber
+                  id="cigar-form-quantity"
+                  v-model="form.quantity"
+                  data-testid="cigar-form-quantity"
+                  class="flex! w-full"
+                  input-class="min-h-11"
+                  :min="1"
+                  :max="9999"
+                  :step="1"
+                  show-buttons
+                  button-layout="horizontal"
                   fluid />
               </div>
 
@@ -368,6 +388,7 @@
 
   interface FormData {
     price: number | null;
+    quantity: number;
     rating: number | null;
     taste: string;
     aroma: string;
@@ -405,6 +426,7 @@
 
   const form = ref<FormData>({
     price: null,
+    quantity: 1,
     rating: null,
     taste: '',
     aroma: '',
@@ -487,6 +509,7 @@
       await cigarService.createCigar({
         cigarBaseId: base.id,
         price: form.value.price,
+        quantity: form.value.quantity ?? 1,
         humidorId: form.value.addToHumidor ? form.value.humidorId : null,
         taste: form.value.taste || null,
         aroma: form.value.aroma || null,
