@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-04** — `useGlobalSearch.ts`: в `onKeydown` для шортката Ctrl+K используется `e.key?.toLowerCase()` — у некоторых событий `key` бывает `undefined`, из‑за чего падал `toLowerCase`.
 - **2026-04-04** — Добавление в коллекцию только из модерированного `CigarBase`: `POST /api/cigars` принимает `cigarBaseId` (+ цена, хьюмидор, вкус/аромат, URL фото); убрано создание немодерированных записей базы из этой формы. В `UserCigars` — колонки `Taste`/`Aroma` (миграция `AddUserCigarTasteAndAroma`). `PUT /api/cigars/{id}` меняет только личные поля и галерею UserCigar, не трогает `CigarBase`. Фронт: `CigarForm.vue` — только выбор из справочника, чекбокс «Добавить в хьюмидор»; редактирование — `CigarCollectionEdit.vue` (`/cigars/:id/edit`); `cigarService.createCigar`/`updateCigar` с новыми контрактами; онбординг и `openapi`/`api.generated` обновлены.
 - **2026-04-04** — Диалог базовой сигары (`CigarBaseEditDialog.vue`): превью в сетке — `object-contain` + центрирование вместо `object-cover`, контейнер с `overflow-hidden` и нейтральным фоном, чтобы картинка целиком помещалась в квадратную ячейку.
 - **2026-04-03** — Импорт: при дубликате `CigarBase` строка пропускается только если в БД уже есть главное фото (`CigarImages` + `IsMain`); иначе к существующей сигаре дозагружается картинка (хранилище/HTTP). Периодический `SaveChanges` по `progressTick`, не только по `importedCount`.
