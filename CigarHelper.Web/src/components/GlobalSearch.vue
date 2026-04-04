@@ -62,6 +62,7 @@
       content: 'global-search-content',
     }"
     class="w-full max-w-lg"
+    content-class="pt-5"
     data-testid="global-search-dialog"
     @keydown.esc="close"
     @keydown.down.prevent="moveDown"
