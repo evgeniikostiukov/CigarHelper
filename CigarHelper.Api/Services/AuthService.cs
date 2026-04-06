@@ -119,4 +119,33 @@ public class AuthService
             Expiration = expiresAtUtc
         };
     }
+
+    /// <summary>По id из валидного JWT выдаёт новый токен (продление сессии).</summary>
+    public async Task<AuthResponse> RefreshTokenAsync(int userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return new AuthResponse
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        user.LastLogin = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        var (token, expiresAtUtc) = _jwtService.GenerateToken(user);
+
+        return new AuthResponse
+        {
+            Success = true,
+            Message = "Token refreshed",
+            Token = token,
+            Username = user.Username,
+            Role = user.Role,
+            Expiration = expiresAtUtc
+        };
+    }
 }

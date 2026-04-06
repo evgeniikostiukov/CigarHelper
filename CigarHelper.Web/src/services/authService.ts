@@ -109,6 +109,21 @@ const authService = {
     updateUserFromToken(token);
   },
 
+  /** После восстановления сессии из storage — новый JWT с продлённым сроком (сервер /auth/refresh). */
+  async refreshSessionIfAuthenticated(): Promise<void> {
+    if (!state.isAuthenticated) return;
+
+    try {
+      const response = await api.post<AuthResponse>('/auth/refresh');
+      if (response.data.success && response.data.token) {
+        localStorage.setItem(TOKEN_KEY, response.data.token);
+        updateUserFromToken(response.data.token);
+      }
+    } catch {
+      // 401 обрабатывает interceptor; при сетевой ошибке оставляем текущий токен.
+    }
+  },
+
   /** После смены своей роли сервер может вернуть новый JWT. */
   setToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);
@@ -117,5 +132,6 @@ const authService = {
 };
 
 authService.initialize();
+void authService.refreshSessionIfAuthenticated();
 
 export default authService;

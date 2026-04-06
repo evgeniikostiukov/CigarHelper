@@ -204,4 +204,53 @@ public class AuthServiceTests
         Assert.Equal(AuthService.LoginFailedMessage, res.Message);
         jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
     }
+
+    [Fact]
+    public async Task RefreshTokenAsync_UserNotFound_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var jwt = new Mock<IJwtService>(MockBehavior.Strict);
+        var sut = new AuthService(context, jwt.Object);
+
+        var res = await sut.RefreshTokenAsync(999);
+
+        Assert.False(res.Success);
+        Assert.Equal("User not found", res.Message);
+        jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RefreshTokenAsync_ValidUser_ReturnsMockToken_AndSetsLastLogin()
+    {
+        await using var context = CreateContext();
+        JwtService.CreatePasswordHash(ValidPassword, out var hash, out var salt);
+        var before = DateTime.UtcNow.AddMinutes(-5);
+        context.Users.Add(new User
+        {
+            Username = "refuser",
+            Email = "ref@example.com",
+            PasswordHash = hash,
+            PasswordSalt = salt,
+            CreatedAt = before,
+            LastLogin = null
+        });
+        await context.SaveChangesAsync();
+        var userId = (await context.Users.SingleAsync()).Id;
+
+        var jwt = new Mock<IJwtService>();
+        var exp = DateTime.UtcNow.AddDays(1);
+        jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("refresh-token", exp));
+        var sut = new AuthService(context, jwt.Object);
+
+        var res = await sut.RefreshTokenAsync(userId);
+
+        Assert.True(res.Success);
+        Assert.Equal("refresh-token", res.Token);
+        Assert.Equal(exp, res.Expiration);
+        Assert.Equal("refuser", res.Username);
+        var reloaded = await context.Users.SingleAsync();
+        Assert.NotNull(reloaded.LastLogin);
+        Assert.True(reloaded.LastLogin >= before);
+        jwt.Verify(j => j.GenerateToken(It.Is<User>(u => u.Id == userId && u.Username == "refuser")), Times.Once);
+    }
 }

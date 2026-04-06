@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using CigarHelper.Data.Models;
 using CigarHelper.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -78,6 +80,35 @@ public class AuthController : ControllerBase
         }
 
         var response = await _authService.LoginAsync(request);
+
+        if (!response.Success)
+            return Unauthorized(response);
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Выдаёт новый JWT по действующему Bearer-токену (продление сессии при повторном открытии клиента).
+    /// </summary>
+    [HttpPost("refresh")]
+    [Authorize]
+    [EnableRateLimiting("auth-refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<ActionResult<AuthResponse>> Refresh()
+    {
+        var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("id");
+        if (string.IsNullOrEmpty(idStr) || !int.TryParse(idStr, out var userId))
+        {
+            return Unauthorized(new AuthResponse
+            {
+                Success = false,
+                Message = "Invalid token claims"
+            });
+        }
+
+        var response = await _authService.RefreshTokenAsync(userId);
 
         if (!response.Success)
             return Unauthorized(response);

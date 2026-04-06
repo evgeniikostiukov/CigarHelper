@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -143,5 +144,45 @@ public class AuthStep4IntegrationTests
         Assert.NotNull(body?.Token);
         var validTo = new JwtSecurityTokenHandler().ReadJwtToken(body.Token).ValidTo;
         Assert.Equal(validTo, body!.Expiration);
+    }
+
+    [Fact]
+    public async Task Refresh_WithoutToken_Returns401()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        using var response = await client.PostAsync("/api/Auth/refresh", null);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Refresh_WithValidToken_ReturnsNewJwt_AndExpirationMatches()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        using var reg = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = "refreshme",
+            Email = "refreshme@example.com",
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+        reg.EnsureSuccessStatusCode();
+        var auth = await reg.Content.ReadFromJsonAsync<AuthResponse>(AuthResponseJsonOptions);
+        Assert.NotNull(auth?.Token);
+
+        using var req = new HttpRequestMessage(HttpMethod.Post, "/api/Auth/refresh");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+        using var refresh = await client.SendAsync(req);
+
+        refresh.EnsureSuccessStatusCode();
+        var body = await refresh.Content.ReadFromJsonAsync<AuthResponse>(AuthResponseJsonOptions);
+        Assert.NotNull(body?.Token);
+        Assert.True(body.Success);
+        var validTo = new JwtSecurityTokenHandler().ReadJwtToken(body.Token).ValidTo;
+        Assert.Equal(validTo, body.Expiration);
     }
 }

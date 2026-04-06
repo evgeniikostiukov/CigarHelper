@@ -225,6 +225,60 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/Auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Продлевает JWT по действующему Bearer-токену */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Новый токен выдан */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AuthResponse'];
+          };
+        };
+        /** @description Токен недействителен или пользователь не найден */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AuthResponse'];
+          };
+        };
+        /** @description Too Many Requests */
+        429: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/Brands': {
     parameters: {
       query?: never;
