@@ -103,6 +103,112 @@ public class ApiAuthorizationAndContractsIntegrationTests
     }
 
     [Fact]
+    public async Task AdminCigarImages_Get_WithoutToken_Returns401()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        using var res = await client.GetAsync("/api/admin/cigar-images?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminCigarImages_Get_AsRegularUser_Returns403()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"img{Guid.NewGuid():N}"[..10],
+            Email = $"{Guid.NewGuid():N}@u.co",
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(auth?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        using var res = await client.GetAsync("/api/admin/cigar-images?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminCigarImages_Get_AsAdmin_Returns200_PageContract()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        var adminEmail = $"{Guid.NewGuid():N}@admin.ci";
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
+            db.Users.Add(new User
+            {
+                Username = $"ad{Guid.NewGuid():N}"[..10],
+                Email = adminEmail,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                CreatedAt = DateTime.UtcNow,
+                Role = Role.Admin
+            });
+            var brand = new Brand
+            {
+                Name = $"Bi_{Guid.NewGuid():N}"[..14],
+                CreatedAt = DateTime.UtcNow,
+                IsModerated = true
+            };
+            db.Brands.Add(brand);
+            await db.SaveChangesAsync();
+            var cb = new CigarBase
+            {
+                Name = "Admin Img List CB",
+                BrandId = brand.Id,
+                IsModerated = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.CigarBases.Add(cb);
+            await db.SaveChangesAsync();
+            db.CigarImages.Add(new CigarImage
+            {
+                CigarBaseId = cb.Id,
+                StoragePath = "adm-list-orig",
+                ThumbnailPath = "adm-list-thumb",
+                FileName = "a.png",
+                ContentType = "image/png",
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        var loginRes = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
+        {
+            Email = adminEmail,
+            Password = "abCd12"
+        });
+        loginRes.EnsureSuccessStatusCode();
+        var authBody = await loginRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(authBody?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBody.Token);
+
+        using var res = await client.GetAsync("/api/admin/cigar-images?page=1&pageSize=10");
+        res.EnsureSuccessStatusCode();
+        using var doc = await JsonDocument.ParseAsync(await res.Content.ReadAsStreamAsync());
+        var root = doc.RootElement;
+        Assert.True(root.TryGetProperty("items", out var itemsEl));
+        Assert.Equal(JsonValueKind.Array, itemsEl.ValueKind);
+        Assert.True(root.TryGetProperty("totalCount", out var totalEl) && totalEl.GetInt32() >= 1);
+        Assert.True(root.TryGetProperty("page", out var pageEl) && pageEl.GetInt32() == 1);
+        Assert.True(root.TryGetProperty("pageSize", out var psEl) && psEl.GetInt32() == 10);
+        var first = itemsEl.EnumerateArray().FirstOrDefault();
+        Assert.Equal(JsonValueKind.Object, first.ValueKind);
+        Assert.True(first.TryGetProperty("id", out _));
+        Assert.True(first.TryGetProperty("cigarBaseId", out _));
+    }
+
+    [Fact]
     public async Task Humidors_GetById_OtherUser_Returns404()
     {
         await using var factory = new AuthIntegrationWebAppFactory();
