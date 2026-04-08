@@ -1,5 +1,6 @@
 ---
-globs: .cs
+description: 
+globs: **.cs
 alwaysApply: false
 ---
 
