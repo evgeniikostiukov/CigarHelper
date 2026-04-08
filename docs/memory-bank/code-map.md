@@ -18,6 +18,7 @@
 | `CigarsController` | Каталог / сигары; `GET .../cigars/bases/paginated` — по умолчанию только `CigarBase.IsModerated`; `unmoderatedOnly=true` только для JWT Admin/Moderator; `CigarResponseDto.Images` для коллекции — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Отзывы |
+| `CigarCommentsController` | Комментарии к `CigarBase` и к чужим `UserCigar` в публичной коллекции: `GET/POST/DELETE api/cigarcomments` (список без авторизации при видимой цели) |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |
 
 ## API — сервисы и прочее
@@ -52,7 +53,7 @@
 ## Data (`CigarHelper.Data/`)
 
 - `Data/AppDbContext.cs` — DbSets и Fluent API.
-- `Models/` — сущности.
+- `Models/` — сущности; таблица **`CigarComments`** — комментарии (ровно одна из связей: `CigarBaseId` или `UserCigarId`).
 - `Migrations/` — EF Core миграции.
 - `Data/DesignTimeDbContextFactory.cs` — design-time для `dotnet ef`.
 

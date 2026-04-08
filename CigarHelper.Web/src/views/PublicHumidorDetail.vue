@@ -186,6 +186,24 @@
                   {{ slotProps.data.rating != null ? `${slotProps.data.rating}/10` : '—' }}
                 </template>
               </Column>
+              <Column
+                style="width: 3.5rem"
+                :exportable="false"
+                header="">
+                <template #body="slotProps">
+                  <Button
+                    type="button"
+                    icon="pi pi-comments"
+                    text
+                    rounded
+                    severity="secondary"
+                    class="min-h-10 min-w-10 touch-manipulation"
+                    :aria-label="`Комментарии: ${slotProps.data.name}`"
+                    :data-testid="`public-humidor-cigar-comments-${slotProps.data.id}`"
+                    v-tooltip.top="'Комментарии'"
+                    @click="openCigarComments(slotProps.data)" />
+                </template>
+              </Column>
               <template #empty>
                 <div
                   class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-10 text-center text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
@@ -197,6 +215,18 @@
           </section>
         </div>
       </template>
+
+      <Dialog
+        v-model:visible="commentsDialogVisible"
+        modal
+        :header="commentsDialogTitle"
+        :style="{ width: 'min(32rem, 94vw)' }"
+        :dismissable-mask="true"
+        data-testid="public-humidor-comments-dialog">
+        <CigarCommentsPanel
+          v-if="commentsUserCigarId != null"
+          :user-cigar-id="commentsUserCigarId" />
+      </Dialog>
     </div>
   </section>
 </template>
@@ -211,6 +241,8 @@
   import Message from 'primevue/message';
   import ProgressBar from 'primevue/progressbar';
   import Skeleton from 'primevue/skeleton';
+  import Dialog from 'primevue/dialog';
+  import CigarCommentsPanel from '@/components/CigarCommentsPanel.vue';
   import humidorService from '@/services/humidorService';
   import * as profileApi from '@/services/profileService';
   import type { Humidor } from '@/services/humidorService';
@@ -227,6 +259,10 @@
   const loading = ref(true);
   const error = ref<string | null>(null);
   const humidor = ref<PublicHumidorView | null>(null);
+
+  const commentsDialogVisible = ref(false);
+  const commentsUserCigarId = ref<number | null>(null);
+  const commentsDialogTitle = ref('Комментарии');
 
   const ownerUsername = computed(() => route.params.username as string);
 
@@ -247,6 +283,12 @@
 
   function goProfile(): void {
     router.push({ name: 'PublicUserProfile', params: { username: ownerUsername.value } });
+  }
+
+  function openCigarComments(row: Cigar): void {
+    commentsUserCigarId.value = row.id;
+    commentsDialogTitle.value = `Комментарии: ${row.name}`;
+    commentsDialogVisible.value = true;
   }
 
   async function load(): Promise<void> {
@@ -280,6 +322,12 @@
     },
     { immediate: true },
   );
+
+  watch(commentsDialogVisible, (open) => {
+    if (!open) {
+      commentsUserCigarId.value = null;
+    }
+  });
 </script>
 
 <style scoped>

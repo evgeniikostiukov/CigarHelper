@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<Review> Reviews { get; set; } = null!;
     public DbSet<ReviewImage> ReviewImages { get; set; } = null!;
     public DbSet<CigarImage> CigarImages { get; set; } = null!;
+    public DbSet<CigarComment> CigarComments { get; set; } = null!;
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -133,5 +134,29 @@ public class AppDbContext : DbContext
             .WithMany(uc => uc.Images)
             .HasForeignKey(ci => ci.UserCigarId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CigarComment>(entity =>
+        {
+            entity.HasOne(c => c.Author)
+                .WithMany()
+                .HasForeignKey(c => c.AuthorUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.CigarBase)
+                .WithMany()
+                .HasForeignKey(c => c.CigarBaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.UserCigar)
+                .WithMany()
+                .HasForeignKey(c => c.UserCigarId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(c => c.CigarBaseId);
+            entity.HasIndex(c => c.UserCigarId);
+            entity.ToTable(t => t.HasCheckConstraint(
+                "CK_CigarComments_SingleTarget",
+                "(\"CigarBaseId\" IS NOT NULL AND \"UserCigarId\" IS NULL) OR (\"CigarBaseId\" IS NULL AND \"UserCigarId\" IS NOT NULL)"));
+        });
     }
 } 

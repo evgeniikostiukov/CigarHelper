@@ -6,6 +6,7 @@
   import type { CigarBase, CigarImage } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
+  import CigarCommentsPanel from './CigarCommentsPanel.vue';
 
   // --- Props ---
 
@@ -255,6 +256,8 @@
           {{ cigar.description }}
         </p>
       </div>
+
+      <CigarCommentsPanel :cigar-base-id="cigar.id" />
     </div>
 
     <div
