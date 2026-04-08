@@ -18,7 +18,7 @@
             Профиль
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Имя, email, публичная страница и смена пароля — всё в одном месте.
+            Имя, email, публичная страница и пароль.
           </p>
         </div>
       </header>
