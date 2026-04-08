@@ -172,7 +172,8 @@
           url-entry-mode="multi"
           url-rows-test-id="cigar-base-image-urls"
           :resolve-url-import="resolveCigarBaseUrlImport"
-          url-help-text="До 12 ссылок: добавьте строки и нажмите «Добавить в галерею» — файлы скачаются на сервер (в галерее не более 5)."
+          url-help-text="До пяти фото в галерее. Несколько ссылок — через «Добавить в галерею»."
+          url-help-detail="До двенадцати строк со ссылками; после добавления в активной галерее остаётся не больше пяти кадров."
           url-placeholder="Введите URL изображения"
           url-input-id="cigar-base-gallery-url"
           test-id="cigar-base-form-images" />

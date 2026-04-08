@@ -240,9 +240,21 @@
               class="mb-1 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               Добавить сигары
             </h2>
-            <p class="mb-5 text-sm text-stone-600 dark:text-stone-400">
-              Ниже — сигары вашей коллекции, которых ещё нет в этом хьюмидоре (остальные хьюмидоры не учитываются).
-            </p>
+            <div class="mb-5 flex items-start gap-2">
+              <p class="min-w-0 flex-1 text-sm text-stone-600 dark:text-stone-400">
+                Сигары из коллекции, которых ещё нет в этом хьюмидоре.
+              </p>
+              <button
+                type="button"
+                class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-200/80 hover:text-stone-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-rose-600 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 dark:focus-visible:ring-rose-400"
+                v-tooltip.top="'Сигары, уже лежащие в других хьюмидорах, здесь всё равно можно добавить в этот.'"
+                aria-label="О списке доступных сигар"
+                data-testid="humidor-detail-available-help">
+                <i
+                  class="pi pi-info-circle text-sm"
+                  aria-hidden="true" />
+              </button>
+            </div>
 
             <div
               v-if="loadingAvailableCigars"

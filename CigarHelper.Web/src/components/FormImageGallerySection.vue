@@ -28,6 +28,8 @@
       showCaptions?: boolean;
       showMainImageStar?: boolean;
       urlHelpText?: string;
+      /** Подсказка по наведению на «i»; null — без иконки */
+      urlHelpDetail?: string | null;
       urlPlaceholder?: string;
       testId?: string;
       urlInputId?: string;
@@ -53,7 +55,7 @@
       variant: 'bare',
       showCaptions: false,
       showMainImageStar: false,
-      urlHelpText: 'Сервер скачает изображение по HTTP(S); файлы с устройства сохраняются при отправке формы.',
+      urlHelpText: 'Снимки по ссылке или с устройства.',
       urlPlaceholder: 'https://…',
       urlInputId: 'form-gallery-image-url',
       urlFieldTestId: 'form-gallery-image-url',
@@ -97,6 +99,22 @@
 
   const helpTextClass = computed(() =>
     props.tone === 'dialog' ? 'text-sm text-gray-500' : 'text-xs text-stone-500 dark:text-stone-500',
+  );
+
+  const DEFAULT_URL_HELP_DETAIL =
+    'Лимит кадров указан в этом блоке. Ссылка должна вести прямо на файл картинки. Несколько ссылок сначала отправьте в галерею кнопкой «Добавить в галерею», если она есть. Подходят обычные форматы: JPEG, PNG, GIF или WebP.';
+
+  const resolvedUrlHelpDetail = computed((): string | null => {
+    if (props.urlHelpDetail === null) return null;
+    const d = props.urlHelpDetail;
+    if (d !== undefined && d.length > 0) return d;
+    return DEFAULT_URL_HELP_DETAIL;
+  });
+
+  const urlHelpInfoButtonClass = computed(() =>
+    props.tone === 'dialog'
+      ? 'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200/80 hover:text-gray-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-gray-500'
+      : 'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-200/80 hover:text-stone-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-rose-600 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 dark:focus-visible:ring-rose-400',
   );
 
   const cellFrameClass = computed(() =>
@@ -448,9 +466,22 @@
             type="button"
             @click="addByUrl" />
         </div>
-        <p :class="helpTextClass">
-          {{ urlHelpText }}
-        </p>
+        <div class="flex items-start gap-1.5">
+          <p :class="[helpTextClass, 'min-w-0 flex-1']">
+            {{ urlHelpText }}
+          </p>
+          <button
+            v-if="resolvedUrlHelpDetail"
+            type="button"
+            :class="urlHelpInfoButtonClass"
+            v-tooltip.top="resolvedUrlHelpDetail"
+            aria-label="Подробнее о добавлении фото"
+            data-testid="form-gallery-url-help-info">
+            <i
+              class="pi pi-info-circle text-xs"
+              aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       <div
@@ -505,9 +536,22 @@
               @click="addAllPendingUrlsToGallery" />
           </div>
         </div>
-        <p :class="helpTextClass">
-          {{ urlHelpText }}
-        </p>
+        <div class="flex items-start gap-1.5">
+          <p :class="[helpTextClass, 'min-w-0 flex-1']">
+            {{ urlHelpText }}
+          </p>
+          <button
+            v-if="resolvedUrlHelpDetail"
+            type="button"
+            :class="urlHelpInfoButtonClass"
+            v-tooltip.top="resolvedUrlHelpDetail"
+            aria-label="Подробнее о добавлении фото"
+            data-testid="form-gallery-url-help-info">
+            <i
+              class="pi pi-info-circle text-xs"
+              aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       <Button

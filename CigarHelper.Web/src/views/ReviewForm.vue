@@ -245,7 +245,7 @@
                 aria-hidden="true" />
               Детали дегустации
             </h2>
-            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Контекст и субъективные штрихи — по желанию.</p>
+            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Дополнительные поля по желанию.</p>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div class="space-y-4">
                 <div class="flex flex-col gap-2">
@@ -392,7 +392,7 @@
             v-model="form.images"
             variant="section"
             title="Изображения"
-            description="До пяти кадров: с устройства или по ссылке — как в редакторе базовой сигары; подпись к кадру по желанию."
+            description="До пяти фото: файл или ссылка; подпись к кадру по желанию."
             show-captions
             url-entry-mode="multi"
             url-rows-test-id="review-form-image-urls"
@@ -400,7 +400,8 @@
             url-input-id="review-image-url"
             url-field-test-id="review-form-image-url"
             caption-test-id-prefix="review-form"
-            url-help-text="До 12 полей со ссылками: заполните и нажмите «Добавить в галерею» (в галерее не более 5 кадров). Сервер скачает по HTTP(S); файлы с устройства — как data URL (JPEG, PNG, GIF, WebP)."
+            url-help-text="В обзоре не больше пяти снимков. Ссылки сначала добавьте в галерею кнопкой ниже."
+            url-help-detail="Можно ввести до двенадцати ссылок по очереди; в галерее останется не больше пяти кадров. Порядок на превью сохраняется при сохранении."
             grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4" />
 
           <div

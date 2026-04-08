@@ -151,9 +151,7 @@
             <i class="pi pi-filter-slash text-2xl" />
           </span>
           <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Ничего не нашлось</h2>
-          <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
-            Попробуйте смягчить фильтры — список обновится сразу.
-          </p>
+          <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">Смягчите условия фильтров или сбросьте их.</p>
           <Button
             data-testid="review-list-filter-reset"
             class="min-h-12 px-6 touch-manipulation"

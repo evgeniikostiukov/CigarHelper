@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-08** — UI: переписаны подсказки галерей (`FormImageGallerySection` + формы/диалог), дашборд (краткий текст + «i»/tooltip), `HumidorDetail` список доступных сигар, пустые состояния и онбординг; `App.vue` fallback «Загрузка…»; memory bank — паттерн tooltip для деталей.
 - **2026-04-08** — Memory bank: в `docs/memory-bank/frontend/overview.md` добавлено правило про краткие пользовательские пояснения в UI без технических деталей; `frontend/README.md` — ссылка в оглавлении.
 - **2026-04-08** — Тексты страниц (`src/views`): убраны пояснения про устройство UI, устройства, «один экран», касания, ленту/JWT и т.п.; правки по отдельным коммитам: `AdminUsers`, `Brands`, `CigarBases`, `CigarCollectionEdit`, `CigarDetail`, `CigarForm`, `CigarList`, `Home` (в т.ч. карточки фич), `HumidorDetail`, `HumidorForm`, `HumidorList`, `Login`, `Onboarding`, `Profile`, `ReviewForm`, `ReviewList`. Без правок в текстах: `Dashboard` (подписи к метрикам — про данные), `PublicHumidorDetail`, `PublicUserProfile`, `ReviewDetail`.
 - **2026-04-08** — `Home.vue`: убраны мета-формулировки в подзаголовке и hero (про «стиль приложения», про кнопки/отступы/тёмную тему).

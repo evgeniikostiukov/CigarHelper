@@ -35,6 +35,8 @@
 
 Такие тексты живут преимущественно в **`src/views/*.vue`**; при добавлении новых страниц придерживаться этого же критерия.
 
+**Детали правил расчёта или загрузки фото:** короткая строка у элемента + при необходимости иконка **`pi-info-circle`** с **`v-tooltip`** (см. плитки **Dashboard**, блок «Добавить сигары» в **HumidorDetail**, **`FormImageGallerySection`**: `url-help-text` + `url-help-detail`). В tooltip — чуть больше контекста, всё ещё без жаргона разработчика.
+
 ## Точка входа
 
 - `src/main.ts` — приложение, router, PrimeVue (тема, слои CSS), ConfirmationService, ToastService.

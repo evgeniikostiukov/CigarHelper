@@ -270,7 +270,7 @@
         </span>
         <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Пока пусто</h2>
         <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
-          Добавьте первую сигару — бренд, формат и ваши заметки останутся под рукой.
+          Добавьте первую сигару: бренд, формат и заметки.
         </p>
         <Button
           data-testid="cigar-list-empty-add"

@@ -214,7 +214,7 @@
                       <i
                         class="pi pi-image text-3xl opacity-70"
                         aria-hidden="true" />
-                      <span class="text-xs leading-snug">Добавьте фото справа — превью первого кадра</span>
+                      <span class="text-xs leading-snug">Здесь будет превью первого кадра галереи</span>
                     </div>
                   </div>
                 </div>
@@ -234,7 +234,8 @@
                 add-url-row-test-id="cigar-edit-add-image-url"
                 apply-urls-to-gallery-test-id="cigar-edit-apply-image-gallery"
                 url-placeholder="https://example.com/cigar.jpg"
-                url-help-text="До 12 кадров: ссылки или файлы, «Добавить в галерею»; при сохранении сервер примет URL и data URL. У сохранённых фото звезда сразу назначает главное на сервере."
+                url-help-text="До двенадцати кадров: ссылки через «Добавить в галерею» или файлы ниже."
+                url-help-detail="У уже сохранённых фото звёздочка назначает главный кадр; изменение применится при сохранении формы."
                 grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4"
                 @existing-main-set="onExistingMainSet" />
             </div>

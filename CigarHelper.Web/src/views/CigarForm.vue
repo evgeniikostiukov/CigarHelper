@@ -245,7 +245,7 @@
                       <i
                         class="pi pi-image text-3xl opacity-70"
                         aria-hidden="true" />
-                      <span class="text-xs leading-snug">Добавьте фото справа — превью первого кадра</span>
+                      <span class="text-xs leading-snug">Здесь будет превью первого кадра галереи</span>
                     </div>
                   </div>
                 </div>
@@ -265,7 +265,8 @@
                 add-url-row-test-id="cigar-form-add-image-url"
                 apply-urls-to-gallery-test-id="cigar-form-apply-image-gallery"
                 url-placeholder="https://example.com/cigar.jpg"
-                url-help-text="До 12 кадров: укажите ссылки или выберите файлы, добавьте в галерею; при сохранении сервер примет URL и data URL. Порядок в галерее — порядок отправки, первое успешное фото — главное."
+                url-help-text="До двенадцати кадров: ссылки через «Добавить в галерею» или файлы ниже."
+                url-help-detail="Порядок на превью сохраняется; первое фото обычно показывается как главное."
                 grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4" />
             </div>
           </div>

@@ -84,9 +84,19 @@
               <p class="text-3xl font-semibold text-stone-900 dark:text-rose-50/95">
                 {{ summary.totalCigars }}
               </p>
-              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
-                Учитываются все сигары, в том числе вне хьюмидоров.
-              </p>
+              <div class="mt-2 flex items-start gap-1">
+                <p class="min-w-0 flex-1 text-xs text-stone-500 dark:text-stone-500">Включая сигары вне хьюмидора.</p>
+                <button
+                  type="button"
+                  :class="dashboardMetricInfoBtnClass"
+                  v-tooltip.top="'Считаются все записи коллекции, в том числе без привязки к хьюмидору.'"
+                  aria-label="Как считается число сигар"
+                  data-testid="dashboard-summary-total-cigars-info">
+                  <i
+                    class="pi pi-info-circle text-xs"
+                    aria-hidden="true" />
+                </button>
+              </div>
             </article>
 
             <article
@@ -108,9 +118,19 @@
                 class="text-3xl font-semibold text-stone-400 dark:text-stone-500">
                 —
               </p>
-              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
-                По полю «оценка» у сигар в коллекции; без оценок среднее не считается.
-              </p>
+              <div class="mt-2 flex items-start gap-1">
+                <p class="min-w-0 flex-1 text-xs text-stone-500 dark:text-stone-500">Только сигары с вашей оценкой.</p>
+                <button
+                  type="button"
+                  :class="dashboardMetricInfoBtnClass"
+                  v-tooltip.top="'Среднее по полю оценки. Если ни у одной сигары нет оценки, показывается прочерк.'"
+                  aria-label="Как считается средняя оценка"
+                  data-testid="dashboard-summary-average-rating-info">
+                  <i
+                    class="pi pi-info-circle text-xs"
+                    aria-hidden="true" />
+                </button>
+              </div>
             </article>
 
             <article
@@ -122,9 +142,21 @@
               <p class="text-3xl font-semibold text-stone-900 dark:text-rose-50/95">
                 {{ summary.totalHumidors }}
               </p>
-              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
-                Суммарная вместимость: {{ summary.totalCapacity }} сигар.
-              </p>
+              <div class="mt-2 flex items-start gap-1">
+                <p class="min-w-0 flex-1 text-xs text-stone-500 dark:text-stone-500">
+                  Суммарная вместимость: {{ summary.totalCapacity }} сигар.
+                </p>
+                <button
+                  type="button"
+                  :class="dashboardMetricInfoBtnClass"
+                  v-tooltip.top="'Складывается из вместимости всех ваших хьюмидоров.'"
+                  aria-label="Что такое суммарная вместимость"
+                  data-testid="dashboard-summary-capacity-info">
+                  <i
+                    class="pi pi-info-circle text-xs"
+                    aria-hidden="true" />
+                </button>
+              </div>
             </article>
 
             <article
@@ -140,9 +172,21 @@
                 :value="summary.averageFillPercent"
                 class="mt-3"
                 :show-value="false" />
-              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
-                В расчёте учтены только хьюмидоры с заданной вместимостью.
-              </p>
+              <div class="mt-2 flex items-start gap-1">
+                <p class="min-w-0 flex-1 text-xs text-stone-500 dark:text-stone-500">
+                  Только хьюмидоры с указанной вместимостью.
+                </p>
+                <button
+                  type="button"
+                  :class="dashboardMetricInfoBtnClass"
+                  v-tooltip.top="'Хьюмидоры без заданного лимита места в этот процент не входят.'"
+                  aria-label="Как считается заполненность"
+                  data-testid="dashboard-summary-fill-info">
+                  <i
+                    class="pi pi-info-circle text-xs"
+                    aria-hidden="true" />
+                </button>
+              </div>
             </article>
 
             <article
@@ -154,9 +198,19 @@
               <p class="text-3xl font-semibold text-stone-900 dark:text-rose-50/95">
                 {{ summary.averageDaysToSmoke }} дн.
               </p>
-              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">
-                Считается по сигарам, где отмечена дата выкуривания.
-              </p>
+              <div class="mt-2 flex items-start gap-1">
+                <p class="min-w-0 flex-1 text-xs text-stone-500 dark:text-stone-500">По сигарам с датой выкура.</p>
+                <button
+                  type="button"
+                  :class="dashboardMetricInfoBtnClass"
+                  v-tooltip.top="'Учитываются позиции, у которых указана плановая или фактическая дата выкуривания.'"
+                  aria-label="Как считается срок до выкура"
+                  data-testid="dashboard-summary-aging-info">
+                  <i
+                    class="pi pi-info-circle text-xs"
+                    aria-hidden="true" />
+                </button>
+              </div>
             </article>
           </section>
 
@@ -373,6 +427,9 @@
   import ProgressBar from 'primevue/progressbar';
   import Skeleton from 'primevue/skeleton';
   import dashboardService, { type DashboardSummary } from '@/services/dashboardService';
+
+  const dashboardMetricInfoBtnClass =
+    'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-200/80 hover:text-stone-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-rose-600 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 dark:focus-visible:ring-rose-400';
 
   const router = useRouter();
 

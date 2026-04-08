@@ -123,7 +123,7 @@
               <i
                 class="pi pi-spinner animate-spin text-3xl text-rose-800/80 dark:text-rose-400/80"
                 aria-hidden="true" />
-              <p class="text-sm text-stone-600 dark:text-stone-400">Загрузка экрана…</p>
+              <p class="text-sm text-stone-600 dark:text-stone-400">Загрузка…</p>
             </div>
           </template>
         </Suspense>

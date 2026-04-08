@@ -73,7 +73,7 @@
         </span>
         <h2 class="mb-2 text-2xl font-semibold text-stone-900 dark:text-rose-50/95">Брендов пока нет</h2>
         <p class="mb-6 text-pretty text-stone-600 dark:text-stone-400">
-          Добавьте первый бренд — он появится в базе и в фильтрах каталога.
+          Добавьте бренд — он будет в справочнике и в фильтрах каталога.
         </p>
         <Button
           data-testid="brands-empty-add"

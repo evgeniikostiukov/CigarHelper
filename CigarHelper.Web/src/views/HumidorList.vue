@@ -71,7 +71,7 @@
         </span>
         <h2 class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95 mb-2">Пока пусто</h2>
         <p class="text-stone-600 dark:text-stone-400 mb-6 text-pretty">
-          Создайте первый хьюмидор — с него начнётся учёт сигар и влажности.
+          Создайте хьюмидор, чтобы вести учёт сигар и влажности.
         </p>
         <Button
           data-testid="humidor-list-empty-add"
