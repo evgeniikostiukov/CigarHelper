@@ -21,6 +21,10 @@ dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj
 
 Убедиться, что задана строка подключения к PostgreSQL и параметры JWT для выдачи токенов.
 
+### Полный стек в Docker (Postgres + MinIO + API + SPA)
+
+Пошаговая инструкция: **[`docs/docker.md`](../docker.md)** (`docker compose --profile full`). Переменные `JWT_KEY`, `WEB_PORT`, `API_HOST_PORT` — в `.env` (шаблон `.env.example`).
+
 ### Локальная БД через Docker
 
 ```bash

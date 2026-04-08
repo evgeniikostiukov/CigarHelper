@@ -1,0 +1,13 @@
+# Сборка образов API из контекста репозитория
+**/.git
+**/.vs
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/TestResults
+**/*.user
+**/e2e/node_modules
+**/.env
+**/.env.*
+!**/.env.example

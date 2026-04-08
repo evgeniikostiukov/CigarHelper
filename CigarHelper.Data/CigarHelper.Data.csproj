@@ -25,11 +25,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- В bin нужны для Import/локальной отладки; в publish зависимого API не попадают (NETSDK1152). -->
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
     <None Update="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 

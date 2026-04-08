@@ -1,7 +1,12 @@
-# Локальная инфраструктура для разработки (Postgres + MinIO).
-# Секреты задаются в файле .env (из .env.example; в git не попадает).
-# API: `dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj`
-# (см. docs/memory-bank/workflow.md)
+# Инфраструктура и приложение в Docker.
+#
+# Только Postgres + MinIO (как раньше):
+#   docker compose up -d postgres minio
+#
+# Полный стек (Postgres, MinIO, API, SPA): см. docs/docker.md
+#   docker compose --profile full up -d --build
+#
+# Кратко: скопировать .env из .env.example, задать JWT_KEY (≥32 символов), затем профиль full.
 services:
   postgres:
     image: postgres:16-alpine
@@ -35,6 +40,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Jwt__Key: ${JWT_KEY}
+      Cors__Origins__0: http://localhost:${WEB_PORT:-8080}
+      ImageStorage__Minio__Endpoint: minio:9000
+      ImageStorage__Minio__AccessKey: ${MINIO_ROOT_USER}
+      ImageStorage__Minio__SecretKey: ${MINIO_ROOT_PASSWORD}
+      ImageStorage__Minio__UseSsl: 'false'
+      ForwardedHeaders__Enabled: 'false'
+    ports:
+      - "${API_HOST_PORT:-5184}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  web:
+    profiles: ['full']
+    build:
+      context: ./CigarHelper.Web
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
 
 volumes:
   cigarhelper-pg:

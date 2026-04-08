@@ -33,7 +33,7 @@
 
 - [ ] **SPA:** единый слой обработки ошибок API (toast + маппинг 401/403/5xx), меньше дублирования по view.
 - [ ] **API:** health / readiness эндпоинты для хостинга и мониторинга (если ещё не покрыто текущей конфигурацией).
-- [ ] **Docker Compose** для локалки: Postgres + API (опционально фронт) одной командой; кратко в memory bank / README.
+- [x] **Docker Compose** для локалки: Postgres + API + фронт (`--profile full`); инструкция [`docs/docker.md`](./docs/docker.md), ссылка в memory bank.
 - [x] **E2E (Playwright):** добавить в репозиторий (`e2e/` или внутри `CigarHelper.Web` — по решению команды).
 - [x] **E2E:** описать в README/memory bank, как поднимать API + фронт (порты, тестовый пользователь, env).
 - [x] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/сеткой карточек (база сигар).
@@ -190,5 +190,6 @@
 - **2026-04-08** — `CigarBases.vue`: единая выдача карточками (`lg:grid-cols-3`), без `DataTable`; панель сортировки (`Select` по полям API: `name`, `brandname`, …), общий `Paginator` с опцией 100 строк; smoke E2E и `collection-list-views.md` переведены на `cigar-bases-grid`.
 - **2026-04-08** — Комментарии: сущность `CigarComment` + миграция, `CigarCommentsController` / `CigarCommentService`, UI `CigarCommentsPanel` в `CigarDetailDialog` (экран базы сигар) и диалог на `PublicHumidorDetail` для чужих `UserCigar`; интеграционные тесты `CigarCommentsIntegrationTests`; `docs/memory-bank/code-map.md`.
 - **2026-04-08** — Модерация комментариев: `CigarCommentModerationStatus`, миграция `AddCigarCommentModeration` (старые строки — Approved), `AdminCigarCommentsController`, очередь в `AdminCigarComments.vue`; `/admin` доступен **Moderator** для ветки «Комментарии»; меню «Админ-панель» у модератора ведёт в очередь; интеграционные тесты обновлены; в `TODO.md` (P3) — отложенные задачи по жалобам/антиспаму/rate limit/уведомлениям.
+- **2026-04-08** — Docker: `Dockerfile.api`, `CigarHelper.Web/Dockerfile` + `nginx.docker.conf`, профиль `full` в `docker-compose.yml` (api + web), `.dockerignore`, `docs/docker.md`; `.env.example` — `JWT_KEY`, `WEB_PORT`, `API_HOST_PORT`.
 - **2026-04-08** — Auth: вход и регистрация по **логину** (`LoginRequest.Username`, без email в `RegisterRequest`); `User.Email` опционален, миграция `UserEmailOptional`; профиль — email необязательный (`UpdateProfileRequest.Email`); JWT: claim `email` только если задан; единое сообщение «Неверный логин или пароль.»; фронт `Login.vue`/`authService`, E2E `E2E_USERNAME`; обновлены тесты и docs (`workflow`, `security-refactor-memory-bank`, `e2e/README`).
 
