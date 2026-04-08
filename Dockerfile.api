@@ -1,18 +1,18 @@
 # syntax=docker/dockerfile:1
-# Сборка ASP.NET Core API (net10.0). Контекст — корень репозитория.
+# Сборка ASP.NET Core Api (net10.0). Контекст — корень репозитория.
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY CigarHelper.sln ./
-COPY CigarHelper.API/CigarHelper.Api.csproj CigarHelper.API/
+COPY CigarHelper.Api/CigarHelper.Api.csproj CigarHelper.Api/
 COPY CigarHelper.Data/CigarHelper.Data.csproj CigarHelper.Data/
 
-RUN dotnet restore CigarHelper.API/CigarHelper.Api.csproj
+RUN dotnet restore CigarHelper.Api/CigarHelper.Api.csproj
 
-COPY CigarHelper.API/ CigarHelper.API/
+COPY CigarHelper.Api/ CigarHelper.Api/
 COPY CigarHelper.Data/ CigarHelper.Data/
 
-RUN dotnet publish CigarHelper.API/CigarHelper.Api.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish CigarHelper.Api/CigarHelper.Api.csproj -c Release -o /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
