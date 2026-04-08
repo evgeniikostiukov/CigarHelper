@@ -13,16 +13,13 @@
 2. Задайте пароли Postgres и MinIO (`POSTGRES_*`, `MINIO_ROOT_*`).
 3. Задайте **`JWT_KEY`** — строка **не короче 32 символов** (секрет подписи JWT); в репозиторий не коммитить.
 4. При необходимости измените **`WEB_PORT`** (порт SPA в браузере, по умолчанию `8080`). CORS для API подставляется как `http://localhost:<WEB_PORT>` — открывайте приложение с тем же хостом и портом.
-5. Если заходите с **`http://127.0.0.1:<порт>`**, добавьте второй origin. Удобнее всего файл **`docker-compose.override.yml`** (не коммитится, если добавите в `.gitignore`) рядом с `docker-compose.yml`:
+5. Если заходите с **`http://127.0.0.1:<порт>`** (или другого origin), добавьте его в CORS. Удобно скопировать шаблон **`docker-compose.override.example.yml`** → **`docker-compose.override.yml`** (этот файл в [`.gitignore`](../.gitignore) и не попадает в git):
 
-```yaml
-services:
-  api:
-    environment:
-      Cors__Origins__1: http://127.0.0.1:8080
+```bash
+cp docker-compose.override.example.yml docker-compose.override.yml
 ```
 
-(порт совместите с `WEB_PORT`).
+При несовпадении порта с `WEB_PORT` отредактируйте значения в override. Для произвольного IP в LAN см. закомментированный пример в том же файле.
 
 ## Первый запуск: миграции БД
 
