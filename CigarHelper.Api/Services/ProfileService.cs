@@ -44,7 +44,7 @@ public class ProfileService : IProfileService
         }
 
         var usernameNorm = request.Username.Trim();
-        var emailNorm = request.Email.Trim();
+        var emailNorm = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
 
         if (!string.Equals(user.Username, usernameNorm, StringComparison.Ordinal))
         {
@@ -55,7 +55,8 @@ public class ProfileService : IProfileService
             }
         }
 
-        if (!string.Equals(user.Email, emailNorm, StringComparison.OrdinalIgnoreCase))
+        if (emailNorm != null
+            && !string.Equals(user.Email, emailNorm, StringComparison.OrdinalIgnoreCase))
         {
             var taken = await _db.Users.AnyAsync(x => x.Email == emailNorm && x.Id != userId, cancellationToken);
             if (taken)
@@ -65,7 +66,7 @@ public class ProfileService : IProfileService
         }
 
         var needNewToken = !string.Equals(user.Username, usernameNorm, StringComparison.Ordinal)
-            || !string.Equals(user.Email, emailNorm, StringComparison.OrdinalIgnoreCase);
+            || !string.Equals(user.Email ?? "", emailNorm ?? "", StringComparison.OrdinalIgnoreCase);
 
         user.Username = usernameNorm;
         user.Email = emailNorm;
@@ -169,7 +170,7 @@ public class ProfileService : IProfileService
     {
         Id = u.Id,
         Username = u.Username,
-        Email = u.Email,
+        Email = u.Email ?? string.Empty,
         Role = u.Role,
         IsProfilePublic = u.IsProfilePublic,
         CreatedAt = u.CreatedAt,

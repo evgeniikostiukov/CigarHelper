@@ -14,10 +14,9 @@ public class User
     [MaxLength(50)]
     public string Username { get; set; } = string.Empty;
 
-    [Required]
-    [EmailAddress]
+    /// <summary>Необязательно: можно указать позже в профиле. Уникален, если задан.</summary>
     [MaxLength(100)]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     [Required]
     public byte[] PasswordHash { get; set; } = Array.Empty<byte>();

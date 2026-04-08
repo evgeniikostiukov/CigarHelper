@@ -101,7 +101,6 @@ public class CigarCommentsIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"cu{Guid.NewGuid():N}"[..11],
-            Email = $"{Guid.NewGuid():N}@t.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -129,6 +128,7 @@ public class CigarCommentsIntegrationTests
             Assert.Empty(emptyList);
         }
 
+        var modUsername = $"mc{Guid.NewGuid():N}"[..9];
         var modEmail = $"{Guid.NewGuid():N}@modcmt.test";
         using (var scope = factory.Services.CreateScope())
         {
@@ -136,7 +136,7 @@ public class CigarCommentsIntegrationTests
             JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
             db.Users.Add(new User
             {
-                Username = $"mc{Guid.NewGuid():N}"[..9],
+                Username = modUsername,
                 Email = modEmail,
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -148,7 +148,7 @@ public class CigarCommentsIntegrationTests
 
         using var loginMod = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = modEmail,
+            Username = modUsername,
             Password = "abCd12",
         });
         loginMod.EnsureSuccessStatusCode();
@@ -199,6 +199,7 @@ public class CigarCommentsIntegrationTests
             cbId = cb.Id;
         }
 
+        var modUsername = $"mw{Guid.NewGuid():N}"[..9];
         var modEmail = $"{Guid.NewGuid():N}@modw.test";
         using (var scope = factory.Services.CreateScope())
         {
@@ -206,7 +207,7 @@ public class CigarCommentsIntegrationTests
             JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
             db.Users.Add(new User
             {
-                Username = $"mw{Guid.NewGuid():N}"[..9],
+                Username = modUsername,
                 Email = modEmail,
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -219,7 +220,7 @@ public class CigarCommentsIntegrationTests
         using var client = factory.CreateClient();
         using var loginMod = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = modEmail,
+            Username = modUsername,
             Password = "abCd12",
         });
         loginMod.EnsureSuccessStatusCode();
@@ -256,7 +257,6 @@ public class CigarCommentsIntegrationTests
         var ownerReg = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = ownerUsername,
-            Email = $"{Guid.NewGuid():N}@t.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -305,7 +305,6 @@ public class CigarCommentsIntegrationTests
         var visitorReg = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"vi{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@v.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });

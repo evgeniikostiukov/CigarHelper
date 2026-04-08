@@ -59,7 +59,7 @@
 
 ### Шаг 4 — auth
 
-- Одно сообщение: `AuthService.LoginFailedMessage` = «Неверный email или пароль.»
+- Одно сообщение: `AuthService.LoginFailedMessage` = «Неверный логин или пароль.» (раньше формулировка была про email; вход по username).
 - Rate limiting (`Program.cs`): политика `auth-login` **20/мин/IP**, `auth-register` **10/мин/IP**; партиция по `RemoteIpAddress`; `UseRateLimiter` после `UseAuthorization`.
 - `[EnableRateLimiting]` на `AuthController` для `login` / `register`.
 

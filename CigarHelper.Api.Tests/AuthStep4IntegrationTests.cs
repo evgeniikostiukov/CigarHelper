@@ -32,7 +32,7 @@ public class AuthStep4IntegrationTests
         {
             using var response = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
             {
-                Email = "nobody@example.com",
+                Username = "nobody",
                 Password = "abCd12"
             });
             Assert.NotEqual(HttpStatusCode.TooManyRequests, response.StatusCode);
@@ -40,7 +40,7 @@ public class AuthStep4IntegrationTests
 
         using var limited = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = "nobody@example.com",
+            Username = "nobody",
             Password = "abCd12"
         });
         Assert.Equal(HttpStatusCode.TooManyRequests, limited.StatusCode);
@@ -57,7 +57,6 @@ public class AuthStep4IntegrationTests
             using var response = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
             {
                 Username = $"rl{i}",
-                Email = $"rl{i}@ratelimit.test",
                 Password = "abCd12",
                 ConfirmPassword = "abCd12"
             });
@@ -67,7 +66,6 @@ public class AuthStep4IntegrationTests
         using var limited = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = "rlExtra",
-            Email = "rlExtra@ratelimit.test",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -75,14 +73,14 @@ public class AuthStep4IntegrationTests
     }
 
     [Fact]
-    public async Task Login_UnknownEmail_Returns401_WithUnifiedMessage()
+    public async Task Login_UnknownUsername_Returns401_WithUnifiedMessage()
     {
         await using var factory = new AuthIntegrationWebAppFactory();
         using var client = factory.CreateClient();
 
         using var response = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = "missing@example.com",
+            Username = "missing_user",
             Password = "abCd12"
         });
 
@@ -115,7 +113,7 @@ public class AuthStep4IntegrationTests
         using var client = factory.CreateClient();
         using var response = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = "has@example.com",
+            Username = "hasuser",
             Password = "wrongPw9"
         });
 
@@ -134,7 +132,6 @@ public class AuthStep4IntegrationTests
         using var res = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = "expchk",
-            Email = "expchk@example.com",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -166,7 +163,6 @@ public class AuthStep4IntegrationTests
         using var reg = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = "refreshme",
-            Email = "refreshme@example.com",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });

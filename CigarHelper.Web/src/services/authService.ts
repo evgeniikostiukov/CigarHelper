@@ -7,20 +7,20 @@ import { reactive, readonly } from 'vue';
 export interface User {
   id: number;
   nameid: string;
-  email: string;
+  /** Нет в JWT, если email в профиле не задан */
+  email?: string;
   unique_name: string;
   /** jwt-decode даёт readonly-массив для claim `role` — совместимость с шаблонным JwtPayload */
   role: string | readonly string[];
 }
 
 export interface AuthCredentials {
-  email?: string;
+  username?: string;
   password?: string;
 }
 
 export interface RegisterData {
   username?: string;
-  email?: string;
   password?: string;
   confirmPassword?: string;
 }

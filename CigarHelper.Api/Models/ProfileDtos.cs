@@ -22,10 +22,9 @@ public class UpdateProfileRequest
     [RegularExpression(@"^[a-zA-Z0-9_-]+$", ErrorMessage = "Имя пользователя может содержать только буквы, цифры, подчеркивания и дефисы")]
     public string Username { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Электронная почта обязательна")]
     [EmailAddress(ErrorMessage = "Некорректный формат электронной почты")]
     [StringLength(100, ErrorMessage = "Длина адреса электронной почты не должна превышать 100 символов")]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     public bool IsProfilePublic { get; set; }
 }

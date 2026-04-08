@@ -47,7 +47,7 @@
 | Пункт | Значение |
 |-------|----------|
 | Файл | `src/views/Login.vue` |
-| `data-testid` | `login`, `login-error`, `login-form`, `login-username`, `login-email`, `login-password`, `login-confirm-password`, `login-submit`, `login-toggle-mode`, `login-home` |
+| `data-testid` | `login`, `login-error`, `login-form`, `login-username`, `login-password`, `login-confirm-password`, `login-submit`, `login-toggle-mode`, `login-home` |
 | Scoped классы | `login-root`, `login-grain`, `login-panel-enter` |
 
 ## Dashboard.vue

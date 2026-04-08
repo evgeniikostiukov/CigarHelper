@@ -89,7 +89,6 @@ public class ApiAuthorizationAndContractsIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"adm{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@u.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -121,7 +120,6 @@ public class ApiAuthorizationAndContractsIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"img{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@u.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -139,6 +137,7 @@ public class ApiAuthorizationAndContractsIntegrationTests
     {
         await using var factory = new AuthIntegrationWebAppFactory();
         var adminEmail = $"{Guid.NewGuid():N}@admin.ci";
+        var adminUsername = $"ad{Guid.NewGuid():N}"[..10];
 
         using (var scope = factory.Services.CreateScope())
         {
@@ -146,7 +145,7 @@ public class ApiAuthorizationAndContractsIntegrationTests
             JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
             db.Users.Add(new User
             {
-                Username = $"ad{Guid.NewGuid():N}"[..10],
+                Username = adminUsername,
                 Email = adminEmail,
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -185,7 +184,7 @@ public class ApiAuthorizationAndContractsIntegrationTests
         using var client = factory.CreateClient();
         var loginRes = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = adminEmail,
+            Username = adminUsername,
             Password = "abCd12"
         });
         loginRes.EnsureSuccessStatusCode();
@@ -246,7 +245,6 @@ public class ApiAuthorizationAndContractsIntegrationTests
         var reg = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"intr{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@i.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -269,7 +267,6 @@ public class ApiAuthorizationAndContractsIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = username,
-            Email = $"{Guid.NewGuid():N}@p.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -315,7 +312,6 @@ public class ApiAuthorizationAndContractsIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"pg{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@g.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -366,7 +362,6 @@ public class ApiAuthorizationAndContractsIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"p2{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@2.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });

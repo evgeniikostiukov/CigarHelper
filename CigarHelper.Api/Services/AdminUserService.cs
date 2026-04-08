@@ -30,7 +30,7 @@ public class AdminUserService : IAdminUserService
             var term = search.Trim();
             query = query.Where(u =>
                 u.Username.Contains(term) ||
-                u.Email.Contains(term));
+                (u.Email != null && u.Email.Contains(term)));
         }
 
         var total = await query.CountAsync(cancellationToken);

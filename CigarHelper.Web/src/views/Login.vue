@@ -17,7 +17,7 @@
           {{ isRegister ? 'Регистрация' : 'Вход' }}
         </h1>
         <p class="mx-auto mt-1.5 max-w-sm text-pretty text-sm text-stone-600 dark:text-stone-400">
-          {{ isRegister ? 'Регистрация по email: коллекция, хьюмидоры и обзоры.' : 'Вход по email.' }}
+          {{ isRegister ? 'Укажите логин и пароль — коллекция, хьюмидоры и обзоры.' : 'Вход по логину.' }}
         </p>
       </header>
 
@@ -36,13 +36,11 @@
           data-testid="login-form"
           class="flex flex-col gap-5"
           @submit.prevent="submitForm">
-          <div
-            v-if="isRegister"
-            class="flex flex-col gap-2">
+          <div class="flex flex-col gap-2">
             <label
               for="login-username"
               class="text-xs font-medium text-stone-600 dark:text-stone-400">
-              Имя пользователя
+              Логин
             </label>
             <InputText
               id="login-username"
@@ -51,38 +49,17 @@
               class="min-h-11 w-full"
               :invalid="!!fieldErrors.username"
               aria-describedby="login-username-help"
-              placeholder="Например, john_doe" />
+              :placeholder="isRegister ? 'Например, john_doe' : 'Ваш логин'"
+              autocomplete="username" />
             <small
               id="login-username-help"
               class="text-xs text-stone-500 dark:text-stone-500">
-              Только буквы, цифры, _ и - (3–50 симв.)
+              {{ isRegister ? 'Только буквы, цифры, _ и - (3–50 симв.)' : 'Те же символы, что при регистрации' }}
             </small>
             <small
               v-if="fieldErrors.username"
               class="text-sm text-red-600 dark:text-red-400">
               {{ fieldErrors.username }}
-            </small>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label
-              for="login-email"
-              class="text-xs font-medium text-stone-600 dark:text-stone-400">
-              Email
-            </label>
-            <InputText
-              id="login-email"
-              v-model="form.email"
-              data-testid="login-email"
-              class="min-h-11 w-full"
-              type="email"
-              :invalid="!!fieldErrors.email"
-              placeholder="email@example.com"
-              autocomplete="email" />
-            <small
-              v-if="fieldErrors.email"
-              class="text-sm text-red-600 dark:text-red-400">
-              {{ fieldErrors.email }}
             </small>
           </div>
 
@@ -176,14 +153,12 @@
 
   interface LoginForm {
     username: string;
-    email: string;
     password: string;
     confirmPassword: string;
   }
 
   interface FieldErrors {
     username: string | null;
-    email: string | null;
     password: string | null;
     confirmPassword: string | null;
   }
@@ -197,14 +172,12 @@
 
   const form = reactive<LoginForm>({
     username: '',
-    email: '',
     password: '',
     confirmPassword: '',
   });
 
   const fieldErrors = reactive<FieldErrors>({
     username: null,
-    email: null,
     password: null,
     confirmPassword: null,
   });
@@ -212,15 +185,9 @@
   const validateField = (field: keyof LoginForm, value: string): string | null => {
     switch (field) {
       case 'username':
-        if (isRegister.value) {
-          if (!value) return 'Имя пользователя обязательно';
-          if (value.length < 3) return 'Минимум 3 символа';
-          if (!/^[a-zA-Z0-9_-]+$/.test(value)) return 'Недопустимые символы';
-        }
-        break;
-      case 'email':
-        if (!value) return 'Email обязателен';
-        if (!/\S+@\S+\.\S+/.test(value)) return 'Некорректный формат email';
+        if (!value) return 'Логин обязателен';
+        if (!/^[a-zA-Z0-9_-]+$/.test(value)) return 'Недопустимые символы';
+        if (isRegister.value && value.length < 3) return 'Минимум 3 символа';
         break;
       case 'password':
         if (!value) return 'Пароль обязателен';
@@ -253,7 +220,6 @@
   const clearForm = (): void => {
     Object.assign(form, {
       username: '',
-      email: '',
       password: '',
       confirmPassword: '',
     });
@@ -269,7 +235,6 @@
     error.value = null;
     Object.assign(fieldErrors, {
       username: null,
-      email: null,
       password: null,
       confirmPassword: null,
     });
@@ -281,7 +246,7 @@
     let hasError = false;
     for (const field in form) {
       const key = field as keyof LoginForm;
-      if (!isRegister.value && (key === 'username' || key === 'confirmPassword')) {
+      if (!isRegister.value && key === 'confirmPassword') {
         continue;
       }
       const validationError = validateField(key, form[key]);
@@ -298,7 +263,6 @@
       if (isRegister.value) {
         const payload: RegisterData = {
           username: form.username,
-          email: form.email,
           password: form.password,
           confirmPassword: form.confirmPassword,
         };
@@ -309,7 +273,7 @@
         localStorage.setItem('needsOnboarding', '1');
       } else {
         const payload: AuthCredentials = {
-          email: form.email,
+          username: form.username,
           password: form.password,
         };
         const response = await authService.login(payload);

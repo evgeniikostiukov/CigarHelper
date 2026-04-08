@@ -13,7 +13,7 @@ export interface MyProfile {
 
 export interface UpdateProfilePayload {
   username: string;
-  email: string;
+  email: string | null;
   isProfilePublic: boolean;
 }
 

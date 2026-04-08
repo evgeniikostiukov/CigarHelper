@@ -6,8 +6,8 @@ namespace CigarHelper.Api.Services;
 
 public class AuthService
 {
-    /// <summary>Сообщение при любой неудачной попытке входа (без раскрытия, существует ли email).</summary>
-    public const string LoginFailedMessage = "Неверный email или пароль.";
+    /// <summary>Сообщение при любой неудачной попытке входа (без раскрытия, существует ли пользователь).</summary>
+    public const string LoginFailedMessage = "Неверный логин или пароль.";
 
     private readonly AppDbContext _context;
     private readonly IJwtService _jwtService;
@@ -20,16 +20,6 @@ public class AuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        // Check if email already exists
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-        {
-            return new AuthResponse
-            {
-                Success = false,
-                Message = "Email already registered"
-            };
-        }
-
         // Check if username already exists
         if (await _context.Users.AnyAsync(u => u.Username == request.Username))
         {
@@ -47,7 +37,7 @@ public class AuthService
         var user = new User
         {
             Username = request.Username,
-            Email = request.Email,
+            Email = null,
             PasswordHash = passwordHash,
             PasswordSalt = passwordSalt,
             CreatedAt = DateTime.UtcNow
@@ -72,8 +62,7 @@ public class AuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        // Find user by email
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
 
         if (user == null)
         {

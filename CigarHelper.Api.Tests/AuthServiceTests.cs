@@ -13,10 +13,9 @@ namespace CigarHelper.Api.Tests;
 public class AuthServiceTests
 {
     private const string ValidPassword = "abCd12";
-    private static RegisterRequest NewRegisterRequest(string username, string email) => new()
+    private static RegisterRequest NewRegisterRequest(string username) => new()
     {
         Username = username,
-        Email = email,
         Password = ValidPassword,
         ConfirmPassword = ValidPassword
     };
@@ -38,7 +37,7 @@ public class AuthServiceTests
         jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("mock-token", exp));
         var sut = new AuthService(context, jwt.Object);
 
-        var res = await sut.RegisterAsync(NewRegisterRequest("newuser", "new@example.com"));
+        var res = await sut.RegisterAsync(NewRegisterRequest("newuser"));
 
         Assert.True(res.Success);
         Assert.Equal("mock-token", res.Token);
@@ -46,32 +45,9 @@ public class AuthServiceTests
         Assert.Equal("newuser", res.Username);
         Assert.Equal(Role.User, res.Role);
         Assert.Single(context.Users);
-        jwt.Verify(j => j.GenerateToken(It.Is<User>(u => u.Username == "newuser" && u.Email == "new@example.com")), Times.Once);
-    }
-
-    [Fact]
-    public async Task RegisterAsync_DuplicateEmail_ReturnsFailure()
-    {
-        await using var context = CreateContext();
-        JwtService.CreatePasswordHash(ValidPassword, out var hash, out var salt);
-        context.Users.Add(new User
-        {
-            Username = "other",
-            Email = "dup@example.com",
-            PasswordHash = hash,
-            PasswordSalt = salt,
-            CreatedAt = DateTime.UtcNow
-        });
-        await context.SaveChangesAsync();
-
-        var jwt = new Mock<IJwtService>(MockBehavior.Strict);
-        var sut = new AuthService(context, jwt.Object);
-
-        var res = await sut.RegisterAsync(NewRegisterRequest("newuser", "dup@example.com"));
-
-        Assert.False(res.Success);
-        Assert.Equal("Email already registered", res.Message);
-        jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
+        var stored = await context.Users.SingleAsync();
+        Assert.Null(stored.Email);
+        jwt.Verify(j => j.GenerateToken(It.Is<User>(u => u.Username == "newuser" && u.Email == null)), Times.Once);
     }
 
     [Fact]
@@ -92,7 +68,7 @@ public class AuthServiceTests
         var jwt = new Mock<IJwtService>(MockBehavior.Strict);
         var sut = new AuthService(context, jwt.Object);
 
-        var res = await sut.RegisterAsync(NewRegisterRequest("taken", "b@example.com"));
+        var res = await sut.RegisterAsync(NewRegisterRequest("taken"));
 
         Assert.False(res.Success);
         Assert.Equal("Username already taken", res.Message);
@@ -121,7 +97,7 @@ public class AuthServiceTests
         jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("login-token", exp));
         var sut = new AuthService(context, jwt.Object);
 
-        var res = await sut.LoginAsync(new LoginRequest { Email = "log@example.com", Password = ValidPassword });
+        var res = await sut.LoginAsync(new LoginRequest { Username = "loguser", Password = ValidPassword });
 
         Assert.True(res.Success);
         Assert.Equal("login-token", res.Token);
@@ -139,7 +115,7 @@ public class AuthServiceTests
         var jwt = new Mock<IJwtService>(MockBehavior.Strict);
         var sut = new AuthService(context, jwt.Object);
 
-        var res = await sut.LoginAsync(new LoginRequest { Email = "none@example.com", Password = ValidPassword });
+        var res = await sut.LoginAsync(new LoginRequest { Username = "nosuchuser", Password = ValidPassword });
 
         Assert.False(res.Success);
         Assert.Equal(AuthService.LoginFailedMessage, res.Message);
@@ -170,7 +146,7 @@ public class AuthServiceTests
         jwt.Setup(j => j.GenerateToken(It.IsAny<User>())).Returns(("t", DateTime.UtcNow.AddHours(1)));
         var sut = new AuthService(context, jwt.Object);
 
-        var res = await sut.LoginAsync(new LoginRequest { Email = "leg@example.com", Password = ValidPassword });
+        var res = await sut.LoginAsync(new LoginRequest { Username = "legacy", Password = ValidPassword });
 
         Assert.True(res.Success);
         var user = await context.Users.SingleAsync();
@@ -198,7 +174,7 @@ public class AuthServiceTests
         var jwt = new Mock<IJwtService>(MockBehavior.Strict);
         var sut = new AuthService(context, jwt.Object);
 
-        var res = await sut.LoginAsync(new LoginRequest { Email = "e@example.com", Password = "wrongPw1" });
+        var res = await sut.LoginAsync(new LoginRequest { Username = "u", Password = "wrongPw1" });
 
         Assert.False(res.Success);
         Assert.Equal(AuthService.LoginFailedMessage, res.Message);

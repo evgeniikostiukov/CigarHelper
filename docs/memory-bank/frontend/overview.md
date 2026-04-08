@@ -12,7 +12,7 @@
 - **PrimeVue 4** + **@primeuix/themes** (база Aura, кастомный пресет в `main.ts` — см. ниже), иконки PrimeIcons.
 - **Tailwind CSS 4** + **tailwindcss-primeui**, PostCSS.
 - **Axios** — единый клиент `src/services/api.ts`, `baseURL: '/api'`.
-- **jwt-decode** — разбор JWT в `authService.ts`; зависимость объявлена в `CigarHelper.Web/package.json`.
+- **jwt-decode** — разбор JWT в `authService.ts`; зависимость объявлена в `CigarHelper.Web/package.json`. Регистрация и вход по **логину** (username); claim `email` в JWT есть только если пользователь указал email в профиле.
 - **TipTap** (+ Vue 3) — **TextEditor.vue**; **DOMPurify** — санитизация HTML где нужно.
 - **@vueuse/core** — утилиты.
 

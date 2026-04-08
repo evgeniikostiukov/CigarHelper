@@ -31,7 +31,7 @@ public class ProfileServiceTests
     private static async Task<User> SeedUserAsync(
         AppDbContext db,
         string username,
-        string email,
+        string? email,
         bool isProfilePublic = true)
     {
         JwtService.CreatePasswordHash(ValidPassword, out var hash, out var salt);
@@ -76,6 +76,19 @@ public class ProfileServiceTests
         Assert.Equal("me", dto.Username);
         Assert.Equal("me@example.com", dto.Email);
         Assert.Equal(Role.User, dto.Role);
+    }
+
+    [Fact]
+    public async Task GetMyProfileAsync_UserWithoutEmail_ReturnsEmptyEmailInDto()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db, "noemail", email: null);
+        var sut = CreateSut(db);
+
+        var dto = await sut.GetMyProfileAsync(user.Id);
+
+        Assert.NotNull(dto);
+        Assert.Equal("", dto!.Email);
     }
 
     [Fact]

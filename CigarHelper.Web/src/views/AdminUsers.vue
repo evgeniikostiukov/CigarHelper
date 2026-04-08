@@ -127,9 +127,11 @@
             <Column
               field="username"
               header="Имя" />
-            <Column
-              field="email"
-              header="Email" />
+            <Column header="Email">
+              <template #body="{ data }">
+                {{ data.email || '—' }}
+              </template>
+            </Column>
             <Column header="Роль">
               <template #body="{ data }">
                 <Select

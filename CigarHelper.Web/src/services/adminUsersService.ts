@@ -5,7 +5,7 @@ export type AdminRole = 'User' | 'Moderator' | 'Admin';
 export interface AdminUserListItem {
   id: number;
   username: string;
-  email: string;
+  email: string | null;
   role: AdminRole;
   createdAt: string;
   lastLogin: string | null;

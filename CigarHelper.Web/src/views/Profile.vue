@@ -18,7 +18,7 @@
             Профиль
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Имя, email, публичная страница и пароль.
+            Имя, необязательный email, публичная страница и пароль.
           </p>
         </div>
       </header>
@@ -93,7 +93,7 @@
               <label
                 for="profile-email"
                 class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                Email
+                Email (необязательно)
               </label>
               <InputText
                 id="profile-email"
@@ -332,9 +332,10 @@
     Object.keys(fieldErrors).forEach((k) => delete fieldErrors[k]);
     saving.value = true;
     try {
+      const trimmedMail = form.email.trim();
       const res = await profileApi.updateProfile({
         username: form.username.trim(),
-        email: form.email.trim(),
+        email: trimmedMail.length > 0 ? trimmedMail : null,
         isProfilePublic: form.isProfilePublic,
       });
       if (res.newToken) {

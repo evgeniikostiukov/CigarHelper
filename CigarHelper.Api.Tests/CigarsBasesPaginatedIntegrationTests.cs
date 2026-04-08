@@ -65,7 +65,6 @@ public class CigarsBasesPaginatedIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"u{Guid.NewGuid():N}"[..12],
-            Email = $"{Guid.NewGuid():N}@t.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -123,7 +122,6 @@ public class CigarsBasesPaginatedIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"v{Guid.NewGuid():N}"[..11],
-            Email = $"{Guid.NewGuid():N}@x.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -198,7 +196,6 @@ public class CigarsBasesPaginatedIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"ni{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@n.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -256,7 +253,6 @@ public class CigarsBasesPaginatedIntegrationTests
         var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
         {
             Username = $"um{Guid.NewGuid():N}"[..10],
-            Email = $"{Guid.NewGuid():N}@u.co",
             Password = "abCd12",
             ConfirmPassword = "abCd12"
         });
@@ -280,6 +276,7 @@ public class CigarsBasesPaginatedIntegrationTests
         await using var factory = new AuthIntegrationWebAppFactory();
         const string moderatedName = "Mod_List_Mod_Test";
         const string unmoderatedName = "Umod_List_Mod_Test";
+        var modUsername = $"mod{Guid.NewGuid():N}"[..10];
         var modEmail = $"{Guid.NewGuid():N}@mod.test";
 
         using (var scope = factory.Services.CreateScope())
@@ -288,7 +285,7 @@ public class CigarsBasesPaginatedIntegrationTests
             JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
             db.Users.Add(new User
             {
-                Username = $"mod{Guid.NewGuid():N}"[..10],
+                Username = modUsername,
                 Email = modEmail,
                 PasswordHash = hash,
                 PasswordSalt = salt,
@@ -325,7 +322,7 @@ public class CigarsBasesPaginatedIntegrationTests
         using var client = factory.CreateClient();
         var loginRes = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
         {
-            Email = modEmail,
+            Username = modUsername,
             Password = "abCd12"
         });
         loginRes.EnsureSuccessStatusCode();

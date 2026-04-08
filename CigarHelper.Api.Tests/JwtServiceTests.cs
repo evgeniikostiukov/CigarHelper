@@ -110,6 +110,24 @@ public class JwtServiceTests
     }
 
     [Fact]
+    public void GenerateToken_NullUserEmail_OmitsEmailClaim()
+    {
+        var config = CreateJwtConfiguration();
+        var jwtService = new JwtService(config);
+        var user = new User
+        {
+            Id = 7,
+            Username = "no_mail",
+            Email = null,
+            Role = Role.User
+        };
+
+        var (token, _) = jwtService.GenerateToken(user);
+        var principal = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        Assert.DoesNotContain(principal.Claims, c => c.Type == ClaimTypes.Email);
+    }
+
+    [Fact]
     public void GenerateToken_ValidTo_AlignsWithIssueTimeAndSevenDayLifetime()
     {
         var config = CreateJwtConfiguration();
