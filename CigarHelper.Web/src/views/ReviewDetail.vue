@@ -71,21 +71,21 @@
         <nav
           class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-stone-600 dark:text-stone-400"
           aria-label="Хлебные крошки">
-          <router-link
+          <RouterLink
             :to="{ name: 'Home' }"
             class="rounded font-medium text-rose-900 underline-offset-2 hover:text-rose-700 hover:underline dark:text-rose-200/90 dark:hover:text-rose-100">
             Главная
-          </router-link>
+          </RouterLink>
           <span
             class="text-stone-400"
             aria-hidden="true"
             >/</span
           >
-          <router-link
+          <RouterLink
             :to="{ name: 'ReviewList' }"
             class="rounded font-medium text-rose-900 underline-offset-2 hover:text-rose-700 hover:underline dark:text-rose-200/90 dark:hover:text-rose-100">
             Обзоры
-          </router-link>
+          </RouterLink>
           <span
             class="text-stone-400"
             aria-hidden="true"
@@ -312,7 +312,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { RouterLink, useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import reviewService from '../services/reviewService';

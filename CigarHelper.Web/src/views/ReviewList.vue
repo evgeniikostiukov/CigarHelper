@@ -186,7 +186,7 @@
             :data-testid="`review-card-${review.id}`"
             class="review-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 motion-reduce:transition-none motion-reduce:animate-none"
             :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
-            <router-link
+            <RouterLink
               :to="{ name: 'ReviewDetail', params: { id: review.id } }"
               class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
               :aria-label="`Открыть обзор: ${review.title}`" />
@@ -268,6 +268,7 @@
 
 <script setup lang="ts">
   import { ref, reactive, computed, onMounted } from 'vue';
+  import { RouterLink } from 'vue-router';
   import reviewService from '../services/reviewService';
   import { useAuth } from '@/services/useAuth';
   import type { Review } from '../services/reviewService';

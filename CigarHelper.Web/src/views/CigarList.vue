@@ -340,7 +340,7 @@
             </Carousel>
           </div>
 
-          <router-link
+          <RouterLink
             :to="{ name: 'CigarDetail', params: { id: String(cigar.id) } }"
             class="relative z-10 flex flex-1 flex-col gap-2.5 p-5 min-h-0 no-underline text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400 rounded-none">
             <h2
@@ -407,7 +407,7 @@
                 aria-hidden="true" />
               <span>Уже выкурена</span>
             </div>
-          </router-link>
+          </RouterLink>
 
           <footer
             class="relative z-20 mt-auto flex justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
@@ -448,7 +448,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { RouterLink, useRouter } from 'vue-router';
   import { useLocalStorage } from '@vueuse/core';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';

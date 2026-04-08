@@ -101,7 +101,7 @@
               :data-testid="`public-profile-humidor-${h.id}`"
               class="public-humidor-card-enter group relative flex min-h-[13rem] flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-rose-900/30 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:animate-none"
               :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
-              <router-link
+              <RouterLink
                 :to="{
                   name: 'PublicHumidorDetail',
                   params: { username: route.params.username, humidorId: String(h.id) },
@@ -131,11 +131,11 @@
                   class="line-clamp-3 mt-auto flex-1 border-t border-stone-100 pt-2 text-sm leading-relaxed text-stone-600 dark:border-stone-700/80 dark:text-stone-400">
                   {{ h.description || 'Нет описания.' }}
                 </p>
-              </router-link>
+              </RouterLink>
 
               <footer
                 class="relative z-20 mt-auto border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
-                <router-link
+                <RouterLink
                   :to="{
                     name: 'PublicHumidorDetail',
                     params: { username: route.params.username, humidorId: String(h.id) },
@@ -147,7 +147,7 @@
                   <i
                     class="pi pi-arrow-right text-xs"
                     aria-hidden="true" />
-                </router-link>
+                </RouterLink>
               </footer>
             </article>
           </div>
@@ -159,7 +159,7 @@
 
 <script setup lang="ts">
   import { ref, watch } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { RouterLink, useRoute, useRouter } from 'vue-router';
   import * as profileApi from '@/services/profileService';
   import type { PublicProfile } from '@/services/profileService';
   import humidorService from '@/services/humidorService';

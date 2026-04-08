@@ -169,12 +169,12 @@
                 header="Название"
                 sortable>
                 <template #body="slotProps">
-                  <router-link
+                  <RouterLink
                     :to="{ name: 'CigarDetail', params: { id: String(slotProps.data.id) } }"
                     class="font-medium text-rose-900 underline-offset-2 hover:underline dark:text-rose-200/95"
                     @click.stop>
                     {{ slotProps.data.name }}
-                  </router-link>
+                  </RouterLink>
                 </template>
               </Column>
               <Column
@@ -350,7 +350,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { RouterLink, useRoute, useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import DataTable from 'primevue/datatable';

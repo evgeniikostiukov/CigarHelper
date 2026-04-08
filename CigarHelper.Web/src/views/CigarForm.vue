@@ -314,11 +314,11 @@
                   v-if="form.addToHumidor && !humidorsLoading && humidors.length === 0"
                   class="text-sm text-rose-900/90 dark:text-rose-200/80">
                   Хьюмидоров пока нет.
-                  <router-link
+                  <RouterLink
                     class="font-medium text-rose-800 underline underline-offset-2 dark:text-rose-300"
                     :to="{ name: 'HumidorList' }">
                     Создайте хьюмидор
-                  </router-link>
+                  </RouterLink>
                   .
                 </p>
               </div>
@@ -369,7 +369,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted, watch } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { RouterLink, useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
   import humidorService from '@/services/humidorService';

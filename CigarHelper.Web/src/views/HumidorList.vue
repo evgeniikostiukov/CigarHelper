@@ -99,7 +99,7 @@
           :data-testid="`humidor-card-${humidor.id}`"
           class="humidor-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 min-h-[16rem] motion-reduce:transition-none motion-reduce:animate-none"
           :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
-          <router-link
+          <RouterLink
             :to="{ name: 'HumidorDetail', params: { id: humidor.id } }"
             class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
             :aria-label="`Открыть хьюмидор ${humidor.name}`" />
@@ -160,6 +160,7 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
+  import { RouterLink } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import humidorService from '../services/humidorService';
