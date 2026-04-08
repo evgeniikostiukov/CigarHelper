@@ -60,7 +60,7 @@
               {{ cigar.name }}
             </h1>
             <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
-              {{ cigar.brand.name }} · карточка сигары и хранение в одном месте.
+              {{ cigar.brand.name }}
             </p>
           </div>
           <div class="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end shrink-0">
