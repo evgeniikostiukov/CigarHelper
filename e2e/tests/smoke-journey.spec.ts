@@ -65,7 +65,7 @@ test.describe('Smoke journey', () => {
     await expect(page.getByTestId('cigar-bases')).toBeVisible({ timeout: 15_000 });
     await expect(
       page.locator(
-        '[data-testid="cigar-bases-table"], [data-testid="cigar-bases-empty"], [data-testid="cigar-bases-error"]',
+        '[data-testid="cigar-bases-grid"], [data-testid="cigar-bases-empty"], [data-testid="cigar-bases-error"]',
       ),
     ).toBeVisible({ timeout: 45_000 });
   });

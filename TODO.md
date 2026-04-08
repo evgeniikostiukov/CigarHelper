@@ -36,7 +36,7 @@
 - [ ] **Docker Compose** для локалки: Postgres + API (опционально фронт) одной командой; кратко в memory bank / README.
 - [x] **E2E (Playwright):** добавить в репозиторий (`e2e/` или внутри `CigarHelper.Web` — по решению команды).
 - [x] **E2E:** описать в README/memory bank, как поднимать API + фронт (порты, тестовый пользователь, env).
-- [x] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/таблицей (например база сигар).
+- [x] **E2E:** smoke-набор — логин, 2–3 ключевых раздела, сценарий с диалогом/сеткой карточек (база сигар).
 - [ ] **E2E:** подключить прогон в CI (Testing/staging по возможности). *(Пока пропущено по запросу.)*
 - [ ] **Коллекция:** экспорт/импорт данных пользователя (CSV/JSON) для бэкапа и переноса.
 - [x] **UX:** дашборд-сводка — объём коллекции, разрез по брендам, недавняя активность/отзывы.
@@ -185,4 +185,6 @@
 - **2026-04-04** — `CigarList.vue`: сворачиваемый блок фильтров (`cigar-list-filters-expanded`, по умолчанию свёрнут), клиентская фильтрация по поиску/бренду/крепости/формату/хьюмидору/выкуриванию, пустое состояние «Ничего не найдено», миниатюры подгружаются для отфильтрованного списка.
 - **2026-04-04** — `docs/memory-bank/frontend/collection-list-views.md`: раздел `CigarList.vue` — фильтры, `localStorage`, `displayedCigars`/миниатюры, полный перечень `data-testid`, `cigar-smoke-{id}`.
 - **2026-04-04** — `CigarList.vue`: фильтр «Крепость» — подписи из `strengthOptions` (русский), значения API без изменений; неизвестные ключи в данных остаются в списке как есть.
+- **2026-04-08** — База сигар: `GET .../cigars/bases/paginated` — `withoutImagesOnly` (нет `CigarImage` с `StoragePath`); `CigarBases.vue` — чекбокс «Нет изображения», интеграционный тест `GetCigarBasesPaginated_WithoutImagesOnly_ReturnsOnlyBasesWithNoStoredImage`.
+- **2026-04-08** — `CigarBases.vue`: единая выдача карточками (`lg:grid-cols-3`), без `DataTable`; панель сортировки (`Select` по полям API: `name`, `brandname`, …), общий `Paginator` с опцией 100 строк; smoke E2E и `collection-list-views.md` переведены на `cigar-bases-grid`.
 

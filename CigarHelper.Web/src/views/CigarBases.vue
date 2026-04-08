@@ -30,6 +30,7 @@
           @click="createNewCigar" />
       </header>
 
+      <!-- Поиск и фильтры — тот же каркас, что hero на главной (Home.vue); тело под спойлер -->
       <div
         class="mb-8 rounded-2xl border border-stone-200/90 bg-white/95 p-6 shadow-md shadow-stone-900/5 sm:mb-10 sm:p-8 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
         data-testid="cigar-bases-filters">
@@ -48,7 +49,7 @@
               </h2>
               <p
                 class="mt-1.5 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 dark:text-stone-300 sm:text-base">
-                Уточните выдачу по названию, бренду или крепости.
+                Уточните выдачу по названию, бренду, крепости или отметьте «Нет изображения».
               </p>
             </div>
           </div>
@@ -167,6 +168,19 @@
                     @change="onFilterChange" />
                 </div>
               </div>
+              <div class="flex items-center gap-2 lg:col-span-12">
+                <Checkbox
+                  v-model="filters.noImageOnly"
+                  input-id="cigar-bases-filter-no-image"
+                  data-testid="cigar-bases-filter-no-image"
+                  binary
+                  @update:model-value="onFilterChange" />
+                <label
+                  for="cigar-bases-filter-no-image"
+                  class="cursor-pointer text-sm text-stone-700 dark:text-stone-300 leading-none select-none">
+                  Нет изображения
+                </label>
+              </div>
             </form>
 
             <div
@@ -203,15 +217,15 @@
           @click="loadCigars" />
       </div>
 
-      <!-- Загрузка: мобильные скелетоны; на lg таблица сама показывает loading -->
+      <!-- Загрузка: скелетоны в сетке как у выдачи -->
       <div
         v-if="loading"
         data-testid="cigar-bases-loading"
-        class="grid min-h-[16rem] grid-cols-1 gap-5 sm:grid-cols-2 lg:hidden sm:gap-6"
+        class="grid min-h-[20rem] grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6"
         aria-busy="true"
         aria-live="polite">
         <Skeleton
-          v-for="n in 3"
+          v-for="n in 6"
           :key="n"
           class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
           height="12rem"
@@ -241,215 +255,63 @@
           @click="resetFilters" />
       </div>
 
-      <!-- Десктоп: таблица -->
-      <div
-        v-show="!error && (loading || pagination.totalRecords > 0)"
-        class="hidden overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 lg:block">
-        <DataTable
-          data-key="id"
-          :value="cigars"
-          :loading="loading"
-          :paginator="true"
-          :rows="pagination.rows"
-          :total-records="pagination.totalRecords"
-          lazy
-          :rows-per-page-options="[10, 20, 50, 100]"
-          :sort-field="sortField"
-          :sort-order="sortOrder"
-          data-testid="cigar-bases-table"
-          striped-rows
-          show-gridlines
-          responsive-layout="scroll"
-          class="p-datatable-sm text-stone-800 dark:text-stone-200 [&_.p-datatable-thead>tr>th]:bg-stone-50/90 dark:[&_.p-datatable-thead>tr>th]:bg-stone-950/80"
-          :virtual-scroller-options="{ itemSize: 60, scrollHeight: '600px' }"
-          @page="onPage"
-          @sort="onSort">
-          <Column
-            header="Логотип"
-            style="width: 4rem">
-            <template #body="{ data }">
-              <div
-                class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
-                <img
-                  v-if="getBrandLogoSrc(data)"
-                  :src="getBrandLogoSrc(data)!"
-                  :alt="data.brand?.name ?? ''"
-                  class="h-full w-full object-cover"
-                  width="40"
-                  height="40"
-                  loading="lazy"
-                  decoding="async" />
-                <i
-                  v-else
-                  class="pi pi-image text-lg text-stone-400"
-                  aria-hidden="true" />
-              </div>
-            </template>
-          </Column>
-          <Column
-            field="name"
-            header="Название"
-            sortable>
-            <template #body="{ data }">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="font-semibold text-stone-900 dark:text-rose-50/90">
-                  {{ data.name }}
-                </span>
-                <Tag
-                  v-if="data.isModerated === false"
-                  severity="warn"
-                  value="На модерации" />
-              </div>
-            </template>
-          </Column>
-          <Column
-            field="brand.name"
-            header="Бренд"
-            sortable>
-            <template #body="{ data }">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="font-medium">{{ data.brand.name }}</span>
-                <span
-                  v-if="data.country"
-                  class="text-xs text-stone-500 dark:text-stone-400">
-                  ({{ data.country }})
-                </span>
-              </div>
-            </template>
-          </Column>
-          <Column
-            field="size"
-            header="Размер"
-            sortable>
-            <template #body="{ data }">
-              <span v-if="data.size">{{ data.size }}</span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-          <Column
-            field="strength"
-            header="Крепость"
-            sortable>
-            <template #body="{ data }">
-              <span
-                v-if="data.strength"
-                class="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                :class="getStrengthBadgeClass(data.strength)">
-                {{ getStrengthLabel(data.strength) }}
-              </span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-          <Column
-            field="wrapper"
-            header="Покровный">
-            <template #body="{ data }">
-              <span v-if="data.wrapper">{{ data.wrapper }}</span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-          <Column
-            field="binder"
-            header="Связующий">
-            <template #body="{ data }">
-              <span v-if="data.binder">{{ data.binder }}</span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-          <Column
-            field="filler"
-            header="Наполнитель">
-            <template #body="{ data }">
-              <span v-if="data.filler">{{ data.filler }}</span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-          <Column
-            header="Действия"
-            :exportable="false"
-            style="min-width: 13rem">
-            <template #body="{ data }">
-              <div class="flex flex-wrap gap-1">
-                <Button
-                  :data-testid="`cigar-bases-row-view-${data.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-eye"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Просмотр"
-                  @click="viewCigar(data)" />
-                <Button
-                  :data-testid="`cigar-bases-row-review-${data.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-pencil"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Написать отзыв"
-                  @click="writeReview(data)" />
-                <Button
-                  :data-testid="`cigar-bases-row-add-${data.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-plus"
-                  text
-                  rounded
-                  aria-label="Добавить в коллекцию"
-                  @click="addToCollection(data)" />
-                <Button
-                  :data-testid="`cigar-bases-row-copy-${data.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-copy"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Создать похожую"
-                  @click="createSimilarCigar(data)" />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-
-      <!-- Мобильные карточки -->
-      <div
-        v-show="!error && (loading || pagination.totalRecords > 0)"
-        class="lg:hidden">
-        <p
+      <!-- Список: карточки на всех ширинах, серверная пагинация и сортировка -->
+      <div v-show="!error && (loading || pagination.totalRecords > 0)">
+        <div
           v-if="!loading && pagination.totalRecords > 0"
-          class="mb-4 text-sm text-stone-600 dark:text-stone-400"
-          data-testid="cigar-bases-mobile-summary">
-          Показано {{ pagination.first + 1 }}-{{
-            Math.min(pagination.first + pagination.rows, pagination.totalRecords)
-          }}
-          из
-          {{ pagination.totalRecords }}
-        </p>
+          class="mb-5 flex flex-col gap-4 sm:mb-6 lg:flex-row lg:items-end lg:justify-between"
+          data-testid="cigar-bases-toolbar">
+          <p
+            class="text-sm text-stone-600 dark:text-stone-400"
+            data-testid="cigar-bases-summary">
+            Показано {{ pagination.first + 1 }}-{{
+              Math.min(pagination.first + pagination.rows, pagination.totalRecords)
+            }}
+            из
+            {{ pagination.totalRecords }}
+          </p>
+          <div class="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end lg:w-auto">
+            <div class="min-w-0 flex-1 sm:flex-initial sm:min-w-[12rem]">
+              <label
+                for="cigar-bases-sort-field"
+                class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                Сортировка
+              </label>
+              <Select
+                id="cigar-bases-sort-field"
+                v-model="sortField"
+                data-testid="cigar-bases-sort-field"
+                :options="sortFieldOptions"
+                option-label="label"
+                option-value="value"
+                class="w-full min-h-12 sm:min-h-11"
+                :show-clear="false"
+                @change="onSortChange" />
+            </div>
+            <div class="min-w-0 flex-1 sm:flex-initial sm:min-w-[11rem]">
+              <label
+                for="cigar-bases-sort-order"
+                class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
+                Порядок
+              </label>
+              <Select
+                id="cigar-bases-sort-order"
+                v-model="sortOrder"
+                data-testid="cigar-bases-sort-order"
+                :options="sortOrderOptions"
+                option-label="label"
+                option-value="value"
+                class="w-full min-h-12 sm:min-h-11"
+                :show-clear="false"
+                @change="onSortChange" />
+            </div>
+          </div>
+        </div>
 
         <div
           v-if="!loading"
-          class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6"
-          data-testid="cigar-bases-mobile-grid">
+          class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+          data-testid="cigar-bases-grid">
           <article
             v-for="(cigar, index) in cigars"
             :key="cigar.id"
@@ -516,6 +378,11 @@
                     {{ getStrengthLabel(cigar.strength) }}
                   </span>
                 </div>
+                <p
+                  v-if="blendLine(cigar)"
+                  class="mt-2 line-clamp-2 text-pretty text-xs text-stone-500 dark:text-stone-400">
+                  {{ blendLine(cigar) }}
+                </p>
               </div>
             </div>
             <footer
@@ -567,7 +434,7 @@
             :first="pagination.first"
             :rows="pagination.rows"
             :total-records="pagination.totalRecords"
-            :rows-per-page-options="[10, 20, 50]"
+            :rows-per-page-options="[10, 20, 50, 100]"
             template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             @page="onPage" />
         </div>
@@ -598,7 +465,6 @@
   import { useAuth } from '@/services/useAuth';
   import { hasAnyRole } from '@/utils/roles';
   import type { CigarBase, CigarImage, PaginatedResult, Brand } from '@/services/cigarService';
-  import type { DataTablePageEvent, DataTableSortEvent } from 'primevue/datatable';
   import type { PageState } from 'primevue/paginator';
   import CigarDetailDialog from '../components/CigarDetailDialog.vue';
   import CigarBaseEditDialog from '../components/CigarBaseEditDialog.vue';
@@ -612,6 +478,8 @@
     brand: number | null;
     strength: string | null;
     moderationFilter: ModerationFilterValue;
+    /** Только записи без файла в хранилище (нет CigarImage с StoragePath). */
+    noImageOnly: boolean;
   }
 
   interface Pagination {
@@ -628,6 +496,20 @@
   const moderationFilterOptions: { label: string; value: ModerationFilterValue }[] = [
     { label: 'Только промодерированные', value: 'moderated' },
     { label: 'Только не промодерированные', value: 'unmoderated' },
+  ];
+
+  /** Значения как в `GetCigarBasesPaginated` (ASP.NET): `brandname`, не `brand.name`. */
+  const sortFieldOptions: { label: string; value: string }[] = [
+    { label: 'Название', value: 'name' },
+    { label: 'Бренд', value: 'brandname' },
+    { label: 'Размер', value: 'size' },
+    { label: 'Крепость', value: 'strength' },
+    { label: 'Страна', value: 'country' },
+  ];
+
+  const sortOrderOptions: { label: string; value: 1 | -1 }[] = [
+    { label: 'По возрастанию', value: 1 },
+    { label: 'По убыванию', value: -1 },
   ];
 
   const router = useRouter();
@@ -654,6 +536,7 @@
     brand: null,
     strength: null,
     moderationFilter: 'moderated',
+    noImageOnly: false,
   });
 
   const sortField = ref<string>('name');
@@ -671,7 +554,13 @@
 
   const filtersActive = computed(() => {
     const f = filters.value;
-    return Boolean(f.search?.trim()) || f.brand != null || f.strength != null || f.moderationFilter === 'unmoderated';
+    return (
+      Boolean(f.search?.trim()) ||
+      f.brand != null ||
+      f.strength != null ||
+      f.moderationFilter === 'unmoderated' ||
+      f.noImageOnly
+    );
   });
 
   /** Байты изображения из инлайн-полей (только DB-хранилище, MinIO не заполняет их). */
@@ -723,9 +612,17 @@
       cigar.country,
       cigar.size,
       cigar.strength,
+      cigar.wrapper,
+      cigar.binder,
+      cigar.filler,
       imgKey,
       imgFailed,
     ];
+  }
+
+  function blendLine(cigar: CigarBase): string {
+    const parts = [cigar.wrapper, cigar.binder, cigar.filler].filter(Boolean) as string[];
+    return parts.join(' · ');
   }
 
   function resetFilters(): void {
@@ -734,6 +631,7 @@
       brand: null,
       strength: null,
       moderationFilter: 'moderated',
+      noImageOnly: false,
     };
     pagination.value.first = 0;
     if (searchTimeout) {
@@ -758,6 +656,9 @@
       };
       if (canFilterUnmoderated.value && filters.value.moderationFilter === 'unmoderated') {
         params.unmoderatedOnly = true;
+      }
+      if (filters.value.noImageOnly) {
+        params.withoutImagesOnly = true;
       }
       const result: PaginatedResult<CigarBase> = await cigarService.getCigarBasesPaginated(params);
       cigars.value = result.items || [];
@@ -862,18 +763,15 @@
     loadCigars();
   }
 
-  function onPage(event: DataTablePageEvent | PageState): void {
+  function onPage(event: PageState): void {
     pagination.value.first = event.first;
     pagination.value.rows = event.rows;
     loadCigars();
   }
 
-  function onSort(event: DataTableSortEvent): void {
-    if (event.sortField && (event.sortOrder === 1 || event.sortOrder === -1)) {
-      sortField.value = event.sortField as string;
-      sortOrder.value = event.sortOrder;
-      loadCigars();
-    }
+  function onSortChange(): void {
+    pagination.value.first = 0;
+    loadCigars();
   }
 
   function getStrengthLabel(strength: string | null | undefined): string {

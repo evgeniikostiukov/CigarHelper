@@ -1,6 +1,6 @@
 # Коллекция, сводка, справочник, обзоры, админ и главная — Home, Login, Dashboard, HumidorList, HumidorDetail, Profile, PublicUserProfile, PublicHumidorDetail, CigarList, CigarForm, CigarDetail, CigarBases, ReviewList, ReviewDetail, ReviewForm, Brands, AdminUsers
 
-Паритетный визуальный язык (градиент, grain, типографика Onest) для **корневой оболочки** (`App.vue`), **главной** (`Home.vue`), **входа** (`Login.vue`), **сводки** (`Dashboard.vue`), **моих хьюмидоров**, **моих сигар**, **формы сигары** (`CigarForm.vue`), **карточки сигары** (`CigarDetail.vue`), **базы сигар** (`CigarBases.vue`), **ленты обзоров** (`ReviewList.vue`, `ReviewDetail.vue`), **публичного профиля** (`PublicUserProfile.vue`), **публичного состава хьюмидора** (`PublicHumidorDetail.vue`), **брендов** (`Brands.vue`) и **пользователей админки** (`AdminUsers.vue`). У базы на `lg+` сохранена **ленивая таблица** (`DataTable`) с серверной пагинацией и сортировкой; на мобиле — карточки и общий `Paginator`.
+Паритетный визуальный язык (градиент, grain, типографика Onest) для **корневой оболочки** (`App.vue`), **главной** (`Home.vue`), **входа** (`Login.vue`), **сводки** (`Dashboard.vue`), **моих хьюмидоров**, **моих сигар**, **формы сигары** (`CigarForm.vue`), **карточки сигары** (`CigarDetail.vue`), **базы сигар** (`CigarBases.vue`), **ленты обзоров** (`ReviewList.vue`, `ReviewDetail.vue`), **публичного профиля** (`PublicUserProfile.vue`), **публичного состава хьюмидора** (`PublicHumidorDetail.vue`), **брендов** (`Brands.vue`) и **пользователей админки** (`AdminUsers.vue`). **База сигар** — сетка карточек на всех ширинах с серверной пагинацией (`Paginator`), сортировка через `Select` (поля API: `name`, `brandname`, `size`, `strength`, `country`).
 
 ## Общее
 
@@ -208,10 +208,9 @@
 | Данные | `cigarService.getCigarBasesPaginated`, тип `CigarBase`; бренды для фильтра — `getBrands()` → `brandOptions` |
 | Маршруты | Страница: `CigarBases`; в коллекцию / новая сигара: `CigarNew`; отзыв: `ReviewCreate` (query: `cigarBaseId`, `brandName`, `cigarName`) |
 | Фильтры | Поиск с debounce 300 ms; бренд и крепость — `Dropdown`; без `watch(filters)` (избегаем двойных запросов на каждый символ) |
-| Десктоп | `DataTable` lazy, `virtualScrollerOptions`: `itemSize`, `scrollHeight`; действия в строке: просмотр (диалог), отзыв, в коллекцию, похожая |
-| Мобилка | Скелетоны при загрузке (`lg:hidden`), сетка `article` с `v-memo`, футер из четырёх icon-кнопок, `Paginator` снизу |
+| Список | Скелетоны в сетке `1 / sm:2 / lg:3`; `article` с фото, брендом, бейджами, строка blend (покровный · связующий · наполнитель), футер из четырёх icon-кнопок; панель «Показано…» + сортировка + `Paginator` |
 | Диалоги | `CigarDetailDialog`, `CigarBaseEditDialog` (как раньше) |
-| `data-testid` | `cigar-bases`, `cigar-bases-filters`, `cigar-bases-search`, `cigar-bases-filter-brand`, `cigar-bases-filter-strength`, `cigar-bases-loading`, `cigar-bases-skeleton`, `cigar-bases-error`, `cigar-bases-retry`, `cigar-bases-empty`, `cigar-bases-empty-reset`, `cigar-bases-add`, `cigar-bases-table`, `cigar-bases-row-*-{id}`, `cigar-bases-mobile-grid`, `cigar-bases-mobile-summary`, `cigar-base-card-{id}`, `cigar-base-*-{id}`, `cigar-bases-paginator` |
+| `data-testid` | `cigar-bases`, `cigar-bases-filters`, `cigar-bases-search`, `cigar-bases-filter-brand`, `cigar-bases-filter-strength`, `cigar-bases-loading`, `cigar-bases-skeleton`, `cigar-bases-error`, `cigar-bases-retry`, `cigar-bases-empty`, `cigar-bases-empty-reset`, `cigar-bases-add`, `cigar-bases-toolbar`, `cigar-bases-summary`, `cigar-bases-sort-field`, `cigar-bases-sort-order`, `cigar-bases-grid`, `cigar-base-card-{id}`, `cigar-base-*-{id}`, `cigar-bases-paginator` |
 | Scoped классы | `cigar-bases-root`, `cigar-bases-grain`, `cigar-base-card-enter` |
 
 ## Brands.vue
