@@ -16,7 +16,7 @@
 | `views/*.vue` | Страницы |
 | `views/Home.vue` | Главная `/`: тот же визуальный каркас, см. [collection-list-views.md](./collection-list-views.md) |
 | `views/Login.vue` | Вход и регистрация `/login` (`meta.public: true`), см. [collection-list-views.md](./collection-list-views.md) |
-| `views/Dashboard.vue`, `views/HumidorList.vue`, `views/HumidorDetail.vue`, `views/Profile.vue`, `views/PublicUserProfile.vue`, `views/PublicHumidorDetail.vue`, `views/HumidorForm.vue`, `views/CigarList.vue`, `views/CigarForm.vue`, `views/CigarCollectionEdit.vue`, `views/CigarDetail.vue`, `views/CigarBases.vue`, `views/ReviewList.vue`, `views/ReviewDetail.vue`, `views/ReviewForm.vue`, `views/Brands.vue`, `views/AdminUsers.vue` | Дашборд-сводка, коллекция (добавление из базы / правка личных полей), профиль, публичный профиль и публичный хьюмидор, база, обзоры, админ (бренды, пользователи): единый стиль, см. [collection-list-views.md](./collection-list-views.md) |
+| `views/Dashboard.vue`, `views/HumidorList.vue`, `views/HumidorDetail.vue`, `views/Profile.vue`, `views/PublicUserProfile.vue`, `views/PublicHumidorDetail.vue`, `views/HumidorForm.vue`, `views/CigarList.vue`, `views/CigarForm.vue`, `views/CigarCollectionEdit.vue`, `views/CigarDetail.vue`, `views/CigarBases.vue`, `views/ReviewList.vue`, `views/ReviewDetail.vue`, `views/ReviewForm.vue`, `views/Brands.vue`, `views/AdminLayout.vue`, `views/AdminDashboard.vue`, `views/AdminUsers.vue`, `views/AdminImages.vue` | Дашборд-сводка, коллекция (добавление из базы / правка личных полей), профиль, публичный профиль и публичный хьюмидор, база, обзоры, админ-панель (`/admin`: обзор, пользователи, изображения в хранилище), бренды: единый стиль, см. [collection-list-views.md](./collection-list-views.md) |
 | `components/*.vue` | Переиспользуемые блоки (диалоги, редактор, загрузка изображений) |
 | `assets/main.css` | Глобальные стили |
 
@@ -28,7 +28,7 @@
 | Контейнер | `app-container` + `app-shell`: градиент фона `stone`/`amber` (как у страниц коллекции), safe-area inset |
 | Шапка | `sticky` `app-header`: полупрозрачный фон, `backdrop-blur`, бордер `stone`; внутри PrimeVue `Menubar` (`app-menubar-bar`, `max-w-7xl`) |
 | Старт | Ссылка бренда на `Home`, подпись в стиле коллекции (uppercase tracking, amber/stone) |
-| Меню | Пункты через `menuItems` + вычислимый `menuItemsVisible` (`visible()`); переходы **именованными** маршрутами: `Dashboard`, `HumidorList`, `CigarList`, `CigarBases`, `Brands`, `AdminUsers`, `ReviewList` |
+| Меню | Пункты через `menuItems` + вычислимый `menuItemsVisible` (`visible()`); переходы **именованными** маршрутами: `Dashboard`, `HumidorList`, `CigarList`, `CigarBases`, `Brands`, `AdminDashboard`, `ReviewList` |
 | Правая колонка | Профиль → `Profile`; выход — `Login`; гость — «Войти» (текст на `sm+`, иконка на мобиле); `min-h-11`, `touch-manipulation` |
 | Контент | `main` (`app-main`): `Suspense` + `router-view`; fallback — панель «Загрузка экрана…», `app-suspense-fallback` |
 | Глобально | `Toast`, `ConfirmDialog` в корне |
@@ -41,7 +41,7 @@
 
 - Публичные: `/`, `/login` (`meta.public`), `/u/:username`, `/u/:username/humidors/:humidorId`, список/деталь отзывов `/reviews`, `/reviews/:id`.
 - Требуют auth: `/dashboard` (сводка), профиль, хьюмидоры, сигары, формы, каталог-базы `/cigar-bases`, создание/редактирование отзывов.
-- Требуют **Admin**: `/brands`, `/admin/users`.
+- Требуют **Admin**: `/brands`, вложенные `/admin`, `/admin/users`, `/admin/images` (родительский маршрут `/admin` с `AdminLayout`).
 
 Guards: неавторизованный → `/login?redirect=…`; авторизованный на `/login` → `/`; без роли Admin на admin-маршруты → `/`.
 

@@ -105,10 +105,26 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
-    path: '/admin/users',
-    name: 'AdminUsers',
-    component: () => import('../views/AdminUsers.vue'),
+    path: '/admin',
+    component: () => import('../views/AdminLayout.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: '',
+        name: 'AdminDashboard',
+        component: () => import('../views/AdminDashboard.vue'),
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: () => import('../views/AdminUsers.vue'),
+      },
+      {
+        path: 'images',
+        name: 'AdminImages',
+        component: () => import('../views/AdminImages.vue'),
+      },
+    ],
   },
   // Маршруты для обзоров
   {

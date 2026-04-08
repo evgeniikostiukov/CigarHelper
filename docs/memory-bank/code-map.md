@@ -12,6 +12,7 @@
 | `AuthController` | Регистрация, логин, JWT |
 | `ProfileController` | Профиль текущего пользователя |
 | `AdminUsersController` | Админ-операции с пользователями |
+| `AdminCigarImagesController` | `GET /api/admin/cigar-images` — пагинированный список всех `CigarImages` (только роль Admin) |
 | `PublicUsersController` | Публичные данные пользователей |
 | `BrandsController` | Бренды |
 | `CigarsController` | Каталог / сигары; `GET .../cigars/bases/paginated` — по умолчанию только `CigarBase.IsModerated`; `unmoderatedOnly=true` только для JWT Admin/Moderator; `CigarResponseDto.Images` для коллекции — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |

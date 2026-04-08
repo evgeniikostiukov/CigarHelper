@@ -199,9 +199,9 @@
       visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
     },
     {
-      label: 'Пользователи',
-      icon: 'pi pi-users',
-      command: () => router.push({ name: 'AdminUsers' }),
+      label: 'Админ-панель',
+      icon: 'pi pi-shield',
+      command: () => router.push({ name: 'AdminDashboard' }),
       visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
     },
     {

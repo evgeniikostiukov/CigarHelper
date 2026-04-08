@@ -15,6 +15,7 @@ declare module 'vue' {
     Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Carousel: typeof import('primevue/carousel')['default']
+    Checkbox: typeof import('primevue/checkbox')['default']
     CigarBaseEditDialog: typeof import('./src/components/CigarBaseEditDialog.vue')['default']
     CigarDetailDialog: typeof import('./src/components/CigarDetailDialog.vue')['default']
     Column: typeof import('primevue/column')['default']
