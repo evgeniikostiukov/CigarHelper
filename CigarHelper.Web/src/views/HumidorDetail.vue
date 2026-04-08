@@ -82,7 +82,7 @@
             <p
               v-else
               class="mt-1.5 text-sm text-stone-500 dark:text-stone-500">
-              Без описания — можно добавить при редактировании.
+              Описание не указано.
             </p>
           </div>
           <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
