@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CigarHelper.Data.Models.Enums;
 
 namespace CigarHelper.Data.Models;
 
@@ -23,6 +24,15 @@ public class CigarComment
     public string Body { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public CigarCommentModerationStatus ModerationStatus { get; set; } = CigarCommentModerationStatus.Approved;
+
+    public DateTime? ModeratedAt { get; set; }
+
+    public int? ModeratedByUserId { get; set; }
+
+    [ForeignKey(nameof(ModeratedByUserId))]
+    public User? ModeratedBy { get; set; }
 
     public int? CigarBaseId { get; set; }
 

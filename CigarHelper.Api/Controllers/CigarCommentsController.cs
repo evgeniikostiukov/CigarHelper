@@ -66,7 +66,8 @@ public class CigarCommentsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var isAdmin = User.IsInRole("Admin");
-        var ok = await _comments.TryDeleteAsync(id, userId, isAdmin, cancellationToken);
+        var isModerator = User.IsInRole("Moderator");
+        var ok = await _comments.TryDeleteAsync(id, userId, isAdmin, isModerator, cancellationToken);
         return ok ? NoContent() : NotFound();
     }
 }

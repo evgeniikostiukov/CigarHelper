@@ -141,7 +141,7 @@
   import Button from 'primevue/button';
   import { useAuth } from '@/services/useAuth';
   import { registerApiErrorNotifier } from '@/services/apiErrorNotifier';
-  import { hasRole } from '@/utils/roles';
+  import { hasAnyRole, hasRole } from '@/utils/roles';
   import ThemeToggle from '@/components/ThemeToggle.vue';
   import GlobalSearch from '@/components/GlobalSearch.vue';
 
@@ -201,8 +201,11 @@
     {
       label: 'Админ-панель',
       icon: 'pi pi-shield',
-      command: () => router.push({ name: 'AdminDashboard' }),
-      visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
+      command: () =>
+        hasRole(user.value, 'Admin')
+          ? void router.push({ name: 'AdminDashboard' })
+          : void router.push({ name: 'AdminCigarComments' }),
+      visible: () => isAuthenticated.value && hasAnyRole(user.value, ['Admin', 'Moderator']),
     },
     {
       label: 'Обзоры',

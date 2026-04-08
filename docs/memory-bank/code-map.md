@@ -18,7 +18,8 @@
 | `CigarsController` | Каталог / сигары; `GET .../cigars/bases/paginated` — по умолчанию только `CigarBase.IsModerated`; `unmoderatedOnly=true` только для JWT Admin/Moderator; `CigarResponseDto.Images` для коллекции — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Отзывы |
-| `CigarCommentsController` | Комментарии к `CigarBase` и к чужим `UserCigar` в публичной коллекции: `GET/POST/DELETE api/cigarcomments` (список без авторизации при видимой цели) |
+| `CigarCommentsController` | Комментарии к `CigarBase` и к чужим `UserCigar` в публичной коллекции: `GET/POST/DELETE api/cigarcomments` (публичный список только **одобренные**; у обычных пользователей новые — **на модерации**) |
+| `AdminCigarCommentsController` | Очередь модерации: `GET/POST …/api/admin/cigar-comments` и `…/{id}/approve` / `reject` (роли **Admin**, **Moderator**) |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |
 
 ## API — сервисы и прочее

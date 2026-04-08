@@ -107,22 +107,30 @@ const routes = [
   {
     path: '/admin',
     component: () => import('../views/AdminLayout.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresAnyRole: ['Admin', 'Moderator'] },
     children: [
       {
         path: '',
         name: 'AdminDashboard',
         component: () => import('../views/AdminDashboard.vue'),
+        meta: { requiresAdmin: true },
       },
       {
         path: 'users',
         name: 'AdminUsers',
         component: () => import('../views/AdminUsers.vue'),
+        meta: { requiresAdmin: true },
       },
       {
         path: 'images',
         name: 'AdminImages',
         component: () => import('../views/AdminImages.vue'),
+        meta: { requiresAdmin: true },
+      },
+      {
+        path: 'comments',
+        name: 'AdminCigarComments',
+        component: () => import('../views/AdminCigarComments.vue'),
       },
     ],
   },
@@ -160,7 +168,7 @@ const router = createRouter({
 router.beforeEach((to) => {
   const { isAuthenticated, user } = useAuth();
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
+  const requiresAdminOnRoute = to.matched.some((record) => record.meta.requiresAdmin === true);
   const requiresAnyRole = to.matched
     .map((record) => record.meta.requiresAnyRole as string[] | undefined)
     .find((r) => r !== undefined);
@@ -178,9 +186,12 @@ router.beforeEach((to) => {
   } else if (isAuthenticated.value && isPublic) {
     // Аутентифицированный пользователь пытается получить доступ к публичной странице (например, /login)
     return '/'; // Перенаправляем на главную
-  } else if (isAuthenticated.value && requiresAdmin && !hasRole(user.value, 'Admin')) {
-    return '/';
   } else if (isAuthenticated.value && requiresAnyRole && !hasAnyRole(user.value, requiresAnyRole)) {
+    return '/';
+  } else if (isAuthenticated.value && requiresAdminOnRoute && !hasRole(user.value, 'Admin')) {
+    if (hasRole(user.value, 'Moderator')) {
+      return { name: 'AdminCigarComments' };
+    }
     return '/';
   }
   // Во всех остальных случаях разрешаем переход

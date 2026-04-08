@@ -40,13 +40,24 @@
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue';
   import { RouterLink, RouterView } from 'vue-router';
+  import { useAuth } from '@/services/useAuth';
+  import { hasRole } from '@/utils/roles';
 
-  const navLinks = [
-    { name: 'AdminDashboard' as const, label: 'Обзор', icon: 'pi pi-home' },
-    { name: 'AdminUsers' as const, label: 'Пользователи', icon: 'pi pi-users' },
-    { name: 'AdminImages' as const, label: 'Изображения', icon: 'pi pi-images' },
+  const { user } = useAuth();
+
+  const allLinks = [
+    { name: 'AdminDashboard' as const, label: 'Обзор', icon: 'pi pi-home', adminOnly: true },
+    { name: 'AdminUsers' as const, label: 'Пользователи', icon: 'pi pi-users', adminOnly: true },
+    { name: 'AdminImages' as const, label: 'Изображения', icon: 'pi pi-images', adminOnly: true },
+    { name: 'AdminCigarComments' as const, label: 'Комментарии', icon: 'pi pi-comments', adminOnly: false },
   ];
+
+  const navLinks = computed(() => {
+    const isAdmin = hasRole(user.value, 'Admin');
+    return allLinks.filter((l) => !l.adminOnly || isAdmin);
+  });
 </script>
 
 <style scoped>

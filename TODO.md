@@ -86,6 +86,7 @@
 - [ ] **Отзывы:** оси оценок (сила, аромат, сочетания) и фильтры/сортировки в каталоге по ним.
 - [ ] **PWA / офлайн:** минимум — кэш списков и очередь действий при появлении мобильного сценария.
 - [ ] **Монетизация (если актуально):** лимиты по тарифам (хьюмидоры, фото, объём) под покрытие хостинга.
+- [ ] **Комментарии (расширение):** жалобы пользователей на комментарии; простой антиспам (чёрный список / эвристики); rate limit на `POST /api/cigarcomments` по IP и/или по пользователю; уведомления модераторам (email/push).
 
 ---
 
@@ -188,4 +189,5 @@
 - **2026-04-08** — База сигар: `GET .../cigars/bases/paginated` — `withoutImagesOnly` (нет `CigarImage` с `StoragePath`); `CigarBases.vue` — чекбокс «Нет изображения», интеграционный тест `GetCigarBasesPaginated_WithoutImagesOnly_ReturnsOnlyBasesWithNoStoredImage`.
 - **2026-04-08** — `CigarBases.vue`: единая выдача карточками (`lg:grid-cols-3`), без `DataTable`; панель сортировки (`Select` по полям API: `name`, `brandname`, …), общий `Paginator` с опцией 100 строк; smoke E2E и `collection-list-views.md` переведены на `cigar-bases-grid`.
 - **2026-04-08** — Комментарии: сущность `CigarComment` + миграция, `CigarCommentsController` / `CigarCommentService`, UI `CigarCommentsPanel` в `CigarDetailDialog` (экран базы сигар) и диалог на `PublicHumidorDetail` для чужих `UserCigar`; интеграционные тесты `CigarCommentsIntegrationTests`; `docs/memory-bank/code-map.md`.
+- **2026-04-08** — Модерация комментариев: `CigarCommentModerationStatus`, миграция `AddCigarCommentModeration` (старые строки — Approved), `AdminCigarCommentsController`, очередь в `AdminCigarComments.vue`; `/admin` доступен **Moderator** для ветки «Комментарии»; меню «Админ-панель» у модератора ведёт в очередь; интеграционные тесты обновлены; в `TODO.md` (P3) — отложенные задачи по жалобам/антиспаму/rate limit/уведомлениям.
 

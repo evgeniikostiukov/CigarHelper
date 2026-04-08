@@ -154,6 +154,13 @@ public class AppDbContext : DbContext
 
             entity.HasIndex(c => c.CigarBaseId);
             entity.HasIndex(c => c.UserCigarId);
+            entity.HasIndex(c => c.ModerationStatus);
+
+            entity.HasOne(c => c.ModeratedBy)
+                .WithMany()
+                .HasForeignKey(c => c.ModeratedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_CigarComments_SingleTarget",
                 "(\"CigarBaseId\" IS NOT NULL AND \"UserCigarId\" IS NULL) OR (\"CigarBaseId\" IS NULL AND \"UserCigarId\" IS NOT NULL)"));

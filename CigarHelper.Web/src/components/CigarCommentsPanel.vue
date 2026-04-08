@@ -4,6 +4,7 @@
   import Button from 'primevue/button';
   import { useToast } from 'primevue/usetoast';
   import { useAuth } from '@/services/useAuth';
+  import { hasAnyRole } from '@/utils/roles';
   import * as cigarCommentApi from '@/services/cigarCommentService';
 
   const props = defineProps<{
@@ -76,14 +77,23 @@
     }
     submitting.value = true;
     try {
-      await cigarCommentApi.createComment({
+      const created = await cigarCommentApi.createComment({
         cigarBaseId: props.cigarBaseId,
         userCigarId: props.userCigarId,
         body,
       });
       newBody.value = '';
-      await load();
-      toast.add({ severity: 'success', summary: 'Комментарий добавлен', life: 2500 });
+      if (created.moderationStatus === 'Pending') {
+        toast.add({
+          severity: 'info',
+          summary: 'На проверке',
+          detail: 'Комментарий появится после одобрения модератором.',
+          life: 4500,
+        });
+      } else {
+        await load();
+        toast.add({ severity: 'success', summary: 'Комментарий добавлен', life: 2500 });
+      }
     } finally {
       submitting.value = false;
     }
@@ -101,7 +111,10 @@
 
   function canDelete(comment: cigarCommentApi.CigarCommentDto): boolean {
     const uid = user.value?.id;
-    return uid != null && comment.authorUserId === uid;
+    if (uid != null && comment.authorUserId === uid) {
+      return true;
+    }
+    return hasAnyRole(user.value, ['Admin', 'Moderator']);
   }
 </script>
 

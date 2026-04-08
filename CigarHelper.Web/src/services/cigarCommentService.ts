@@ -1,5 +1,8 @@
 import api from './api';
 
+/** Состояние модерации (совпадает с API enum). */
+export type CigarCommentModerationStatus = 'Pending' | 'Approved' | 'Rejected';
+
 export interface CigarCommentDto {
   id: number;
   body: string;
@@ -8,6 +11,7 @@ export interface CigarCommentDto {
   authorUsername: string;
   cigarBaseId?: number | null;
   userCigarId?: number | null;
+  moderationStatus: CigarCommentModerationStatus;
 }
 
 export async function fetchComments(params: {
