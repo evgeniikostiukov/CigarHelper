@@ -17,11 +17,7 @@
           {{ isRegister ? 'Регистрация' : 'Вход' }}
         </h1>
         <p class="mx-auto mt-1.5 max-w-sm text-pretty text-sm text-stone-600 dark:text-stone-400">
-          {{
-            isRegister
-              ? 'Создайте аккаунт — коллекция, хьюмидоры и обзоры в одном месте.'
-              : 'Войдите по email, чтобы продолжить работу с коллекцией.'
-          }}
+          {{ isRegister ? 'Регистрация по email: коллекция, хьюмидоры и обзоры.' : 'Вход по email.' }}
         </p>
       </header>
 
