@@ -19,7 +19,7 @@
             База сигар
           </h1>
           <p class="mt-1.5 text-sm text-stone-600 dark:text-stone-400 max-w-xl text-pretty">
-            Каталог образцов: поиск, фильтры и быстрые действия — на десктопе таблица, на телефоне карточки.
+            Каталог образцов с поиском, фильтрами и действиями.
           </p>
         </div>
         <Button
@@ -30,7 +30,6 @@
           @click="createNewCigar" />
       </header>
 
-      <!-- Поиск и фильтры — тот же каркас, что hero на главной (Home.vue); тело под спойлер -->
       <div
         class="mb-8 rounded-2xl border border-stone-200/90 bg-white/95 p-6 shadow-md shadow-stone-900/5 sm:mb-10 sm:p-8 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
         data-testid="cigar-bases-filters">
@@ -49,8 +48,7 @@
               </h2>
               <p
                 class="mt-1.5 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 dark:text-stone-300 sm:text-base">
-                Уточните выдачу по названию, бренду или крепости — на большом экране удобна таблица, на телефоне те же
-                данные в карточках.
+                Уточните выдачу по названию, бренду или крепости.
               </p>
             </div>
           </div>
