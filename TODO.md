@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-08** — Тексты страниц (`src/views`): убраны пояснения про устройство UI, устройства, «один экран», касания, ленту/JWT и т.п.; правки по отдельным коммитам: `AdminUsers`, `Brands`, `CigarBases`, `CigarCollectionEdit`, `CigarDetail`, `CigarForm`, `CigarList`, `Home` (в т.ч. карточки фич), `HumidorDetail`, `HumidorForm`, `HumidorList`, `Login`, `Onboarding`, `Profile`, `ReviewForm`, `ReviewList`. Без правок в текстах: `Dashboard` (подписи к метрикам — про данные), `PublicHumidorDetail`, `PublicUserProfile`, `ReviewDetail`.
 - **2026-04-08** — `Home.vue`: убраны мета-формулировки в подзаголовке и hero (про «стиль приложения», про кнопки/отступы/тёмную тему).
 - **2026-04-08** — Во всех затронутых view: `<router-link>` → `<RouterLink>` + `import { RouterLink }` из `vue-router` (тот же обход ошибки VueDX); файлы: `CigarList`, `CigarForm`, `ReviewDetail`, `HumidorList`, `HumidorDetail`, `ReviewList`, `PublicUserProfile`.
 - **2026-04-08** — `App.vue`: `<router-link>` / `<router-view>` заменены на `<RouterLink>` / `<RouterView>` и добавлен явный импорт из `vue-router`, чтобы VueDX/Volar корректно резолвили компоненты (ошибка `__VueDX__get_identifier_RouterLink`).
