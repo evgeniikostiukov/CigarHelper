@@ -14,7 +14,7 @@
         :model="menuItemsVisible"
         class="app-menubar-bar mx-auto container border-0 bg-transparent px-2 sm:px-4">
         <template #start>
-          <router-link
+          <RouterLink
             :to="{ name: 'Home' }"
             data-testid="app-nav-brand"
             class="no-underline touch-manipulation rounded-lg py-1.5 pl-1 pr-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400">
@@ -23,7 +23,7 @@
               Cigar Helper
             </span>
             <span class="sr-only"> — на главную</span>
-          </router-link>
+          </RouterLink>
         </template>
         <template #end>
           <div class="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -61,7 +61,7 @@
             <div
               v-if="isAuthenticated"
               class="flex items-center gap-1 sm:gap-2">
-              <router-link
+              <RouterLink
                 :to="{ name: 'Profile' }"
                 data-testid="app-nav-profile"
                 class="inline-flex max-w-[min(100%,14rem)] min-h-11 items-center gap-2 rounded-xl px-2 py-1.5 font-medium text-stone-800 no-underline transition-colors hover:bg-stone-100 dark:text-stone-100 dark:hover:bg-stone-800 sm:max-w-[20rem]"
@@ -71,7 +71,7 @@
                   class="pi pi-user shrink-0 text-base text-rose-800 dark:text-rose-400/90"
                   aria-hidden="true" />
                 <span class="truncate text-sm sm:text-base">{{ user?.unique_name }}</span>
-              </router-link>
+              </RouterLink>
               <Button
                 data-testid="app-nav-logout"
                 class="min-h-11 min-w-11 touch-manipulation"
@@ -109,7 +109,7 @@
     <main
       data-testid="app-main"
       class="app-main flex-1 w-full px-2 py-4 sm:px-6 sm:py-8">
-      <router-view v-slot="{ Component }">
+      <RouterView v-slot="{ Component }">
         <Suspense>
           <div data-testid="app-router-outlet">
             <component :is="Component" />
@@ -127,13 +127,13 @@
             </div>
           </template>
         </Suspense>
-      </router-view>
+      </RouterView>
     </main>
   </div>
 </template>
 <script setup lang="ts">
   import { computed, onMounted, ref } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { RouterLink, RouterView, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import Toast from 'primevue/toast';
   import ConfirmDialog from 'primevue/confirmdialog';

@@ -99,6 +99,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-08** — `App.vue`: `<router-link>` / `<router-view>` заменены на `<RouterLink>` / `<RouterView>` и добавлен явный импорт из `vue-router`, чтобы VueDX/Volar корректно резолвили компоненты (ошибка `__VueDX__get_identifier_RouterLink`).
 - **2026-04-06** — Продление JWT при повторном открытии SPA: `POST /api/Auth/refresh` (Bearer), `AuthService.RefreshTokenAsync`, rate limit `auth-refresh`; фронт `authService.refreshSessionIfAuthenticated()` после `initialize()`; OpenAPI + `api.generated.ts`; тесты `AuthServiceTests` / `AuthStep4IntegrationTests`.
 - **2026-04-04** — `CigarCollectionEdit.vue`: галерея фото на `FormImageGallerySection` (файлы + multi URL, главное для существующих через `existingMainSet` → `setCigarImageMain`); emit `existingMainSet` в `FormImageGallerySection.vue`; `collection-list-views.md`.
 - **2026-04-04** — Количество в UI коллекции: `CigarForm.vue` — поле «Количество (шт.)» (`cigar-form-quantity`) в `createCigar`; `CigarList.vue` — «N шт.» на карточке (`cigar-card-quantity-{id}`), `memoKey` учитывает `quantity`; `collection-list-views.md`.
