@@ -139,6 +139,84 @@ public class CigarsBasesPaginatedIntegrationTests
     }
 
     [Fact]
+    public async Task GetCigarBasesPaginated_WithoutImagesOnly_ReturnsOnlyBasesWithNoStoredImage()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        const string withImageName = "Has_Image_Filter_Test";
+        const string noImageName = "No_Image_Filter_Test";
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var brand = new Brand
+            {
+                Name = $"BnI_{Guid.NewGuid():N}"[..16],
+                CreatedAt = DateTime.UtcNow,
+                IsModerated = true
+            };
+            db.Brands.Add(brand);
+            await db.SaveChangesAsync();
+
+            var withImg = new CigarBase
+            {
+                Name = withImageName,
+                BrandId = brand.Id,
+                IsModerated = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            var noImg = new CigarBase
+            {
+                Name = noImageName,
+                BrandId = brand.Id,
+                IsModerated = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.CigarBases.AddRange(withImg, noImg);
+            await db.SaveChangesAsync();
+
+            db.CigarImages.Add(new CigarImage
+            {
+                CigarBaseId = withImg.Id,
+                StoragePath = "img-filter-main-1",
+                ThumbnailPath = "img-filter-thumb-1",
+                FileName = "a.png",
+                ContentType = "image/png",
+                CreatedAt = DateTime.UtcNow
+            });
+            db.CigarImages.Add(new CigarImage
+            {
+                CigarBaseId = noImg.Id,
+                StoragePath = null,
+                FileName = "orphan-meta.png",
+                ContentType = "image/png",
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"ni{Guid.NewGuid():N}"[..10],
+            Email = $"{Guid.NewGuid():N}@n.co",
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(authBody?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBody.Token);
+
+        using var res = await client.GetAsync(
+            "/api/cigars/bases/paginated?page=1&pageSize=100&withoutImagesOnly=true");
+        res.EnsureSuccessStatusCode();
+        var page = await res.Content.ReadFromJsonAsync<PaginatedResult<CigarBaseDto>>(JsonOptions);
+        Assert.NotNull(page?.Items);
+        Assert.DoesNotContain(page!.Items, x => x.Name == withImageName);
+        Assert.Contains(page.Items, x => x.Name == noImageName);
+    }
+
+    [Fact]
     public async Task GetCigarBasesPaginated_UnmoderatedOnly_AsUser_Ignored_StillModeratedOnly()
     {
         await using var factory = new AuthIntegrationWebAppFactory();

@@ -119,7 +119,8 @@ public class CigarsController : ControllerBase
         [FromQuery] int? brandId = null,
         [FromQuery] string? strength = null,
         [FromQuery] bool excludeBinaryMedia = false,
-        [FromQuery] bool unmoderatedOnly = false)
+        [FromQuery] bool unmoderatedOnly = false,
+        [FromQuery] bool withoutImagesOnly = false)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
@@ -148,6 +149,11 @@ public class CigarsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(strength))
         {
             query = query.Where(cb => cb.Strength == strength);
+        }
+
+        if (withoutImagesOnly)
+        {
+            query = query.Where(cb => !cb.Images.Any(img => img.StoragePath != null));
         }
 
         // Получаем общее количество записей
