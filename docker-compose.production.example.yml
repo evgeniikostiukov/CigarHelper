@@ -12,6 +12,9 @@ services:
   api:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      # Явно (перекрывает appsettings.*): устраняет 400 Invalid Hostname, если образ старый
+      # или Host не попадает под шаблон. При своём домене задайте ALLOWED_HOSTS в .env.
+      AllowedHosts: "${ALLOWED_HOSTS:-*.sslip.io;localhost;127.0.0.1;[::1]}"
       ForwardedHeaders__Enabled: 'true'
       ForwardedHeaders__ForwardLimit: 2
       ForwardedHeaders__TrustPrivateNetworks: 'true'

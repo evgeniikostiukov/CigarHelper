@@ -106,6 +106,19 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml --profile 
 
 Конфиг **nginx** в образе фронта пробрасывает в API вычисленный `X-Forwarded-Proto` (с учётом того, что прислал edge) и `X-Forwarded-Host`.
 
+### 400 «Invalid Hostname» на `/api/*`
+
+Ответ от **ASP.NET Core** (host filtering): заголовок **`Host`**, который видит приложение, не входит в **`AllowedHosts`**.
+
+Проверьте на сервере:
+
+1. Контейнер API в **Production**: `docker exec <api> printenv ASPNETCORE_ENVIRONMENT` → должно быть `Production`. Если `Development`, подключается базовый `appsettings.json` с `AllowedHosts` только для `localhost`.
+2. Фактический список хостов: `docker exec <api> printenv AllowedHosts` (в прод-примере задаётся через compose / переменную **`ALLOWED_HOSTS`** в `.env`).
+3. Подняли стек с **обоими** файлами: `docker compose -f docker-compose.yml -f docker-compose.production.yml …`.
+4. После смены `appsettings` или compose выполнен **`--build`** и пересоздание контейнера API.
+
+Если публичное имя не sslip, в `.env` задайте, например: `ALLOWED_HOSTS=example.com;www.example.com`.
+
 ## Продакшен (общие замечания)
 
 Базовый `docker-compose.yml` рассчитан на **локальную** и **демо**-среду. Для боя используйте сильные секреты, HTTPS на edge, при необходимости чеклисты [security-refactor-memory-bank.md](./security-refactor-memory-bank.md) и [memory-bank/security-deploy-checklist.md](./memory-bank/security-deploy-checklist.md).
