@@ -36,6 +36,13 @@ public static class ForwardedHeadersConfigurationExtensions
                     options.KnownProxies.Add(ip);
             }
 
+            if (cfg.TrustPrivateNetworks)
+            {
+                options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
+                options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
+                options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("192.168.0.0"), 16));
+            }
+
             if (options.KnownProxies.Count == 0)
             {
                 options.KnownProxies.Add(IPAddress.Loopback);

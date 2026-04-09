@@ -40,6 +40,7 @@ yarn-error.log
 .env
 .env.local
 docker-compose.override.yml
+docker-compose.production.yml
 .env.development
 .env.development.local
 .env.test.local

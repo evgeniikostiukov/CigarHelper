@@ -111,7 +111,7 @@
   - `Jwt__Key`, при необходимости `Jwt__Issuer`, `Jwt__Audience`, `Jwt__AccessTokenDays`
   - `AllowedHosts` — один список через `;`, как в JSON
   - CORS: `Cors__Origins__0`, `Cors__Origins__1`, … для каждого HTTPS origin фронта (с `AllowCredentials` wildcard нельзя).
-  - Forwarded headers: `ForwardedHeaders__Enabled`, `ForwardedHeaders__ForwardLimit`, `ForwardedHeaders__KnownProxyAddresses__0`, …
+  - Forwarded headers: `ForwardedHeaders__Enabled`, `ForwardedHeaders__ForwardLimit`, `ForwardedHeaders__TrustPrivateNetworks` (только изолированный Docker за edge), `ForwardedHeaders__KnownProxyAddresses__0`, …
 - За обратным прокси: при `ForwardedHeaders:Enabled` задать **внутренние IP** ingress в `KnownProxyAddresses`, если прокси не на loopback; иначе заголовки не применяются (безопасно, но схема/host и rate limit по IP могут не совпасть с реальностью).
 
 ---

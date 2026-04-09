@@ -14,4 +14,11 @@ public sealed class ReverseProxyForwardedHeadersOptions
     public string[] KnownProxyAddresses { get; set; } = [];
 
     public int ForwardLimit { get; set; } = 1;
+
+    /// <summary>
+    /// Если true — в список доверенных сетей forwarded headers добавляются частные диапазоны (10/8, 172.16/12, 192.168/16),
+    /// чтобы запросы от контейнера nginx в Docker bridge к API принимали X-Forwarded-*.
+    /// Включайте только когда до API нет прямого доступа из интернета, только через edge TLS и внутреннюю сеть compose.
+    /// </summary>
+    public bool TrustPrivateNetworks { get; set; }
 }

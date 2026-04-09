@@ -79,6 +79,33 @@ docker build -f Dockerfile.api -t cigarhelper-api .
 docker build -t cigarhelper-web ./CigarHelper.Web
 ```
 
-## Продакшен
+## Продакшен на одном сервере (вариант A)
 
-Этот compose рассчитан на **локальную** и **демо**-среду. Для боя используйте сильные секреты, HTTPS на edge, `ASPNETCORE_ENVIRONMENT=Production`, настройки CORS и `ForwardedHeaders` по [security-refactor-memory-bank.md](./security-refactor-memory-bank.md) и [memory-bank/security-deploy-checklist.md](./memory-bank/security-deploy-checklist.md) при необходимости.
+Когда **фронт и API** крутятся в Docker на одной машине, а снаружи стоит **Caddy/Nginx с HTTPS**, удобно подключить второй файл compose (шаблон в git, рабочая копия не коммитится):
+
+```bash
+cp docker-compose.production.example.yml docker-compose.production.yml
+```
+
+В **`.env`** задайте минимум:
+
+- те же секреты, что и для локального `full`-стека;
+- **`PUBLIC_WEB_ORIGIN`** — точный origin из адресной строки браузера, например `https://31-177-83-239.sslip.io` (схема + хост, без пути; порт указывайте только если он нестандартный).
+
+Запуск:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.production.yml --profile full up -d --build
+```
+
+Что меняет `docker-compose.production.yml` по сравнению с базовым файлом:
+
+- `ASPNETCORE_ENVIRONMENT=Production` (подхватывается `appsettings.Production.json`, в т.ч. `AllowedHosts`/CORS-шаблон);
+- `ForwardedHeaders` включены, `ForwardLimit=2` (типично: edge → nginx → Kestrel), **`TrustPrivateNetworks`** — чтобы заголовки учитывались для запросов с контейнера `web` по внутренней сети Docker;
+- **CORS:** основной origin — `PUBLIC_WEB_ORIGIN`, дополнительно `http://localhost` и `http://127.0.0.1` с портом `PUBLIC_WEB_PORT` (по умолчанию как `WEB_PORT`) для проверок с самого сервера.
+
+Конфиг **nginx** в образе фронта пробрасывает в API вычисленный `X-Forwarded-Proto` (с учётом того, что прислал edge) и `X-Forwarded-Host`.
+
+## Продакшен (общие замечания)
+
+Базовый `docker-compose.yml` рассчитан на **локальную** и **демо**-среду. Для боя используйте сильные секреты, HTTPS на edge, при необходимости чеклисты [security-refactor-memory-bank.md](./security-refactor-memory-bank.md) и [memory-bank/security-deploy-checklist.md](./memory-bank/security-deploy-checklist.md).
