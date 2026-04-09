@@ -1,2 +1,23 @@
-dotnet test CigarHelper.sln -c Release
+#!/usr/bin/env sh
 
+# Git хуки на Windows часто получают минимальный PATH без SDK — dotnet "не найден".
+if ! command -v dotnet >/dev/null 2>&1; then
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+      export PATH="$PATH:$HOME/.dotnet:/c/Program Files/dotnet:/c/Program Files (x86)/dotnet"
+      ;;
+    Darwin*)
+      export PATH="$PATH:/usr/local/share/dotnet:$HOME/.dotnet"
+      ;;
+    Linux*)
+      export PATH="$PATH:$HOME/.dotnet:/usr/share/dotnet"
+      ;;
+  esac
+fi
+
+if ! command -v dotnet >/dev/null 2>&1; then
+  echo "husky pre-push: dotnet не найден в PATH. Установите .NET SDK или добавьте его в PATH для окружения Git."
+  exit 1
+fi
+
+dotnet test CigarHelper.sln -c Release
