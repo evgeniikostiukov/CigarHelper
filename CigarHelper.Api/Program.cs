@@ -37,10 +37,11 @@ builder.Host.UseSerilog((ctx, services, cfg) =>
        .ReadFrom.Services(services)
        .Enrich.FromLogContext());
 
-// Лимит тела запроса: JSON с base64 изображениями и крупный HTML в обзорах (см. ImageUpload:MaxBytes).
+// Лимит тела запроса: JSON с data URL (base64) для нескольких фото в обзорах + крупный HTML.
+// Nginx перед API должен задавать client_max_body_size не меньше этого значения (см. nginx.docker.conf).
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = 12 * 1024 * 1024;
+    options.Limits.MaxRequestBodySize = 32 * 1024 * 1024;
 });
 
 // Add services to the container.

@@ -104,7 +104,7 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml --profile 
 - `ForwardedHeaders` включены, `ForwardLimit=2` (типично: edge → nginx → Kestrel), **`TrustPrivateNetworks`** — чтобы заголовки учитывались для запросов с контейнера `web` по внутренней сети Docker;
 - **CORS:** основной origin — `PUBLIC_WEB_ORIGIN`, дополнительно `http://localhost` и `http://127.0.0.1` с портом `PUBLIC_WEB_PORT` (по умолчанию как `WEB_PORT`) для проверок с самого сервера.
 
-Конфиг **nginx** в образе фронта пробрасывает в API вычисленный `X-Forwarded-Proto` (с учётом того, что прислал edge) и `X-Forwarded-Host`.
+Конфиг **nginx** в образе фронта пробрасывает в API вычисленный `X-Forwarded-Proto` (с учётом того, что прислал edge) и `X-Forwarded-Host`. Для тел больших JSON (обзоры с фото в виде `data:` URL) задан **`client_max_body_size`** (см. `CigarHelper.Web/nginx.docker.conf`), в паре с **`MaxRequestBodySize`** у Kestrel в `Program.cs`.
 
 ### 400 «Invalid Hostname» на `/api/*`
 
