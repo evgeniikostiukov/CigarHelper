@@ -213,17 +213,19 @@
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
                   Общая оценка <span class="text-red-600 dark:text-red-400">*</span>
                 </label>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <Slider
-                    id="rating-slider"
-                    v-model="form.rating"
-                    data-testid="review-form-rating"
-                    class="w-full flex-1"
-                    :min="1"
-                    :max="10"
-                    :step="1" />
+                <div class="flex min-w-0 w-full flex-col gap-4 sm:flex-row sm:items-center">
+                  <div class="min-w-0 w-full sm:flex-1">
+                    <Slider
+                      id="rating-slider"
+                      v-model="form.rating"
+                      data-testid="review-form-rating"
+                      class="w-full touch-manipulation"
+                      :min="1"
+                      :max="10"
+                      :step="1" />
+                  </div>
                   <Tag
-                    class="shrink-0"
+                    class="shrink-0 self-start sm:self-center"
                     :value="`${form.rating}/10`"
                     icon="pi pi-star-fill"
                     severity="warning" />
@@ -334,7 +336,7 @@
                         :min="1"
                         :max="5"
                         :step="1"
-                        class="w-full" />
+                        class="w-full touch-manipulation" />
                     </div>
                     <div>
                       <label class="mb-1 block text-xs text-stone-600 dark:text-stone-400">
@@ -346,7 +348,7 @@
                         :min="1"
                         :max="5"
                         :step="1"
-                        class="w-full" />
+                        class="w-full touch-manipulation" />
                     </div>
                     <div>
                       <label class="mb-1 block text-xs text-stone-600 dark:text-stone-400"
@@ -358,7 +360,7 @@
                         :min="1"
                         :max="5"
                         :step="1"
-                        class="w-full" />
+                        class="w-full touch-manipulation" />
                     </div>
                   </div>
                 </div>
@@ -905,6 +907,17 @@
 
   :deep(.p-slider) {
     margin: 0;
+  }
+
+  /*
+   * На мобильной ширине ручка слайдера (Aura) смещена на половину ширины наружу от 0%/100%;
+   * без внутреннего отступа трек и ручки визуально упираются в края карточки или обрезаются.
+   */
+  @media (max-width: 639px) {
+    .review-form-root :deep(.p-slider.p-slider-horizontal) {
+      box-sizing: border-box;
+      padding-inline: 0.875rem;
+    }
   }
 
   :deep(.p-slider .p-slider-handle) {
