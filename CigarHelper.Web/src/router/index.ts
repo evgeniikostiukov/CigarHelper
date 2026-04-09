@@ -102,7 +102,7 @@ const routes = [
     path: '/brands',
     name: 'Brands',
     component: () => import('../views/Brands.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true },
   },
   {
     path: '/admin',

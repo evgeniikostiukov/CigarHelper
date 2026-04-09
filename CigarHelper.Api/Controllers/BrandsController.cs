@@ -66,6 +66,7 @@ public class BrandsController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<ActionResult<BrandDto>> CreateBrand(CreateBrandRequest request)
     {
         if (!ModelState.IsValid)
@@ -114,6 +115,7 @@ public class BrandsController : ControllerBase
     }
     
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<ActionResult<BrandDto>> UpdateBrand(int id, UpdateBrandRequest request)
     {
         if (!ModelState.IsValid)
@@ -164,6 +166,7 @@ public class BrandsController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> DeleteBrand(int id)
     {
         var brand = await _context.Brands.FindAsync(id);

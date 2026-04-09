@@ -25,9 +25,9 @@
         <Button
           data-testid="cigar-bases-add"
           class="w-full sm:w-auto shrink-0 min-h-12 px-5 sm:min-h-11 touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
-          label="Добавить в коллекцию (новая сигара)"
+          :label="canMutateCatalog ? 'Новая запись справочника' : 'Добавить в коллекцию'"
           icon="pi pi-plus"
-          @click="createNewCigar" />
+          @click="onPrimaryAddClick" />
       </header>
 
       <!-- Поиск и фильтры — тот же каркас, что hero на главной (Home.vue); тело под спойлер -->
@@ -444,12 +444,14 @@
     <CigarDetailDialog
       v-model:visible="showDetailDialog"
       :cigar="selectedCigar"
+      :can-edit-catalog="canMutateCatalog"
       @write-review="writeReview"
       @add-to-collection="addToCollection"
       @create-similar-cigar="createSimilarCigar"
       @edit-base-cigar="editBaseCigar" />
 
     <CigarBaseEditDialog
+      v-if="canMutateCatalog"
       v-model:visible="showEditDialog"
       :cigar="editingCigar"
       @saved="onCigarSaved" />
@@ -517,7 +519,9 @@
   const toast = useToast();
   const { user } = useAuth();
 
-  const canFilterUnmoderated = computed(() => hasAnyRole(user.value, ['Admin', 'Moderator']));
+  const canMutateCatalog = computed(() => hasAnyRole(user.value, ['Admin', 'Moderator']));
+
+  const canFilterUnmoderated = canMutateCatalog;
 
   /** Состояние спойлера фильтров запоминается в браузере. */
   const filtersExpanded = useLocalStorage('cigar-bases-filters-expanded', true);
@@ -701,11 +705,18 @@
     });
   }
 
-  function createNewCigar(): void {
-    // router.push({ name: 'CigarNew' });
+  function openNewCatalogEntryDialog(): void {
     showDetailDialog.value = false;
     showEditDialog.value = true;
     editingCigar.value = undefined;
+  }
+
+  function onPrimaryAddClick(): void {
+    if (canMutateCatalog.value) {
+      openNewCatalogEntryDialog();
+    } else {
+      router.push({ name: 'CigarNew' });
+    }
   }
 
   function createSimilarCigar(cigar: CigarBase): void {

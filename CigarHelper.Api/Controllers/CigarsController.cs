@@ -591,7 +591,7 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPost("bases")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<ActionResult<CigarBaseDto>> CreateCigarBase([FromForm] CreateCigarBaseFormRequest request)
     {
         if (!ModelState.IsValid)
@@ -759,7 +759,7 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPut("bases/{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<ActionResult<CigarBaseDto>> UpdateCigarBase(int id, [FromForm] UpdateCigarBaseFormRequest request)
     {
         if (!ModelState.IsValid)

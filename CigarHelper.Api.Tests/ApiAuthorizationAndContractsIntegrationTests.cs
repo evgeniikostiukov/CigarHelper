@@ -379,4 +379,94 @@ public class ApiAuthorizationAndContractsIntegrationTests
         Assert.True(page.TotalCount >= 1);
         Assert.Empty(page.Items);
     }
+
+    [Fact]
+    public async Task CatalogMutation_AsRegularUser_BrandsPost_Returns403()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"u{Guid.NewGuid():N}"[..10],
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(auth?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        using var res = await client.PostAsJsonAsync("/api/Brands", new CreateBrandRequest
+        {
+            Name = $"Brand_{Guid.NewGuid():N}"[..20],
+            IsModerated = false
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task CatalogMutation_AsRegularUser_CigarBasesPost_Returns403()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"u{Guid.NewGuid():N}"[..10],
+            Password = "abCd12",
+            ConfirmPassword = "abCd12"
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(auth?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        using var content = new MultipartFormDataContent();
+        using var res = await client.PostAsync("/api/cigars/bases", content);
+        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task CatalogMutation_AsModerator_PostBrand_Returns201()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        var modUsername = $"mod{Guid.NewGuid():N}"[..10];
+        var modEmail = $"{Guid.NewGuid():N}@mod.ci";
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
+            db.Users.Add(new User
+            {
+                Username = modUsername,
+                Email = modEmail,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                CreatedAt = DateTime.UtcNow,
+                Role = Role.Moderator
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        var loginRes = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
+        {
+            Username = modUsername,
+            Password = "abCd12"
+        });
+        loginRes.EnsureSuccessStatusCode();
+        var authBody = await loginRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(authBody?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBody.Token);
+
+        var brandName = $"ModBrand_{Guid.NewGuid():N}"[..24];
+        using var res = await client.PostAsJsonAsync("/api/Brands", new CreateBrandRequest
+        {
+            Name = brandName,
+            IsModerated = true
+        });
+        Assert.Equal(HttpStatusCode.Created, res.StatusCode);
+    }
 }

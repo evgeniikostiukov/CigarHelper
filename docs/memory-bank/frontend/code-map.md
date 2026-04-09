@@ -40,10 +40,10 @@
 ## Маршруты (сжато)
 
 - Публичные: `/`, `/login` (`meta.public`), `/u/:username`, `/u/:username/humidors/:humidorId`, список/деталь отзывов `/reviews`, `/reviews/:id`.
-- Требуют auth: `/dashboard` (сводка), профиль, хьюмидоры, сигары, формы, каталог-базы `/cigar-bases`, создание/редактирование отзывов.
-- Требуют **Admin**: `/brands`, вложенные `/admin`, `/admin/users`, `/admin/images` (родительский маршрут `/admin` с `AdminLayout`).
+- Требуют auth: `/dashboard` (сводка), профиль, хьюмидоры, сигары, формы, каталог-базы `/cigar-bases`, справочник брендов `/brands` (просмотр всем залогиненным; кнопки создания/редактирования/удаления — только **Admin**/**Moderator** в UI), создание/редактирование отзывов.
+- Требуют **Admin** (или Moderator для части `/admin`): вложенные `/admin`, `/admin/users`, `/admin/images` (родитель `/admin` с `AdminLayout`); `/brands` к этому не относится.
 
-Guards: неавторизованный → `/login?redirect=…`; авторизованный на `/login` → `/`; без роли Admin на admin-маршруты → `/`.
+Guards: неавторизованный → `/login?redirect=…`; авторизованный на `/login` → `/`; без нужной роли на admin-маршруты → `/`.
 
 ## Сервисы API (именование)
 

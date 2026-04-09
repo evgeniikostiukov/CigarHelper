@@ -13,11 +13,14 @@
   interface Props {
     visible: boolean;
     cigar: CigarBase | undefined;
+    /** Редактирование записи справочника (CigarBase) — только Admin/Moderator. */
+    canEditCatalog?: boolean;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     visible: false,
     cigar: undefined,
+    canEditCatalog: false,
   });
 
   // --- Emits ---
@@ -270,6 +273,7 @@
     <template #footer>
       <div class="flex flex-wrap justify-end gap-2">
         <Button
+          v-if="canEditCatalog"
           label="Редактировать"
           icon="pi pi-pencil"
           class="p-button-secondary"

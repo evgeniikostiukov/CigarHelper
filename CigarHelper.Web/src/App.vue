@@ -190,13 +190,13 @@
       label: 'База сигар',
       icon: 'pi pi-database',
       command: () => router.push({ name: 'CigarBases' }),
-      visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
+      visible: () => isAuthenticated.value,
     },
     {
       label: 'Бренды',
       icon: 'pi pi-tag',
       command: () => router.push({ name: 'Brands' }),
-      visible: () => isAuthenticated.value && hasRole(user.value, 'Admin'),
+      visible: () => isAuthenticated.value,
     },
     {
       label: 'Админ-панель',

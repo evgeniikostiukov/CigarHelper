@@ -10,7 +10,7 @@
         <div class="min-w-0">
           <p
             class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
-            Администрирование
+            {{ canMutateCatalog ? 'Администрирование' : 'Справочник' }}
           </p>
           <h1
             id="brands-heading"
@@ -18,10 +18,11 @@
             Бренды сигар
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Справочник брендов: модерация и логотипы.
+            {{ canMutateCatalog ? 'Справочник брендов: модерация и логотипы.' : 'Просмотр справочника брендов.' }}
           </p>
         </div>
         <Button
+          v-if="canMutateCatalog"
           data-testid="brands-add"
           class="w-full shrink-0 px-5 shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:w-auto sm:min-h-11 min-h-12 touch-manipulation"
           icon="pi pi-plus"
@@ -73,9 +74,12 @@
         </span>
         <h2 class="mb-2 text-2xl font-semibold text-stone-900 dark:text-rose-50/95">Брендов пока нет</h2>
         <p class="mb-6 text-pretty text-stone-600 dark:text-stone-400">
-          Добавьте бренд — он будет в справочнике и в фильтрах каталога.
+          {{
+            canMutateCatalog ? 'Добавьте бренд — он будет в справочнике и в фильтрах каталога.' : 'Список брендов пуст.'
+          }}
         </p>
         <Button
+          v-if="canMutateCatalog"
           data-testid="brands-empty-add"
           class="min-h-12 px-6 touch-manipulation"
           label="Добавить бренд"
@@ -275,6 +279,7 @@
                   aria-label="Просмотр"
                   @click="viewBrand(data)" />
                 <Button
+                  v-if="canMutateCatalog"
                   :data-testid="`brands-edit-${data.id}`"
                   class="min-h-11 min-w-11 touch-manipulation"
                   icon="pi pi-pencil"
@@ -284,6 +289,7 @@
                   aria-label="Редактировать"
                   @click="editBrand(data)" />
                 <Button
+                  v-if="canMutateCatalog"
                   :data-testid="`brands-delete-${data.id}`"
                   class="min-h-11 min-w-11 touch-manipulation"
                   icon="pi pi-trash"
@@ -474,7 +480,7 @@
             outlined
             @click="showDetailDialog = false" />
           <Button
-            v-if="selectedBrand"
+            v-if="selectedBrand && canMutateCatalog"
             data-testid="brands-detail-edit"
             class="min-h-12 w-full touch-manipulation sm:min-h-11 sm:w-auto"
             label="Редактировать"
@@ -493,6 +499,8 @@
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import { useConfirm } from 'primevue/useconfirm';
+  import { useAuth } from '@/services/useAuth';
+  import { hasAnyRole } from '@/utils/roles';
   import cigarService from '@/services/cigarService';
   import type { Brand } from '@/services/cigarService';
   import DataTable from 'primevue/datatable';
@@ -533,6 +541,9 @@
   const confirm = useConfirm();
   const route = useRoute();
   const router = useRouter();
+  const { user } = useAuth();
+
+  const canMutateCatalog = computed(() => hasAnyRole(user.value, ['Admin', 'Moderator']));
 
   const loading = ref(true);
   const loadError = ref<string | null>(null);
