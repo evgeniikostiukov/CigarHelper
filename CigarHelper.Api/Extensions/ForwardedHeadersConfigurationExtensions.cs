@@ -38,9 +38,10 @@ public static class ForwardedHeadersConfigurationExtensions
 
             if (cfg.TrustPrivateNetworks)
             {
-                options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
-                options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
-                options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("192.168.0.0"), 16));
+                // ForwardedHeadersOptions.KnownIPNetworks uses System.Net.IPNetwork (.NET 10); unqualified IPNetwork is ambiguous with the obsolete HttpOverrides type.
+                options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
+                options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
+                options.KnownIPNetworks.Add(new System.Net.IPNetwork(IPAddress.Parse("192.168.0.0"), 16));
             }
 
             if (options.KnownProxies.Count == 0)
