@@ -902,6 +902,7 @@ public class CigarsController : ControllerBase
         new()
         {
             Id = uc.Id,
+            CigarBaseId = uc.CigarBaseId,
             Name = uc.CigarBase.Name,
             Brand = new BrandDto
             {

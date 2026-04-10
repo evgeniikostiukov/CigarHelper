@@ -109,12 +109,18 @@ public class AppDbContext : DbContext
             .WithMany(u => u.Reviews)
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.CigarBase)
+            .WithMany(cb => cb.Reviews)
+            .HasForeignKey(r => r.CigarBaseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Cigar)
             .WithMany(c => c.Reviews)
             .HasForeignKey(r => r.CigarId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
             
         // Configure ReviewImage entity
         modelBuilder.Entity<ReviewImage>()

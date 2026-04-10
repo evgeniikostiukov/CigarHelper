@@ -23,11 +23,18 @@ public class Review
     
     [ForeignKey("UserId")]
     public User User { get; set; } = null!;
-    
-    public int CigarId { get; set; }
-    
+
+    /// <summary>Каталожная сигара — всегда задана.</summary>
+    public int CigarBaseId { get; set; }
+
+    [ForeignKey("CigarBaseId")]
+    public CigarBase CigarBase { get; set; } = null!;
+
+    /// <summary>Опционально: запись коллекции пользователя, если обзор привязан к «моей» сигаре.</summary>
+    public int? CigarId { get; set; }
+
     [ForeignKey("CigarId")]
-    public UserCigar Cigar { get; set; } = null!;
+    public UserCigar? Cigar { get; set; }
     
     public ICollection<ReviewImage> Images { get; set; } = new List<ReviewImage>();
     

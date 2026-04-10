@@ -22,15 +22,17 @@ public class ReviewsController : ControllerBase
     /// Получает список всех обзоров
     /// </summary>
     /// <param name="userId">Фильтр по пользователю (опционально)</param>
-    /// <param name="cigarId">Фильтр по сигаре (опционально)</param>
+    /// <param name="cigarBaseId">Фильтр по каталожной сигаре (CigarBase)</param>
+    /// <param name="userCigarId">Фильтр по записи коллекции (UserCigar)</param>
     /// <returns>Список обзоров</returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<List<ReviewListItemDto>>> GetReviews(
         [FromQuery] int? userId = null,
-        [FromQuery] int? cigarId = null)
+        [FromQuery] int? cigarBaseId = null,
+        [FromQuery] int? userCigarId = null)
     {
-        var reviews = await _reviewService.GetReviewsAsync(userId, cigarId);
+        var reviews = await _reviewService.GetReviewsAsync(userId, cigarBaseId, userCigarId);
         return Ok(reviews);
     }
     

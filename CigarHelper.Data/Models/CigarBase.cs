@@ -50,6 +50,8 @@ public class CigarBase
     
     // Navigation properties
     public ICollection<UserCigar> UserCigars { get; set; } = new List<UserCigar>();
+
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
     
     public ICollection<CigarImage> Images { get; set; } = new List<CigarImage>();
 } 
