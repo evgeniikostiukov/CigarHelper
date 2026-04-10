@@ -1,3 +1,4 @@
+using System.Reflection;
 using CigarHelper.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,21 +12,26 @@ public class AppDbContext : DbContext
     }
     
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<Cigar> Cigars { get; set; } = null!;
+    public DbSet<Brand> Brands { get; set; } = null!;
+    public DbSet<CigarBase> CigarBases { get; set; } = null!;
+    public DbSet<UserCigar> UserCigars { get; set; } = null!;
     public DbSet<Humidor> Humidors { get; set; } = null!;
     public DbSet<Review> Reviews { get; set; } = null!;
     public DbSet<ReviewImage> ReviewImages { get; set; } = null!;
+    public DbSet<CigarImage> CigarImages { get; set; } = null!;
+    public DbSet<CigarComment> CigarComments { get; set; } = null!;
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!optionsBuilder.IsConfigured)
+        if (optionsBuilder.IsConfigured)
+            return;
+
+        var connectionString = GetConnectionStringFromConfig();
+        if (!string.IsNullOrEmpty(connectionString))
         {
-            // This is a fallback if the context is created without options
-            var connectionString = GetConnectionStringFromConfig();
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                optionsBuilder.UseNpgsql(connectionString);
-            }
+            optionsBuilder.UseNpgsql(connectionString);
+            optionsBuilder.EnableSensitiveDataLogging(true);
+            optionsBuilder.EnableDetailedErrors(true);
         }
     }
     
@@ -34,8 +40,10 @@ public class AppDbContext : DbContext
         var configBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json", optional: true);
-            
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json", optional: true)
+            .AddUserSecrets(Assembly.GetExecutingAssembly())
+            .AddEnvironmentVariables();
+
         var config = configBuilder.Build();
         return config.GetConnectionString("DefaultConnection") ?? "";
     }
@@ -53,11 +61,33 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Username)
             .IsUnique();
             
-        // Configure Cigar entity
-        modelBuilder.Entity<Cigar>()
-            .HasOne(c => c.User)
+        // Configure Brand entity
+        modelBuilder.Entity<Brand>()
+            .HasIndex(b => b.Name)
+            .IsUnique();
+            
+        // Configure CigarBase entity
+        modelBuilder.Entity<CigarBase>()
+            .HasIndex(c => new { c.Name, c.BrandId })
+            .IsUnique();
+            
+        modelBuilder.Entity<CigarBase>()
+            .HasOne(cb => cb.Brand)
+            .WithMany(b => b.Cigars)
+            .HasForeignKey(cb => cb.BrandId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        // Configure UserCigar entity
+        modelBuilder.Entity<UserCigar>()
+            .HasOne(uc => uc.CigarBase)
+            .WithMany(cb => cb.UserCigars)
+            .HasForeignKey(uc => uc.CigarBaseId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<UserCigar>()
+            .HasOne(uc => uc.User)
             .WithMany()
-            .HasForeignKey(c => c.UserId)
+            .HasForeignKey(uc => uc.UserId)
             .OnDelete(DeleteBehavior.Cascade);
             
         // Configure Humidor entity
@@ -67,10 +97,10 @@ public class AppDbContext : DbContext
             .HasForeignKey(h => h.UserId)
             .OnDelete(DeleteBehavior.Cascade);
             
-        modelBuilder.Entity<Cigar>()
-            .HasOne(c => c.Humidor)
+        modelBuilder.Entity<UserCigar>()
+            .HasOne(uc => uc.Humidor)
             .WithMany(h => h.Cigars)
-            .HasForeignKey(c => c.HumidorId)
+            .HasForeignKey(uc => uc.HumidorId)
             .OnDelete(DeleteBehavior.SetNull);
             
         // Configure Review entity
@@ -79,12 +109,18 @@ public class AppDbContext : DbContext
             .WithMany(u => u.Reviews)
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.CigarBase)
+            .WithMany(cb => cb.Reviews)
+            .HasForeignKey(r => r.CigarBaseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Review>()
             .HasOne(r => r.Cigar)
             .WithMany(c => c.Reviews)
             .HasForeignKey(r => r.CigarId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
             
         // Configure ReviewImage entity
         modelBuilder.Entity<ReviewImage>()
@@ -92,5 +128,48 @@ public class AppDbContext : DbContext
             .WithMany(r => r.Images)
             .HasForeignKey(ri => ri.ReviewId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CigarImage>()
+            .HasOne(ci => ci.CigarBase)
+            .WithMany(cb => cb.Images)
+            .HasForeignKey(ci => ci.CigarBaseId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<CigarImage>()
+            .HasOne(ci => ci.UserCigar)
+            .WithMany(uc => uc.Images)
+            .HasForeignKey(ci => ci.UserCigarId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CigarComment>(entity =>
+        {
+            entity.HasOne(c => c.Author)
+                .WithMany()
+                .HasForeignKey(c => c.AuthorUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.CigarBase)
+                .WithMany()
+                .HasForeignKey(c => c.CigarBaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.UserCigar)
+                .WithMany()
+                .HasForeignKey(c => c.UserCigarId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(c => c.CigarBaseId);
+            entity.HasIndex(c => c.UserCigarId);
+            entity.HasIndex(c => c.ModerationStatus);
+
+            entity.HasOne(c => c.ModeratedBy)
+                .WithMany()
+                .HasForeignKey(c => c.ModeratedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.ToTable(t => t.HasCheckConstraint(
+                "CK_CigarComments_SingleTarget",
+                "(\"CigarBaseId\" IS NOT NULL AND \"UserCigarId\" IS NULL) OR (\"CigarBaseId\" IS NULL AND \"UserCigarId\" IS NOT NULL)"));
+        });
     }
 } 

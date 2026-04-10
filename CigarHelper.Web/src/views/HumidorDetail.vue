@@ -1,290 +1,591 @@
 <template>
-  <div class="humidor-detail">
-    <div v-if="loading" class="text-center my-5">
-      <div class="spinner-border" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
+  <section
+    class="humidor-detail-root -mx-2 sm:mx-0 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-6 ring-1 ring-stone-900/5 dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-8"
+    data-testid="humidor-detail"
+    aria-labelledby="humidor-detail-heading">
+    <div
+      class="humidor-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
-    <div v-else-if="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+    <div class="relative z-[1] mx-auto max-w-7xl">
+      <div
+        v-if="loading"
+        data-testid="humidor-detail-loading"
+        class="min-h-[20rem] space-y-6"
+        aria-busy="true"
+        aria-live="polite">
+        <Skeleton
+          class="max-w-md rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+          height="3rem" />
+        <div class="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3">
+          <Skeleton
+            v-for="n in 3"
+            :key="n"
+            class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+            height="8rem"
+            data-testid="humidor-detail-skeleton" />
+        </div>
+        <Skeleton
+          class="max-w-xs rounded-md"
+          height="1.25rem" />
+        <Skeleton
+          class="rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+          height="16rem" />
+      </div>
 
-    <div v-else>
-      <div class="d-sm-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 class="mb-1">{{ humidor.name }}</h1>
-          <p v-if="humidor.description" class="text-muted mb-0">{{ humidor.description }}</p>
-        </div>
-        <div class="mt-3 mt-sm-0">
-          <router-link :to="`/humidors/${humidor.id}/edit`" class="btn btn-outline-primary me-2">
-            Edit Humidor
-          </router-link>
-          <router-link to="/humidors" class="btn btn-outline-secondary">
-            Back to List
-          </router-link>
+      <div
+        v-else-if="error"
+        class="max-w-2xl rounded-2xl border border-red-200/80 bg-white/90 p-5 dark:border-red-900/50 dark:bg-stone-900/80"
+        data-testid="humidor-detail-error"
+        role="alert">
+        <Message
+          severity="error"
+          :closable="false">
+          {{ error }}
+        </Message>
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Button
+            data-testid="humidor-detail-retry"
+            class="min-h-12 w-full touch-manipulation sm:w-auto"
+            label="Повторить загрузку"
+            icon="pi pi-refresh"
+            severity="secondary"
+            outlined
+            @click="loadHumidor" />
+          <Button
+            data-testid="humidor-detail-back"
+            class="min-h-12 w-full touch-manipulation sm:w-auto"
+            label="К списку хьюмидоров"
+            icon="pi pi-list"
+            severity="secondary"
+            outlined
+            @click="router.push({ name: 'HumidorList' })" />
         </div>
       </div>
-      
-      <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Capacity</h5>
-              <div class="progress">
-                <div 
-                  class="progress-bar" 
-                  :class="capacityClass" 
-                  role="progressbar" 
-                  :style="`width: ${capacityPercentage}%`" 
-                  :aria-valuenow="humidor.cigars.length" 
-                  aria-valuemin="0" 
-                  :aria-valuemax="humidor.capacity">
-                  {{ humidor.cigars.length }}/{{ humidor.capacity }}
-                </div>
+
+      <template v-else-if="humidor">
+        <header class="flex flex-col gap-4 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
+          <div class="min-w-0">
+            <p
+              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
+              Коллекция
+            </p>
+            <h1
+              id="humidor-detail-heading"
+              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
+              {{ humidor.name }}
+            </h1>
+            <p
+              v-if="humidor.description"
+              class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
+              {{ humidor.description }}
+            </p>
+            <p
+              v-else
+              class="mt-1.5 text-sm text-stone-500 dark:text-stone-500">
+              Описание не указано.
+            </p>
+          </div>
+          <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button
+              data-testid="humidor-detail-edit"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:min-h-11 sm:w-auto"
+              label="Редактировать"
+              icon="pi pi-pencil"
+              @click="router.push({ name: 'HumidorEdit', params: { id: humidor.id } })" />
+            <Button
+              data-testid="humidor-detail-to-list"
+              class="min-h-12 w-full touch-manipulation sm:min-h-11 sm:w-auto"
+              label="К списку"
+              icon="pi pi-arrow-left"
+              severity="secondary"
+              outlined
+              @click="router.push({ name: 'HumidorList' })" />
+          </div>
+        </header>
+
+        <div
+          class="humidor-detail-enter space-y-6 sm:space-y-8"
+          data-testid="humidor-detail-content">
+          <div
+            class="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-3"
+            data-testid="humidor-detail-stats">
+            <div
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                Вместимость
+              </h2>
+              <p class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95">
+                {{ currentQuantity }} / {{ humidor.capacity }}
+              </p>
+              <ProgressBar
+                :value="capacityPercentage"
+                class="mt-3"
+                :show-value="false" />
+            </div>
+            <div
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                Температура, °C
+              </h2>
+              <p class="text-2xl font-semibold text-stone-700 dark:text-stone-200">—</p>
+              <p class="mt-2 text-xs text-stone-500 dark:text-stone-500">Поле зарезервировано под датчики.</p>
+            </div>
+            <div
+              class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                Влажность
+              </h2>
+              <div v-if="humidor.humidity">
+                <Badge
+                  :value="`${humidor.humidity}%`"
+                  :severity="humidorService.getHumiditySeverity(humidor.humidity)" />
               </div>
+              <p
+                v-else
+                class="text-stone-600 dark:text-stone-400">
+                Не указана
+              </p>
             </div>
           </div>
-        </div>
-        <div class="col-md-4 mb-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Humidity</h5>
-              <div class="d-flex align-items-center">
-                <div class="display-6 me-2">{{ humidor.currentHumidity || '-' }}%</div>
-                <span class="badge" :class="humidityClass">{{ humidityStatus }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 mb-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Temperature</h5>
-              <div class="display-6">{{ humidor.currentTemperature || '-' }}°C</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <h3 class="mb-3">Cigars in this Humidor</h3>
-      
-      <div v-if="humidor.cigars.length === 0" class="alert alert-info">
-        <p class="mb-0">This humidor is empty.</p>
-      </div>
-      
-      <div v-else class="table-responsive">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Brand</th>
-              <th>Size</th>
-              <th>Strength</th>
-              <th>Rating</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="cigar in humidor.cigars" :key="cigar.id">
-              <td>{{ cigar.name }}</td>
-              <td>{{ cigar.brand }}</td>
-              <td>{{ cigar.size || '-' }}</td>
-              <td>{{ cigar.strength || '-' }}</td>
-              <td>
-                <div v-if="cigar.rating">
-                  {{ cigar.rating }}/10
+
+          <section
+            class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+            aria-labelledby="humidor-detail-cigars-heading">
+            <h2
+              id="humidor-detail-cigars-heading"
+              class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
+              Сигары в этом хьюмидоре
+            </h2>
+            <DataTable
+              :value="humidor.cigars"
+              class="humidor-detail-table"
+              data-testid="humidor-detail-table"
+              responsive-layout="scroll"
+              :paginator="humidor.cigars.length > 5"
+              removable-sort
+              :rows="5">
+              <Column
+                field="name"
+                header="Название"
+                sortable>
+                <template #body="slotProps">
+                  <RouterLink
+                    :to="{ name: 'CigarDetail', params: { id: String(slotProps.data.id) } }"
+                    class="font-medium text-rose-900 underline-offset-2 hover:underline dark:text-rose-200/95"
+                    @click.stop>
+                    {{ slotProps.data.name }}
+                  </RouterLink>
+                </template>
+              </Column>
+              <Column
+                field="brand.name"
+                header="Бренд"
+                sortable />
+              <Column
+                field="size"
+                header="Размер"
+                sortable>
+                <template #body="slotProps">
+                  {{ slotProps.data.size || '—' }}
+                </template>
+              </Column>
+              <Column
+                field="strength"
+                header="Крепость"
+                sortable>
+                <template #body="slotProps">
+                  {{ getStrengthLabel(slotProps.data.strength) || '—' }}
+                </template>
+              </Column>
+              <Column
+                field="rating"
+                header="Рейтинг"
+                sortable>
+                <template #body="slotProps">
+                  {{ slotProps.data.rating != null ? `${slotProps.data.rating}/10` : '—' }}
+                </template>
+              </Column>
+              <Column
+                field="quantity"
+                header="Кол-во"
+                sortable
+                class="w-[6rem] text-right">
+                <template #body="slotProps">
+                  {{ Math.max(1, Math.trunc(slotProps.data.quantity ?? 1)) }}
+                </template>
+              </Column>
+              <Column
+                header="Действия"
+                class="w-[8rem] text-center">
+                <template #body="slotProps">
+                  <Button
+                    :data-testid="`humidor-detail-remove-cigar-${slotProps.data.id}`"
+                    class="min-h-11 min-w-11 touch-manipulation"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    text
+                    rounded
+                    :disabled="!slotProps.data.id"
+                    aria-label="Убрать сигару из хьюмидора"
+                    @click="confirmRemoveCigar(slotProps.data)" />
+                </template>
+              </Column>
+              <template #empty>
+                <div
+                  class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-10 text-center text-stone-600 dark:border-rose-200/15 dark:bg-stone-950/40 dark:text-stone-400"
+                  data-testid="humidor-detail-table-empty">
+                  В этом хьюмидоре пока нет сигар.
                 </div>
-                <span v-else>-</span>
-              </td>
-              <td>
-                <button 
-                  @click="removeCigar(cigar.id)" 
-                  class="btn btn-sm btn-outline-danger"
-                  :disabled="removingCigar === cigar.id">
-                  <span v-if="removingCigar === cigar.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  Remove
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <h4 class="mt-4 mb-3">Add Cigars to Humidor</h4>
-      
-      <div v-if="loadingAvailableCigars" class="text-center my-3">
-        <div class="spinner-border spinner-border-sm" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <span class="ms-2">Loading available cigars...</span>
-      </div>
-      
-      <div v-else-if="availableCigarsError" class="alert alert-danger">
-        {{ availableCigarsError }}
-      </div>
-      
-      <div v-else-if="availableCigars.length === 0" class="alert alert-info">
-        <p class="mb-0">You don't have any cigars available to add to this humidor.</p>
-      </div>
-      
-      <div v-else>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-          <div v-for="cigar in availableCigars" :key="cigar.id" class="col">
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title">{{ cigar.name }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ cigar.brand }}</h6>
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                  <div>
-                    <span v-if="cigar.strength" class="badge bg-secondary me-1">{{ cigar.strength }}</span>
-                    <span v-if="cigar.size" class="badge bg-secondary">{{ cigar.size }}</span>
+              </template>
+            </DataTable>
+          </section>
+
+          <section
+            class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+            aria-labelledby="humidor-detail-add-heading"
+            data-testid="humidor-detail-available">
+            <h2
+              id="humidor-detail-add-heading"
+              class="mb-1 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
+              Добавить сигары
+            </h2>
+            <div class="mb-5 flex items-start gap-2">
+              <p class="min-w-0 flex-1 text-sm text-stone-600 dark:text-stone-400">
+                Сигары из коллекции, которых ещё нет в этом хьюмидоре.
+              </p>
+              <button
+                type="button"
+                class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-200/80 hover:text-stone-700 focus-visible:outline focus-visible:ring-2 focus-visible:ring-rose-600 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 dark:focus-visible:ring-rose-400"
+                v-tooltip.top="'Сигары, уже лежащие в других хьюмидорах, здесь всё равно можно добавить в этот.'"
+                aria-label="О списке доступных сигар"
+                data-testid="humidor-detail-available-help">
+                <i
+                  class="pi pi-info-circle text-sm"
+                  aria-hidden="true" />
+              </button>
+            </div>
+
+            <div
+              v-if="loadingAvailableCigars"
+              class="flex min-h-[8rem] flex-col items-center justify-center gap-3 rounded-xl border border-stone-200/70 bg-stone-50/50 dark:border-stone-700/60 dark:bg-stone-950/35"
+              data-testid="humidor-detail-available-loading"
+              aria-busy="true">
+              <i
+                class="pi pi-spin pi-spinner text-2xl text-rose-800 dark:text-rose-400"
+                aria-hidden="true" />
+              <span class="text-sm text-stone-600 dark:text-stone-400">Загрузка списка…</span>
+            </div>
+
+            <div
+              v-else-if="availableCigarsError"
+              class="rounded-xl border border-red-200/70 bg-red-50/50 p-4 dark:border-red-900/40 dark:bg-red-950/20"
+              data-testid="humidor-detail-available-error"
+              role="alert">
+              <Message
+                severity="error"
+                :closable="false">
+                {{ availableCigarsError }}
+              </Message>
+              <Button
+                data-testid="humidor-detail-available-retry"
+                class="mt-3 min-h-12 w-full touch-manipulation sm:w-auto"
+                label="Повторить"
+                icon="pi pi-refresh"
+                severity="secondary"
+                outlined
+                @click="loadAvailableCigars" />
+            </div>
+
+            <div
+              v-else-if="availableCigars.length === 0"
+              class="rounded-xl border border-dashed border-rose-800/25 bg-stone-50/80 px-5 py-10 text-center dark:border-rose-200/15 dark:bg-stone-950/40"
+              data-testid="humidor-detail-available-empty">
+              <p class="text-stone-600 dark:text-stone-400">Нет сигар для добавления в этот хьюмидор.</p>
+            </div>
+
+            <div
+              v-else
+              class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6"
+              data-testid="humidor-detail-available-grid">
+              <article
+                v-for="(cigar, index) in availableCigars"
+                :key="cigar.id"
+                v-memo="[
+                  cigar.id,
+                  cigar.name,
+                  cigar.strength,
+                  cigar.size,
+                  cigar.brand?.name,
+                  addingCigar === cigar.id,
+                  isHumidorFull,
+                ]"
+                :data-testid="`humidor-detail-add-card-${cigar.id}`"
+                class="available-card-enter flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50"
+                :style="{ animationDelay: `${Math.min(index, 8) * 40}ms` }">
+                <div class="flex flex-1 flex-col gap-2 border-b border-stone-100 p-4 dark:border-stone-700/80">
+                  <h3 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-rose-50/95">
+                    {{ cigar.name }}
+                  </h3>
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
+                    {{ cigar.brand.name }}
+                  </p>
+                  <div class="flex flex-wrap gap-2 pt-1">
+                    <Tag
+                      v-if="cigar.strength"
+                      :value="getStrengthLabel(cigar.strength) || cigar.strength"
+                      severity="secondary" />
+                    <Tag
+                      v-if="cigar.size"
+                      :value="cigar.size"
+                      severity="info" />
                   </div>
-                  <button 
-                    @click="addCigar(cigar.id)" 
-                    class="btn btn-sm btn-primary"
-                    :disabled="addingCigar === cigar.id || isHumidorFull">
-                    <span v-if="addingCigar === cigar.id" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    Add to Humidor
-                  </button>
                 </div>
-              </div>
+                <footer class="mt-auto bg-stone-50/90 p-3 dark:bg-stone-950/50">
+                  <Button
+                    :data-testid="`humidor-detail-add-${cigar.id}`"
+                    class="min-h-11 w-full touch-manipulation"
+                    label="Добавить"
+                    icon="pi pi-plus"
+                    size="small"
+                    :disabled="!cigar.id || addingCigar === cigar.id || isHumidorFull"
+                    :loading="addingCigar === cigar.id"
+                    @click="addCigar(cigar.id!)" />
+                </footer>
+              </article>
             </div>
-          </div>
+
+            <Message
+              v-if="isHumidorFull"
+              severity="warn"
+              class="mt-4"
+              data-testid="humidor-detail-full"
+              :closable="false">
+              Хьюмидор заполнен — уберите сигары или увеличьте вместимость в настройках.
+            </Message>
+          </section>
         </div>
-      </div>
+      </template>
     </div>
-  </div>
+  </section>
 </template>
 
-<script>
-import humidorService from '../services/humidorService'
-import cigarService from '../services/cigarService'
+<script setup lang="ts">
+  import { ref, computed, onMounted } from 'vue';
+  import { RouterLink, useRoute, useRouter } from 'vue-router';
+  import { useConfirm } from 'primevue/useconfirm';
+  import { useToast } from 'primevue/usetoast';
+  import DataTable from 'primevue/datatable';
+  import Column from 'primevue/column';
+  import ProgressBar from 'primevue/progressbar';
+  import humidorService from '../services/humidorService';
+  import cigarService from '../services/cigarService';
+  import type { Humidor } from '../services/humidorService';
+  import type { Cigar } from '../services/cigarService';
+  import { strengthOptions } from '../utils/cigarOptions';
 
-export default {
-  data() {
-    return {
-      humidor: {
-        id: 0,
-        name: '',
-        description: '',
-        capacity: 0,
-        currentHumidity: null,
-        currentTemperature: null,
-        cigars: []
+  interface HumidorDetail extends Humidor {
+    cigars: Cigar[];
+  }
+
+  const route = useRoute();
+  const router = useRouter();
+  const confirm = useConfirm();
+  const toast = useToast();
+
+  const humidor = ref<HumidorDetail | null>(null);
+  const loading = ref(true);
+  const error = ref<string | null>(null);
+  const addingCigar = ref<number | null>(null);
+
+  const availableCigars = ref<Cigar[]>([]);
+  const loadingAvailableCigars = ref(false);
+  const availableCigarsError = ref<string | null>(null);
+
+  const currentQuantity = computed((): number => {
+    const list = humidor.value?.cigars ?? [];
+    return list.reduce((sum, c) => sum + Math.max(1, Math.trunc(c.quantity ?? 1)), 0);
+  });
+
+  const capacityPercentage = computed((): number => {
+    if (!humidor.value || !humidor.value.capacity) return 0;
+    return Math.min(100, Math.round((currentQuantity.value / humidor.value.capacity) * 100));
+  });
+
+  const isHumidorFull = computed((): boolean => {
+    if (!humidor.value || !humidor.value.capacity) return false;
+    return currentQuantity.value >= humidor.value.capacity;
+  });
+
+  function getStrengthLabel(strength: string | null | undefined): string {
+    if (!strength) return '';
+    return strengthOptions.find((o) => o.value === strength)?.label || strength;
+  }
+
+  const loadHumidor = async (): Promise<void> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const humidorId = Number(route.params.id);
+      const humidorData = await humidorService.getHumidor(humidorId);
+      humidor.value = { ...humidorData, cigars: humidorData.cigars || [] };
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Ошибка загрузки хьюмидора:', err);
+      }
+      error.value = 'Не удалось загрузить данные хьюмидора.';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const loadAvailableCigars = async (): Promise<void> => {
+    loadingAvailableCigars.value = true;
+    availableCigarsError.value = null;
+    try {
+      const allCigarsResult = await cigarService.getCigars();
+      const humidorCigarIds = new Set(humidor.value?.cigars.map((c) => c.id));
+      availableCigars.value = allCigarsResult.filter((c) => !humidorCigarIds.has(c.id));
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Ошибка загрузки доступных сигар:', err);
+      }
+      availableCigarsError.value = 'Не удалось загрузить список доступных сигар.';
+    } finally {
+      loadingAvailableCigars.value = false;
+    }
+  };
+
+  const addCigar = async (cigarId: number): Promise<void> => {
+    if (!humidor.value?.id) return;
+    addingCigar.value = cigarId;
+    try {
+      await humidorService.addCigarToHumidor(humidor.value.id, cigarId);
+      toast.add({
+        severity: 'success',
+        summary: 'Успех',
+        detail: 'Сигара добавлена в хьюмидор',
+        life: 2000,
+      });
+      await loadHumidor();
+      await loadAvailableCigars();
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Ошибка при добавлении сигары:', err);
+      }
+      toast.add({
+        severity: 'error',
+        summary: 'Ошибка',
+        detail: 'Не удалось добавить сигару',
+        life: 3000,
+      });
+    } finally {
+      addingCigar.value = null;
+    }
+  };
+
+  const confirmRemoveCigar = (cigar: Cigar): void => {
+    if (!humidor.value || !humidor.value.id || !cigar.id) return;
+
+    const humidorId = humidor.value.id;
+    const cigarId = cigar.id;
+
+    confirm.require({
+      message: `Убрать сигару «${cigar.name}» из этого хьюмидора?`,
+      header: 'Подтверждение',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Отмена',
+      acceptLabel: 'Убрать',
+      accept: async () => {
+        try {
+          await humidorService.removeCigarFromHumidor(humidorId, cigarId);
+          toast.add({
+            severity: 'info',
+            summary: 'Успешно',
+            detail: 'Сигара убрана',
+            life: 3000,
+          });
+          await Promise.all([loadHumidor(), loadAvailableCigars()]);
+        } catch (err) {
+          if (import.meta.env.DEV) {
+            console.error(err);
+          }
+          toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: 'Не удалось убрать сигару',
+            life: 3000,
+          });
+        }
       },
-      loading: true,
-      error: null,
-      removingCigar: null,
-      availableCigars: [],
-      loadingAvailableCigars: false,
-      availableCigarsError: null,
-      addingCigar: null
+    });
+  };
+
+  onMounted(async () => {
+    await loadHumidor();
+    if (!error.value) {
+      void loadAvailableCigars();
     }
-  },
-  computed: {
-    capacityPercentage() {
-      if (!this.humidor.capacity) return 0
-      return (this.humidor.cigars.length / this.humidor.capacity) * 100
-    },
-    capacityClass() {
-      const percentage = this.capacityPercentage
-      if (percentage >= 90) return 'bg-danger'
-      if (percentage >= 75) return 'bg-warning'
-      return 'bg-success'
-    },
-    isHumidorFull() {
-      return this.humidor.cigars.length >= this.humidor.capacity
-    },
-    humidityClass() {
-      const humidity = this.humidor.currentHumidity
-      if (!humidity) return 'bg-secondary'
-      if (humidity < 62) return 'bg-danger'
-      if (humidity > 75) return 'bg-danger'
-      if (humidity < 65) return 'bg-warning'
-      if (humidity > 72) return 'bg-warning'
-      return 'bg-success'
-    },
-    humidityStatus() {
-      const humidity = this.humidor.currentHumidity
-      if (!humidity) return 'Unknown'
-      if (humidity < 62) return 'Too Dry'
-      if (humidity > 75) return 'Too Humid'
-      if (humidity < 65) return 'Slightly Dry'
-      if (humidity > 72) return 'Slightly Humid'
-      return 'Optimal'
+  });
+</script>
+
+<style scoped>
+  .humidor-detail-root {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .humidor-detail-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  /*:global(.dark) .humidor-detail-grain {
+    mix-blend-mode: soft-light;
+  }*/
+
+  .humidor-detail-enter {
+    animation: humidor-detail-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes humidor-detail-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
     }
-  },
-  async created() {
-    await this.loadHumidor()
-    this.loadAvailableCigars()
-  },
-  methods: {
-    async loadHumidor() {
-      this.loading = true
-      this.error = null
-      
-      try {
-        const response = await humidorService.getHumidor(this.$route.params.id)
-        this.humidor = response.data
-      } catch (error) {
-        this.error = 'Failed to load humidor details'
-        console.error(error)
-      } finally {
-        this.loading = false
-      }
-    },
-    async loadAvailableCigars() {
-      this.loadingAvailableCigars = true
-      this.availableCigarsError = null
-      
-      try {
-        const response = await cigarService.getCigars()
-        // Filter out cigars that are already in this humidor
-        this.availableCigars = response.data.filter(
-          cigar => !cigar.humidorId || cigar.humidorId !== this.humidor.id
-        )
-      } catch (error) {
-        this.availableCigarsError = 'Failed to load available cigars'
-        console.error(error)
-      } finally {
-        this.loadingAvailableCigars = false
-      }
-    },
-    async addCigar(cigarId) {
-      if (this.isHumidorFull) return
-      
-      this.addingCigar = cigarId
-      
-      try {
-        await humidorService.addCigarToHumidor(this.humidor.id, cigarId)
-        // Reload humidor to get updated list
-        await this.loadHumidor()
-        // Reload available cigars
-        await this.loadAvailableCigars()
-      } catch (error) {
-        this.error = 'Failed to add cigar to humidor'
-        console.error(error)
-      } finally {
-        this.addingCigar = null
-      }
-    },
-    async removeCigar(cigarId) {
-      this.removingCigar = cigarId
-      
-      try {
-        await humidorService.removeCigarFromHumidor(this.humidor.id, cigarId)
-        // Reload humidor to get updated list
-        await this.loadHumidor()
-        // Reload available cigars
-        await this.loadAvailableCigars()
-      } catch (error) {
-        this.error = 'Failed to remove cigar from humidor'
-        console.error(error)
-      } finally {
-        this.removingCigar = null
-      }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
-}
-</script> 
+
+  .available-card-enter {
+    animation: humidor-available-card-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes humidor-available-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .humidor-detail-enter,
+    .available-card-enter {
+      animation: none;
+    }
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+</style>

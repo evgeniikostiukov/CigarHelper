@@ -1,0 +1,23 @@
+# Продакшен на одном сервере (SPA + API в Docker, снаружи Caddy/другой TLS-proxy).
+#
+# Базовый compose оставляет Development и локальный CORS; этот файл подключается поверх:
+#   cp docker-compose.production.example.yml docker-compose.production.yml
+#   # В .env задать PUBLIC_WEB_ORIGIN (https://ваш-домен) и остальные секреты.
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml --profile full up -d --build
+#
+# `PUBLIC_WEB_PORT` — порт публикации SPA на хосте (как WEB_PORT), если заходят по HTTP
+# с порта, например http://сервер:8080 (редко при HTTPS на 443).
+
+services:
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Явно (перекрывает appsettings.*): устраняет 400 Invalid Hostname, если образ старый
+      # или Host не попадает под шаблон. При своём домене задайте ALLOWED_HOSTS в .env.
+      AllowedHosts: "${ALLOWED_HOSTS:-*.sslip.io;localhost;127.0.0.1;[::1]}"
+      ForwardedHeaders__Enabled: 'true'
+      ForwardedHeaders__ForwardLimit: 2
+      ForwardedHeaders__TrustPrivateNetworks: 'true'
+      Cors__Origins__0: ${PUBLIC_WEB_ORIGIN:?Set PUBLIC_WEB_ORIGIN in .env (e.g. https://your-host.example)}
+      Cors__Origins__1: http://localhost:${PUBLIC_WEB_PORT:-8080}
+      Cors__Origins__2: http://127.0.0.1:${PUBLIC_WEB_PORT:-8080}

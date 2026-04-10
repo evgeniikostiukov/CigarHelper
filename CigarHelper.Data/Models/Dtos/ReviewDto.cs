@@ -11,16 +11,22 @@ public class ReviewDto
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
     public string? UserAvatarUrl { get; set; }
-    public int CigarId { get; set; }
+
+    /// <summary>Каталожная сигара.</summary>
+    public int CigarBaseId { get; set; }
+
+    /// <summary>Запись коллекции пользователя, если обзор с неё; иначе null.</summary>
+    public int? UserCigarId { get; set; }
+
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;
     public List<ReviewImageDto> Images { get; set; } = new List<ReviewImageDto>();
     public string? SmokingExperience { get; set; }
     public string? Aroma { get; set; }
     public string? Taste { get; set; }
-    public string? Construction { get; set; }
-    public string? BurnQuality { get; set; }
-    public string? Draw { get; set; }
+    public int? Construction { get; set; }
+    public int? BurnQuality { get; set; }
+    public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime SmokingDate { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -35,11 +41,15 @@ public class ReviewListItemDto
     public int Rating { get; set; }
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
-    public string? UserAvatarUrl { get; set; }
-    public int CigarId { get; set; }
+    
+    //TODO: Сделать аватарку пользователя на обзоре
+    // public byte[]? UserAvatarBytes { get; set; }
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;
-    public string? MainImageUrl { get; set; } // Главное изображение обзора
+
+    public int CigarBaseId { get; set; }
+
+    public byte[]? MainImageBytes { get; set; } // Главное изображение обзора
     public int ImageCount { get; set; } // Количество изображений
     public DateTime CreatedAt { get; set; }
 }
@@ -47,7 +57,7 @@ public class ReviewListItemDto
 public class ReviewImageDto
 {
     public int Id { get; set; }
-    public string ImageUrl { get; set; } = string.Empty;
+    public byte[]? ImageBytes { get; set; } = [];
     public string? Caption { get; set; }
 }
 
@@ -63,16 +73,19 @@ public class CreateReviewRequest
     [Required(ErrorMessage = "Оценка обязательна")]
     [Range(1, 10, ErrorMessage = "Оценка должна быть от 1 до 10")]
     public int Rating { get; set; }
-    
-    [Required(ErrorMessage = "Идентификатор сигары обязателен")]
-    public int CigarId { get; set; }
+
+    [Required(ErrorMessage = "Идентификатор базовой сигары обязателен")]
+    public int CigarBaseId { get; set; }
+
+    /// <summary>Опционально: ID записи коллекции текущего пользователя (должен совпадать с CigarBaseId).</summary>
+    public int? UserCigarId { get; set; }
     
     public string? SmokingExperience { get; set; }
     public string? Aroma { get; set; }
     public string? Taste { get; set; }
-    public string? Construction { get; set; }
-    public string? BurnQuality { get; set; }
-    public string? Draw { get; set; }
+    public int? Construction { get; set; }
+    public int? BurnQuality { get; set; }
+    public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
     
@@ -103,9 +116,9 @@ public class UpdateReviewRequest
     public string? SmokingExperience { get; set; }
     public string? Aroma { get; set; }
     public string? Taste { get; set; }
-    public string? Construction { get; set; }
-    public string? BurnQuality { get; set; }
-    public string? Draw { get; set; }
+    public int? Construction { get; set; }
+    public int? BurnQuality { get; set; }
+    public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
     

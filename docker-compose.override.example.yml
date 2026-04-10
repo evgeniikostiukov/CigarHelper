@@ -1,0 +1,14 @@
+# Шаблон локальных переопределений для Docker Compose.
+# Скопируйте в docker-compose.override.yml (файл в .gitignore — не в коммит):
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#
+# Зачем: базовый compose задаёт CORS только для http://localhost:<WEB_PORT>.
+# Если открываете SPA с http://127.0.0.1:<порт>, браузер шлёт другой Origin —
+# без второго origin запросы к API отвергнутся.
+
+services:
+  api:
+    environment:
+      Cors__Origins__1: http://127.0.0.1:${WEB_PORT:-8080}
+      # Доступ с другой машины в LAN (пример):
+      # Cors__Origins__2: http://192.168.1.100:${WEB_PORT:-8080}

@@ -1,0 +1,45 @@
+# E2E (Playwright)
+
+## Предусловия
+
+1. **Node.js** **24.x** (эталон **24.14.1** — `CigarHelper.Web/.nvmrc` и `engines` во фронте).
+2. **PostgreSQL** (или `docker compose up -d postgres` из корня репозитория).
+3. **API:** из корня репозитория  
+   `dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj`  
+   Убедиться, что Kestrel слушает порт **5184** (или измените `CigarHelper.Web/vite.config.js` → `server.proxy['/api'].target`).
+4. **Фронт:** из `CigarHelper.Web`  
+   `npm run dev` → **http://localhost:3000**
+
+## Установка
+
+```bash
+cd e2e
+npm ci
+npx playwright install chromium
+```
+
+## Сценарии
+
+- **`tests/smoke.spec.ts`** — главная без логина (`data-testid="app"`).
+- **`tests/smoke-journey.spec.ts`** — регистрация через UI (уникальный логин) **или** вход по переменным **`E2E_USERNAME`** и **`E2E_PASSWORD`** (обе заданы — регистрация не выполняется). Далее: хьюмидоры → форма создания → назад, «Мои сигары», «Обзоры», прямой переход на `/cigar-bases` (сетка карточек / пусто / ошибка API).
+
+## Запуск
+
+```bash
+npm test
+```
+
+Только journey-smoke:
+
+```bash
+npx playwright test tests/smoke-journey.spec.ts
+```
+
+Отчёт: `npx playwright show-report`
+
+Переопределить URL фронта:
+
+```bash
+set PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000
+npm test
+```

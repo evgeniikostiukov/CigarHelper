@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /CigarHelper.Web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      vite-ecosystem:
+        patterns:
+          - 'vite*'
+          - '@vitejs/*'
+      vue-ecosystem:
+        patterns:
+          - 'vue*'
+          - '@vue/*'
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: npm
+    directory: /cigar-scraper
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

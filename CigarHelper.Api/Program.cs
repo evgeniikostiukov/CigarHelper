@@ -1,18 +1,56 @@
+using System.Security.Claims;
 using System.Text;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using CigarHelper.Data.Data;
 using CigarHelper.Api.Services;
 using CigarHelper.Api.Extensions;
+using CigarHelper.Api.Exceptions;
+using CigarHelper.Api.Middleware;
+using CigarHelper.Api.Observability;
+using CigarHelper.Api.Options;
+using CigarHelper.Api.Storage;
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Npgsql;
+using Microsoft.OpenApi;
+using Serilog;
+
+static string GetRateLimitPartitionKey(HttpContext httpContext)
+{
+    var ip = httpContext.Connection.RemoteIpAddress?.ToString();
+    return string.IsNullOrEmpty(ip) ? "unknown" : ip;
+}
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Serilog: конфигурация из appsettings + enrichers.
+// Намеренно не используем CreateBootstrapLogger() — он фиксирует статический Log.Logger,
+// что ломает параллельный запуск WebApplicationFactory в интеграционных тестах.
+builder.Host.UseSerilog((ctx, services, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration)
+       .ReadFrom.Services(services)
+       .Enrich.FromLogContext());
+
+// Лимит тела запроса: JSON с data URL (base64) для нескольких фото в обзорах + крупный HTML.
+// Nginx перед API должен задавать client_max_body_size не меньше этого значения (см. nginx.docker.conf).
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 32 * 1024 * 1024;
+});
 
 // Add services to the container.
 builder.Services.AddControllers(options => {
     options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 })
 .ConfigureApiBehaviorOptions(options => {
     options.SuppressModelStateInvalidFilter = true; // Отключаем автоматическую валидацию модели
@@ -44,31 +82,59 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Scheme = "bearer"
     });
     
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
+    options.AddSecurityRequirement(document => new() { [new OpenApiSecuritySchemeReference("Bearer", document)] = [] });
+
+    // options.AddSecurityRequirement(document =>
+
+        // new OpenApiSecurityRequirement()
+    // {
+    //     [new OpenApiSecuritySchemeReference("oauth2", document)] = []
+    // }
+    // );
+    //     new OpenApiSecurityRequirement
+    // {
+    //     {
+    //         new OpenApiSecurityScheme
+    //         {
+    //             Reference = new OpenApiSecuritySchemeReference("Bearer"),
+    //             // new OpenApiReference
+    //             // {
+    //             //     Type = ReferenceType.SecurityScheme,
+    //             //     Id = "Bearer"
+    //             // },
+    //             Scheme = "oauth2",
+    //             Name = "Bearer",
+    //             In = ParameterLocation.Header
+    //         },
+    //         new List<string>()
+    //     }
+    // });
 });
 
-// Configure DbContext with PostgreSQL
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configure DbContext: один провайдер на процесс (интеграционные тесты — InMemory)
+// Имя БД фиксируем один раз на запуск хоста: лямбда AddDbContext может вызываться повторно,
+// иначе каждый DbContext получал бы свой InMemory store — сиды из тестового scope не видны HTTP-запросам.
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    var integrationInMemoryName = $"Integration_{Guid.NewGuid():N}";
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseInMemoryDatabase(integrationInMemoryName));
+}
+else
+{
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection")
+               ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
+    var csb = new NpgsqlConnectionStringBuilder(conn)
+    {
+        // Подробности ошибок БД — только в Development (меньше утечек в prod).
+        IncludeErrorDetail = builder.Environment.IsDevelopment(),
+    };
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(csb.ConnectionString));
+}
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -83,30 +149,156 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured")))
+                Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured"))),
+            // После чтения JWT inbound-маппинг превращает claim "role" в ClaimTypes.Role; иначе [Authorize(Roles)] не видит роль → 403
+            RoleClaimType = ClaimTypes.Role,
         };
     });
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("auth-login", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            GetRateLimitPartitionKey(context),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
+    options.AddPolicy("auth-register", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            GetRateLimitPartitionKey(context),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
+    options.AddPolicy("auth-refresh", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            GetRateLimitPartitionKey(context),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 60,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
+
+builder.Services.AddMemoryCache();
+builder.Services.AddProblemDetails();
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("database", tags: ["ready"]);
+
+builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
+builder.Services.Configure<ImageStorageOptions>(builder.Configuration.GetSection(ImageStorageOptions.SectionName));
+
+// Image storage: только MinIO или локальные файлы (без bytea в БД).
+builder.Services.AddSingleton<IImageStorageProvider>(sp =>
+{
+    var opts = sp.GetRequiredService<IOptions<ImageStorageOptions>>().Value;
+
+    if (opts.Provider.Equals("LocalFile", StringComparison.OrdinalIgnoreCase))
+    {
+        var rootPath = Path.IsPathRooted(opts.LocalPath)
+            ? opts.LocalPath
+            : Path.Combine(builder.Environment.ContentRootPath, opts.LocalPath);
+        var logger = sp.GetRequiredService<ILogger<LocalFileImageStorage>>();
+        return new LocalFileImageStorage(rootPath, logger);
+    }
+
+    if (opts.Provider.Equals("Minio", StringComparison.OrdinalIgnoreCase))
+    {
+        var logger = sp.GetRequiredService<ILogger<MinioImageStorageProvider>>();
+        var provider = new MinioImageStorageProvider(opts.Minio, logger);
+        provider.EnsureBucketExistsAsync().GetAwaiter().GetResult();
+        return provider;
+    }
+
+    throw new InvalidOperationException(
+        $"ImageStorage:Provider '{opts.Provider}' не поддерживается. Укажите Minio или LocalFile.");
+});
+
+builder.Services.AddSingleton<IThumbnailGenerator, ImageSharpThumbnailGenerator>();
+
+// Observability
+builder.Services.AddSingleton<IMetricsCollector, InMemoryMetricsCollector>();
+
 // Register Services
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IHumidorService, HumidorService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<ICigarCommentService, CigarCommentService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
-// Add CORS policy
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["http://localhost:3000"];
+if (corsOrigins.Length == 0)
+    corsOrigins = ["http://localhost:3000"];
+
+var corsPolicyName = builder.Configuration["Cors:PolicyName"] ?? "DefaultCors";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        builder => builder
-            .WithOrigins("http://localhost:3000") // Конкретный origin для frontend
+    options.AddPolicy(corsPolicyName,
+        policy => policy
+            .WithOrigins(corsOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
 });
 
+builder.Services.AddHsts(options =>
+{
+    options.Preload = false;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+
+builder.Services.AddCigarForwardedHeaders(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Первым: иначе схема/Host/клиентский IP из запроса к Kestrel без учёта X-Forwarded-*.
+app.UseForwardedHeaders();
+
+// Correlation ID: должен быть максимально ранним — до логов и метрик
+app.UseMiddleware<CorrelationIdMiddleware>();
+
+// Глобальная обработка исключений: после CorrelationId (нужен ID в ответе), перед Serilog (логирует уже обработанный запрос)
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+// Serilog request logging — обогащаем каждый запрос correlation id из Items
+app.UseSerilogRequestLogging(opts =>
+{
+    opts.EnrichDiagnosticContext = (diag, httpCtx) =>
+    {
+        if (httpCtx.Items[CorrelationIdMiddleware.ItemsKey] is string cid)
+            diag.Set("CorrelationId", cid);
+        diag.Set("UserAgent", httpCtx.Request.Headers.UserAgent.ToString());
+    };
+});
+
+// Метрики запросов
+app.UseMiddleware<RequestMetricsMiddleware>();
+
+app.UseSecurityHeaders();
+
+if (app.Environment.IsProduction())
+    app.UseHsts();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -119,10 +311,10 @@ if (app.Environment.IsDevelopment())
 }
 
 // Use CORS middleware before routing and endpoint execution
-app.UseCors("AllowSpecificOrigin");
+app.UseCors(corsPolicyName);
 
 // Conditional HTTPS redirection only if we're not using HTTP explicitly
-if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue<bool>("UseHttp", false))
+if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue("UseHttp", false))
 {
     app.UseHttpsRedirection();
 }
@@ -131,9 +323,33 @@ if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue<bool>("U
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRateLimiter();
+
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = static reg => reg.Tags.Contains("ready"),
+});
+
+// Базовые метрики доступны только из локалки / dev — не экспонировать без аутентификации в проде
+app.MapGet("/metrics", (IMetricsCollector collector) =>
+{
+    var snap = collector.Snapshot();
+    return Results.Ok(new
+    {
+        totalRequests = snap.TotalRequests,
+        totalErrors = snap.TotalErrors,
+        totalDurationMs = Math.Round(snap.TotalDurationMs, 2),
+        avgDurationMs = snap.TotalRequests > 0
+            ? Math.Round(snap.TotalDurationMs / snap.TotalRequests, 2)
+            : 0.0,
+    });
+}).ExcludeFromDescription();
+
 app.MapControllers();
 
-// Apply database migrations
-app.ApplyMigrations<AppDbContext>(app.Services.GetRequiredService<ILogger<Program>>());
+// В интеграционных тестах БД — InMemory, миграции не применяем
+if (!app.Environment.IsEnvironment("Testing"))
+    app.ApplyMigrations<AppDbContext>(app.Services.GetRequiredService<ILogger<Program>>());
 
 app.Run();

@@ -1,68 +1,225 @@
 <template>
-  <div class="app-container">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
-        <router-link class="navbar-brand" to="/">Cigar Helper</router-link>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/humidors">Humidors</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/cigars">My Cigars</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/reviews">Reviews</router-link>
-            </li>
-          </ul>
-          <div class="d-flex">
-            <button v-if="isAuthenticated" @click="logout" class="btn btn-outline-light">Logout</button>
-            <router-link v-else class="btn btn-outline-light" to="/login">Login</router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
+  <div
+    data-testid="app"
+    class="app-container app-shell min-h-screen min-w-full flex flex-col bg-gradient-to-b from-stone-50 via-rose-50/45 to-stone-50 text-stone-800 dark:from-stone-900 dark:via-rose-900/12 dark:to-stone-900 dark:text-stone-100">
+    <Toast />
+    <ConfirmDialog />
+    <GlobalSearch ref="searchRef" />
 
-    <div class="container mt-4">
-      <router-view />
-    </div>
+    <header
+      class="app-header sticky top-0 z-50 border-b border-stone-200/90 bg-white/85 shadow-sm shadow-stone-900/5 backdrop-blur-md dark:border-stone-600/80 dark:bg-stone-800/90 dark:shadow-stone-950/40"
+      data-testid="app-header">
+      <Menubar
+        data-testid="app-nav"
+        :model="menuItemsVisible"
+        class="app-menubar-bar mx-auto container border-0 bg-transparent px-2 sm:px-4">
+        <template #start>
+          <RouterLink
+            :to="{ name: 'Home' }"
+            data-testid="app-nav-brand"
+            class="no-underline touch-manipulation rounded-lg py-1.5 pl-1 pr-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400">
+            <span
+              class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-rose-900/65 dark:text-rose-200/55">
+              Cigar Helper
+            </span>
+            <span class="sr-only"> — на главную</span>
+          </RouterLink>
+        </template>
+        <template #end>
+          <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+            <Button
+              v-if="isAuthenticated"
+              data-testid="app-nav-search"
+              class="hidden min-h-9 shrink-0 touch-manipulation whitespace-nowrap !rounded-lg sm:inline-flex"
+              severity="secondary"
+              text
+              aria-label="Поиск (Ctrl+K)"
+              title="Поиск (Ctrl+K)"
+              @click="searchRef?.open()">
+              <i
+                class="pi pi-search text-sm"
+                aria-hidden="true" />
+              <span class="ml-1.5 text-sm text-stone-500 dark:text-stone-400">
+                Поиск
+                <kbd
+                  class="ml-1 rounded border border-stone-200/80 bg-stone-100/80 px-1 py-px text-[0.6rem] font-mono text-stone-400 dark:border-stone-600/60 dark:bg-stone-800 dark:text-stone-500">
+                  Ctrl K
+                </kbd>
+              </span>
+            </Button>
+            <Button
+              v-if="isAuthenticated"
+              data-testid="app-nav-search-icon"
+              class="min-h-11 min-w-11 touch-manipulation sm:hidden"
+              icon="pi pi-search"
+              text
+              rounded
+              severity="secondary"
+              aria-label="Поиск"
+              @click="searchRef?.open()" />
+            <ThemeToggle />
+            <div
+              v-if="isAuthenticated"
+              class="flex items-center gap-1 sm:gap-2">
+              <RouterLink
+                :to="{ name: 'Profile' }"
+                data-testid="app-nav-profile"
+                class="inline-flex max-w-[min(100%,14rem)] min-h-11 items-center gap-2 rounded-xl px-2 py-1.5 font-medium text-stone-800 no-underline transition-colors hover:bg-stone-100 dark:text-stone-100 dark:hover:bg-stone-800 sm:max-w-[20rem]"
+                :aria-label="`Профиль: ${user?.unique_name ?? ''}`"
+                title="Перейти в профиль">
+                <i
+                  class="pi pi-user shrink-0 text-base text-rose-800 dark:text-rose-400/90"
+                  aria-hidden="true" />
+                <span class="truncate text-sm sm:text-base">{{ user?.unique_name }}</span>
+              </RouterLink>
+              <Button
+                data-testid="app-nav-logout"
+                class="min-h-11 min-w-11 touch-manipulation"
+                icon="pi pi-sign-out"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Выйти"
+                @click="handleLogout" />
+            </div>
+
+            <template v-else>
+              <Button
+                data-testid="app-nav-login-wide"
+                class="hidden min-h-11 touch-manipulation sm:inline-flex"
+                label="Войти"
+                icon="pi pi-sign-in"
+                text
+                @click="router.push({ name: 'Login' })" />
+              <Button
+                data-testid="app-nav-login-icon"
+                class="min-h-11 min-w-11 touch-manipulation sm:hidden"
+                icon="pi pi-sign-in"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Войти"
+                @click="router.push({ name: 'Login' })" />
+            </template>
+          </div>
+        </template>
+      </Menubar>
+    </header>
+
+    <main
+      data-testid="app-main"
+      class="app-main flex-1 w-full px-2 py-4 sm:px-6 sm:py-8">
+      <RouterView v-slot="{ Component }">
+        <Suspense>
+          <div data-testid="app-router-outlet">
+            <component :is="Component" />
+          </div>
+          <template #fallback>
+            <div
+              data-testid="app-suspense-fallback"
+              class="mx-auto flex min-h-[12rem] max-w-2xl flex-col items-center justify-center gap-4 rounded-2xl border border-stone-200/90 bg-white/90 px-6 py-10 text-center dark:border-stone-600/80 dark:bg-stone-800/80"
+              aria-busy="true"
+              aria-live="polite">
+              <i
+                class="pi pi-spinner animate-spin text-3xl text-rose-800/80 dark:text-rose-400/80"
+                aria-hidden="true" />
+              <p class="text-sm text-stone-600 dark:text-stone-400">Загрузка…</p>
+            </div>
+          </template>
+        </Suspense>
+      </RouterView>
+    </main>
   </div>
 </template>
+<script setup lang="ts">
+  import { computed, onMounted, ref } from 'vue';
+  import { RouterLink, RouterView, useRouter } from 'vue-router';
+  import { useToast } from 'primevue/usetoast';
+  import Toast from 'primevue/toast';
+  import ConfirmDialog from 'primevue/confirmdialog';
+  import Menubar from 'primevue/menubar';
+  import Button from 'primevue/button';
+  import { useAuth } from '@/services/useAuth';
+  import { registerApiErrorNotifier } from '@/services/apiErrorNotifier';
+  import { hasAnyRole, hasRole } from '@/utils/roles';
+  import ThemeToggle from '@/components/ThemeToggle.vue';
+  import GlobalSearch from '@/components/GlobalSearch.vue';
 
-<script>
-export default {
-  data() {
-    return {
-      isAuthenticated: false
-    }
-  },
-  created() {
-    // Check if user is authenticated
-    this.isAuthenticated = !!localStorage.getItem('token')
-  },
-  methods: {
-    logout() {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      this.isAuthenticated = false
-      this.$router.push('/login')
-    }
+  interface MenuItem {
+    label: string;
+    icon: string;
+    command: () => void;
+    visible?: () => boolean;
   }
-}
+
+  const router = useRouter();
+  const toast = useToast();
+  const { isAuthenticated, user, logout } = useAuth();
+
+  onMounted(() => {
+    registerApiErrorNotifier(({ summary, detail, severity }) => {
+      toast.add({
+        summary,
+        detail,
+        severity: severity ?? 'error',
+        life: 6000,
+      });
+    });
+  });
+
+  const menuItems = computed<MenuItem[]>(() => [
+    {
+      label: 'Сводка',
+      icon: 'pi pi-chart-pie',
+      command: () => router.push({ name: 'Dashboard' }),
+      visible: () => isAuthenticated.value,
+    },
+    {
+      label: 'Хьюмидоры',
+      icon: 'pi pi-box',
+      command: () => router.push({ name: 'HumidorList' }),
+      visible: () => isAuthenticated.value,
+    },
+    {
+      label: 'Мои сигары',
+      icon: 'pi pi-star',
+      command: () => router.push({ name: 'CigarList' }),
+      visible: () => isAuthenticated.value,
+    },
+    {
+      label: 'База сигар',
+      icon: 'pi pi-database',
+      command: () => router.push({ name: 'CigarBases' }),
+      visible: () => isAuthenticated.value,
+    },
+    {
+      label: 'Бренды',
+      icon: 'pi pi-tag',
+      command: () => router.push({ name: 'Brands' }),
+      visible: () => isAuthenticated.value,
+    },
+    {
+      label: 'Админ-панель',
+      icon: 'pi pi-shield',
+      command: () =>
+        hasRole(user.value, 'Admin')
+          ? void router.push({ name: 'AdminDashboard' })
+          : void router.push({ name: 'AdminCigarComments' }),
+      visible: () => isAuthenticated.value && hasAnyRole(user.value, ['Admin', 'Moderator']),
+    },
+    {
+      label: 'Обзоры',
+      icon: 'pi pi-list',
+      command: () => router.push({ name: 'ReviewList' }),
+    },
+  ]);
+
+  const menuItemsVisible = computed(() => menuItems.value.filter((item) => (item.visible ? item.visible() : true)));
+
+  const searchRef = ref<InstanceType<typeof GlobalSearch> | null>(null);
+
+  const handleLogout = (): void => {
+    logout();
+    router.push({ name: 'Login' });
+  };
 </script>
-
-<style>
-.app-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.container {
-  flex: 1;
-}
-</style> 

@@ -1,322 +1,339 @@
 <template>
-  <div class="login-page">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-title text-center mb-4">{{ isRegister ? 'Регистрация' : 'Вход' }}</h3>
-            
-            <!-- Общая ошибка -->
-            <div v-if="error" class="alert alert-danger">{{ error }}</div>
-            
-            <form @submit.prevent="submitForm">
-              <!-- Username field - only for register -->
-              <div class="mb-3" v-if="isRegister">
-                <label for="username" class="form-label">Имя пользователя</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.username}"
-                  id="username"
-                  v-model="form.username"
-                  required
-                >
-                <div v-if="fieldErrors.username" class="invalid-feedback">
-                  {{ fieldErrors.username }}
-                </div>
-                <small class="form-text text-muted">
-                  Используйте только буквы, цифры, подчеркивания и дефисы (3-50 символов)
-                </small>
-              </div>
-              
-              <!-- Email field -->
-              <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.email}"
-                  id="email"
-                  v-model="form.email"
-                  required
-                >
-                <div v-if="fieldErrors.email" class="invalid-feedback">
-                  {{ fieldErrors.email }}
-                </div>
-              </div>
-              
-              <!-- Password field -->
-              <div class="mb-3">
-                <label for="password" class="form-label">Пароль</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.password}"
-                  id="password"
-                  v-model="form.password"
-                  required
-                >
-                <div v-if="fieldErrors.password" class="invalid-feedback">
-                  {{ fieldErrors.password }}
-                </div>
-                <small v-if="isRegister" class="form-text text-muted">
-                  Минимум 6 символов, включая минимум одну строчную букву и одну заглавную букву или цифру
-                </small>
-              </div>
-              
-              <!-- Confirm Password field - only for register -->
-              <div class="mb-3" v-if="isRegister">
-                <label for="confirmPassword" class="form-label">Подтверждение пароля</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  :class="{'is-invalid': fieldErrors.confirmPassword}"
-                  id="confirmPassword"
-                  v-model="form.confirmPassword"
-                  required
-                >
-                <div v-if="fieldErrors.confirmPassword" class="invalid-feedback">
-                  {{ fieldErrors.confirmPassword }}
-                </div>
-              </div>
-              
-              <div class="d-grid">
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                  <span v-if="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                  {{ isRegister ? 'Зарегистрироваться' : 'Войти' }}
-                </button>
-              </div>
-            </form>
-            
-            <div class="text-center mt-3">
-              <a href="#" @click.prevent="toggleForm">
-                {{ isRegister ? 'Уже есть аккаунт? Войти' : 'Нужен аккаунт? Зарегистрироваться' }}
-              </a>
-            </div>
+  <section
+    class="login-root -mx-2 flex min-h-[min(28rem,75dvh)] flex-col justify-center rounded-2xl bg-gradient-to-b from-stone-50 via-rose-50/40 to-stone-50 px-3 py-10 ring-1 ring-stone-900/5 sm:mx-0 sm:min-h-[min(32rem,70dvh)] sm:rounded-3xl dark:from-stone-950 dark:via-rose-950/20 dark:to-stone-950 dark:ring-stone-100/10 sm:px-6 sm:py-12"
+    data-testid="login"
+    aria-labelledby="login-heading">
+    <div class="login-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
+
+    <div class="relative z-[1] mx-auto w-full max-w-md">
+      <header class="mb-6 text-center sm:mb-8">
+        <p
+          class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
+          Cigar Helper
+        </p>
+        <h1
+          id="login-heading"
+          class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
+          {{ isRegister ? 'Регистрация' : 'Вход' }}
+        </h1>
+        <p class="mx-auto mt-1.5 max-w-sm text-pretty text-sm text-stone-600 dark:text-stone-400">
+          {{ isRegister ? 'Укажите логин и пароль — коллекция, хьюмидоры и обзоры.' : 'Вход по логину.' }}
+        </p>
+      </header>
+
+      <div
+        class="login-panel-enter rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6">
+        <Message
+          v-if="error"
+          severity="error"
+          class="mb-4"
+          data-testid="login-error"
+          :closable="false">
+          {{ error }}
+        </Message>
+
+        <form
+          data-testid="login-form"
+          class="flex flex-col gap-5"
+          @submit.prevent="submitForm">
+          <div class="flex flex-col gap-2">
+            <label
+              for="login-username"
+              class="text-xs font-medium text-stone-600 dark:text-stone-400">
+              Логин
+            </label>
+            <InputText
+              id="login-username"
+              v-model="form.username"
+              data-testid="login-username"
+              class="min-h-11 w-full"
+              :invalid="!!fieldErrors.username"
+              aria-describedby="login-username-help"
+              :placeholder="isRegister ? 'Например, john_doe' : 'Ваш логин'"
+              autocomplete="username" />
+            <small
+              id="login-username-help"
+              class="text-xs text-stone-500 dark:text-stone-500">
+              {{ isRegister ? 'Только буквы, цифры, _ и - (3–50 симв.)' : 'Те же символы, что при регистрации' }}
+            </small>
+            <small
+              v-if="fieldErrors.username"
+              class="text-sm text-red-600 dark:text-red-400">
+              {{ fieldErrors.username }}
+            </small>
           </div>
-        </div>
+
+          <div class="flex flex-col gap-2">
+            <label
+              for="login-password"
+              class="text-xs font-medium text-stone-600 dark:text-stone-400">
+              Пароль
+            </label>
+            <Password
+              id="login-password"
+              v-model="form.password"
+              data-testid="login-password"
+              class="w-full"
+              input-class="min-h-11 w-full"
+              :invalid="!!fieldErrors.password"
+              :feedback="isRegister"
+              toggle-mask
+              placeholder="••••••"
+              :input-props="{ autocomplete: isRegister ? 'new-password' : 'current-password' }" />
+            <small
+              v-if="fieldErrors.password"
+              class="text-sm text-red-600 dark:text-red-400">
+              {{ fieldErrors.password }}
+            </small>
+          </div>
+
+          <div
+            v-if="isRegister"
+            class="flex flex-col gap-2">
+            <label
+              for="login-confirm-password"
+              class="text-xs font-medium text-stone-600 dark:text-stone-400">
+              Подтверждение пароля
+            </label>
+            <Password
+              id="login-confirm-password"
+              v-model="form.confirmPassword"
+              data-testid="login-confirm-password"
+              class="w-full"
+              input-class="min-h-11 w-full"
+              :invalid="!!fieldErrors.confirmPassword"
+              :feedback="false"
+              toggle-mask
+              placeholder="••••••"
+              :input-props="{ autocomplete: 'new-password' }" />
+            <small
+              v-if="fieldErrors.confirmPassword"
+              class="text-sm text-red-600 dark:text-red-400">
+              {{ fieldErrors.confirmPassword }}
+            </small>
+          </div>
+
+          <Button
+            data-testid="login-submit"
+            type="submit"
+            class="mt-1 min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40"
+            :label="isRegister ? 'Зарегистрироваться' : 'Войти'"
+            :loading="loading"
+            :icon="isRegister ? 'pi pi-user-plus' : 'pi pi-sign-in'" />
+
+          <div class="flex flex-col gap-3 border-t border-stone-200/80 pt-4 dark:border-stone-700/80">
+            <Button
+              data-testid="login-toggle-mode"
+              type="button"
+              class="min-h-12 w-full touch-manipulation text-stone-700 dark:text-stone-200"
+              :label="isRegister ? 'Уже есть аккаунт? Войти' : 'Нужен аккаунт? Зарегистрироваться'"
+              text
+              @click="toggleForm" />
+            <Button
+              data-testid="login-home"
+              type="button"
+              class="min-h-12 w-full touch-manipulation"
+              label="На главную"
+              icon="pi pi-home"
+              severity="secondary"
+              outlined
+              @click="router.push({ name: 'Home' })" />
+          </div>
+        </form>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
-<script>
-import authService from '../services/authService'
+<script setup lang="ts">
+  import { ref, reactive, watch } from 'vue';
+  import { useRouter, useRoute } from 'vue-router';
+  import authService from '../services/authService';
+  import type { AuthCredentials, RegisterData } from '../services/authService';
 
-export default {
-  data() {
-    return {
-      isRegister: false,
-      loading: false,
-      error: null,
-      validationErrors: {},
-      fieldErrors: {
-        username: null,
-        email: null,
-        password: null,
-        confirmPassword: null
-      },
-      form: {
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      }
-    }
-  },
-  watch: {
-    // Валидация при вводе данных
-    'form.username': function(value) {
-      if (!value && this.isRegister) {
-        this.fieldErrors.username = 'Имя пользователя обязательно'
-      } else if (this.isRegister && value.length < 3) {
-        this.fieldErrors.username = 'Минимум 3 символа'
-      } else if (this.isRegister && !/^[a-zA-Z0-9_-]+$/.test(value)) {
-        this.fieldErrors.username = 'Допустимы только буквы, цифры, подчеркивания и дефисы'
-      } else {
-        this.fieldErrors.username = null
-      }
-    },
-    'form.email': function(value) {
-      if (!value) {
-        this.fieldErrors.email = 'Email обязателен'
-      } else if (!/\S+@\S+\.\S+/.test(value)) {
-        this.fieldErrors.email = 'Некорректный формат email'
-      } else {
-        this.fieldErrors.email = null
-      }
-    },
-    'form.password': function(value) {
-      if (!value) {
-        this.fieldErrors.password = 'Пароль обязателен'
-      } else if (value.length < 6) {
-        this.fieldErrors.password = 'Минимум 6 символов'
-      } else if (this.isRegister && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(value)) {
-        this.fieldErrors.password = 'Должен содержать строчную букву и заглавную букву или цифру'
-      } else {
-        this.fieldErrors.password = null
-      }
-      
-      // Проверка подтверждения пароля при изменении самого пароля
-      if (this.isRegister && this.form.confirmPassword && value !== this.form.confirmPassword) {
-        this.fieldErrors.confirmPassword = 'Пароли не совпадают'
-      } else if (this.isRegister && this.form.confirmPassword) {
-        this.fieldErrors.confirmPassword = null
-      }
-    },
-    'form.confirmPassword': function(value) {
-      if (!value && this.isRegister) {
-        this.fieldErrors.confirmPassword = 'Подтверждение пароля обязательно'
-      } else if (this.isRegister && value !== this.form.password) {
-        this.fieldErrors.confirmPassword = 'Пароли не совпадают'
-      } else {
-        this.fieldErrors.confirmPassword = null
-      }
-    }
-  },
-  methods: {
-    toggleForm() {
-      this.isRegister = !this.isRegister
-      this.clearErrors()
-      
-      // Сбросить форму
-      this.form = {
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      }
-    },
-    clearErrors() {
-      this.error = null
-      this.validationErrors = {}
-      this.fieldErrors = {
-        username: null,
-        email: null,
-        password: null,
-        confirmPassword: null
-      }
-    },
-    async submitForm() {
-      this.clearErrors()
-      
-      // Проверить форму перед отправкой
-      if (!this.validateForm()) {
-        return
-      }
-      
-      this.loading = true
-      
-      try {
-        if (this.isRegister) {
-          // Registration
-          const response = await authService.register({
-            username: this.form.username,
-            email: this.form.email,
-            password: this.form.password,
-            confirmPassword: this.form.confirmPassword
-          })
-          
-          const userData = authService.formatUserData(response.data)
-          authService.setAuth(userData.token, userData)
-          this.redirectAfterAuth()
-        } else {
-          // Login
-          const response = await authService.login({
-            email: this.form.email,
-            password: this.form.password
-          })
-          
-          const userData = authService.formatUserData(response.data)
-          authService.setAuth(userData.token, userData)
-          this.redirectAfterAuth()
-        }
-      } catch (error) {
-        this.handleError(error)
-      } finally {
-        this.loading = false
-      }
-    },
-    validateForm() {
-      let isValid = true
-      
-      // Проверяем email для всех форм
-      if (!this.form.email) {
-        this.fieldErrors.email = 'Email обязателен'
-        isValid = false
-      } else if (!/\S+@\S+\.\S+/.test(this.form.email)) {
-        this.fieldErrors.email = 'Некорректный формат email'
-        isValid = false
-      }
-      
-      // Проверяем пароль для всех форм
-      if (!this.form.password) {
-        this.fieldErrors.password = 'Пароль обязателен'
-        isValid = false
-      } else if (this.isRegister && this.form.password.length < 6) {
-        this.fieldErrors.password = 'Минимум 6 символов'
-        isValid = false
-      } else if (this.isRegister && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(this.form.password)) {
-        this.fieldErrors.password = 'Должен содержать строчную букву и заглавную букву или цифру'
-        isValid = false
-      }
-      
-      // Дополнительные проверки только для формы регистрации
-      if (this.isRegister) {
-        // Проверка имени пользователя
-        if (!this.form.username) {
-          this.fieldErrors.username = 'Имя пользователя обязательно'
-          isValid = false
-        } else if (this.form.username.length < 3) {
-          this.fieldErrors.username = 'Минимум 3 символа'
-          isValid = false
-        } else if (!/^[a-zA-Z0-9_-]+$/.test(this.form.username)) {
-          this.fieldErrors.username = 'Допустимы только буквы, цифры, подчеркивания и дефисы'
-          isValid = false
-        }
-        
-        // Проверка подтверждения пароля
-        if (!this.form.confirmPassword) {
-          this.fieldErrors.confirmPassword = 'Подтверждение пароля обязательно'
-          isValid = false
-        } else if (this.form.confirmPassword !== this.form.password) {
-          this.fieldErrors.confirmPassword = 'Пароли не совпадают'
-          isValid = false
-        }
-      }
-      
-      return isValid
-    },
-    handleError(error) {
-      if (error.response) {
-        const { data } = error.response
-        
-        // Обработка ошибок валидации
-        if (data.errors && typeof data.errors === 'object') {
-          this.validationErrors = data.errors
-          this.error = data.message || 'Ошибка валидации данных формы'
-        } 
-        // Обработка других ошибок с помощью сервиса аутентификации
-        else {
-          this.error = authService.getErrorMessage(error)
-        }
-      } else {
-        this.error = authService.getErrorMessage(error)
-      }
-    },
-    redirectAfterAuth() {
-      const redirectUrl = this.$route.query.redirect || '/humidors'
-      this.$router.push(redirectUrl)
-    }
+  interface LoginForm {
+    username: string;
+    password: string;
+    confirmPassword: string;
   }
-}
+
+  interface FieldErrors {
+    username: string | null;
+    password: string | null;
+    confirmPassword: string | null;
+  }
+
+  const router = useRouter();
+  const route = useRoute();
+
+  const isRegister = ref(false);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
+  const form = reactive<LoginForm>({
+    username: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const fieldErrors = reactive<FieldErrors>({
+    username: null,
+    password: null,
+    confirmPassword: null,
+  });
+
+  const validateField = (field: keyof LoginForm, value: string): string | null => {
+    switch (field) {
+      case 'username':
+        if (!value) return 'Логин обязателен';
+        if (!/^[a-zA-Z0-9_-]+$/.test(value)) return 'Недопустимые символы';
+        if (isRegister.value && value.length < 3) return 'Минимум 3 символа';
+        break;
+      case 'password':
+        if (!value) return 'Пароль обязателен';
+        if (value.length < 6) return 'Минимум 6 символов';
+        if (isRegister.value && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(value)) {
+          return 'Нужна строчная буква и заглавная/цифра';
+        }
+        break;
+      case 'confirmPassword':
+        if (isRegister.value) {
+          if (!value) return 'Подтверждение пароля обязательно';
+          if (value !== form.password) return 'Пароли не совпадают';
+        }
+        break;
+    }
+    return null;
+  };
+
+  watch(
+    form,
+    (newForm) => {
+      for (const field in newForm) {
+        const key = field as keyof LoginForm;
+        fieldErrors[key] = validateField(key, newForm[key]);
+      }
+    },
+    { deep: true },
+  );
+
+  const clearForm = (): void => {
+    Object.assign(form, {
+      username: '',
+      password: '',
+      confirmPassword: '',
+    });
+    clearErrors();
+  };
+
+  const toggleForm = (): void => {
+    isRegister.value = !isRegister.value;
+    clearForm();
+  };
+
+  const clearErrors = (): void => {
+    error.value = null;
+    Object.assign(fieldErrors, {
+      username: null,
+      password: null,
+      confirmPassword: null,
+    });
+  };
+
+  const submitForm = async (): Promise<void> => {
+    clearErrors();
+
+    let hasError = false;
+    for (const field in form) {
+      const key = field as keyof LoginForm;
+      if (!isRegister.value && key === 'confirmPassword') {
+        continue;
+      }
+      const validationError = validateField(key, form[key]);
+      if (validationError) {
+        fieldErrors[key] = validationError;
+        hasError = true;
+      }
+    }
+
+    if (hasError) return;
+
+    loading.value = true;
+    try {
+      if (isRegister.value) {
+        const payload: RegisterData = {
+          username: form.username,
+          password: form.password,
+          confirmPassword: form.confirmPassword,
+        };
+        const response = await authService.register(payload);
+        if (!response.success) {
+          throw new Error(response.message || 'Ошибка регистрации');
+        }
+        localStorage.setItem('needsOnboarding', '1');
+      } else {
+        const payload: AuthCredentials = {
+          username: form.username,
+          password: form.password,
+        };
+        const response = await authService.login(payload);
+        if (!response.success) {
+          throw new Error(response.message || 'Ошибка входа');
+        }
+      }
+
+      if (isRegister.value) {
+        await router.push({ name: 'Onboarding' });
+      } else {
+        const redirectUrl = (route.query.redirect as string) || '/';
+        await router.push(redirectUrl);
+      }
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } }; message?: string };
+      error.value =
+        ax.response?.data?.message || ax.message || (isRegister.value ? 'Ошибка регистрации' : 'Ошибка входа');
+      if (import.meta.env.DEV && err instanceof Error) {
+        console.error(err);
+      }
+    } finally {
+      loading.value = false;
+    }
+  };
 </script>
 
 <style scoped>
-.login-page {
-  padding-top: 2rem;
-}
-.card {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-</style> 
+  .login-root {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .login-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  /*:global(.dark) .login-grain {
+    mix-blend-mode: soft-light;
+  }*/
+
+  .login-panel-enter {
+    animation: login-panel-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes login-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .login-panel-enter {
+      animation: none;
+    }
+  }
+</style>

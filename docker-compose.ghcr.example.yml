@@ -1,0 +1,28 @@
+# Образы из GHCR вместо сборки на сервере.
+#
+# Условия:
+# - В .env задать GHCR_IMAGE_NAMESPACE — владелец пакетов на GitHub в нижнем регистре (как в URL ghcr.io/<namespace>/...).
+# - IMAGE_TAG — тег из Actions (например latest, main или короткий SHA); по умолчанию latest.
+# - На сервере один раз: docker login ghcr.io -u <github-username> -p <PAT>
+#   (классический PAT: read:packages; для push из CI используется GITHUB_TOKEN.)
+#
+# Локально / на сервере без сборки api/web:
+#   docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profile full pull
+#   docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profile full up -d
+#
+# Прод (как в docs/docker.md) + готовые образы:
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.ghcr.example.yml --profile full pull
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.ghcr.example.yml --profile full up -d
+#
+# build: null снимает наследованный build из базового compose (см. merge в спецификации Compose).
+
+services:
+  api:
+    image: ghcr.io/${GHCR_IMAGE_NAMESPACE:?Set GHCR_IMAGE_NAMESPACE in .env (lowercase GitHub user or org)}/cigarhelper-api:${IMAGE_TAG:-latest}
+    build: null
+    pull_policy: always
+
+  web:
+    image: ghcr.io/${GHCR_IMAGE_NAMESPACE:?Set GHCR_IMAGE_NAMESPACE in .env (lowercase GitHub user or org)}/cigarhelper-web:${IMAGE_TAG:-latest}
+    build: null
+    pull_policy: always

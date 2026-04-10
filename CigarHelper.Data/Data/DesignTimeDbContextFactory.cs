@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,8 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
         {
             configBuilder.AddJsonFile($"appsettings.{environment}.json", optional: true);
         }
-        
+
+        configBuilder.AddUserSecrets(Assembly.GetExecutingAssembly());
         configBuilder.AddEnvironmentVariables();
         
         IConfiguration configuration = configBuilder.Build();

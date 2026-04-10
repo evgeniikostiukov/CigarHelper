@@ -6,27 +6,20 @@ namespace CigarHelper.Api.Services;
 
 public class AuthService
 {
-    private readonly AppDbContext _context;
-    private readonly JwtService _jwtService;
+    /// <summary>Сообщение при любой неудачной попытке входа (без раскрытия, существует ли пользователь).</summary>
+    public const string LoginFailedMessage = "Неверный логин или пароль.";
 
-    public AuthService(AppDbContext context, JwtService jwtService)
+    private readonly AppDbContext _context;
+    private readonly IJwtService _jwtService;
+
+    public AuthService(AppDbContext context, IJwtService jwtService)
     {
         _context = context;
         _jwtService = jwtService;
     }
-    
+
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        // Check if email already exists
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-        {
-            return new AuthResponse
-            {
-                Success = false,
-                Message = "Email already registered"
-            };
-        }
-        
         // Check if username already exists
         if (await _context.Users.AnyAsync(u => u.Username == request.Username))
         {
@@ -36,43 +29,90 @@ public class AuthService
                 Message = "Username already taken"
             };
         }
-        
+
         // Create password hash
         JwtService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-        
+
         // Create new user
         var user = new User
         {
             Username = request.Username,
-            Email = request.Email,
+            Email = null,
             PasswordHash = passwordHash,
             PasswordSalt = passwordSalt,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         // Add user to database
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        
-        // Generate JWT token
-        var token = _jwtService.GenerateToken(user);
-        
+
+        var (token, expiresAtUtc) = _jwtService.GenerateToken(user);
+
         return new AuthResponse
         {
             Success = true,
             Message = "Registration successful",
             Token = token,
             Username = user.Username,
-            Expiration = DateTime.UtcNow.AddDays(7)
+            Role = user.Role,
+            Expiration = expiresAtUtc
         };
     }
-    
+
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        // Find user by email
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-        
-        // Check if user exists
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+
+        if (user == null)
+        {
+            return new AuthResponse
+            {
+                Success = false,
+                Message = LoginFailedMessage
+            };
+        }
+
+        if (!JwtService.VerifyPasswordHash(
+                request.Password,
+                user.PasswordHash,
+                user.PasswordSalt,
+                out var rehashWithModernAlgorithm))
+        {
+            return new AuthResponse
+            {
+                Success = false,
+                Message = LoginFailedMessage
+            };
+        }
+
+        if (rehashWithModernAlgorithm)
+        {
+            JwtService.CreatePasswordHash(request.Password, out var newHash, out var newSalt);
+            user.PasswordHash = newHash;
+            user.PasswordSalt = newSalt;
+        }
+
+        user.LastLogin = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        var (token, expiresAtUtc) = _jwtService.GenerateToken(user);
+
+        return new AuthResponse
+        {
+            Success = true,
+            Message = "Login successful",
+            Token = token,
+            Username = user.Username,
+            Role = user.Role,
+            Expiration = expiresAtUtc
+        };
+    }
+
+    /// <summary>По id из валидного JWT выдаёт новый токен (продление сессии).</summary>
+    public async Task<AuthResponse> RefreshTokenAsync(int userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null)
         {
             return new AuthResponse
@@ -81,31 +121,20 @@ public class AuthService
                 Message = "User not found"
             };
         }
-        
-        // Verify password
-        if (!JwtService.VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
-        {
-            return new AuthResponse
-            {
-                Success = false,
-                Message = "Invalid password"
-            };
-        }
-        
-        // Update last login time
+
         user.LastLogin = DateTime.UtcNow;
         await _context.SaveChangesAsync();
-        
-        // Generate JWT token
-        var token = _jwtService.GenerateToken(user);
-        
+
+        var (token, expiresAtUtc) = _jwtService.GenerateToken(user);
+
         return new AuthResponse
         {
             Success = true,
-            Message = "Login successful",
+            Message = "Token refreshed",
             Token = token,
             Username = user.Username,
-            Expiration = DateTime.UtcNow.AddDays(7)
+            Role = user.Role,
+            Expiration = expiresAtUtc
         };
     }
-} 
+}

@@ -3,38 +3,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CigarHelper.Data.Models;
 
-[Table("Cigars")]
-public class Cigar
+[Table("UserCigars")]
+public class UserCigar
 {
     [Key]
     public int Id { get; set; }
     
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
+    public int CigarBaseId { get; set; }
     
-    [MaxLength(100)]
-    public string Brand { get; set; } = string.Empty;
-    
-    [MaxLength(100)]
-    public string? Country { get; set; }
-    
-    [MaxLength(500)]
-    public string? Description { get; set; }
-    
-    [MaxLength(50)]
-    public string? Strength { get; set; }
-    
-    [MaxLength(50)]
-    public string? Size { get; set; }
+    [ForeignKey("CigarBaseId")]
+    public CigarBase CigarBase { get; set; } = null!;
     
     [Column(TypeName = "decimal(10,2)")]
     public decimal? Price { get; set; }
     
     public int? Rating { get; set; }
-    
-    [MaxLength(255)]
-    public string? ImageUrl { get; set; }
     
     public int UserId { get; set; }
     
@@ -48,7 +31,29 @@ public class Cigar
     
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     
+    public ICollection<CigarImage> Images { get; set; } = new List<CigarImage>();
+
+    /// <summary>Дата попадания сигары в коллекцию пользователя.</summary>
+    public DateTime PurchasedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Дата, когда сигара была выкурена (если уже выкурена).</summary>
+    public DateTime? SmokedAt { get; set; }
+
+    /// <summary>Последнее взаимодействие пользователя с сигарой (добавление, перенос, выкуривание, редактирование).</summary>
+    public DateTime LastTouchedAt { get; set; } = DateTime.UtcNow;
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>Субъективный вкус (заметки пользователя в коллекции).</summary>
+    [MaxLength(500)]
+    public string? Taste { get; set; }
+
+    /// <summary>Субъективный аромат (заметки пользователя в коллекции).</summary>
+    [MaxLength(500)]
+    public string? Aroma { get; set; }
+
+    /// <summary>Количество сигар (шт.) в этой записи коллекции.</summary>
+    public int Quantity { get; set; } = 1;
 } 

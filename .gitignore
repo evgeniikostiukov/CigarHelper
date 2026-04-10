@@ -33,13 +33,31 @@ out-tsc/
 npm-debug.log
 yarn-error.log
 
+# Local app settings overrides (секреты не коммитить)
+**/appsettings.*.local.json
+
 # Environment variables
 .env
 .env.local
+docker-compose.override.yml
+docker-compose.production.yml
+.env.development
 .env.development.local
 .env.test.local
 .env.production.local
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Misc
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Playwright / e2e (иногда создаётся в корне при запуске не из e2e/)
+test-results/
+
+# OpenAPI: openapi.json и api.generated.ts коммитятся намеренно.
+# openapi.json — источник правды (Swashbuckle CLI из сборки API).
+# api.generated.ts — сгенерированные TypeScript-типы (npm run generate:api).
+# Оба файла нужны CI без запуска API. Обновлять при изменении контрактов:

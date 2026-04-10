@@ -1,0 +1,26 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["env.d.ts", "components.d.ts", "src/**/*", "src/**/*.vue"],
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true
+  },
+  "vueCompilerOptions": {
+    "target": 3.5,
+    "nativeTags": ["template"]
+  },
+
+  "references": [
+    {
+      "path": "./tsconfig.vite-config.json"
+    }
+  ]
+}
