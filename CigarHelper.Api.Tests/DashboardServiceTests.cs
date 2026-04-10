@@ -75,7 +75,13 @@ public class DashboardServiceTests
         return h;
     }
 
-    private static async Task<UserCigar> SeedUserCigarAsync(AppDbContext db, int userId, int cigarBaseId, int? humidorId, int? rating = null)
+    private static async Task<UserCigar> SeedUserCigarAsync(
+        AppDbContext db,
+        int userId,
+        int cigarBaseId,
+        int? humidorId,
+        int quantity = 1,
+        int? rating = null)
     {
         var uc = new UserCigar
         {
@@ -84,6 +90,7 @@ public class DashboardServiceTests
             HumidorId = humidorId,
             Price = 10m,
             Rating = rating,
+            Quantity = quantity,
             CreatedAt = DateTime.UtcNow
         };
         db.UserCigars.Add(uc);
@@ -91,15 +98,17 @@ public class DashboardServiceTests
         return uc;
     }
 
-    private static async Task<Review> SeedReviewAsync(AppDbContext db, int userId, int userCigarId, DateTime createdAt)
+    private static async Task<Review> SeedReviewAsync(AppDbContext db, int userId, UserCigar uc, DateTime createdAt)
     {
         var review = new Review
         {
             UserId = userId,
-            CigarId = userCigarId,
+            CigarBaseId = uc.CigarBaseId,
+            CigarId = uc.Id,
             Title = $"Review_{Guid.NewGuid():N}"[..12],
             Content = "Test content",
             Rating = 8,
+            SmokingDate = DateTime.UtcNow,
             CreatedAt = createdAt
         };
         db.Reviews.Add(review);
@@ -146,21 +155,21 @@ public class DashboardServiceTests
         var h2 = await SeedHumidorAsync(db, user.Id, capacity: 20);
 
         // Пользовательские сигары (часть в хьюмидорах, часть "на полке")
-        await SeedUserCigarAsync(db, user.Id, cb1.Id, h1.Id, rating: 7);
-        await SeedUserCigarAsync(db, user.Id, cb1.Id, h1.Id, rating: 9);
-        await SeedUserCigarAsync(db, user.Id, cb2.Id, h2.Id, rating: null);
-        await SeedUserCigarAsync(db, user.Id, cb2.Id, null, rating: 5);
+        await SeedUserCigarAsync(db, user.Id, cb1.Id, h1.Id, quantity: 2, rating: 7);
+        await SeedUserCigarAsync(db, user.Id, cb1.Id, h1.Id, quantity: 3, rating: 9);
+        await SeedUserCigarAsync(db, user.Id, cb2.Id, h2.Id, quantity: 1, rating: null);
+        await SeedUserCigarAsync(db, user.Id, cb2.Id, null, quantity: 4, rating: 5);
 
         // Для другого пользователя создаём шум
         var otherHumidor = await SeedHumidorAsync(db, other.Id, capacity: 5);
-        await SeedUserCigarAsync(db, other.Id, cb1.Id, otherHumidor.Id, rating: 10);
+        await SeedUserCigarAsync(db, other.Id, cb1.Id, otherHumidor.Id, quantity: 10, rating: 10);
 
         var sut = new DashboardService(db);
 
         var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
 
         Assert.Equal(2, summary.TotalHumidors);
-        Assert.Equal(4, summary.TotalCigars);
+        Assert.Equal(10, summary.TotalCigars);
         Assert.Equal(30, summary.TotalCapacity);
         Assert.InRange(summary.AverageFillPercent, 0, 100);
 
@@ -168,8 +177,8 @@ public class DashboardServiceTests
         var brand1Item = summary.BrandBreakdown.Single(b => b.BrandId == brand1.Id);
         var brand2Item = summary.BrandBreakdown.Single(b => b.BrandId == brand2.Id);
 
-        Assert.Equal(2, brand1Item.CigarCount);
-        Assert.Equal(2, brand2Item.CigarCount);
+        Assert.Equal(5, brand1Item.CigarCount);
+        Assert.Equal(5, brand2Item.CigarCount);
         Assert.Equal(8, brand1Item.AverageRating);
         Assert.Equal(5, brand2Item.AverageRating);
         // Среднее по всем оценённым сигарам пользователя: 7, 9, 5 (null не входит)
@@ -191,11 +200,11 @@ public class DashboardServiceTests
         // 6 обзоров пользователя, берём последние 5
         for (var i = 0; i < 6; i++)
         {
-            await SeedReviewAsync(db, user.Id, userCigar.Id, DateTime.UtcNow.AddMinutes(-i));
+            await SeedReviewAsync(db, user.Id, userCigar, DateTime.UtcNow.AddMinutes(-i));
         }
 
         // Обзор другого пользователя не должен попасть в выборку
-        await SeedReviewAsync(db, other.Id, otherCigar.Id, DateTime.UtcNow);
+        await SeedReviewAsync(db, other.Id, otherCigar, DateTime.UtcNow);
 
         var sut = new DashboardService(db);
 

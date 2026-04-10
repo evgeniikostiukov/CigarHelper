@@ -27,7 +27,7 @@ public class DashboardService : IDashboardService
             {
                 h.Id,
                 h.Capacity,
-                CurrentCount = h.Cigars.Count
+                CurrentCount = h.Cigars.Sum(c => (int?)c.Quantity) ?? 0
             });
 
         var humidors = await humidorsQuery.ToListAsync();
@@ -38,7 +38,7 @@ public class DashboardService : IDashboardService
 
         var totalUserCigars = await _context.UserCigars
             .Where(c => c.UserId == userId)
-            .CountAsync();
+            .SumAsync(c => (int?)c.Quantity) ?? 0;
 
         var ratedCigarsQuery = _context.UserCigars
             .Where(uc => uc.UserId == userId && uc.Rating.HasValue);
@@ -72,7 +72,7 @@ public class DashboardService : IDashboardService
             {
                 BrandId = g.Key.BrandId,
                 BrandName = g.Key.Name,
-                CigarCount = g.Count(),
+                CigarCount = g.Sum(x => x.Quantity),
                 AverageRating = g.Any(uc => uc.Rating.HasValue)
                     ? g.Where(uc => uc.Rating.HasValue).Average(uc => uc.Rating)!.Value
                     : null
@@ -83,8 +83,7 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         var recentReviews = await _context.Reviews
-            .Include(r => r.Cigar)
-            .ThenInclude(uc => uc.CigarBase)
+            .Include(r => r.CigarBase)
             .ThenInclude(cb => cb.Brand)
             .Where(r => r.UserId == userId)
             .OrderByDescending(r => r.CreatedAt)
@@ -94,8 +93,8 @@ public class DashboardService : IDashboardService
                 Id = r.Id,
                 Title = r.Title,
                 Rating = r.Rating,
-                CigarName = r.Cigar.CigarBase.Name,
-                CigarBrand = r.Cigar.CigarBase.Brand.Name,
+                CigarName = r.CigarBase.Name,
+                CigarBrand = r.CigarBase.Brand.Name,
                 CreatedAt = r.CreatedAt
             })
             .ToListAsync();

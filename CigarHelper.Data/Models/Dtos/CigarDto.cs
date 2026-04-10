@@ -12,6 +12,8 @@ public class CigarBriefDto
     public string? Strength { get; set; }
     public decimal? Price { get; set; }
     public int? Rating { get; set; }
+    /// <summary>Количество сигар (шт.) в записи коллекции.</summary>
+    public int Quantity { get; set; } = 1;
     public string? ImageUrl { get; set; }
 }
 
@@ -36,6 +38,9 @@ public class CigarBaseDto
 
 public class CigarResponseDto : CigarBriefDto
 {
+    /// <summary>Идентификатор записи в справочнике CigarBase (каталожная сигара).</summary>
+    public int CigarBaseId { get; set; }
+
     public string? Country { get; set; }
     public string? Description { get; set; }
     public string? Wrapper { get; set; }
@@ -56,9 +61,6 @@ public class CigarResponseDto : CigarBriefDto
 
     /// <summary>Заметки пользователя об аромате.</summary>
     public string? Aroma { get; set; }
-
-    /// <summary>Количество сигар (шт.) в записи коллекции.</summary>
-    public int Quantity { get; set; }
 
     /// <summary>
     /// Галерея для карточки коллекции: сначала изображения личной сигары (UserCigar), затем изображения базы (CigarBase).

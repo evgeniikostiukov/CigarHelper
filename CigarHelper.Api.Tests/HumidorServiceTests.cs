@@ -78,7 +78,12 @@ public class HumidorServiceTests
         return h;
     }
 
-    private static async Task<UserCigar> SeedUserCigarAsync(AppDbContext db, int userId, int cigarBaseId, int? humidorId)
+    private static async Task<UserCigar> SeedUserCigarAsync(
+        AppDbContext db,
+        int userId,
+        int cigarBaseId,
+        int? humidorId,
+        int quantity = 1)
     {
         var uc = new UserCigar
         {
@@ -87,6 +92,7 @@ public class HumidorServiceTests
             HumidorId = humidorId,
             Price = 10m,
             Rating = 4,
+            Quantity = quantity,
             CreatedAt = DateTime.UtcNow
         };
         db.UserCigars.Add(uc);
@@ -115,14 +121,14 @@ public class HumidorServiceTests
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var h1 = await SeedHumidorAsync(db, u1.Id, 10);
         await SeedHumidorAsync(db, u2.Id, 5);
-        await SeedUserCigarAsync(db, u1.Id, cb.Id, h1.Id);
-        await SeedUserCigarAsync(db, u1.Id, cb.Id, h1.Id);
+        await SeedUserCigarAsync(db, u1.Id, cb.Id, h1.Id, quantity: 3);
+        await SeedUserCigarAsync(db, u1.Id, cb.Id, h1.Id, quantity: 2);
         var sut = new HumidorService(db);
 
         var forUser1 = await sut.GetUserHumidors(u1.Id);
 
         Assert.Single(forUser1);
-        Assert.Equal(2, forUser1[0].CurrentCount);
+        Assert.Equal(5, forUser1[0].CurrentCount);
         var forUser2 = await sut.GetUserHumidors(u2.Id);
         Assert.Single(forUser2);
         Assert.Equal(0, forUser2[0].CurrentCount);
@@ -304,14 +310,14 @@ public class HumidorServiceTests
         var user = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var h = await SeedHumidorAsync(db, user.Id, 5);
-        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id, h.Id);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id, h.Id, quantity: 4);
         var sut = new HumidorService(db);
 
         var ok = await sut.AddCigarToHumidor(h.Id, cigar.Id, user.Id);
 
         Assert.True(ok);
         var list = await sut.GetUserHumidors(user.Id);
-        Assert.Equal(1, list[0].CurrentCount);
+        Assert.Equal(4, list[0].CurrentCount);
     }
 
     [Fact]
@@ -330,6 +336,27 @@ public class HumidorServiceTests
 
         Assert.False(ok);
         Assert.Null((await db.UserCigars.FindAsync(loose.Id))!.HumidorId);
+    }
+
+    [Fact]
+    public async Task AddCigarToHumidor_CapacityWouldBeExceededByQuantity_ReturnsFalse()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb1) = await SeedBrandAndCigarBaseAsync(db);
+        var (_, cb2) = await SeedBrandAndCigarBaseAsync(db);
+        var h = await SeedHumidorAsync(db, user.Id, capacity: 10);
+
+        await SeedUserCigarAsync(db, user.Id, cb1.Id, h.Id, quantity: 9);
+        var incoming = await SeedUserCigarAsync(db, user.Id, cb2.Id, null, quantity: 2);
+        var sut = new HumidorService(db);
+
+        var ok = await sut.AddCigarToHumidor(h.Id, incoming.Id, user.Id);
+
+        Assert.False(ok);
+        Assert.Null((await db.UserCigars.FindAsync(incoming.Id))!.HumidorId);
+        var list = await sut.GetUserHumidors(user.Id);
+        Assert.Equal(9, list.Single().CurrentCount);
     }
 
     [Fact]

@@ -115,7 +115,7 @@
                 Вместимость
               </h2>
               <p class="text-2xl font-semibold text-stone-900 dark:text-rose-50/95">
-                {{ humidor.cigars.length }} / {{ humidor.capacity }}
+                {{ currentQuantity }} / {{ humidor.capacity }}
               </p>
               <ProgressBar
                 :value="capacityPercentage"
@@ -392,14 +392,19 @@
   const loadingAvailableCigars = ref(false);
   const availableCigarsError = ref<string | null>(null);
 
+  const currentQuantity = computed((): number => {
+    const list = humidor.value?.cigars ?? [];
+    return list.reduce((sum, c) => sum + Math.max(1, Math.trunc(c.quantity ?? 1)), 0);
+  });
+
   const capacityPercentage = computed((): number => {
     if (!humidor.value || !humidor.value.capacity) return 0;
-    return Math.min(100, Math.round((humidor.value.cigars.length / humidor.value.capacity) * 100));
+    return Math.min(100, Math.round((currentQuantity.value / humidor.value.capacity) * 100));
   });
 
   const isHumidorFull = computed((): boolean => {
     if (!humidor.value || !humidor.value.capacity) return false;
-    return humidor.value.cigars.length >= humidor.value.capacity;
+    return currentQuantity.value >= humidor.value.capacity;
   });
 
   function getStrengthLabel(strength: string | null | undefined): string {

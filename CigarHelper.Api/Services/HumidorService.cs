@@ -38,7 +38,7 @@ public class HumidorService : IHumidorService
                 Description = h.Description,
                 Capacity = h.Capacity,
                 Humidity = h.Humidity,
-                CurrentCount = h.Cigars.Count,
+                CurrentCount = h.Cigars.Sum(c => (int?)c.Quantity) ?? 0,
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt
             })
@@ -81,6 +81,7 @@ public class HumidorService : IHumidorService
                     Strength = c.CigarBase.Strength,
                     Price = c.Price,
                     Rating = c.Rating,
+                    Quantity = c.Quantity,
                 }).ToList(),
                 CreatedAt = h.CreatedAt,
                 UpdatedAt = h.UpdatedAt
@@ -167,8 +168,13 @@ public class HumidorService : IHumidorService
         if (cigar.HumidorId == humidorId)
             return true; // Already in this humidor
 
-        if (humidor.Cigars.Count >= humidor.Capacity)
-            return false; // Capacity exceeded
+        if (humidor.Capacity > 0)
+        {
+            var currentQty = humidor.Cigars.Sum(c => c.Quantity);
+            var incomingQty = cigar.Quantity < 1 ? 1 : cigar.Quantity;
+            if (currentQty + incomingQty > humidor.Capacity)
+                return false; // Capacity exceeded
+        }
 
         cigar.HumidorId = humidorId;
         cigar.UpdatedAt = DateTime.UtcNow;
@@ -228,6 +234,7 @@ public class HumidorService : IHumidorService
                 Strength = c.CigarBase.Strength,
                 Price = c.Price,
                 Rating = c.Rating,
+                Quantity = c.Quantity,
             })
             .ToListAsync();
 
