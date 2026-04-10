@@ -465,6 +465,7 @@
   import cigarService from '@/services/cigarService';
   import type { Brand } from '@/services/cigarService';
   import { useAuth } from '@/services/useAuth';
+  import { getAuthUserId } from '@/utils/roles';
 
   /** Единый вариант выбора: каталог (CigarBase) или запись коллекции (UserCigar + CigarBaseId). */
   interface ReviewCigarOption {
@@ -633,7 +634,7 @@
         return;
       }
 
-      const currentUserId = user.value?.id;
+      const currentUserId = getAuthUserId(user.value);
       if (currentUserId == null || review.userId !== currentUserId) {
         error.value = 'Вы можете редактировать только свои обзоры.';
         return;

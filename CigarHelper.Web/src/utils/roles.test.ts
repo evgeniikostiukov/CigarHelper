@@ -43,6 +43,29 @@ describe('getAuthUserId', () => {
     expect(getAuthUserId(user('User'))).toBe(1);
   });
 
+  it('нормализует id из строки (как в JWT JSON)', () => {
+    const u = { ...user('User'), id: '42' as unknown as number };
+    expect(getAuthUserId(u)).toBe(42);
+  });
+
+  it('берёт nameid при отсутствии числового id', () => {
+    const u = {
+      nameid: '7',
+      unique_name: 'x',
+      role: 'User' as const,
+    } as unknown as User;
+    expect(getAuthUserId(u)).toBe(7);
+  });
+
+  it('берёт claim NameIdentifier (.NET JWT)', () => {
+    const u = {
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': '99',
+      unique_name: 'x',
+      role: 'User' as const,
+    } as unknown as User;
+    expect(getAuthUserId(u)).toBe(99);
+  });
+
   it('null без пользователя', () => {
     expect(getAuthUserId(null)).toBeNull();
   });

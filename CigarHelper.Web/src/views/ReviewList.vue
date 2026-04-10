@@ -283,10 +283,11 @@
   import reviewService from '../services/reviewService';
   import { useAuth } from '@/services/useAuth';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import { getAuthUserId } from '@/utils/roles';
   import type { ReviewListItem } from '../services/reviewService';
 
   const { isAuthenticated, user } = useAuth();
-  const authUserId = computed(() => user.value?.id ?? null);
+  const authUserId = computed(() => getAuthUserId(user.value));
 
   const reviews = ref<ReviewListItem[]>([]);
   const loading = ref(true);
