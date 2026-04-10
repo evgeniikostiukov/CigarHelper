@@ -17,7 +17,7 @@
 | `BrandsController` | Бренды: `GET` — любой JWT; `POST` / `PUT` / `DELETE` — только **Admin**, **Moderator** |
 | `CigarsController` | Каталог / сигары; чтение баз (`GET .../bases`, `.../paginated`, `.../bases/{id}`, `.../brands`) — любой JWT; **`POST`/`PUT` справочника** (`.../bases`, `.../bases/{id}`) — только **Admin**, **Moderator**; `unmoderatedOnly=true` только для staff; коллекция `UserCigar` без изменений; `CigarResponseDto.Images` — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
-| `ReviewsController` | Отзывы |
+| `ReviewsController` | Обзоры: `POST` с `cigarBaseId` и опционально `userCigarId` (запись коллекции); `GET` списка — `cigarBaseId` / `userCigarId` / `userId` |
 | `CigarCommentsController` | Комментарии к `CigarBase` и к чужим `UserCigar` в публичной коллекции: `GET/POST/DELETE api/cigarcomments` (публичный список только **одобренные**; у обычных пользователей новые — **на модерации**) |
 | `AdminCigarCommentsController` | Очередь модерации: `GET/POST …/api/admin/cigar-comments` и `…/{id}/approve` / `reject` (роли **Admin**, **Moderator**) |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |

@@ -74,7 +74,7 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Title = "Tst",
             Content = "Body",
-            CigarId = 1,
+            CigarBaseId = 1,
             Rating = 5
         });
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);

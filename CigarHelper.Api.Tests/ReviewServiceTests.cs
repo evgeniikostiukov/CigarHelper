@@ -79,20 +79,27 @@ public class ReviewServiceTests
 
     private static ReviewService Sut(AppDbContext db) => new(db);
 
-    private static CreateReviewRequest BuildCreateRequest(int cigarId, string title, string content, int rating = 8) =>
+    private static CreateReviewRequest BuildCreateRequest(
+        int cigarBaseId,
+        string title,
+        string content,
+        int rating = 8,
+        int? userCigarId = null) =>
         new()
         {
             Title = title,
             Content = content,
             Rating = rating,
-            CigarId = cigarId,
+            CigarBaseId = cigarBaseId,
+            UserCigarId = userCigarId,
             Images = new List<CreateReviewImageRequest>()
         };
 
     private static async Task<Review> SeedReviewAsync(
         AppDbContext db,
         int userId,
-        int cigarId,
+        int cigarBaseId,
+        int? userCigarId,
         string title,
         string content,
         DateTime createdAtUtc,
@@ -104,7 +111,8 @@ public class ReviewServiceTests
             Content = content,
             Rating = rating,
             UserId = userId,
-            CigarId = cigarId,
+            CigarBaseId = cigarBaseId,
+            CigarId = userCigarId,
             SmokingDate = DateTime.UtcNow,
             CreatedAt = createdAtUtc
         };
@@ -121,8 +129,8 @@ public class ReviewServiceTests
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar1 = await SeedUserCigarAsync(db, user.Id, cb.Id);
         var cigar2 = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        await SeedReviewAsync(db, user.Id, cigar1.Id, "Old", "a", DateTime.UtcNow.AddDays(-3));
-        await SeedReviewAsync(db, user.Id, cigar2.Id, "New", "b", DateTime.UtcNow.AddDays(-1));
+        await SeedReviewAsync(db, user.Id, cb.Id, cigar1.Id, "Old", "a", DateTime.UtcNow.AddDays(-3));
+        await SeedReviewAsync(db, user.Id, cb.Id, cigar2.Id, "New", "b", DateTime.UtcNow.AddDays(-1));
         var sut = Sut(db);
 
         var list = await sut.GetReviewsAsync();
@@ -141,8 +149,8 @@ public class ReviewServiceTests
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var c1 = await SeedUserCigarAsync(db, u1.Id, cb.Id);
         var c2 = await SeedUserCigarAsync(db, u2.Id, cb.Id);
-        await SeedReviewAsync(db, u1.Id, c1.Id, "A", "x", DateTime.UtcNow);
-        await SeedReviewAsync(db, u2.Id, c2.Id, "B", "y", DateTime.UtcNow);
+        await SeedReviewAsync(db, u1.Id, cb.Id, c1.Id, "A", "x", DateTime.UtcNow);
+        await SeedReviewAsync(db, u2.Id, cb.Id, c2.Id, "B", "y", DateTime.UtcNow);
         var sut = Sut(db);
 
         var list = await sut.GetReviewsAsync(userId: u1.Id);
@@ -152,18 +160,18 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task GetReviewsAsync_FilterByCigarId_ReturnsOnlyThatCigar()
+    public async Task GetReviewsAsync_FilterByUserCigarId_ReturnsOnlyThatCollectionRow()
     {
         await using var db = CreateContext();
         var user = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var c1 = await SeedUserCigarAsync(db, user.Id, cb.Id);
         var c2 = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        await SeedReviewAsync(db, user.Id, c1.Id, "On1", "x", DateTime.UtcNow);
-        await SeedReviewAsync(db, user.Id, c2.Id, "On2", "y", DateTime.UtcNow);
+        await SeedReviewAsync(db, user.Id, cb.Id, c1.Id, "On1", "x", DateTime.UtcNow);
+        await SeedReviewAsync(db, user.Id, cb.Id, c2.Id, "On2", "y", DateTime.UtcNow);
         var sut = Sut(db);
 
-        var list = await sut.GetReviewsAsync(cigarId: c1.Id);
+        var list = await sut.GetReviewsAsync(userCigarId: c1.Id);
 
         Assert.Single(list);
         Assert.Equal("On1", list[0].Title);
@@ -177,7 +185,7 @@ public class ReviewServiceTests
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
         var longBody = new string('x', 250);
-        await SeedReviewAsync(db, user.Id, cigar.Id, "T", longBody, DateTime.UtcNow);
+        await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "T", longBody, DateTime.UtcNow);
         var sut = Sut(db);
 
         var list = await sut.GetReviewsAsync();
@@ -195,7 +203,7 @@ public class ReviewServiceTests
         var user = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, user.Id, cigar.Id, "Pic", "body", DateTime.UtcNow);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Pic", "body", DateTime.UtcNow);
         db.ReviewImages.Add(new ReviewImage
         {
             ReviewId = rev.Id,
@@ -236,7 +244,7 @@ public class ReviewServiceTests
         var user = await SeedUserAsync(db);
         var (brand, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, user.Id, cigar.Id, "Full", "Text here", DateTime.UtcNow, rating: 9);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Full", "Text here", DateTime.UtcNow, rating: 9);
         var sut = Sut(db);
 
         var dto = await sut.GetReviewByIdAsync(rev.Id);
@@ -250,7 +258,7 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task CreateReviewAsync_UserCigarMissing_ThrowsNotFoundException()
+    public async Task CreateReviewAsync_CigarBaseMissing_ThrowsNotFoundException()
     {
         await using var db = CreateContext();
         var user = await SeedUserAsync(db);
@@ -263,7 +271,28 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task CreateReviewAsync_ValidRequest_PersistsAndReturnsDetail()
+    public async Task CreateReviewAsync_ValidRequest_OnlyCigarBase_PersistsWithoutUserCigar()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+
+        var dto = await sut.CreateReviewAsync(user.Id, BuildCreateRequest(cb.Id, "Nice", "Good smoke", rating: 6));
+
+        Assert.True(dto.Id > 0);
+        Assert.Equal("Nice", dto.Title);
+        Assert.Equal(6, dto.Rating);
+        Assert.Equal(user.Id, dto.UserId);
+        Assert.Equal(cb.Id, dto.CigarBaseId);
+        Assert.Null(dto.UserCigarId);
+        var row = await db.Reviews.SingleAsync(r => r.Id == dto.Id);
+        Assert.Equal(cb.Id, row.CigarBaseId);
+        Assert.Null(row.CigarId);
+    }
+
+    [Fact]
+    public async Task CreateReviewAsync_WithUserCigarId_LinksCollectionRow()
     {
         await using var db = CreateContext();
         var user = await SeedUserAsync(db);
@@ -271,13 +300,14 @@ public class ReviewServiceTests
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
         var sut = Sut(db);
 
-        var dto = await sut.CreateReviewAsync(user.Id, BuildCreateRequest(cigar.Id, "Nice", "Good smoke", rating: 6));
+        var dto = await sut.CreateReviewAsync(
+            user.Id,
+            BuildCreateRequest(cb.Id, "Linked", "Body text here", rating: 7, userCigarId: cigar.Id));
 
-        Assert.True(dto.Id > 0);
-        Assert.Equal("Nice", dto.Title);
-        Assert.Equal(6, dto.Rating);
-        Assert.Equal(user.Id, dto.UserId);
-        Assert.True(await db.Reviews.AnyAsync(r => r.Id == dto.Id));
+        Assert.Equal(cb.Id, dto.CigarBaseId);
+        Assert.Equal(cigar.Id, dto.UserCigarId);
+        var row = await db.Reviews.SingleAsync(r => r.Id == dto.Id);
+        Assert.Equal(cigar.Id, row.CigarId);
     }
 
     [Fact]
@@ -305,7 +335,7 @@ public class ReviewServiceTests
         var intruder = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, owner.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, owner.Id, cigar.Id, "Mine", "x", DateTime.UtcNow);
+        var rev = await SeedReviewAsync(db, owner.Id, cb.Id, cigar.Id, "Mine", "x", DateTime.UtcNow);
         var sut = Sut(db);
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -324,7 +354,7 @@ public class ReviewServiceTests
         var user = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, user.Id, cigar.Id, "Was", "old", DateTime.UtcNow.AddDays(-2), rating: 5);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Was", "old", DateTime.UtcNow.AddDays(-2), rating: 5);
         var sut = Sut(db);
 
         var dto = await sut.UpdateReviewAsync(rev.Id, user.Id, new UpdateReviewRequest
@@ -350,7 +380,7 @@ public class ReviewServiceTests
         var user = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, user.Id, cigar.Id, "Imgs", "x", DateTime.UtcNow);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Imgs", "x", DateTime.UtcNow);
         var img1 = new ReviewImage { ReviewId = rev.Id, ImageBytes = new byte[] { 1 }, CreatedAt = DateTime.UtcNow };
         var img2 = new ReviewImage { ReviewId = rev.Id, ImageBytes = new byte[] { 2 }, CreatedAt = DateTime.UtcNow };
         db.ReviewImages.AddRange(img1, img2);
@@ -391,7 +421,7 @@ public class ReviewServiceTests
         var other = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, owner.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, owner.Id, cigar.Id, "X", "y", DateTime.UtcNow);
+        var rev = await SeedReviewAsync(db, owner.Id, cb.Id, cigar.Id, "X", "y", DateTime.UtcNow);
         var sut = Sut(db);
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -405,7 +435,7 @@ public class ReviewServiceTests
         var user = await SeedUserAsync(db);
         var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
         var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
-        var rev = await SeedReviewAsync(db, user.Id, cigar.Id, "Del", "z", DateTime.UtcNow);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Del", "z", DateTime.UtcNow);
         db.ReviewImages.Add(new ReviewImage
         {
             ReviewId = rev.Id,
