@@ -201,3 +201,5 @@
 - **2026-04-10** — `ReviewForm.vue`: мобильная вёрстка слайдеров оценки — обёртка `min-w-0`/`sm:flex-1` вместо `flex-1` на корне PrimeVue `Slider`, `padding-inline` на `.p-slider-horizontal` при `max-width: 639px` (ручка темы Aura выступает за трек), `touch-manipulation`, выравнивание тега оценки (`self-start` / `sm:self-center`).
 - **2026-04-10** — Обзоры привязаны к каталогу: сущность `Review` — обязательный `CigarBaseId`, опциональный `CigarId` (UserCigar); миграция `ReviewCigarBaseOptionalUserCigar` (backfill из коллекции); API/DTO/фронт (`ReviewForm`, `ReviewDetail`, `reviewService`, `api.generated.ts`); `CigarResponseDto.CigarBaseId`; тесты `ReviewServiceTests` / дашборд.
 
+- **2026-04-10** — Деплой через **GHCR**: workflow `.github/workflows/publish-ghcr.yml` (push в `main`, теги `v*`, `workflow_dispatch`), образы `cigarhelper-api` / `cigarhelper-web`; `docker-compose.ghcr.example.yml` (`build: null`, `pull_policy: always`); `.env.example` — `GHCR_IMAGE_NAMESPACE`, `IMAGE_TAG`; раздел в `docs/docker.md`, ссылка в `docs/memory-bank/workflow.md`.
+

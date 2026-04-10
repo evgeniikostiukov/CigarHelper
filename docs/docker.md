@@ -79,6 +79,38 @@ docker build -f Dockerfile.api -t cigarhelper-api .
 docker build -t cigarhelper-web ./CigarHelper.Web
 ```
 
+## Образы в GHCR (без сборки на сервере)
+
+Workflow **[`.github/workflows/publish-ghcr.yml`](../.github/workflows/publish-ghcr.yml)** собирает и пушит в **GitHub Container Registry** два образа:
+
+- `ghcr.io/<владелец-в-нижнем-регистре>/cigarhelper-api`
+- `ghcr.io/<владелец-в-нижнем-регистре>/cigarhelper-web`
+
+Триггеры: push в ветку **`main`**, теги вида **`v*`**, ручной запуск **Actions → Publish images to GHCR**. Для ветки `main` дополнительно выставляется тег **`latest`**, плюс теги по **git SHA** и semver (если пушите релизный тег).
+
+На сервере:
+
+1. Создать [Personal Access Token](https://github.com/settings/tokens) с правом **`read:packages`** (классический PAT) или использовать подходящий fine-grained token.
+2. Войти в реестр: `echo <TOKEN> | docker login ghcr.io -u <github-username> --password-stdin`
+3. В **`.env`** задать **`GHCR_IMAGE_NAMESPACE`** — тот же владелец пакетов, **строчными буквами**, что и в URL на GitHub Packages, и **`IMAGE_TAG`** (например `latest`, имя ветки или короткий SHA из Actions).
+4. Поднять стек **без** `--build`, с подмешиванием **[`docker-compose.ghcr.example.yml`](../docker-compose.ghcr.example.yml)**:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profile full pull
+docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profile full up -d
+```
+
+С прод-оверлеем (как в разделе ниже) порядок файлов такой:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.ghcr.example.yml --profile full pull
+docker compose -f docker-compose.yml -f docker-compose.production.yml -f docker-compose.ghcr.example.yml --profile full up -d
+```
+
+Файл **`docker-compose.ghcr.example.yml`** задаёт **`image`** для `api` и `web` и снимает унаследованный **`build`** через **`build: null`** (поведение merge в Compose v2 по спецификации). Если локальный Compose очень старый и ругается, обновите Docker Engine / Compose plugin.
+
+Пакеты по умолчанию могут быть **приватными**; при необходимости в настройках пакета на GitHub задайте видимость или привяжите репозиторий.
+
 ## Продакшен на одном сервере (вариант A)
 
 Когда **фронт и API** крутятся в Docker на одной машине, а снаружи стоит **Caddy/Nginx с HTTPS**, удобно подключить второй файл compose (шаблон в git, рабочая копия не коммитится):

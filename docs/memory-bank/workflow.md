@@ -25,6 +25,8 @@ dotnet run --project CigarHelper.Api/CigarHelper.Api.csproj
 
 Пошаговая инструкция: **[`docs/docker.md`](../docker.md)** (`docker compose --profile full`). Переменные `JWT_KEY`, `WEB_PORT`, `API_HOST_PORT` — в `.env` (шаблон `.env.example`).
 
+Публикация готовых образов **api** и **web** в **GHCR** и деплой без сборки на сервере — раздел **«Образы в GHCR»** в том же [`docs/docker.md`](../docker.md) (workflow `publish-ghcr.yml`, файл `docker-compose.ghcr.example.yml`, переменные `GHCR_IMAGE_NAMESPACE` / `IMAGE_TAG` в `.env.example`).
+
 ### Локальная БД через Docker
 
 ```bash
