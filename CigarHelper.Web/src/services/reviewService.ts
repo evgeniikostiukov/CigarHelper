@@ -7,6 +7,21 @@ export interface ReviewImage {
   caption?: string;
 }
 
+export interface ReviewListItem {
+  id: number;
+  title: string;
+  summary?: string | null;
+  rating: number;
+  userId: number;
+  username: string;
+  cigarBaseId: number;
+  cigarName: string;
+  cigarBrand: string;
+  mainImageBytes?: string | null;
+  imageCount?: number | null;
+  createdAt: string;
+}
+
 export interface Review {
   id: number;
   userId: number;
@@ -56,8 +71,8 @@ class ReviewService {
     this.api = apiInstance;
   }
 
-  async getReviews(params: Record<string, unknown> = {}): Promise<Review[]> {
-    const response = await this.api.get<Review[]>('/reviews', { params });
+  async getReviews(params: Record<string, unknown> = {}): Promise<ReviewListItem[]> {
+    const response = await this.api.get<ReviewListItem[]>('/reviews', { params });
     return response.data;
   }
 

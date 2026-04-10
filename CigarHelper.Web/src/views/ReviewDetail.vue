@@ -172,18 +172,20 @@
             :show-thumbnails="review.images.length > 1"
             :show-item-navigators="review.images.length > 1">
             <template #item="slotProps">
-              <img
-                :src="`data:image/jpeg;base64,${slotProps.item.imageData}`"
-                :alt="slotProps.item.caption || review.title"
-                class="block max-h-[70vh] w-full object-contain"
-                width="1200"
-                height="900"
-                loading="lazy"
-                decoding="async" />
+              <div class="review-detail-gallery-item">
+                <img
+                  :src="reviewImageInlineDataSrc(slotProps.item)"
+                  :alt="slotProps.item.caption || review.title"
+                  class="review-detail-gallery-img"
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                  decoding="async" />
+              </div>
             </template>
             <template #thumbnail="slotProps">
               <img
-                :src="`data:image/jpeg;base64,${slotProps.item.imageData}`"
+                :src="reviewImageInlineDataSrc(slotProps.item)"
                 :alt="slotProps.item.caption || review.title"
                 class="h-16 w-24 object-cover"
                 width="96"
@@ -319,6 +321,7 @@
   import type { Review } from '../services/reviewService';
   import authService from '../services/authService';
   import DOMPurify from 'dompurify';
+  import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
 
   const route = useRoute();
   const router = useRouter();
@@ -478,5 +481,20 @@
     margin-bottom: 0.75rem;
     margin-top: 1.25rem;
     font-weight: 600;
+  }
+
+  .review-detail-gallery-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 18rem;
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  .review-detail-gallery-img {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
   }
 </style>

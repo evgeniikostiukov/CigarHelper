@@ -191,23 +191,25 @@
 
             <div class="relative z-10 pointer-events-none shrink-0">
               <div
-                v-if="review.images && review.images.length > 0"
+                v-if="review.mainImageBytes"
                 class="relative h-56 overflow-hidden border-b border-stone-100 bg-stone-100 dark:border-stone-700/80 dark:bg-stone-800/80">
-                <img
-                  :src="`data:image/jpeg;base64,${review.images[0].imageData}`"
-                  :alt="review.title"
-                  class="h-full w-full object-cover"
-                  width="800"
-                  height="448"
-                  loading="lazy"
-                  decoding="async" />
+                <div class="review-list-card-media">
+                  <img
+                    :src="reviewImageInlineDataSrc({ imageBytes: review.mainImageBytes })"
+                    :alt="review.title"
+                    class="review-list-card-img"
+                    width="800"
+                    height="448"
+                    loading="lazy"
+                    decoding="async" />
+                </div>
                 <div
-                  v-if="review.images.length > 1"
+                  v-if="(review.imageCount ?? 0) > 1"
                   class="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-xs text-white">
                   <i
                     class="pi pi-images"
                     aria-hidden="true" />
-                  <span>{{ review.images.length }}</span>
+                  <span>{{ review.imageCount }}</span>
                 </div>
               </div>
               <div
@@ -232,7 +234,7 @@
               <p class="text-sm text-stone-600 dark:text-stone-400">{{ review.cigarBrand }} · {{ review.cigarName }}</p>
               <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
                 <Avatar
-                  :image="review.userAvatarUrl || '/img/default-avatar.png'"
+                  image="/img/default-avatar.png"
                   size="small"
                   shape="circle"
                   :aria-label="`Автор: ${review.username}`" />
@@ -243,7 +245,7 @@
               </div>
               <p
                 class="line-clamp-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
-                {{ review.content }}
+                {{ review.summary ?? '' }}
               </p>
             </div>
 
@@ -269,11 +271,12 @@
   import { RouterLink } from 'vue-router';
   import reviewService from '../services/reviewService';
   import { useAuth } from '@/services/useAuth';
-  import type { Review } from '../services/reviewService';
+  import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import type { ReviewListItem } from '../services/reviewService';
 
   const { isAuthenticated } = useAuth();
 
-  const reviews = ref<Review[]>([]);
+  const reviews = ref<ReviewListItem[]>([]);
   const loading = ref(true);
   const error = ref<string | null>(null);
 
@@ -289,7 +292,7 @@
   });
 
   const brandSelectOptions = computed(() => {
-    const names = [...new Set(reviews.value.map((r) => r.cigarBrand))].sort();
+    const names = [...new Set(reviews.value.map((r) => r.cigarBrand).filter(Boolean))].sort();
     return names.map((b) => ({ label: b, value: b }));
   });
 
@@ -390,6 +393,21 @@
 
   .review-card-enter {
     animation: review-card-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .review-list-card-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .review-list-card-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   @keyframes review-card-in {
