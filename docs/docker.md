@@ -100,7 +100,9 @@ docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profil
 docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profile full up -d
 ```
 
-То же из скрипта (удобно на сервере): **[`scripts/deploy-docker-ghcr.sh`](../scripts/deploy-docker-ghcr.sh)** — из корня репозитория выполните `chmod +x scripts/deploy-docker-ghcr.sh`, затем `./scripts/deploy-docker-ghcr.sh`. Для стека с **`docker-compose.production.yml`**: `./scripts/deploy-docker-ghcr.sh --production`. Пропустить `pull`: `--no-pull`. Другой каталог с compose: `DEPLOY_REPO_ROOT=/path/to/repo ./scripts/deploy-docker-ghcr.sh`.
+То же из скрипта (удобно на сервере): **[`scripts/deploy-docker-ghcr.sh`](../scripts/deploy-docker-ghcr.sh)** — `chmod +x scripts/deploy-docker-ghcr.sh`, затем из корня каталога с compose: `./scripts/deploy-docker-ghcr.sh`. Прод: `./scripts/deploy-docker-ghcr.sh --production`. Без `pull`: `--no-pull`. Явный каталог: `DEPLOY_REPO_ROOT=/path/to/compose ./scripts/deploy-docker-ghcr.sh`.
+
+**Без полного репозитория:** на сервер достаточно скопировать (scp/rsync/artefact) минимум: `docker-compose.yml`, `docker-compose.ghcr.example.yml` (или ваш копипаст), при проде — `docker-compose.production.yml`, файл **`.env`**, по желанию **`scripts/deploy-docker-ghcr.sh`**. Исходники .NET/Vue в рантайме не нужны. Скрипт можно положить **в ту же папку**, что и `docker-compose.yml` (плоская раскладка) — тогда корень определится автоматически. Миграции EF с хоста по-прежнему требуют отдельно checkout/SDK или другой способ наката БД (см. раздел про миграции выше).
 
 С прод-оверлеем (как в разделе ниже) порядок файлов такой:
 

@@ -203,4 +203,5 @@
 
 - **2026-04-10** — Деплой через **GHCR**: workflow `.github/workflows/publish-ghcr.yml` (push в `main`, теги `v*`, `workflow_dispatch`), образы `cigarhelper-api` / `cigarhelper-web`; `docker-compose.ghcr.example.yml` (`build: null`, `pull_policy: always`); `.env.example` — `GHCR_IMAGE_NAMESPACE`, `IMAGE_TAG`; раздел в `docs/docker.md`, ссылка в `docs/memory-bank/workflow.md`.
 - **2026-04-10** — Скрипт серверного деплоя `scripts/deploy-docker-ghcr.sh` (pull + up, флаги `--production`, `--no-pull`, env `DEPLOY_REPO_ROOT` / `GHCR_COMPOSE_FILE`); описание в `docs/docker.md` (раздел GHCR).
+- **2026-04-10** — `deploy-docker-ghcr.sh`: авто-поиск каталога с `docker-compose.yml` (рядом со скриптом или `../` как в репо); в `docs/docker.md` — минимальный набор файлов на сервере без git clone.
 

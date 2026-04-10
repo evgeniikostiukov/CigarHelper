@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 # Деплой на сервере: Postgres + MinIO + API + Web из образов GHCR (без сборки на хосте).
 #
-# Требования: Docker Engine + Compose v2, в корне репозитория файл .env с секретами и
-# GHCR_IMAGE_NAMESPACE / IMAGE_TAG (см. .env.example и docs/docker.md).
+# Целый git-клон не обязателен: достаточно каталога с compose-файлами, .env и (по желанию) этого скрипта.
+# Варианты раскладки:
+#   - как в репо: .../docker-compose.yml и .../scripts/deploy-docker-ghcr.sh
+#   - «плоско»: всё в одной папке, включая этот скрипт и docker-compose.yml
+#
+# Требования: Docker Compose v2, .env с секретами и GHCR_IMAGE_NAMESPACE / IMAGE_TAG (см. .env.example).
 # Один раз: docker login ghcr.io
 #
-# Использование (из любого каталога):
-#   bash scripts/deploy-docker-ghcr.sh
-#   bash scripts/deploy-docker-ghcr.sh --production
-#   bash scripts/deploy-docker-ghcr.sh --no-pull
+# Использование:
+#   ./scripts/deploy-docker-ghcr.sh
+#   ./scripts/deploy-docker-ghcr.sh --production
+#   ./scripts/deploy-docker-ghcr.sh --no-pull
 #
 # Переменные окружения:
-#   DEPLOY_REPO_ROOT — корень репо с compose-файлами (по умолчанию родитель каталога scripts/)
+#   DEPLOY_REPO_ROOT — явный каталог с compose (если не задан: ищется рядом со скриптом или на уровень выше)
 #   GHCR_COMPOSE_FILE — файл с image: для api/web (по умолчанию docker-compose.ghcr.example.yml)
 
 set -euo pipefail
@@ -41,7 +45,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="${DEPLOY_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+
+if [[ -n "${DEPLOY_REPO_ROOT:-}" ]]; then
+  ROOT="$(cd "$DEPLOY_REPO_ROOT" && pwd)"
+elif [[ -f "$SCRIPT_DIR/docker-compose.yml" ]]; then
+  ROOT="$SCRIPT_DIR"
+elif [[ -f "$SCRIPT_DIR/../docker-compose.yml" ]]; then
+  ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  echo "Ошибка: не найден docker-compose.yml рядом со скриптом и не задан DEPLOY_REPO_ROOT." >&2
+  echo "Скопируйте на сервер compose-файлы и .env или укажите: DEPLOY_REPO_ROOT=/path/to/compose ./deploy-docker-ghcr.sh" >&2
+  exit 1
+fi
+
 cd "$ROOT"
 
 GHCR_FILE="${GHCR_COMPOSE_FILE:-docker-compose.ghcr.example.yml}"
