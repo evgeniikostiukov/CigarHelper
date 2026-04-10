@@ -206,6 +206,15 @@
                 </template>
               </Column>
               <Column
+                field="quantity"
+                header="Кол-во"
+                sortable
+                class="w-[6rem] text-right">
+                <template #body="slotProps">
+                  {{ Math.max(1, Math.trunc(slotProps.data.quantity ?? 1)) }}
+                </template>
+              </Column>
+              <Column
                 header="Действия"
                 class="w-[8rem] text-center">
                 <template #body="slotProps">

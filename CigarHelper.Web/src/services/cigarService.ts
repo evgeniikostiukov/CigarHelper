@@ -48,6 +48,8 @@ export interface Cigar {
   binder: string | null;
   filler: string | null;
   humidorId: number | null;
+  /** Дата добавления записи в коллекцию (CreatedAt из API). */
+  createdAt?: string;
   taste?: string | null;
   aroma?: string | null;
   /** Количество сигар (шт.) в записи коллекции; при отсутствии в ответе API считать 1. */

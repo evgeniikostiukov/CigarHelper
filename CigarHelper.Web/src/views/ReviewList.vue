@@ -177,9 +177,9 @@
               review.cigarName,
               review.username,
               review.createdAt,
-              review.content,
-              review.images?.length,
-              review.images?.[0]?.id,
+              review.summary,
+              review.imageCount,
+              review.mainImageBytes,
             ]"
             :data-testid="`review-card-${review.id}`"
             class="review-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 motion-reduce:transition-none motion-reduce:animate-none"

@@ -210,6 +210,14 @@
                     {{ collectionQuantityLabel }}
                   </p>
                 </div>
+                <div data-testid="cigar-detail-added-at">
+                  <span class="block text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                    Дата добавления
+                  </span>
+                  <p class="mt-1 text-stone-800 dark:text-stone-200">
+                    {{ addedAtLabel }}
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -460,6 +468,14 @@
     const q = c.quantity;
     const n = q != null && Number.isFinite(q) ? Math.min(9999, Math.max(1, Math.trunc(q))) : 1;
     return `${n} шт.`;
+  });
+
+  const addedAtLabel = computed(() => {
+    const raw = cigar.value?.createdAt;
+    if (!raw) return '—';
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('ru-RU', { timeZone: 'UTC' });
   });
 
   interface GallerySlide {
