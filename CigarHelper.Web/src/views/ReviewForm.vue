@@ -114,6 +114,11 @@
             </h2>
             <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">
               Сигара, заголовок и общая оценка — обязательны для публикации.
+              <span
+                v-if="isEditing"
+                class="mt-1 block text-stone-500 dark:text-stone-500">
+                При редактировании сигару сменить нельзя — она привязана к обзору.
+              </span>
             </p>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div class="flex flex-col gap-2 md:col-span-2">
@@ -442,7 +447,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, watch, onMounted } from 'vue';
+  import { ref, reactive, computed, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import api from '../services/api';
   import TextEditor from '../components/TextEditor.vue';
@@ -533,7 +538,7 @@
   const { user } = useAuth();
 
   const isEditing = computed(() => route.name === 'ReviewEdit');
-  const loading = ref(route.name === 'ReviewEdit');
+  const loading = ref(false);
   const error = ref<string | null>(null);
   const saveError = ref<string | null>(null);
   const saving = ref(false);
@@ -542,22 +547,33 @@
   const selectedCigar = ref<ReviewCigarOption | null>(null);
   const searchLoading = ref(false);
 
-  const form = reactive<ReviewFormModel>({
-    cigarBaseId: null,
-    userCigarId: null,
-    title: '',
-    rating: 5,
-    content: '',
-    smokingExperience: '',
-    aroma: '',
-    taste: '',
-    construction: 3,
-    burnQuality: 3,
-    draw: 3,
-    venue: '',
-    smokingDate: new Date(),
-    images: [],
-  });
+  function createEmptyForm(): ReviewFormModel {
+    return {
+      cigarBaseId: null,
+      userCigarId: null,
+      title: '',
+      rating: 5,
+      content: '',
+      smokingExperience: '',
+      aroma: '',
+      taste: '',
+      construction: 3,
+      burnQuality: 3,
+      draw: 3,
+      venue: '',
+      smokingDate: new Date(),
+      images: [],
+    };
+  }
+
+  const form = reactive<ReviewFormModel>(createEmptyForm());
+
+  function resetFormForCreate(): void {
+    Object.assign(form, createEmptyForm());
+    selectedCigar.value = null;
+    filteredCigars.value = [];
+    Object.keys(validationErrors).forEach((key) => delete validationErrors[key]);
+  }
 
   const handleQueryParameters = (): void => {
     const query = route.query;
@@ -613,12 +629,14 @@
     try {
       const { data: review } = await api.get<ReviewResponse>(`/reviews/${id}`);
 
-      if (route.name === 'ReviewEdit') {
-        const currentUserId = user.value?.id;
-        if (currentUserId == null || review.userId !== currentUserId) {
-          error.value = 'Вы можете редактировать только свои обзоры.';
-          return;
-        }
+      if (route.name !== 'ReviewEdit' || route.params.id !== id) {
+        return;
+      }
+
+      const currentUserId = user.value?.id;
+      if (currentUserId == null || review.userId !== currentUserId) {
+        error.value = 'Вы можете редактировать только свои обзоры.';
+        return;
       }
 
       const cigarBrandName = review.cigarBrand || 'Неизвестный бренд';
@@ -764,7 +782,7 @@
         smokingDate: form.smokingDate ? form.smokingDate.toISOString() : null,
       };
 
-      if (isEditing.value && route.params.id) {
+      if (isEditing.value && route.name === 'ReviewEdit' && route.params.id) {
         const reviewId = route.params.id as string;
 
         const keptImageIds = form.images
@@ -913,15 +931,21 @@
     },
   );
 
-  onMounted(async () => {
-    const reviewId = route.params.id as string | undefined;
-    if (reviewId) {
-      await fetchReview(reviewId);
-    } else {
-      loading.value = false;
-      handleQueryParameters();
-    }
-  });
+  watch(
+    () => ({ name: route.name, id: route.params.id as string | undefined }),
+    async ({ name, id }) => {
+      if (name === 'ReviewEdit' && id) {
+        await fetchReview(id);
+      } else if (name === 'ReviewCreate') {
+        loading.value = false;
+        error.value = null;
+        saveError.value = null;
+        resetFormForCreate();
+        handleQueryParameters();
+      }
+    },
+    { immediate: true },
+  );
 </script>
 
 <style scoped>

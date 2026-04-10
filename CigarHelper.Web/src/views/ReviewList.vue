@@ -176,10 +176,12 @@
               review.cigarBrand,
               review.cigarName,
               review.username,
+              review.userId,
               review.createdAt,
               review.summary,
               review.imageCount,
               review.mainImageBytes,
+              authUserId,
             ]"
             :data-testid="`review-card-${review.id}`"
             class="review-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 motion-reduce:transition-none motion-reduce:animate-none"
@@ -250,11 +252,11 @@
             </div>
 
             <footer
-              class="relative z-20 mt-auto flex flex-col gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 pointer-events-auto dark:border-stone-700/80 dark:bg-stone-950/50">
+              class="relative z-20 mt-auto flex flex-col gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 pointer-events-auto dark:border-stone-700/80 dark:bg-stone-950/50 sm:flex-row sm:flex-wrap">
               <Button
-                v-if="isOwnReview(review)"
+                v-if="isAuthenticated && review.userId === authUserId"
                 :data-testid="`review-edit-${review.id}`"
-                class="w-full min-h-11 touch-manipulation"
+                class="w-full min-h-11 touch-manipulation sm:min-w-0 sm:flex-1"
                 label="Редактировать"
                 icon="pi pi-pencil"
                 severity="secondary"
@@ -262,7 +264,7 @@
                 @click.stop="$router.push({ name: 'ReviewEdit', params: { id: String(review.id) } })" />
               <Button
                 :data-testid="`review-open-${review.id}`"
-                class="w-full min-h-11 touch-manipulation"
+                class="w-full min-h-11 touch-manipulation sm:min-w-0 sm:flex-1"
                 label="Читать полностью"
                 icon="pi pi-arrow-right"
                 icon-pos="right"
@@ -284,10 +286,7 @@
   import type { ReviewListItem } from '../services/reviewService';
 
   const { isAuthenticated, user } = useAuth();
-
-  function isOwnReview(r: ReviewListItem): boolean {
-    return isAuthenticated.value && user.value != null && user.value.id === r.userId;
-  }
+  const authUserId = computed(() => user.value?.id ?? null);
 
   const reviews = ref<ReviewListItem[]>([]);
   const loading = ref(true);
