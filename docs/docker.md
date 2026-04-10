@@ -100,6 +100,8 @@ docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profil
 docker compose -f docker-compose.yml -f docker-compose.ghcr.example.yml --profile full up -d
 ```
 
+То же из скрипта (удобно на сервере): **[`scripts/deploy-docker-ghcr.sh`](../scripts/deploy-docker-ghcr.sh)** — из корня репозитория выполните `chmod +x scripts/deploy-docker-ghcr.sh`, затем `./scripts/deploy-docker-ghcr.sh`. Для стека с **`docker-compose.production.yml`**: `./scripts/deploy-docker-ghcr.sh --production`. Пропустить `pull`: `--no-pull`. Другой каталог с compose: `DEPLOY_REPO_ROOT=/path/to/repo ./scripts/deploy-docker-ghcr.sh`.
+
 С прод-оверлеем (как в разделе ниже) порядок файлов такой:
 
 ```bash
