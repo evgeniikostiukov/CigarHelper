@@ -250,7 +250,16 @@
             </div>
 
             <footer
-              class="relative z-20 mt-auto border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+              class="relative z-20 mt-auto flex flex-col gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 pointer-events-auto dark:border-stone-700/80 dark:bg-stone-950/50">
+              <Button
+                v-if="isOwnReview(review)"
+                :data-testid="`review-edit-${review.id}`"
+                class="w-full min-h-11 touch-manipulation"
+                label="Редактировать"
+                icon="pi pi-pencil"
+                severity="secondary"
+                outlined
+                @click.stop="$router.push({ name: 'ReviewEdit', params: { id: String(review.id) } })" />
               <Button
                 :data-testid="`review-open-${review.id}`"
                 class="w-full min-h-11 touch-manipulation"
@@ -274,7 +283,11 @@
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
   import type { ReviewListItem } from '../services/reviewService';
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+
+  function isOwnReview(r: ReviewListItem): boolean {
+    return isAuthenticated.value && user.value != null && user.value.id === r.userId;
+  }
 
   const reviews = ref<ReviewListItem[]>([]);
   const loading = ref(true);

@@ -139,6 +139,7 @@
                   option-group-label="brand"
                   option-group-children="cigars"
                   :dropdown="true"
+                  :disabled="isEditing"
                   :virtual-scroller-options="{ itemSize: 50 }"
                   @complete="searchCigars"
                   @option-select="handleCigarSelect">
@@ -183,6 +184,11 @@
                   class="text-sm text-red-600 dark:text-red-400">
                   {{ validationErrors.cigarBaseId }}
                 </small>
+                <p
+                  v-if="isEditing"
+                  class="text-xs text-stone-500 dark:text-stone-400">
+                  Сигару при редактировании сменить нельзя — так устроен сервер.
+                </p>
               </div>
 
               <div class="flex flex-col gap-2 md:col-span-2">
@@ -416,7 +422,11 @@
               severity="secondary"
               outlined
               type="button"
-              @click="router.push({ name: 'ReviewList' })" />
+              @click="
+                isEditing && route.params.id
+                  ? router.push({ name: 'ReviewDetail', params: { id: String(route.params.id) } })
+                  : router.push({ name: 'ReviewList' })
+              " />
             <Button
               data-testid="review-form-submit"
               class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
@@ -449,6 +459,7 @@
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
   import type { Brand } from '@/services/cigarService';
+  import { useAuth } from '@/services/useAuth';
 
   /** Единый вариант выбора: каталог (CigarBase) или запись коллекции (UserCigar + CigarBaseId). */
   interface ReviewCigarOption {
@@ -497,6 +508,7 @@
   }
 
   interface ReviewResponse {
+    userId: number;
     cigarBaseId: number;
     userCigarId?: number | null;
     cigarName: string;
@@ -518,9 +530,10 @@
   const route = useRoute();
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
 
-  const isEditing = computed(() => Boolean(route.params.id));
-  const loading = ref(Boolean(route.params.id));
+  const isEditing = computed(() => route.name === 'ReviewEdit');
+  const loading = ref(route.name === 'ReviewEdit');
   const error = ref<string | null>(null);
   const saveError = ref<string | null>(null);
   const saving = ref(false);
@@ -599,6 +612,14 @@
 
     try {
       const { data: review } = await api.get<ReviewResponse>(`/reviews/${id}`);
+
+      if (route.name === 'ReviewEdit') {
+        const currentUserId = user.value?.id;
+        if (currentUserId == null || review.userId !== currentUserId) {
+          error.value = 'Вы можете редактировать только свои обзоры.';
+          return;
+        }
+      }
 
       const cigarBrandName = review.cigarBrand || 'Неизвестный бренд';
       const cigarData: ReviewCigarOption = {
