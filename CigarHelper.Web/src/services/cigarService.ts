@@ -34,6 +34,8 @@ export interface CigarBase {
 
 export interface Cigar {
   id: number;
+  /** Идентификатор CigarBase для этой записи коллекции (из API). */
+  cigarBaseId?: number;
   name: string;
   brand: Brand;
   country: string | null;

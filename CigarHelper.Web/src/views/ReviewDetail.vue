@@ -300,10 +300,10 @@
           <Button
             data-testid="review-detail-cigar"
             class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
-            label="Открыть сигару в коллекции"
+            :label="review.userCigarId ? 'Открыть сигару в коллекции' : 'Открыть в каталоге'"
             icon="pi pi-arrow-right"
             icon-pos="right"
-            @click="router.push({ name: 'CigarDetail', params: { id: String(review.cigarId) } })" />
+            @click="goToCigar" />
         </footer>
       </article>
     </div>
@@ -346,6 +346,18 @@
       USE_PROFILES: { html: true },
     });
   });
+
+  const goToCigar = (): void => {
+    if (!review.value) return;
+    if (review.value.userCigarId != null) {
+      void router.push({ name: 'CigarDetail', params: { id: String(review.value.userCigarId) } });
+      return;
+    }
+    void router.push({
+      name: 'CigarBases',
+      query: { selectedCigarBaseId: String(review.value.cigarBaseId) },
+    });
+  };
 
   const loadReview = async (): Promise<void> => {
     loading.value = true;

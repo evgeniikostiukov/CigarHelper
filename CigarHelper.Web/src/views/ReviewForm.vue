@@ -118,18 +118,18 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div class="flex flex-col gap-2 md:col-span-2">
                 <label
-                  for="cigarId"
+                  for="cigar-select"
                   class="text-xs font-medium text-stone-600 dark:text-stone-400">
                   Сигара <span class="text-red-600 dark:text-red-400">*</span>
                 </label>
                 <AutoComplete
-                  id="cigarId"
+                  id="cigar-select"
                   v-model="selectedCigar"
                   data-testid="review-form-cigar"
                   :suggestions="filteredCigars"
                   input-class="min-h-11 w-full"
                   class="w-full"
-                  :class="{ 'p-invalid': validationErrors.cigarId }"
+                  :class="{ 'p-invalid': validationErrors.cigarBaseId }"
                   placeholder="Введите название сигары для поиска"
                   :show-clear="true"
                   :loading="searchLoading"
@@ -179,9 +179,9 @@
                   </template>
                 </AutoComplete>
                 <small
-                  v-if="validationErrors.cigarId"
+                  v-if="validationErrors.cigarBaseId"
                   class="text-sm text-red-600 dark:text-red-400">
-                  {{ validationErrors.cigarId }}
+                  {{ validationErrors.cigarBaseId }}
                 </small>
               </div>
 
@@ -448,13 +448,24 @@
   import Toast from 'primevue/toast';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
-  import type { Cigar, CigarBase } from '@/services/cigarService';
+  import type { Brand } from '@/services/cigarService';
 
-  /** Сигара в поле выбора: из API или временный объект из query — с displayName для AutoComplete */
-  type ReviewCigarOption = (Cigar | CigarBase) & { displayName: string; isUserCigar?: boolean };
+  /** Единый вариант выбора: каталог (CigarBase) или запись коллекции (UserCigar + CigarBaseId). */
+  interface ReviewCigarOption {
+    cigarBaseId: number;
+    userCigarId: number | null;
+    isUserCigar: boolean;
+    displayName: string;
+    name: string;
+    brand: Brand;
+    size?: string | null;
+    strength?: string | null;
+    country?: string | null;
+  }
 
   interface ReviewFormModel {
-    cigarId: number | null;
+    cigarBaseId: number | null;
+    userCigarId: number | null;
     title: string;
     rating: number;
     content: string;
@@ -486,7 +497,8 @@
   }
 
   interface ReviewResponse {
-    cigarId: number;
+    cigarBaseId: number;
+    userCigarId?: number | null;
     cigarName: string;
     cigarBrand: string;
     title: string;
@@ -518,7 +530,8 @@
   const searchLoading = ref(false);
 
   const form = reactive<ReviewFormModel>({
-    cigarId: null,
+    cigarBaseId: null,
+    userCigarId: null,
     title: '',
     rating: 5,
     content: '',
@@ -536,12 +549,17 @@
   const handleQueryParameters = (): void => {
     const query = route.query;
 
-    if (query.cigarId && query.cigarName) {
-      const cigarId = parseInt(query.cigarId as string, 10);
+    if (query.cigarBaseId && query.cigarName) {
+      const cigarBaseId = parseInt(query.cigarBaseId as string, 10);
+      if (!Number.isFinite(cigarBaseId)) {
+        return;
+      }
       const brandName = (query.brandName as string) || 'Неизвестный бренд';
 
       const tempCigar: ReviewCigarOption = {
-        id: cigarId,
+        cigarBaseId,
+        userCigarId: null,
+        isUserCigar: false,
         name: query.cigarName as string,
         brand: {
           id: 0,
@@ -552,15 +570,12 @@
         country: (query.country as string) || '',
         size: (query.size as string) || '',
         strength: (query.strength as string) || '',
-        description: (query.description as string) || '',
-        wrapper: query.wrapper as string,
-        binder: query.binder as string,
-        filler: query.filler as string,
         displayName: `${brandName} ${query.cigarName as string}`,
       };
 
       selectedCigar.value = tempCigar;
-      form.cigarId = cigarId;
+      form.cigarBaseId = cigarBaseId;
+      form.userCigarId = null;
       form.title = `Обзор: ${query.cigarName as string}`;
 
       let cigarInfo = `**Сигара:** ${query.cigarName as string}\n`;
@@ -587,7 +602,9 @@
 
       const cigarBrandName = review.cigarBrand || 'Неизвестный бренд';
       const cigarData: ReviewCigarOption = {
-        id: review.cigarId,
+        cigarBaseId: review.cigarBaseId,
+        userCigarId: review.userCigarId ?? null,
+        isUserCigar: Boolean(review.userCigarId),
         name: review.cigarName || 'Неизвестная сигара',
         brand: {
           id: 0,
@@ -598,18 +615,12 @@
         country: null,
         size: null,
         strength: null,
-        price: null,
-        rating: null,
-        description: null,
-        wrapper: null,
-        binder: null,
-        filler: null,
-        humidorId: null,
         displayName: `${cigarBrandName} ${review.cigarName || 'Неизвестная сигара'}`,
       };
 
       selectedCigar.value = cigarData;
-      form.cigarId = review.cigarId;
+      form.cigarBaseId = review.cigarBaseId;
+      form.userCigarId = review.userCigarId ?? null;
       form.title = review.title;
       form.rating = review.rating;
       form.content = review.content;
@@ -686,8 +697,8 @@
     Object.keys(validationErrors).forEach((key) => delete validationErrors[key]);
     let isValid = true;
 
-    if (!form.cigarId) {
-      validationErrors.cigarId = 'Необходимо выбрать сигару';
+    if (form.cigarBaseId == null) {
+      validationErrors.cigarBaseId = 'Необходимо выбрать сигару';
       isValid = false;
     }
     if (!form.title) {
@@ -718,8 +729,7 @@
     saveError.value = null;
 
     try {
-      const reviewData = {
-        cigarId: form.cigarId,
+      const commonFields = {
         title: form.title,
         rating: form.rating,
         content: form.content,
@@ -747,12 +757,17 @@
           .filter((img) => !keptImageIds.includes(img.id))
           .map((img) => img.id);
 
-        const updateData = { ...reviewData, imagesToAdd, imageIdsToRemove };
+        const updateData = { ...commonFields, imagesToAdd, imageIdsToRemove };
         await api.put(`/reviews/${reviewId}`, updateData);
         await router.push({ name: 'ReviewDetail', params: { id: reviewId } });
       } else {
         const images = await buildImagePayloadsForCreate(form.images);
-        const newReviewData = { ...reviewData, images };
+        const newReviewData = {
+          ...commonFields,
+          cigarBaseId: form.cigarBaseId!,
+          userCigarId: form.userCigarId,
+          images,
+        };
         const response = await api.post<{ id: number }>('/reviews', newReviewData);
         await router.push({ name: 'ReviewDetail', params: { id: String(response.data.id) } });
       }
@@ -780,27 +795,44 @@
         cigarService.getCigars({ name: event.query, pageSize: 10 }),
       ]);
 
-      const allCigars = new Map<number, ReviewCigarOption>();
+      const collectionBaseIds = new Set<number>();
+      const uniqueCigars: ReviewCigarOption[] = [];
 
       userCigars.forEach((cigar) => {
-        allCigars.set(cigar.id, {
-          ...cigar,
-          displayName: `${cigar.name} (${cigar.brand.name})`,
+        const cbId = cigar.cigarBaseId;
+        if (cbId == null) {
+          return;
+        }
+        collectionBaseIds.add(cbId);
+        uniqueCigars.push({
+          cigarBaseId: cbId,
+          userCigarId: cigar.id,
           isUserCigar: true,
+          displayName: `${cigar.name} (${cigar.brand.name})`,
+          name: cigar.name,
+          brand: cigar.brand,
+          size: cigar.size,
+          strength: cigar.strength,
+          country: cigar.country,
         });
       });
 
       baseResult.items.forEach((cigarBase) => {
-        if (!allCigars.has(cigarBase.id)) {
-          allCigars.set(cigarBase.id, {
-            ...cigarBase,
-            displayName: `${cigarBase.name} (${cigarBase.brand.name})`,
-            isUserCigar: false,
-          });
+        if (collectionBaseIds.has(cigarBase.id)) {
+          return;
         }
+        uniqueCigars.push({
+          cigarBaseId: cigarBase.id,
+          userCigarId: null,
+          isUserCigar: false,
+          displayName: `${cigarBase.name} (${cigarBase.brand.name})`,
+          name: cigarBase.name,
+          brand: cigarBase.brand,
+          size: cigarBase.size,
+          strength: cigarBase.strength,
+          country: cigarBase.country,
+        });
       });
-
-      const uniqueCigars = Array.from(allCigars.values());
 
       const grouped: Record<string, GroupedCigar> = {};
       uniqueCigars.forEach((cigar) => {
@@ -830,7 +862,8 @@
 
     const cigar = selected as ReviewCigarOption;
     selectedCigar.value = cigar;
-    form.cigarId = cigar.id;
+    form.cigarBaseId = cigar.cigarBaseId;
+    form.userCigarId = cigar.userCigarId;
 
     if (!form.title) {
       form.title = `Обзор: ${cigar.name}`;
@@ -853,7 +886,8 @@
     () => selectedCigar.value,
     (newCigar) => {
       if (newCigar) {
-        form.cigarId = newCigar.id;
+        form.cigarBaseId = newCigar.cigarBaseId;
+        form.userCigarId = newCigar.userCigarId;
       }
     },
   );

@@ -13,7 +13,9 @@ export interface Review {
   title: string;
   content: string;
   rating: number;
-  cigarId: number;
+  cigarBaseId: number;
+  /** Запись коллекции, если обзор с неё; иначе отсутствует. */
+  userCigarId?: number | null;
   cigarName: string;
   cigarBrand: string;
   username: string;
@@ -30,21 +32,9 @@ export interface Review {
   venue?: string;
 }
 
-// export interface ReviewListItemDto{
-//   id: number;
-//   title: string;
-//   summary: string;
-//   rating: number;
-//   userId: number;
-//   userName: string;
-//   cigarId: number;
-//   cigarName: string;
-//   cigarBrand: string;
-//   mainImageUr
-// }
-
 export interface CreateReviewDto {
-  cigarId: number;
+  cigarBaseId: number;
+  userCigarId?: number | null;
   title: string;
   content: string;
   rating: number;
@@ -66,7 +56,7 @@ class ReviewService {
     this.api = apiInstance;
   }
 
-  async getReviews(params: any = {}): Promise<Review[]> {
+  async getReviews(params: Record<string, unknown> = {}): Promise<Review[]> {
     const response = await this.api.get<Review[]>('/reviews', { params });
     return response.data;
   }
