@@ -34,7 +34,7 @@
     "@tiptap/extension-character-count": "^3.21.0",
     "@tiptap/extension-image": "^3.21.0",
     "@tiptap/extension-placeholder": "^3.21.0",
-    "@tiptap/starter-kit": "^3.21.0",
+    "@tiptap/starter-kit": "^3.22.3",
     "@tiptap/vue-3": "^3.21.0",
     "@vueuse/core": "^14.2.1",
     "axios": "^1.14.0",
