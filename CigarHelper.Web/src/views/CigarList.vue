@@ -289,10 +289,16 @@
           :key="cigar.id"
           v-memo="memoKey(cigar)"
           :data-testid="`cigar-card-${cigar.id}`"
-          class="cigar-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 min-h-[20rem] motion-reduce:transition-none motion-reduce:animate-none"
-          :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
+          role="button"
+          tabindex="0"
+          :aria-label="`Сигара ${cigar.name}, открыть подробности`"
+          class="cigar-card-enter group relative flex min-h-[20rem] cursor-pointer flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform,border-color] duration-300 hover:border-rose-800/25 hover:shadow-lg hover:shadow-rose-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-rose-900/35 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:animate-none"
+          :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }"
+          @click="onCigarCardClick($event, cigar)"
+          @keydown.enter.prevent="viewCigar(cigar)"
+          @keydown.space.prevent="viewCigar(cigar)">
           <div
-            class="relative z-20 shrink-0 h-48 rounded-t-2xl overflow-hidden border-b border-stone-100 dark:border-stone-700/80 bg-stone-100 dark:bg-stone-800/80">
+            class="relative z-20 h-48 shrink-0 overflow-hidden rounded-t-2xl border-b border-stone-100 bg-stone-100 dark:border-stone-700/80 dark:bg-stone-800/80">
             <Carousel
               :value="orderUserCigarGalleryImages(cigar.images)"
               :num-visible="1"
@@ -302,11 +308,9 @@
               :show-indicators="(cigar.images?.length ?? 0) > 1"
               :show-navigators="(cigar.images?.length ?? 0) > 1">
               <template #item="slotProps">
-                <button
-                  type="button"
-                  class="cigar-list-card-image-frame relative h-48 w-full min-h-0 cursor-pointer touch-manipulation border-0 bg-transparent p-0 text-left"
-                  :aria-label="`Открыть сигару ${cigar.name}`"
-                  @click="viewCigar(cigar)">
+                <div
+                  class="cigar-list-card-image-frame relative h-48 w-full min-h-0"
+                  aria-hidden="true">
                   <div
                     class="cigar-list-card-image-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-2">
                     <img
@@ -320,28 +324,24 @@
                       class="pi pi-image text-5xl text-stone-400 dark:text-stone-500"
                       aria-hidden="true" />
                   </div>
-                </button>
+                </div>
               </template>
               <template #empty>
-                <button
-                  type="button"
-                  class="cigar-list-card-image-frame relative h-48 w-full min-h-0 cursor-pointer touch-manipulation border-0 bg-transparent p-0 text-left"
-                  :aria-label="`Открыть сигару ${cigar.name}`"
-                  @click="viewCigar(cigar)">
+                <div
+                  class="cigar-list-card-image-frame relative h-48 w-full min-h-0"
+                  aria-hidden="true">
                   <div
                     class="cigar-list-card-image-inner absolute inset-0 box-border flex min-h-0 min-w-0 items-center justify-center p-2">
                     <i
                       class="pi pi-image text-5xl text-stone-400 dark:text-stone-500"
                       aria-hidden="true" />
                   </div>
-                </button>
+                </div>
               </template>
             </Carousel>
           </div>
 
-          <RouterLink
-            :to="{ name: 'CigarDetail', params: { id: String(cigar.id) } }"
-            class="relative z-10 flex flex-1 flex-col gap-2.5 p-5 min-h-0 no-underline text-inherit focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400 rounded-none">
+          <div class="relative z-10 flex min-h-0 flex-1 flex-col gap-2.5 p-5">
             <h2
               class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 pr-1 line-clamp-2">
               {{ cigar.name }}
@@ -408,10 +408,11 @@
                 aria-hidden="true" />
               <span>Уже выкурена</span>
             </div>
-          </RouterLink>
+          </div>
 
           <footer
-            class="relative z-20 mt-auto flex justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+            class="relative z-20 mt-auto flex justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50"
+            @click.stop>
             <Button
               v-if="!cigar.isSmoked"
               :data-testid="`cigar-smoke-${cigar.id}`"
@@ -449,7 +450,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-  import { RouterLink, useRouter } from 'vue-router';
+  import { useRouter } from 'vue-router';
   import { useLocalStorage } from '@vueuse/core';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
@@ -729,6 +730,17 @@
     if (cigar.id != null) {
       router.push({ name: 'CigarDetail', params: { id: String(cigar.id) } });
     }
+  }
+
+  function onCigarCardClick(e: MouseEvent, cigar: Cigar): void {
+    const el = e.target as HTMLElement | null;
+    if (!el) return;
+    if (el.closest('footer')) return;
+    if (el.closest('.cigar-carousel')) {
+      if (el.closest('[data-pc-group-section="navigator"]')) return;
+      if (el.closest('[data-pc-section="indicator"]')) return;
+    }
+    viewCigar(cigar);
   }
 
   function formatPrice(price: number): string {

@@ -97,14 +97,15 @@
             humidor.description,
           ]"
           :data-testid="`humidor-card-${humidor.id}`"
-          class="humidor-card-enter group relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform] duration-300 hover:shadow-lg hover:shadow-rose-900/10 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:shadow-black/70 dark:hover:border-rose-900/30 min-h-[16rem] motion-reduce:transition-none motion-reduce:animate-none"
-          :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }">
-          <RouterLink
-            :to="{ name: 'HumidorDetail', params: { id: humidor.id } }"
-            class="absolute inset-0 z-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400"
-            :aria-label="`Открыть хьюмидор ${humidor.name}`" />
-
-          <div class="relative z-10 flex flex-1 flex-col gap-3 p-5 pointer-events-none min-h-0">
+          role="button"
+          tabindex="0"
+          :aria-label="`Хьюмидор ${humidor.name}, открыть`"
+          class="humidor-card-enter group relative flex min-h-[16rem] cursor-pointer flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,transform,border-color] duration-300 hover:border-rose-800/25 hover:shadow-lg hover:shadow-rose-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-rose-900/35 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:animate-none"
+          :style="{ animationDelay: `${Math.min(index, 8) * 48}ms` }"
+          @click="openHumidorDetail(humidor)"
+          @keydown.enter.prevent="openHumidorDetail(humidor)"
+          @keydown.space.prevent="openHumidorDetail(humidor)">
+          <div class="relative z-10 flex min-h-0 flex-1 flex-col gap-3 p-5">
             <h2
               class="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 pr-2 line-clamp-2">
               {{ humidor.name }}
@@ -132,7 +133,8 @@
           </div>
 
           <footer
-            class="relative z-20 mt-auto flex justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50">
+            class="relative z-20 mt-auto flex justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-3 py-3 dark:border-stone-700/80 dark:bg-stone-950/50"
+            @click.stop>
             <Button
               :data-testid="`humidor-edit-${humidor.id}`"
               class="min-h-11 min-w-11 touch-manipulation"
@@ -160,7 +162,7 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
-  import { RouterLink } from 'vue-router';
+  import { useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
   import { useToast } from 'primevue/usetoast';
   import humidorService from '../services/humidorService';
@@ -168,6 +170,13 @@
 
   const confirm = useConfirm();
   const toast = useToast();
+  const router = useRouter();
+
+  function openHumidorDetail(humidor: Humidor): void {
+    if (humidor.id != null) {
+      router.push({ name: 'HumidorDetail', params: { id: humidor.id } });
+    }
+  }
 
   const humidors = ref<Humidor[]>([]);
   const loading = ref(true);
