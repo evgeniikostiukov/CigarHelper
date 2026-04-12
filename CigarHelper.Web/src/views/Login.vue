@@ -125,9 +125,11 @@
             <Button
               data-testid="login-toggle-mode"
               type="button"
-              class="min-h-12 w-full touch-manipulation text-stone-700 dark:text-stone-200"
-              :label="isRegister ? 'Уже есть аккаунт? Войти' : 'Нужен аккаунт? Зарегистрироваться'"
-              text
+              class="min-h-12 w-full touch-manipulation"
+              :label="isRegister ? 'Войти' : 'Регистрация'"
+              :icon="isRegister ? 'pi pi-sign-in' : 'pi pi-user-plus'"
+              severity="secondary"
+              outlined
               @click="toggleForm" />
             <Button
               data-testid="login-home"
@@ -193,7 +195,7 @@
         if (!value) return 'Пароль обязателен';
         if (value.length < 6) return 'Минимум 6 символов';
         if (isRegister.value && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(value)) {
-          return 'Нужна строчная буква и заглавная/цифра';
+          return 'В пароле нужны строчная латинская буква и хотя бы одна заглавная буква или цифра';
         }
         break;
       case 'confirmPassword':
