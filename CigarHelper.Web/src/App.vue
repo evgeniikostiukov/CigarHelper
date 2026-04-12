@@ -19,7 +19,7 @@
             data-testid="app-nav-brand"
             class="no-underline touch-manipulation rounded-lg py-1.5 pl-1 pr-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 dark:focus-visible:outline-rose-400">
             <span
-              class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-rose-900/65 dark:text-rose-200/55">
+              class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-rose-900/65 dark:text-rose-200/55 ml-2">
               Cigar Helper
             </span>
             <span class="sr-only"> — на главную</span>
