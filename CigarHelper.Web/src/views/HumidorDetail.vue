@@ -182,11 +182,11 @@
                 header="Бренд"
                 sortable />
               <Column
-                field="size"
+                field="lengthMm"
                 header="Размер"
                 sortable>
                 <template #body="slotProps">
-                  {{ slotProps.data.size || '—' }}
+                  {{ formatVitola(slotProps.data.lengthMm, slotProps.data.diameter) || '—' }}
                 </template>
               </Column>
               <Column
@@ -314,7 +314,8 @@
                   cigar.id,
                   cigar.name,
                   cigar.strength,
-                  cigar.size,
+                  cigar.lengthMm,
+                  cigar.diameter,
                   cigar.brand?.name,
                   addingCigar === cigar.id,
                   isHumidorFull,
@@ -335,8 +336,8 @@
                       :value="getStrengthLabel(cigar.strength) || cigar.strength"
                       severity="secondary" />
                     <Tag
-                      v-if="cigar.size"
-                      :value="cigar.size"
+                      v-if="formatVitola(cigar.lengthMm, cigar.diameter)"
+                      :value="formatVitola(cigar.lengthMm, cigar.diameter)"
                       severity="info" />
                   </div>
                 </div>
@@ -382,6 +383,7 @@
   import type { Humidor } from '../services/humidorService';
   import type { Cigar } from '../services/cigarService';
   import { strengthOptions } from '../utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
 
   interface HumidorDetail extends Humidor {
     cigars: Cigar[];

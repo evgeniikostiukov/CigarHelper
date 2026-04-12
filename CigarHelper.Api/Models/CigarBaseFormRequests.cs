@@ -24,13 +24,20 @@ public class CreateCigarBaseFormRequest
     public string? Country { get; set; }
     public string? Description { get; set; }
     public string? Strength { get; set; }
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+    public int? Diameter { get; set; }
     public string? Wrapper { get; set; }
     public string? Binder { get; set; }
     public string? Filler { get; set; }
 
     /// <summary>Загружаемые файлы изображений.</summary>
     public List<NewImageUpload>? NewImages { get; set; }
+
+    /// <summary>URL изображений (http/https); скачиваются на сервере и привязываются к карточке после <see cref="NewImages"/>.</summary>
+    public List<string>? ImageUrls { get; set; }
+
+    /// <summary>Главный кадр по индексу в <see cref="ImageUrls"/> (длина может быть меньше списка URL).</summary>
+    public List<bool>? ImageUrlIsMain { get; set; }
 }
 
 /// <summary>Обновление CigarBase с загрузкой файлов (multipart/form-data).</summary>
@@ -41,7 +48,8 @@ public class UpdateCigarBaseFormRequest
     public string? Country { get; set; }
     public string? Description { get; set; }
     public string? Strength { get; set; }
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+    public int? Diameter { get; set; }
     public string? Wrapper { get; set; }
     public string? Binder { get; set; }
     public string? Filler { get; set; }

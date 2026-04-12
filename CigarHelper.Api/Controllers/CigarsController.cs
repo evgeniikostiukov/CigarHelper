@@ -1,5 +1,6 @@
 using CigarHelper.Api.Helpers;
 using CigarHelper.Api.Models;
+using CigarHelper.Api.Options;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -8,6 +9,7 @@ using CigarHelper.Data.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace CigarHelper.Api.Controllers;
@@ -19,11 +21,16 @@ public class CigarsController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IImageService _imageService;
+    private readonly ImageUploadOptions _imageUpload;
 
-    public CigarsController(AppDbContext context, IImageService imageService)
+    public CigarsController(
+        AppDbContext context,
+        IImageService imageService,
+        IOptions<ImageUploadOptions> imageUploadOptions)
     {
         _context = context;
         _imageService = imageService;
+        _imageUpload = imageUploadOptions.Value;
     }
 
     [HttpGet]
@@ -79,7 +86,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -164,7 +172,9 @@ public class CigarsController : ControllerBase
         {
             "name" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name),
             "brandname" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Brand.Name) : query.OrderBy(cb => cb.Brand.Name),
-            "size" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Size) : query.OrderBy(cb => cb.Size),
+            "size" => sortOrder?.ToLower() == "desc"
+                ? query.OrderByDescending(cb => cb.LengthMm).ThenByDescending(cb => cb.Diameter)
+                : query.OrderBy(cb => cb.LengthMm).ThenBy(cb => cb.Diameter),
             "strength" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Strength) : query.OrderBy(cb => cb.Strength),
             "country" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Country) : query.OrderBy(cb => cb.Country),
             _ => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name)
@@ -195,7 +205,8 @@ public class CigarsController : ControllerBase
                         CreatedAt = cb.Brand.CreatedAt,
                         UpdatedAt = cb.Brand.UpdatedAt
                     },
-                    Size = cb.Size,
+                    LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                     Strength = cb.Strength,
                     Country = cb.Country,
                     Description = cb.Description,
@@ -240,7 +251,8 @@ public class CigarsController : ControllerBase
                         CreatedAt = cb.Brand.CreatedAt,
                         UpdatedAt = cb.Brand.UpdatedAt
                     },
-                    Size = cb.Size,
+                    LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                     Strength = cb.Strength,
                     Country = cb.Country,
                     Description = cb.Description,
@@ -328,10 +340,12 @@ public class CigarsController : ControllerBase
 
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+        // Любая существующая запись справочника: пользователь может добавить в коллекцию и немодерированную карточку,
+        // если она доступна ему в каталоге (фильтрация — на выдаче /bases/paginated).
         var cigarBaseExists = await _context.CigarBases
-            .AnyAsync(cb => cb.Id == request.CigarBaseId && cb.IsModerated, cancellationToken);
+            .AnyAsync(cb => cb.Id == request.CigarBaseId, cancellationToken);
         if (!cigarBaseExists)
-            return BadRequest("Сигара не найдена в справочнике или не прошла модерацию.");
+            return BadRequest("Сигара не найдена в справочнике.");
 
         // Создаем сигару пользователя
         var userCigar = new UserCigar
@@ -591,17 +605,26 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPost("bases")]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase([FromForm] CreateCigarBaseFormRequest request)
+    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase(
+        [FromForm] CreateCigarBaseFormRequest request,
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        var isStaff = User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator));
 
         // Проверяем существование бренда
         var brand = await _context.Brands.FindAsync(request.BrandId);
         if (brand == null)
         {
             return BadRequest($"Бренд с ID {request.BrandId} не найден");
+        }
+
+        // Обычные пользователи привязывают карточку только к промодерированному бренду (список — GET .../cigars/brands).
+        if (!isStaff && !brand.IsModerated)
+        {
+            return BadRequest("Выберите бренд из промодерированного списка.");
         }
 
         // Проверяем, не существует ли уже сигара с таким названием и брендом
@@ -621,11 +644,12 @@ public class CigarsController : ControllerBase
             Country = request.Country,
             Description = request.Description,
             Strength = request.Strength,
-            Size = request.Size,
+            LengthMm = request.LengthMm,
+            Diameter = request.Diameter,
             Wrapper = request.Wrapper,
             Binder = request.Binder,
             Filler = request.Filler,
-            IsModerated = User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator)),
+            IsModerated = isStaff,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -653,6 +677,15 @@ public class CigarsController : ControllerBase
             }
         }
 
+        if (request.ImageUrls is { Count: > 0 })
+        {
+            await AppendCigarBaseImagesFromUrlsAsync(
+                cigarBase.Id,
+                request.ImageUrls,
+                request.ImageUrlIsMain,
+                cancellationToken);
+        }
+
         // Возвращаем созданную сигару с данными
         var createdCigar = await _context.CigarBases
             .Include(cb => cb.Brand)
@@ -674,7 +707,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -726,7 +760,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -795,7 +830,8 @@ public class CigarsController : ControllerBase
         cigarBase.Country = request.Country;
         cigarBase.Description = request.Description;
         cigarBase.Strength = request.Strength;
-        cigarBase.Size = request.Size;
+        cigarBase.LengthMm = request.LengthMm;
+        cigarBase.Diameter = request.Diameter;
         cigarBase.Wrapper = request.Wrapper;
         cigarBase.Binder = request.Binder;
         cigarBase.Filler = request.Filler;
@@ -869,7 +905,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -916,7 +953,8 @@ public class CigarsController : ControllerBase
                 LogoBytes = uc.CigarBase.Brand.LogoBytes,
             },
             BrandName = uc.CigarBase.Brand.Name,
-            Size = uc.CigarBase.Size,
+            LengthMm = uc.CigarBase.LengthMm,
+            Diameter = uc.CigarBase.Diameter,
             Strength = uc.CigarBase.Strength,
             Price = uc.Price,
             Rating = uc.Rating,
@@ -1058,6 +1096,58 @@ public class CigarsController : ControllerBase
         }
 
         return "image/jpeg"; // По умолчанию
+    }
+
+    private async Task AppendCigarBaseImagesFromUrlsAsync(
+        int cigarBaseId,
+        IReadOnlyList<string> urls,
+        IReadOnlyList<bool>? imageUrlIsMain,
+        CancellationToken cancellationToken)
+    {
+        var hasMain = await _context.CigarImages.AsNoTracking()
+            .AnyAsync(i => i.CigarBaseId == cigarBaseId && i.IsMain, cancellationToken);
+
+        for (var i = 0; i < urls.Count; i++)
+        {
+            var raw = urls[i];
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+
+            var url = raw.Trim();
+            var imageBytes = await ImageDownloader.DownloadImageAsync(url);
+            if (imageBytes == null || imageBytes.Length == 0)
+                continue;
+
+            var contentType = GetContentTypeFromUrl(url);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = ImageBinaryValidator.SuggestContentType(imageBytes);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = "image/jpeg";
+
+            if (!ImageBinaryValidator.TryValidate(
+                    imageBytes,
+                    contentType,
+                    imageBytes.Length,
+                    _imageUpload.MaxBytes,
+                    out _))
+                continue;
+
+            var explicitMain = imageUrlIsMain != null && i < imageUrlIsMain.Count && imageUrlIsMain[i];
+            var setMain = explicitMain || !hasMain;
+
+            await _imageService.SaveImageAsync(
+                imageData: imageBytes,
+                contentType: contentType,
+                fileName: GetFileNameFromUrl(url),
+                description: null,
+                isMain: setMain,
+                cigarBaseId: cigarBaseId,
+                userCigarId: null,
+                ct: cancellationToken);
+
+            if (setMain)
+                hasMain = true;
+        }
     }
 
     private static async Task<byte[]> ReadFormFileAsync(IFormFile file)

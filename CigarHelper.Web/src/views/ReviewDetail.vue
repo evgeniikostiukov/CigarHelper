@@ -322,6 +322,7 @@
   import authService from '../services/authService';
   import DOMPurify from 'dompurify';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import { getAuthUserId } from '@/utils/roles';
 
   const route = useRoute();
   const router = useRouter();
@@ -334,8 +335,8 @@
 
   const isCurrentUserReview = computed(() => {
     if (!review.value) return false;
-    const currentUser = authService.state.user;
-    return Boolean(currentUser && currentUser.id === review.value.userId);
+    const uid = getAuthUserId(authService.state.user);
+    return uid !== null && uid === review.value.userId;
   });
 
   const sanitizedContent = computed(() => {

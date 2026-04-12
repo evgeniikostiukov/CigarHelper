@@ -839,7 +839,10 @@ export interface paths {
             Country?: string;
             Description?: string;
             Strength?: string;
-            Size?: string;
+            /** Format: int32 */
+            LengthMm?: number | null;
+            /** Format: int32 */
+            Diameter?: number | null;
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
@@ -1132,7 +1135,10 @@ export interface paths {
             Country?: string;
             Description?: string;
             Strength?: string;
-            Size?: string;
+            /** Format: int32 */
+            LengthMm?: number | null;
+            /** Format: int32 */
+            Diameter?: number | null;
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
@@ -1841,10 +1847,8 @@ export interface paths {
         query?: {
           /** @description Фильтр по пользователю (опционально) */
           userId?: number;
-          /** @description Фильтр по каталожной сигаре (CigarBase) */
-          cigarBaseId?: number;
-          /** @description Фильтр по записи коллекции (UserCigar) */
-          userCigarId?: number;
+          /** @description Фильтр по сигаре (опционально) */
+          cigarId?: number;
         };
         header?: never;
         path?: never;
@@ -2185,7 +2189,10 @@ export interface components {
       id?: number;
       name?: string | null;
       brand?: components['schemas']['BrandDto'];
-      size?: string | null;
+      /** Format: int32 */
+      lengthMm?: number | null;
+      /** Format: int32 */
+      diameter?: number | null;
       strength?: string | null;
       country?: string | null;
       description?: string | null;
@@ -2215,7 +2222,10 @@ export interface components {
       name?: string | null;
       brand?: components['schemas']['BrandDto'];
       brandName?: string | null;
-      size?: string | null;
+      /** Format: int32 */
+      lengthMm?: number | null;
+      /** Format: int32 */
+      diameter?: number | null;
       strength?: string | null;
       /** Format: double */
       price?: number | null;
@@ -2246,7 +2256,10 @@ export interface components {
       name?: string | null;
       brand?: components['schemas']['BrandDto'];
       brandName?: string | null;
-      size?: string | null;
+      /** Format: int32 */
+      lengthMm?: number | null;
+      /** Format: int32 */
+      diameter?: number | null;
       strength?: string | null;
       /** Format: double */
       price?: number | null;
@@ -2334,9 +2347,7 @@ export interface components {
       /** Format: int32 */
       rating: number;
       /** Format: int32 */
-      cigarBaseId: number;
-      /** Format: int32 */
-      userCigarId?: number | null;
+      cigarId: number;
       smokingExperience?: string | null;
       aroma?: string | null;
       taste?: string | null;
@@ -2507,10 +2518,9 @@ export interface components {
     };
     RegisterRequest: {
       username: string;
-      /** Format: email */
-      email: string;
       password: string;
       confirmPassword: string;
+      confirmedAge18: boolean;
     };
     ReviewDto: {
       /** Format: int32 */
@@ -2524,9 +2534,7 @@ export interface components {
       username?: string | null;
       userAvatarUrl?: string | null;
       /** Format: int32 */
-      cigarBaseId?: number;
-      /** Format: int32 */
-      userCigarId?: number | null;
+      cigarId?: number;
       cigarName?: string | null;
       cigarBrand?: string | null;
       images?: components['schemas']['ReviewImageDto'][] | null;
@@ -2566,8 +2574,6 @@ export interface components {
       username?: string | null;
       cigarName?: string | null;
       cigarBrand?: string | null;
-      /** Format: int32 */
-      cigarBaseId?: number;
       /** Format: byte */
       mainImageBytes?: string | null;
       /** Format: int32 */

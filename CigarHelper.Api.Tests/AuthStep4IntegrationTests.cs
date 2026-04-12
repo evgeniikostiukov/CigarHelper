@@ -58,7 +58,8 @@ public class AuthStep4IntegrationTests
             {
                 Username = $"rl{i}",
                 Password = "abCd12",
-                ConfirmPassword = "abCd12"
+                ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
             });
             Assert.NotEqual(HttpStatusCode.TooManyRequests, response.StatusCode);
         }
@@ -67,9 +68,27 @@ public class AuthStep4IntegrationTests
         {
             Username = "rlExtra",
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         Assert.Equal(HttpStatusCode.TooManyRequests, limited.StatusCode);
+    }
+
+    [Fact]
+    public async Task Register_WithoutAgeConfirmation_Returns400()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        using var res = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = "noage18",
+            Password = "abCd12",
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = false
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
     [Fact]
@@ -133,7 +152,8 @@ public class AuthStep4IntegrationTests
         {
             Username = "expchk",
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
 
         res.EnsureSuccessStatusCode();
@@ -164,7 +184,8 @@ public class AuthStep4IntegrationTests
         {
             Username = "refreshme",
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         reg.EnsureSuccessStatusCode();
         var auth = await reg.Content.ReadFromJsonAsync<AuthResponse>(AuthResponseJsonOptions);

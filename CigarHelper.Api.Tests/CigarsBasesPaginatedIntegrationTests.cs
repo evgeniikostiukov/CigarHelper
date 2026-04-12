@@ -66,7 +66,8 @@ public class CigarsBasesPaginatedIntegrationTests
         {
             Username = $"u{Guid.NewGuid():N}"[..12],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -123,7 +124,8 @@ public class CigarsBasesPaginatedIntegrationTests
         {
             Username = $"v{Guid.NewGuid():N}"[..11],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -197,7 +199,8 @@ public class CigarsBasesPaginatedIntegrationTests
         {
             Username = $"ni{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -254,7 +257,8 @@ public class CigarsBasesPaginatedIntegrationTests
         {
             Username = $"um{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);

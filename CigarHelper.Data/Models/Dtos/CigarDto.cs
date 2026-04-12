@@ -8,7 +8,9 @@ public class CigarBriefDto
     public string Name { get; set; } = string.Empty;
     public BrandDto Brand { get; set; }
     public string BrandName { get; set; } = string.Empty;
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+
+    public int? Diameter { get; set; }
     public string? Strength { get; set; }
     public decimal? Price { get; set; }
     public int? Rating { get; set; }
@@ -24,7 +26,9 @@ public class CigarBaseDto
     /// <summary>Промодерирована ли запись справочника CigarBase (не путать с BrandDto.IsModerated).</summary>
     public bool IsModerated { get; set; }
     public BrandDto Brand { get; set; } = new BrandDto();
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+
+    public int? Diameter { get; set; }
     public string? Strength { get; set; }
     public string? Country { get; set; }
     public string? Description { get; set; }
@@ -119,7 +123,9 @@ public class CreateCigarBaseRequest
 
     public string? Strength { get; set; }
 
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+
+    public int? Diameter { get; set; }
 
     public string? Wrapper { get; set; }
 
@@ -144,7 +150,9 @@ public class UpdateCigarBaseRequest
 
     public string? Strength { get; set; }
 
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+
+    public int? Diameter { get; set; }
 
     public string? Wrapper { get; set; }
 

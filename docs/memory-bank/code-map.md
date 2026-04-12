@@ -15,7 +15,7 @@
 | `AdminCigarImagesController` | `GET /api/admin/cigar-images` — пагинированный список всех `CigarImages` (только роль Admin) |
 | `PublicUsersController` | Публичные данные пользователей |
 | `BrandsController` | Бренды: `GET` — любой JWT; `POST` / `PUT` / `DELETE` — только **Admin**, **Moderator** |
-| `CigarsController` | Каталог / сигары; чтение баз (`GET .../bases`, `.../paginated`, `.../bases/{id}`, `.../brands`) — любой JWT; **`POST`/`PUT` справочника** (`.../bases`, `.../bases/{id}`) — только **Admin**, **Moderator**; `unmoderatedOnly=true` только для staff; коллекция `UserCigar` без изменений; `CigarResponseDto.Images` — merged: UserCigar + CigarBase (`LoadMergedUserCigarGalleriesAsync`) |
+| `CigarsController` | Каталог / сигары; чтение баз (`GET .../bases`, `.../paginated`, `.../bases/{id}`, `.../brands`) — любой JWT; **`POST .../bases`** — любой JWT: карточка `IsModerated` только у **Admin**/**Moderator**; обычный пользователь может создать запись с **промодерированным** брендом (`GET .../brands`); **`PUT .../bases/{id}`** — только **Admin**, **Moderator**; `unmoderatedOnly=true` только для staff; **`POST /api/cigars`** — коллекция по любому существующему `CigarBaseId`; `CigarResponseDto.Images` — merged (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Обзоры: `POST` с `cigarBaseId` и опционально `userCigarId` (запись коллекции); `GET` списка — `cigarBaseId` / `userCigarId` / `userId` |
 | `CigarCommentsController` | Комментарии к `CigarBase` и к чужим `UserCigar` в публичной коллекции: `GET/POST/DELETE api/cigarcomments` (публичный список только **одобренные**; у обычных пользователей новые — **на модерации**) |

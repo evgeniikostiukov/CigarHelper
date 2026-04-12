@@ -183,7 +183,7 @@
                     Размер
                   </span>
                   <p class="mt-1 text-stone-800 dark:text-stone-200">
-                    {{ cigar.size || '—' }}
+                    {{ formatVitola(cigar.lengthMm, cigar.diameter) || '—' }}
                   </p>
                 </div>
                 <div>
@@ -450,6 +450,7 @@
   import type { Cigar } from '../services/cigarService';
   import type { Humidor } from '../services/humidorService';
   import { strengthOptions } from '../utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
   import { cigarImageInlineDataSrc, orderUserCigarGalleryImages } from '../utils/cigarImageDisplay';
 
   const route = useRoute();

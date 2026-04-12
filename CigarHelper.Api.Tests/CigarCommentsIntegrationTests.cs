@@ -102,7 +102,8 @@ public class CigarCommentsIntegrationTests
         {
             Username = $"cu{Guid.NewGuid():N}"[..11],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -258,7 +259,8 @@ public class CigarCommentsIntegrationTests
         {
             Username = ownerUsername,
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         ownerReg.EnsureSuccessStatusCode();
         var ownerAuth = await ownerReg.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -306,7 +308,8 @@ public class CigarCommentsIntegrationTests
         {
             Username = $"vi{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         visitorReg.EnsureSuccessStatusCode();
         var visitorAuth = await visitorReg.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);

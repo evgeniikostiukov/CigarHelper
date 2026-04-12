@@ -27,8 +27,11 @@ public class CigarBase
     [MaxLength(50)]
     public string? Strength { get; set; }
     
-    [MaxLength(50)]
-    public string? Size { get; set; }
+    /// <summary>Длина, мм (первая часть записи «AAA × BB»).</summary>
+    public int? LengthMm { get; set; }
+
+    /// <summary>Второе число в формате «длина × кольцо» (кольцо RG).</summary>
+    public int? Diameter { get; set; }
     
     [MaxLength(100)]
     public string? Wrapper { get; set; }

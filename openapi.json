@@ -974,8 +974,15 @@
                   "Strength": {
                     "type": "string"
                   },
-                  "Size": {
-                    "type": "string"
+                  "LengthMm": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
+                  },
+                  "Diameter": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
                   },
                   "Wrapper": {
                     "type": "string"
@@ -1011,7 +1018,10 @@
                 "Strength": {
                   "style": "form"
                 },
-                "Size": {
+                "LengthMm": {
+                  "style": "form"
+                },
+                "Diameter": {
                   "style": "form"
                 },
                 "Wrapper": {
@@ -1444,8 +1454,15 @@
                   "Strength": {
                     "type": "string"
                   },
-                  "Size": {
-                    "type": "string"
+                  "LengthMm": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
+                  },
+                  "Diameter": {
+                    "type": "integer",
+                    "format": "int32",
+                    "nullable": true
                   },
                   "Wrapper": {
                     "type": "string"
@@ -1496,7 +1513,10 @@
                 "Strength": {
                   "style": "form"
                 },
-                "Size": {
+                "LengthMm": {
+                  "style": "form"
+                },
+                "Diameter": {
                   "style": "form"
                 },
                 "Wrapper": {
@@ -2729,8 +2749,14 @@
           "brand": {
             "$ref": "#/components/schemas/BrandDto"
           },
-          "size": {
-            "type": "string",
+          "lengthMm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "diameter": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "strength": {
@@ -2823,8 +2849,14 @@
             "type": "string",
             "nullable": true
           },
-          "size": {
-            "type": "string",
+          "lengthMm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "diameter": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "strength": {
@@ -2913,8 +2945,14 @@
             "type": "string",
             "nullable": true
           },
-          "size": {
-            "type": "string",
+          "lengthMm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "diameter": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "strength": {
@@ -3762,7 +3800,7 @@
       "RegisterRequest": {
         "required": [
           "confirmPassword",
-          "email",
+          "confirmedAge18",
           "password",
           "username"
         ],
@@ -3774,12 +3812,6 @@
             "pattern": "^[a-zA-Z0-9_-]+$",
             "type": "string"
           },
-          "email": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "format": "email"
-          },
           "password": {
             "maxLength": 100,
             "minLength": 6,
@@ -3789,6 +3821,9 @@
           "confirmPassword": {
             "minLength": 1,
             "type": "string"
+          },
+          "confirmedAge18": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

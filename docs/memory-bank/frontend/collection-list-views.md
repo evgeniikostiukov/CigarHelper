@@ -164,15 +164,15 @@
 
 ## CigarForm.vue
 
-Только **добавление в коллекцию из модерированного справочника** (`CigarNew`). Оболочка: `cigar-form-root`, grain, подпись «Справочник → коллекция», `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`** (`cigar-form-save-error`). API: `POST /api/cigars` с телом `CreateUserCigarPayload` (`cigarBaseId`, опционально цена, **количество** `quantity` — по умолчанию на сервере 1, хьюмидор, вкус/аромат, URL фото).
+**Добавление в коллекцию** (`CigarNew`): выбор из `AutoComplete` (группы брендов) или **новая карточка справочника** — кнопка в **footer** оверлея при **пустой строке поиска** (`cigar-form-add-new-footer`), либо в **empty** при нуле результатов и непустом запросе (`cigar-form-add-new-empty`). Диалог (`cigar-form-new-base-dialog`): поля как у создания базовой сигары (Name, BrandId, Country, Size, Strength, Wrapper, Binder, Filler, Description до 500, NewImages файлы — `hideUrlEntry` в **`FormImageGallerySection`**); `POST /api/cigars/bases`, затем выбор подставляется в форму; коллекция — `POST /api/cigars`. Бренды: `getAllBrands()`. Оболочка: `cigar-form-root`, grain, `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`**.
 
 | Пункт | Значение |
 |-------|----------|
 | Файл | `src/views/CigarForm.vue` |
-| Данные | Хьюмидоры: `humidorService.getHumidors()`; поиск/выбор сигары — `getCigarBasesPaginated` + debounce 300 ms; префилл по `?cigarBaseId=` — `getCigarBase(id)` |
-| Маршруты | `CigarNew`; успех / отмена / «К списку» → `CigarList` |
-| UI | `AutoComplete` с группировкой по бренду; бренд только для чтения после выбора; поля: название (только из подсказок), цена, **количество** (`InputNumber` 1–9999), оценка (`Rating`), вкус, аромат; фото — **`FormImageGallerySection`** (ссылки + файлы, превью слева); чекбокс **«Добавить в хьюмидор»** — при включении доступен `Select` хьюмидора |
-| `data-testid` | `cigar-form`, `cigar-form-back`, `cigar-form-save-error`, `cigar-form-fields`, `cigar-form-name`, `cigar-form-brand`, `cigar-form-price`, `cigar-form-quantity`, `cigar-form-rating`, `cigar-form-taste`, `cigar-form-aroma`, `cigar-form-image-preview`, `cigar-form-image-gallery`, `cigar-form-image-urls`, `cigar-form-image-url`, `cigar-form-add-image-url`, `cigar-form-apply-image-gallery`, `cigar-form-add-to-humidor`, `cigar-form-humidor`, `cigar-form-cancel`, `cigar-form-submit` |
+| Данные | Хьюмидоры: `humidorService.getHumidors()`; поиск: `getCigarBasesPaginated` + debounce; бренды для диалога — по открытию; префилл `?cigarBaseId=` — `getCigarBase(id)` |
+| Маршруты | `CigarNew`; успех → `CigarList` |
+| UI | `AutoComplete` + footer/empty; диалог полей карточки; цена, количество, оценка, вкус, аромат; **`FormImageGallerySection`**; хьюмидор |
+| `data-testid` | `cigar-form-add-new-footer`, `cigar-form-add-new-empty`, `cigar-form-new-base-dialog`, `cigar-form-dialog-*`, плюс `cigar-form`, `cigar-form-name`, `cigar-form-brand`, … |
 | Scoped классы | `cigar-form-root`, `cigar-form-grain`, `cigar-form-enter`, `prefers-reduced-motion` |
 
 ## CigarCollectionEdit.vue

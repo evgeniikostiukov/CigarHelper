@@ -117,7 +117,7 @@
                   <label
                     for="onboarding-humidor-capacity"
                     class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                    Вместимость (сигар) <span class="text-red-600 dark:text-red-400">*</span>
+                    Вместимость (опционально)
                   </label>
                   <InputNumber
                     id="onboarding-humidor-capacity"
@@ -214,14 +214,14 @@
                       Вместимость: {{ createdHumidor.capacity }} сигар
                     </p>
                   </div>
-                  <Button
+                  <!-- <Button
                     data-testid="onboarding-open-humidor"
                     class="min-h-11 touch-manipulation"
                     severity="secondary"
                     outlined
                     icon="pi pi-external-link"
                     label="Открыть"
-                    @click="router.push({ name: 'HumidorDetail', params: { id: String(createdHumidor.id) } })" />
+                    @click="router.push({ name: 'HumidorDetail', params: { id: String(createdHumidor.id) } })" /> -->
                 </div>
               </div>
 
@@ -307,9 +307,9 @@
                       <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
                         {{ cigar.brand?.name }}
                         <span
-                          v-if="cigar.size"
+                          v-if="formatVitola(cigar.lengthMm, cigar.diameter)"
                           class="text-stone-500 dark:text-stone-500"
-                          >· {{ cigar.size }}</span
+                          >· {{ formatVitola(cigar.lengthMm, cigar.diameter) }}</span
                         >
                       </p>
                     </div>
@@ -407,6 +407,7 @@
   import type { Humidor } from '@/services/humidorService';
   import type { CigarBase } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
 
   const router = useRouter();
   const toast = useToast();

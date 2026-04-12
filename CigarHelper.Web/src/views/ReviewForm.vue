@@ -114,6 +114,11 @@
             </h2>
             <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">
               Сигара, заголовок и общая оценка — обязательны для публикации.
+              <span
+                v-if="isEditing"
+                class="mt-1 block text-stone-500 dark:text-stone-500">
+                При редактировании сигару сменить нельзя — она привязана к обзору.
+              </span>
             </p>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div class="flex flex-col gap-2 md:col-span-2">
@@ -139,6 +144,7 @@
                   option-group-label="brand"
                   option-group-children="cigars"
                   :dropdown="true"
+                  :disabled="isEditing"
                   :virtual-scroller-options="{ itemSize: 50 }"
                   @complete="searchCigars"
                   @option-select="handleCigarSelect">
@@ -153,9 +159,9 @@
                         <div class="font-semibold text-stone-900 dark:text-stone-100">{{ slotProps.option.name }}</div>
                         <div class="text-xs text-stone-500 dark:text-stone-400">
                           <span
-                            v-if="slotProps.option.size"
+                            v-if="slotProps.option.vitolaLabel"
                             class="mr-2"
-                            >{{ slotProps.option.size }}</span
+                            >{{ slotProps.option.vitolaLabel }}</span
                           >
                           <span v-if="slotProps.option.strength">{{
                             getStrengthLabel(slotProps.option.strength)
@@ -183,6 +189,11 @@
                   class="text-sm text-red-600 dark:text-red-400">
                   {{ validationErrors.cigarBaseId }}
                 </small>
+                <p
+                  v-if="isEditing"
+                  class="text-xs text-stone-500 dark:text-stone-400">
+                  Сигару при редактировании сменить нельзя — так устроен сервер.
+                </p>
               </div>
 
               <div class="flex flex-col gap-2 md:col-span-2">
@@ -416,7 +427,11 @@
               severity="secondary"
               outlined
               type="button"
-              @click="router.push({ name: 'ReviewList' })" />
+              @click="
+                isEditing && route.params.id
+                  ? router.push({ name: 'ReviewDetail', params: { id: String(route.params.id) } })
+                  : router.push({ name: 'ReviewList' })
+              " />
             <Button
               data-testid="review-form-submit"
               class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
@@ -432,7 +447,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, computed, watch, onMounted } from 'vue';
+  import { ref, reactive, computed, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import api from '../services/api';
   import TextEditor from '../components/TextEditor.vue';
@@ -449,6 +464,9 @@
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
   import type { Brand } from '@/services/cigarService';
+  import { useAuth } from '@/services/useAuth';
+  import { getAuthUserId } from '@/utils/roles';
+  import { formatVitola } from '@/utils/vitola';
 
   /** Единый вариант выбора: каталог (CigarBase) или запись коллекции (UserCigar + CigarBaseId). */
   interface ReviewCigarOption {
@@ -458,7 +476,7 @@
     displayName: string;
     name: string;
     brand: Brand;
-    size?: string | null;
+    vitolaLabel?: string | null;
     strength?: string | null;
     country?: string | null;
   }
@@ -497,6 +515,7 @@
   }
 
   interface ReviewResponse {
+    userId: number;
     cigarBaseId: number;
     userCigarId?: number | null;
     cigarName: string;
@@ -518,9 +537,10 @@
   const route = useRoute();
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
 
-  const isEditing = computed(() => Boolean(route.params.id));
-  const loading = ref(Boolean(route.params.id));
+  const isEditing = computed(() => route.name === 'ReviewEdit');
+  const loading = ref(false);
   const error = ref<string | null>(null);
   const saveError = ref<string | null>(null);
   const saving = ref(false);
@@ -529,22 +549,33 @@
   const selectedCigar = ref<ReviewCigarOption | null>(null);
   const searchLoading = ref(false);
 
-  const form = reactive<ReviewFormModel>({
-    cigarBaseId: null,
-    userCigarId: null,
-    title: '',
-    rating: 5,
-    content: '',
-    smokingExperience: '',
-    aroma: '',
-    taste: '',
-    construction: 3,
-    burnQuality: 3,
-    draw: 3,
-    venue: '',
-    smokingDate: new Date(),
-    images: [],
-  });
+  function createEmptyForm(): ReviewFormModel {
+    return {
+      cigarBaseId: null,
+      userCigarId: null,
+      title: '',
+      rating: 5,
+      content: '',
+      smokingExperience: '',
+      aroma: '',
+      taste: '',
+      construction: 3,
+      burnQuality: 3,
+      draw: 3,
+      venue: '',
+      smokingDate: new Date(),
+      images: [],
+    };
+  }
+
+  const form = reactive<ReviewFormModel>(createEmptyForm());
+
+  function resetFormForCreate(): void {
+    Object.assign(form, createEmptyForm());
+    selectedCigar.value = null;
+    filteredCigars.value = [];
+    Object.keys(validationErrors).forEach((key) => delete validationErrors[key]);
+  }
 
   const handleQueryParameters = (): void => {
     const query = route.query;
@@ -555,6 +586,11 @@
         return;
       }
       const brandName = (query.brandName as string) || 'Неизвестный бренд';
+
+      const qLen = query.lengthMm != null ? Number(query.lengthMm) : NaN;
+      const qDia = query.diameter != null ? Number(query.diameter) : NaN;
+      const fromDims = Number.isFinite(qLen) && Number.isFinite(qDia) ? formatVitola(qLen, qDia) : '';
+      const vitolaFromQuery = fromDims || (query.vitola as string) || (query.size as string) || '';
 
       const tempCigar: ReviewCigarOption = {
         cigarBaseId,
@@ -568,7 +604,7 @@
           createdAt: new Date().toISOString(),
         },
         country: (query.country as string) || '',
-        size: (query.size as string) || '',
+        vitolaLabel: vitolaFromQuery,
         strength: (query.strength as string) || '',
         displayName: `${brandName} ${query.cigarName as string}`,
       };
@@ -581,7 +617,7 @@
       let cigarInfo = `**Сигара:** ${query.cigarName as string}\n`;
       if (query.brandName) cigarInfo += `**Бренд:** ${query.brandName as string}\n`;
       if (query.country) cigarInfo += `**Страна:** ${query.country as string}\n`;
-      if (query.size) cigarInfo += `**Размер:** ${query.size as string}\n`;
+      if (vitolaFromQuery) cigarInfo += `**Размер:** ${vitolaFromQuery}\n`;
       if (query.strength) cigarInfo += `**Крепость:** ${getStrengthLabel(query.strength as string)}\n`;
       if (query.description) cigarInfo += `**Описание:** ${query.description as string}\n`;
       if (query.wrapper) cigarInfo += `**Покровный лист:** ${query.wrapper as string}\n`;
@@ -600,6 +636,16 @@
     try {
       const { data: review } = await api.get<ReviewResponse>(`/reviews/${id}`);
 
+      if (route.name !== 'ReviewEdit' || route.params.id !== id) {
+        return;
+      }
+
+      const currentUserId = getAuthUserId(user.value);
+      if (currentUserId == null || review.userId !== currentUserId) {
+        error.value = 'Вы можете редактировать только свои обзоры.';
+        return;
+      }
+
       const cigarBrandName = review.cigarBrand || 'Неизвестный бренд';
       const cigarData: ReviewCigarOption = {
         cigarBaseId: review.cigarBaseId,
@@ -613,7 +659,7 @@
           createdAt: new Date().toISOString(),
         },
         country: null,
-        size: null,
+        vitolaLabel: null,
         strength: null,
         displayName: `${cigarBrandName} ${review.cigarName || 'Неизвестная сигара'}`,
       };
@@ -743,7 +789,7 @@
         smokingDate: form.smokingDate ? form.smokingDate.toISOString() : null,
       };
 
-      if (isEditing.value && route.params.id) {
+      if (isEditing.value && route.name === 'ReviewEdit' && route.params.id) {
         const reviewId = route.params.id as string;
 
         const keptImageIds = form.images
@@ -811,7 +857,7 @@
           displayName: `${cigar.name} (${cigar.brand.name})`,
           name: cigar.name,
           brand: cigar.brand,
-          size: cigar.size,
+          vitolaLabel: formatVitola(cigar.lengthMm, cigar.diameter),
           strength: cigar.strength,
           country: cigar.country,
         });
@@ -828,7 +874,7 @@
           displayName: `${cigarBase.name} (${cigarBase.brand.name})`,
           name: cigarBase.name,
           brand: cigarBase.brand,
-          size: cigarBase.size,
+          vitolaLabel: formatVitola(cigarBase.lengthMm, cigarBase.diameter),
           strength: cigarBase.strength,
           country: cigarBase.country,
         });
@@ -892,15 +938,21 @@
     },
   );
 
-  onMounted(async () => {
-    const reviewId = route.params.id as string | undefined;
-    if (reviewId) {
-      await fetchReview(reviewId);
-    } else {
-      loading.value = false;
-      handleQueryParameters();
-    }
-  });
+  watch(
+    () => ({ name: route.name, id: route.params.id as string | undefined }),
+    async ({ name, id }) => {
+      if (name === 'ReviewEdit' && id) {
+        await fetchReview(id);
+      } else if (name === 'ReviewCreate') {
+        loading.value = false;
+        error.value = null;
+        saveError.value = null;
+        resetFormForCreate();
+        handleQueryParameters();
+      }
+    },
+    { immediate: true },
+  );
 </script>
 
 <style scoped>

@@ -163,11 +163,11 @@
                 header="Бренд"
                 sortable />
               <Column
-                field="size"
+                field="lengthMm"
                 header="Размер"
                 sortable>
                 <template #body="slotProps">
-                  {{ slotProps.data.size || '—' }}
+                  {{ formatVitola(slotProps.data.lengthMm, slotProps.data.diameter) || '—' }}
                 </template>
               </Column>
               <Column
@@ -248,6 +248,7 @@
   import type { Humidor } from '@/services/humidorService';
   import type { Cigar } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
 
   interface PublicHumidorView extends Humidor {
     cigars: Cigar[];

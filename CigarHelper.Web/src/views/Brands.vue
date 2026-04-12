@@ -39,12 +39,15 @@
         <Skeleton
           class="h-24 rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
           data-testid="brands-skeleton-filters" />
-        <Skeleton
-          v-for="n in 5"
-          :key="n"
-          class="rounded-xl border border-stone-200/80 dark:border-stone-700/80"
-          height="3rem"
-          data-testid="brands-skeleton-row" />
+        <div
+          class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          aria-hidden="true">
+          <Skeleton
+            v-for="n in 6"
+            :key="n"
+            class="min-h-[10rem] rounded-2xl border border-stone-200/80 dark:border-stone-700/80"
+            data-testid="brands-skeleton-card" />
+        </div>
       </div>
 
       <div
@@ -129,7 +132,9 @@
                 show-clear
                 @update:model-value="applyFilters" />
             </div>
-            <div class="min-w-[min(100%,12rem)] flex-1 sm:flex-initial">
+            <div
+              v-if="canMutateCatalog"
+              class="min-w-[min(100%,12rem)] flex-1 sm:flex-initial">
               <label
                 for="brands-status"
                 class="mb-1.5 block text-xs font-medium text-stone-600 dark:text-stone-400">
@@ -151,157 +156,131 @@
           </div>
         </div>
 
-        <DataTable
-          :value="filteredBrands"
-          data-testid="brands-table"
-          striped-rows
-          show-grid-lines
-          responsive-layout="scroll"
-          paginator
-          :rows="10"
-          :rows-per-page-options="[10, 25, 50]"
-          class="brands-datatable text-sm"
-          :pt="{ root: { class: 'border-0' } }">
-          <template #empty>
-            <div
-              class="flex flex-col items-center gap-4 py-10 text-center"
-              data-testid="brands-filter-empty">
-              <p class="text-stone-600 dark:text-stone-400">Ничего не найдено по текущим фильтрам.</p>
-              <Button
-                data-testid="brands-filter-reset"
-                class="min-h-11 touch-manipulation"
-                label="Сбросить фильтры"
-                icon="pi pi-filter-slash"
-                severity="secondary"
-                outlined
-                @click="clearFilters" />
-            </div>
-          </template>
+        <div
+          v-if="orderedFilteredBrands.length === 0"
+          class="flex flex-col items-center gap-4 py-10 text-center"
+          data-testid="brands-filter-empty">
+          <p class="text-stone-600 dark:text-stone-400">Ничего не найдено по текущим фильтрам.</p>
+          <Button
+            data-testid="brands-filter-reset"
+            class="min-h-11 touch-manipulation"
+            label="Сбросить фильтры"
+            icon="pi pi-filter-slash"
+            severity="secondary"
+            outlined
+            @click="clearFilters" />
+        </div>
 
-          <Column
-            field="name"
-            header="Название"
-            sortable>
-            <template #body="{ data }">
-              <div class="flex min-w-0 items-center gap-3">
+        <template v-else>
+          <div
+            class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+            data-testid="brands-grid">
+            <article
+              v-for="(brand, index) in paginatedBrands"
+              :key="brand.id"
+              :data-testid="`brands-card-${brand.id}`"
+              role="button"
+              tabindex="0"
+              :aria-label="`Бренд ${brand.name}, открыть подробности`"
+              class="brand-card-enter relative flex min-h-[10rem] flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,border-color] duration-200 hover:border-rose-800/25 hover:shadow-lg hover:shadow-rose-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-rose-900/35 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:hover:shadow-md cursor-pointer motion-reduce:animate-none"
+              :style="{ animationDelay: `${Math.min(index, 8) * 40}ms` }"
+              @click="viewBrand(brand)"
+              @keydown.enter.prevent="viewBrand(brand)"
+              @keydown.space.prevent="viewBrand(brand)">
+              <div class="flex flex-1 gap-4 p-4">
                 <div
-                  v-if="data.logoUrl"
-                  class="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+                  class="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-stone-100 ring-1 ring-stone-200/80 dark:bg-stone-800 dark:ring-stone-600/60 sm:h-24 sm:w-24">
                   <img
-                    :src="data.logoUrl"
-                    :alt="data.name"
+                    v-if="brand.logoUrl"
+                    :src="brand.logoUrl"
+                    :alt="brand.name"
                     class="h-full w-full object-cover"
                     loading="lazy"
                     decoding="async" />
+                  <div
+                    v-else
+                    class="flex h-full w-full items-center justify-center">
+                    <i
+                      class="pi pi-image text-2xl text-stone-400 sm:text-3xl"
+                      aria-hidden="true" />
+                  </div>
                 </div>
-                <div
-                  v-else
-                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-stone-200/80 dark:bg-stone-700">
-                  <i class="pi pi-image text-sm text-stone-500 dark:text-stone-400" />
+                <div class="min-w-0 flex-1">
+                  <h2 class="line-clamp-2 text-base font-semibold text-stone-900 dark:text-rose-50/95">
+                    {{ brand.name }}
+                  </h2>
+                  <p
+                    v-if="brand.country"
+                    class="mt-1 text-sm text-stone-600 dark:text-stone-400">
+                    {{ brand.country }}
+                  </p>
+                  <p
+                    v-else
+                    class="mt-1 text-sm text-stone-400 dark:text-stone-500">
+                    Страна не указана
+                  </p>
+                  <div
+                    v-if="canMutateCatalog"
+                    class="mt-2 flex flex-wrap gap-2">
+                    <Tag
+                      v-if="brand.isModerated"
+                      value="Проверен"
+                      severity="success"
+                      class="text-xs" />
+                    <Tag
+                      v-else
+                      value="На модерации"
+                      severity="warn"
+                      class="text-xs" />
+                  </div>
+                  <p
+                    v-if="brand.description"
+                    class="mt-2 line-clamp-2 text-pretty text-xs text-stone-500 dark:text-stone-400"
+                    :title="brand.description">
+                    {{ brand.description }}
+                  </p>
+                  <p class="mt-2 text-xs text-stone-400 dark:text-stone-500">
+                    Создан: {{ formatDate(brand.createdAt) }}
+                  </p>
                 </div>
-                <div class="min-w-0 truncate font-medium text-stone-900 dark:text-stone-100">{{ data.name }}</div>
               </div>
-            </template>
-          </Column>
-
-          <Column
-            field="country"
-            header="Страна"
-            sortable>
-            <template #body="{ data }">
-              <span v-if="data.country">{{ data.country }}</span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-
-          <Column
-            field="description"
-            header="Описание">
-            <template #body="{ data }">
-              <span
-                v-if="data.description"
-                class="line-clamp-2 block max-w-xs"
-                :title="data.description">
-                {{ data.description }}
-              </span>
-              <span
-                v-else
-                class="text-stone-400"
-                >—</span
-              >
-            </template>
-          </Column>
-
-          <Column
-            field="isModerated"
-            header="Статус"
-            sortable>
-            <template #body="{ data }">
-              <Tag
-                v-if="data.isModerated"
-                value="Проверен"
-                severity="success"
-                class="text-xs" />
-              <Tag
-                v-else
-                value="На модерации"
-                severity="warn"
-                class="text-xs" />
-            </template>
-          </Column>
-
-          <Column
-            field="createdAt"
-            header="Создан"
-            sortable>
-            <template #body="{ data }">
-              {{ formatDate(data.createdAt) }}
-            </template>
-          </Column>
-
-          <Column
-            header="Действия"
-            :exportable="false"
-            style="min-width: 9rem">
-            <template #body="{ data }">
-              <div class="flex flex-wrap items-center gap-1">
+              <footer
+                v-if="canMutateCatalog"
+                class="mt-auto flex flex-wrap justify-end gap-1 border-t border-stone-100 bg-stone-50/90 px-2 py-2 dark:border-stone-700/80 dark:bg-stone-950/50"
+                @click.stop>
                 <Button
-                  :data-testid="`brands-view-${data.id}`"
-                  class="min-h-11 min-w-11 touch-manipulation"
-                  icon="pi pi-eye"
-                  text
-                  rounded
-                  severity="secondary"
-                  aria-label="Просмотр"
-                  @click="viewBrand(data)" />
-                <Button
-                  v-if="canMutateCatalog"
-                  :data-testid="`brands-edit-${data.id}`"
+                  :data-testid="`brands-edit-${brand.id}`"
                   class="min-h-11 min-w-11 touch-manipulation"
                   icon="pi pi-pencil"
                   text
                   rounded
                   severity="secondary"
                   aria-label="Редактировать"
-                  @click="editBrand(data)" />
+                  @click="editBrand(brand)" />
                 <Button
-                  v-if="canMutateCatalog"
-                  :data-testid="`brands-delete-${data.id}`"
+                  :data-testid="`brands-delete-${brand.id}`"
                   class="min-h-11 min-w-11 touch-manipulation"
                   icon="pi pi-trash"
                   text
                   rounded
                   severity="danger"
                   aria-label="Удалить"
-                  @click="deleteBrand(data)" />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
+                  @click="deleteBrand(brand)" />
+              </footer>
+            </article>
+          </div>
+
+          <div class="mt-6 flex justify-center">
+            <Paginator
+              data-testid="brands-paginator"
+              :first="pagination.first"
+              :rows="pagination.rows"
+              :total-records="orderedFilteredBrands.length"
+              :rows-per-page-options="[10, 25, 50]"
+              template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+              @page="onPage" />
+          </div>
+        </template>
       </div>
     </div>
 
@@ -453,7 +432,9 @@
           </p>
         </div>
         <div class="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-          <div class="flex flex-wrap items-center gap-2">
+          <div
+            v-if="canMutateCatalog"
+            class="flex flex-wrap items-center gap-2">
             <span class="font-medium text-stone-600 dark:text-stone-400">Статус:</span>
             <Tag
               v-if="selectedBrand.isModerated"
@@ -503,8 +484,7 @@
   import { hasAnyRole } from '@/utils/roles';
   import cigarService from '@/services/cigarService';
   import type { Brand } from '@/services/cigarService';
-  import DataTable from 'primevue/datatable';
-  import Column from 'primevue/column';
+  import type { PageState } from 'primevue/paginator';
   import InputText from 'primevue/inputtext';
   import Select from 'primevue/select';
   import Button from 'primevue/button';
@@ -512,6 +492,7 @@
   import Textarea from 'primevue/textarea';
   import Checkbox from 'primevue/checkbox';
   import Tag from 'primevue/tag';
+  import Paginator from 'primevue/paginator';
   import ConfirmDialog from 'primevue/confirmdialog';
 
   interface BrandForm {
@@ -537,6 +518,11 @@
     name?: string;
   }
 
+  interface Pagination {
+    first: number;
+    rows: number;
+  }
+
   const toast = useToast();
   const confirm = useConfirm();
   const route = useRoute();
@@ -550,6 +536,7 @@
   const submitting = ref(false);
   const brands = ref<Brand[]>([]);
   const filteredBrands = ref<Brand[]>([]);
+  const pagination = ref<Pagination>({ first: 0, rows: 10 });
   const showBrandDialog = ref(false);
   const showDetailDialog = ref(false);
   const selectedBrand = ref<Brand | null>(null);
@@ -584,6 +571,21 @@
     }));
   });
 
+  const orderedFilteredBrands = computed(() =>
+    [...filteredBrands.value].sort((a, b) => a.name.localeCompare(b.name, 'ru', { sensitivity: 'base' })),
+  );
+
+  const paginatedBrands = computed(() => {
+    const list = orderedFilteredBrands.value;
+    const { first, rows } = pagination.value;
+    return list.slice(first, first + rows);
+  });
+
+  function onPage(event: PageState): void {
+    pagination.value.first = event.first;
+    pagination.value.rows = event.rows;
+  }
+
   function applyFilters(): void {
     let result = [...brands.value];
 
@@ -594,11 +596,12 @@
     if (filters.value.country) {
       result = result.filter((b) => b.country === filters.value.country);
     }
-    if (filters.value.status !== null && filters.value.status !== undefined) {
+    if (canMutateCatalog.value && filters.value.status !== null && filters.value.status !== undefined) {
       result = result.filter((b) => b.isModerated === filters.value.status);
     }
 
     filteredBrands.value = result;
+    pagination.value.first = 0;
   }
 
   function clearFilters(): void {
@@ -834,6 +837,27 @@
 
   @media (prefers-reduced-motion: reduce) {
     .brands-panel-enter {
+      animation: none;
+    }
+  }
+
+  .brand-card-enter {
+    animation: brand-card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes brand-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-card-enter {
       animation: none;
     }
   }

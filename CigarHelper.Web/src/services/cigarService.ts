@@ -22,7 +22,8 @@ export interface CigarBase {
   brand: Brand;
   country: string;
   strength: string;
-  size: string;
+  lengthMm?: number | null;
+  diameter?: number | null;
   wrapper?: string;
   binder?: string;
   filler?: string;
@@ -39,7 +40,8 @@ export interface Cigar {
   name: string;
   brand: Brand;
   country: string | null;
-  size: string | null;
+  lengthMm?: number | null;
+  diameter?: number | null;
   strength: string | null;
   price: number | null;
   rating: number | null;
@@ -77,7 +79,7 @@ export interface PaginatedResult<T> {
   totalCount: number;
 }
 
-/** POST /api/cigars — только по CigarBaseId (модерированный справочник). */
+/** POST /api/cigars — по существующему CigarBaseId (карточка может быть ещё не промодерирована). */
 export interface CreateUserCigarPayload {
   cigarBaseId: number;
   price?: number | null;

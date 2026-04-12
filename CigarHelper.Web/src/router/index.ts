@@ -147,15 +147,15 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/reviews/:id',
-    name: 'ReviewDetail',
-    component: () => import('../views/ReviewDetail.vue'),
-  },
-  {
     path: '/reviews/:id/edit',
     name: 'ReviewEdit',
     component: () => import('../views/ReviewForm.vue'),
     meta: { requiresAuth: true, isEdit: true },
+  },
+  {
+    path: '/reviews/:id',
+    name: 'ReviewDetail',
+    component: () => import('../views/ReviewDetail.vue'),
   },
 ];
 

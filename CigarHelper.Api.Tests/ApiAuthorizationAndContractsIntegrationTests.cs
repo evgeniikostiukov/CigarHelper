@@ -90,7 +90,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"adm{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -121,7 +122,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"img{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -246,7 +248,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"intr{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         reg.EnsureSuccessStatusCode();
         var body = await reg.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -268,7 +271,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = username,
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
 
@@ -313,7 +317,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"pg{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -363,7 +368,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"p2{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -390,7 +396,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"u{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -406,7 +413,7 @@ public class ApiAuthorizationAndContractsIntegrationTests
     }
 
     [Fact]
-    public async Task CatalogMutation_AsRegularUser_CigarBasesPost_Returns403()
+    public async Task CatalogMutation_AsRegularUser_CigarBasesPost_EmptyBody_Returns400()
     {
         await using var factory = new AuthIntegrationWebAppFactory();
         using var client = factory.CreateClient();
@@ -415,7 +422,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"u{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -424,7 +432,50 @@ public class ApiAuthorizationAndContractsIntegrationTests
 
         using var content = new MultipartFormDataContent();
         using var res = await client.PostAsync("/api/cigars/bases", content);
-        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task CatalogMutation_AsRegularUser_CigarBasesPost_WithModeratedBrand_Returns201_UnmoderatedCigarBase()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        int brandId;
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var brand = new Brand
+            {
+                Name = $"Br_{Guid.NewGuid():N}"[..18],
+                CreatedAt = DateTime.UtcNow,
+                IsModerated = true
+            };
+            db.Brands.Add(brand);
+            await db.SaveChangesAsync();
+            brandId = brand.Id;
+        }
+
+        using var client = factory.CreateClient();
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"u{Guid.NewGuid():N}"[..10],
+            Password = "abCd12",
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(auth?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        using var content = new MultipartFormDataContent();
+        content.Add(new StringContent($"User CB {Guid.NewGuid():N}"[..28]), "Name");
+        content.Add(new StringContent(brandId.ToString()), "BrandId");
+        using var res = await client.PostAsync("/api/cigars/bases", content);
+        Assert.Equal(HttpStatusCode.Created, res.StatusCode);
+        var dto = await res.Content.ReadFromJsonAsync<CigarBaseDto>(JsonOptions);
+        Assert.NotNull(dto);
+        Assert.False(dto.IsModerated);
+        Assert.Equal(brandId, dto.Brand.Id);
     }
 
     [Fact]

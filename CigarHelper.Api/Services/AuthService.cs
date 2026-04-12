@@ -20,6 +20,15 @@ public class AuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
+        if (!request.ConfirmedAge18)
+        {
+            return new AuthResponse
+            {
+                Success = false,
+                Message = AuthValidationMessages.ConfirmedAge18
+            };
+        }
+
         // Check if username already exists
         if (await _context.Users.AnyAsync(u => u.Username == request.Username))
         {

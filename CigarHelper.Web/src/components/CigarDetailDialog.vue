@@ -5,6 +5,7 @@
   import Button from 'primevue/button';
   import type { CigarBase, CigarImage } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
   import CigarCommentsPanel from './CigarCommentsPanel.vue';
 
@@ -212,10 +213,10 @@
             <span class="text-right">{{ cigar.country }}</span>
           </div>
           <div
-            v-if="cigar.size"
+            v-if="formatVitola(cigar.lengthMm, cigar.diameter)"
             class="flex justify-between">
             <span class="font-medium text-gray-600 dark:text-gray-400">Размер:</span>
-            <span class="text-right">{{ cigar.size }}</span>
+            <span class="text-right">{{ formatVitola(cigar.lengthMm, cigar.diameter) }}</span>
           </div>
           <div
             v-if="cigar.strength"

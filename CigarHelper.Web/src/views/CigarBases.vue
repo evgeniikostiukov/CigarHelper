@@ -317,8 +317,14 @@
             :key="cigar.id"
             v-memo="memoKey(cigar)"
             :data-testid="`cigar-base-card-${cigar.id}`"
-            class="cigar-base-card-enter relative flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 min-h-[9rem] motion-reduce:animate-none"
-            :style="{ animationDelay: `${Math.min(index, 8) * 40}ms` }">
+            role="button"
+            tabindex="0"
+            :aria-label="`Сигара ${cigar.name}, открыть подробности`"
+            class="cigar-base-card-enter relative flex min-h-[9rem] cursor-pointer flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-md shadow-stone-900/5 transition-[box-shadow,border-color] duration-200 hover:border-rose-800/25 hover:shadow-lg hover:shadow-rose-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 dark:hover:border-rose-900/35 dark:hover:shadow-black/70 motion-reduce:transition-none motion-reduce:animate-none"
+            :style="{ animationDelay: `${Math.min(index, 8) * 40}ms` }"
+            @click="viewCigar(cigar)"
+            @keydown.enter.prevent="viewCigar(cigar)"
+            @keydown.space.prevent="viewCigar(cigar)">
             <div class="flex gap-4 p-4">
               <div
                 class="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-stone-100 dark:bg-stone-800 ring-1 ring-stone-200/80 dark:ring-stone-600/60">
@@ -367,9 +373,9 @@
                 </div>
                 <div class="mt-2 flex flex-wrap gap-2">
                   <span
-                    v-if="cigar.size"
+                    v-if="formatVitola(cigar.lengthMm, cigar.diameter)"
                     class="rounded-full bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-800 dark:bg-stone-700/80 dark:text-stone-200">
-                    {{ cigar.size }}
+                    {{ formatVitola(cigar.lengthMm, cigar.diameter) }}
                   </span>
                   <span
                     v-if="cigar.strength"
@@ -386,16 +392,8 @@
               </div>
             </div>
             <footer
-              class="mt-auto flex flex-wrap justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-2 py-2 dark:border-stone-700/80 dark:bg-stone-950/50">
-              <Button
-                :data-testid="`cigar-base-view-${cigar.id}`"
-                class="min-h-11 min-w-11 touch-manipulation"
-                icon="pi pi-eye"
-                text
-                rounded
-                severity="secondary"
-                aria-label="Подробнее"
-                @click="viewCigar(cigar)" />
+              class="mt-auto flex flex-wrap justify-end gap-2 border-t border-stone-100 bg-stone-50/90 px-2 py-2 dark:border-stone-700/80 dark:bg-stone-950/50"
+              @click.stop>
               <Button
                 :data-testid="`cigar-base-review-${cigar.id}`"
                 class="min-h-11 min-w-11 touch-manipulation"
@@ -471,6 +469,7 @@
   import CigarDetailDialog from '../components/CigarDetailDialog.vue';
   import CigarBaseEditDialog from '../components/CigarBaseEditDialog.vue';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
 
   type ModerationFilterValue = 'moderated' | 'unmoderated';
@@ -614,7 +613,8 @@
       cigar.isModerated,
       cigar.brand?.name,
       cigar.country,
-      cigar.size,
+      cigar.lengthMm,
+      cigar.diameter,
       cigar.strength,
       cigar.wrapper,
       cigar.binder,
@@ -755,7 +755,13 @@
   function writeReview(cigar: CigarBase): void {
     router.push({
       name: 'ReviewCreate',
-      query: { cigarBaseId: String(cigar.id), brandName: cigar.brand.name, cigarName: cigar.name },
+      query: {
+        cigarBaseId: String(cigar.id),
+        brandName: cigar.brand.name,
+        cigarName: cigar.name,
+        ...(cigar.lengthMm != null ? { lengthMm: String(cigar.lengthMm) } : {}),
+        ...(cigar.diameter != null ? { diameter: String(cigar.diameter) } : {}),
+      },
     });
   }
 
