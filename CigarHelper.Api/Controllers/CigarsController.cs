@@ -328,10 +328,12 @@ public class CigarsController : ControllerBase
 
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
+        // Любая существующая запись справочника: пользователь может добавить в коллекцию и немодерированную карточку,
+        // если она доступна ему в каталоге (фильтрация — на выдаче /bases/paginated).
         var cigarBaseExists = await _context.CigarBases
-            .AnyAsync(cb => cb.Id == request.CigarBaseId && cb.IsModerated, cancellationToken);
+            .AnyAsync(cb => cb.Id == request.CigarBaseId, cancellationToken);
         if (!cigarBaseExists)
-            return BadRequest("Сигара не найдена в справочнике или не прошла модерацию.");
+            return BadRequest("Сигара не найдена в справочнике.");
 
         // Создаем сигару пользователя
         var userCigar = new UserCigar

@@ -164,7 +164,7 @@
 
 ## CigarForm.vue
 
-Только **добавление в коллекцию из модерированного справочника** (`CigarNew`). Оболочка: `cigar-form-root`, grain, подпись «Справочник → коллекция», `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`** (`cigar-form-save-error`). API: `POST /api/cigars` с телом `CreateUserCigarPayload` (`cigarBaseId`, опционально цена, **количество** `quantity` — по умолчанию на сервере 1, хьюмидор, вкус/аромат, URL фото).
+**Добавление в коллекцию по записи справочника** (`CigarNew`), в том числе **ещё не промодерированной** карточки, если она доступна в выдаче каталога. Оболочка: `cigar-form-root`, grain, подпись «Справочник → коллекция», `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`** (`cigar-form-save-error`). API: `POST /api/cigars` с телом `CreateUserCigarPayload` (`cigarBaseId`, опционально цена, **количество** `quantity` — по умолчанию на сервере 1, хьюмидор, вкус/аромат, URL фото).
 
 | Пункт | Значение |
 |-------|----------|

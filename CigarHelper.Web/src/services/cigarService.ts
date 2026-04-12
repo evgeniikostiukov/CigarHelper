@@ -77,7 +77,7 @@ export interface PaginatedResult<T> {
   totalCount: number;
 }
 
-/** POST /api/cigars — только по CigarBaseId (модерированный справочник). */
+/** POST /api/cigars — по существующему CigarBaseId (карточка может быть ещё не промодерирована). */
 export interface CreateUserCigarPayload {
   cigarBaseId: number;
   price?: number | null;

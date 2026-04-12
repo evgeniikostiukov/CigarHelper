@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CigarHelper.Data.Models.Dtos;
 
-/// <summary>Добавление сигары в коллекцию только по записи из модерированного справочника (CigarBase).</summary>
+/// <summary>Добавление сигары в коллекцию по существующей записи справочника (CigarBase), в т.ч. до модерации карточки.</summary>
 public class CreateCigarRequest
 {
     [Required]
