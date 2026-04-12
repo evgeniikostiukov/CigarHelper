@@ -139,6 +139,8 @@ dotnet test CigarHelper.sln
 
 В корне репозитория: **`npm run changelog`** — пересобирает [`CHANGELOG.md`](../../CHANGELOG.md) по истории git и тегам (шаблон Keep a Changelog, настройки в [`.auto-changelog`](../../.auto-changelog)). Перед релизом или после значимых коммитов имеет смысл обновить файл и закоммитить его вместе с тегом версии. Нужен **git** в `PATH` (локально обычно так и есть; в минимальной среде без git команда упадёт с `spawn git ENOENT`).
 
+Порядок **релиза с агентом** (semver → `npm version` → changelog → push): правило Cursor [`.cursor/rules/releases.mdc`](../../.cursor/rules/releases.mdc).
+
 ## Продакшен
 
 Чеклист по хостам, CORS, секретам и Npgsql см. в [../security-refactor-memory-bank.md](../security-refactor-memory-bank.md) (раздел про выкат и `appsettings.Production.json`).
