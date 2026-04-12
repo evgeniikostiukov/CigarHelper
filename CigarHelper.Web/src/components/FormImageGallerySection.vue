@@ -49,6 +49,8 @@
       urlRowsTestId?: string;
       addUrlRowTestId?: string;
       applyUrlsToGalleryTestId?: string;
+      /** Скрыть блоки ввода URL (остаётся загрузка файлов и галерея). */
+      hideUrlEntry?: boolean;
     }>(),
     {
       maxFiles: 5,
@@ -70,6 +72,7 @@
       urlRowsTestId: 'form-gallery-multi-urls',
       addUrlRowTestId: 'form-gallery-add-url-row',
       applyUrlsToGalleryTestId: 'form-gallery-apply-urls',
+      hideUrlEntry: false,
     },
   );
 
@@ -441,7 +444,7 @@
         @files-selected="handleFilesSelected" />
 
       <div
-        v-if="urlEntryMode === 'single'"
+        v-if="!hideUrlEntry && urlEntryMode === 'single'"
         class="space-y-2">
         <label
           :for="urlInputId"
@@ -485,7 +488,7 @@
       </div>
 
       <div
-        v-else
+        v-else-if="!hideUrlEntry"
         class="space-y-2">
         <span :class="labelClass">{{ multiUrlLabel }}</span>
         <div

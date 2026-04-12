@@ -164,7 +164,7 @@
 
 ## CigarForm.vue
 
-**Добавление в коллекцию** (`CigarNew`): выбор из `AutoComplete` (группы брендов) или **новая карточка справочника** — кнопка в **footer** оверлея при **пустой строке поиска** (`cigar-form-add-new-footer`), либо в **empty** при нуле результатов и непустом запросе (`cigar-form-add-new-empty`). Диалог (`cigar-form-new-base-dialog`): `POST /api/cigars/bases`, затем выбор подставляется в форму; сохранение коллекции — `POST /api/cigars`. Бренды в диалоге: `getAllBrands()`. Оболочка: `cigar-form-root`, grain, `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`**.
+**Добавление в коллекцию** (`CigarNew`): выбор из `AutoComplete` (группы брендов) или **новая карточка справочника** — кнопка в **footer** оверлея при **пустой строке поиска** (`cigar-form-add-new-footer`), либо в **empty** при нуле результатов и непустом запросе (`cigar-form-add-new-empty`). Диалог (`cigar-form-new-base-dialog`): поля как у создания базовой сигары (Name, BrandId, Country, Size, Strength, Wrapper, Binder, Filler, Description до 500, NewImages файлы — `hideUrlEntry` в **`FormImageGallerySection`**); `POST /api/cigars/bases`, затем выбор подставляется в форму; коллекция — `POST /api/cigars`. Бренды: `getAllBrands()`. Оболочка: `cigar-form-root`, grain, `id="cigar-form-heading"`, `max-w-4xl`. Состояние: **`saving`**, **`saveError`**.
 
 | Пункт | Значение |
 |-------|----------|

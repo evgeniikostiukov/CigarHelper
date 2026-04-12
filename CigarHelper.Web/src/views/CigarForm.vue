@@ -400,117 +400,205 @@
       v-model:visible="newCigarDialogVisible"
       header="Новая сигара в справочнике"
       modal
-      :style="{ width: 'min(32rem, 100vw)' }"
+      :style="{ width: 'min(48rem, 92vw)' }"
+      :content-style="{ maxHeight: 'min(85vh, 720px)', overflow: 'auto' }"
       :dismissable-mask="true"
       :closable="!newCigarSaving"
       data-testid="cigar-form-new-base-dialog"
       @hide="resetNewCigarDialog">
-      <div class="flex flex-col gap-4 pt-1">
-        <div class="flex flex-col gap-2">
-          <label
-            for="cigar-form-dialog-name"
-            class="text-xs font-medium text-stone-600 dark:text-stone-400">
-            Название <span class="text-red-600 dark:text-red-400">*</span>
-          </label>
-          <InputText
-            id="cigar-form-dialog-name"
-            v-model="draftName"
-            data-testid="cigar-form-dialog-name"
-            class="min-h-11 w-full"
-            :class="{ 'p-invalid': dialogErrors.name }"
-            maxlength="100"
-            placeholder="Как на этикетке или в каталоге"
-            autocomplete="off" />
-          <small
-            v-if="dialogErrors.name"
-            class="text-sm text-red-600 dark:text-red-400"
-            >{{ dialogErrors.name }}</small
-          >
-        </div>
-        <div class="flex flex-col gap-2">
-          <label
-            for="cigar-form-dialog-brand"
-            class="text-xs font-medium text-stone-600 dark:text-stone-400">
-            Бренд <span class="text-red-600 dark:text-red-400">*</span>
-          </label>
-          <Select
-            id="cigar-form-dialog-brand"
-            v-model="draftBrandId"
-            data-testid="cigar-form-dialog-brand"
-            class="w-full"
-            label-class="min-h-11"
-            :options="catalogBrands"
-            option-label="name"
-            option-value="id"
-            placeholder="Выберите бренд"
-            show-clear
-            filter
-            :loading="brandsLoading"
-            :class="{ 'p-invalid': dialogErrors.brand }" />
-          <small
-            v-if="dialogErrors.brand"
-            class="text-sm text-red-600 dark:text-red-400"
-            >{{ dialogErrors.brand }}</small
-          >
-          <small class="text-stone-500 dark:text-stone-400">
-            Только промодерированные бренды. Нет нужного —
-            <RouterLink
-              class="font-medium text-rose-800 underline underline-offset-2 dark:text-rose-300"
-              :to="{ name: 'CigarBases' }">
-              база сигар
-            </RouterLink>
-            .
-          </small>
-        </div>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div class="flex flex-col gap-2">
-            <label
-              for="cigar-form-dialog-strength"
-              class="text-xs font-medium text-stone-600 dark:text-stone-400">
-              Крепость
-            </label>
-            <Select
-              id="cigar-form-dialog-strength"
-              v-model="draftStrength"
-              data-testid="cigar-form-dialog-strength"
-              class="w-full"
-              label-class="min-h-11"
-              :options="strengthOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="Не указано"
-              show-clear />
+      <div class="flex flex-col gap-6 pt-1">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="flex flex-col gap-4">
+            <h3 class="text-sm font-semibold text-stone-800 dark:text-stone-200">Основное</h3>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-name"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Название <span class="text-red-600 dark:text-red-400">*</span>
+              </label>
+              <InputText
+                id="cigar-form-dialog-name"
+                v-model="draftName"
+                data-testid="cigar-form-dialog-name"
+                class="min-h-11 w-full"
+                :class="{ 'p-invalid': dialogErrors.name }"
+                maxlength="100"
+                placeholder="Как на этикетке или в каталоге"
+                autocomplete="off" />
+              <small
+                v-if="dialogErrors.name"
+                class="text-sm text-red-600 dark:text-red-400"
+                >{{ dialogErrors.name }}</small
+              >
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-brand"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Бренд <span class="text-red-600 dark:text-red-400">*</span>
+              </label>
+              <Select
+                id="cigar-form-dialog-brand"
+                v-model="draftBrandId"
+                data-testid="cigar-form-dialog-brand"
+                class="w-full"
+                label-class="min-h-11"
+                :options="catalogBrands"
+                option-label="name"
+                option-value="id"
+                placeholder="Выберите бренд"
+                show-clear
+                filter
+                :loading="brandsLoading"
+                :class="{ 'p-invalid': dialogErrors.brand }" />
+              <small
+                v-if="dialogErrors.brand"
+                class="text-sm text-red-600 dark:text-red-400"
+                >{{ dialogErrors.brand }}</small
+              >
+              <small class="text-stone-500 dark:text-stone-400">
+                Только промодерированные бренды. Нет нужного —
+                <RouterLink
+                  class="font-medium text-rose-800 underline underline-offset-2 dark:text-rose-300"
+                  :to="{ name: 'CigarBases' }">
+                  база сигар
+                </RouterLink>
+                .
+              </small>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-country"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Страна
+              </label>
+              <InputText
+                id="cigar-form-dialog-country"
+                v-model="draftCountry"
+                data-testid="cigar-form-dialog-country"
+                class="min-h-11 w-full"
+                maxlength="100"
+                placeholder="Необязательно"
+                autocomplete="off" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-size"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Размер (vitola)
+              </label>
+              <InputText
+                id="cigar-form-dialog-size"
+                v-model="draftSize"
+                data-testid="cigar-form-dialog-size"
+                class="min-h-11 w-full"
+                maxlength="50"
+                placeholder="Например 6×50 или Robusto"
+                autocomplete="off" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-strength"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Крепость
+              </label>
+              <Select
+                id="cigar-form-dialog-strength"
+                v-model="draftStrength"
+                data-testid="cigar-form-dialog-strength"
+                class="w-full"
+                label-class="min-h-11"
+                :options="strengthOptions"
+                option-label="label"
+                option-value="value"
+                placeholder="Не указано"
+                show-clear />
+            </div>
           </div>
-          <div class="flex flex-col gap-2">
-            <label
-              for="cigar-form-dialog-size"
-              class="text-xs font-medium text-stone-600 dark:text-stone-400">
-              Формат (vitola)
-            </label>
-            <InputText
-              id="cigar-form-dialog-size"
-              v-model="draftSize"
-              data-testid="cigar-form-dialog-size"
-              class="min-h-11 w-full"
-              maxlength="50"
-              placeholder="Например Robusto"
-              autocomplete="off" />
+
+          <div class="flex flex-col gap-4">
+            <h3 class="text-sm font-semibold text-stone-800 dark:text-stone-200">Структура</h3>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-wrapper"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Покровный лист (wrapper)
+              </label>
+              <InputText
+                id="cigar-form-dialog-wrapper"
+                v-model="draftWrapper"
+                data-testid="cigar-form-dialog-wrapper"
+                class="min-h-11 w-full"
+                maxlength="100"
+                placeholder="Необязательно"
+                autocomplete="off" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-binder"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Связующий лист (binder)
+              </label>
+              <InputText
+                id="cigar-form-dialog-binder"
+                v-model="draftBinder"
+                data-testid="cigar-form-dialog-binder"
+                class="min-h-11 w-full"
+                maxlength="100"
+                placeholder="Необязательно"
+                autocomplete="off" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-filler"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Наполнитель (filler)
+              </label>
+              <InputText
+                id="cigar-form-dialog-filler"
+                v-model="draftFiller"
+                data-testid="cigar-form-dialog-filler"
+                class="min-h-11 w-full"
+                maxlength="100"
+                placeholder="Необязательно"
+                autocomplete="off" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="cigar-form-dialog-description"
+                class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                Описание
+              </label>
+              <Textarea
+                id="cigar-form-dialog-description"
+                v-model="draftDescription"
+                data-testid="cigar-form-dialog-description"
+                class="w-full min-h-[6rem]"
+                :rows="4"
+                :auto-resize="true"
+                maxlength="500"
+                placeholder="Необязательно" />
+            </div>
           </div>
         </div>
+
         <div class="flex flex-col gap-2">
-          <label
-            for="cigar-form-dialog-country"
-            class="text-xs font-medium text-stone-600 dark:text-stone-400">
-            Страна
-          </label>
-          <InputText
-            id="cigar-form-dialog-country"
-            v-model="draftCountry"
-            data-testid="cigar-form-dialog-country"
-            class="min-h-11 w-full"
-            maxlength="100"
-            placeholder="Необязательно"
-            autocomplete="off" />
+          <h3 class="text-sm font-semibold text-stone-800 dark:text-stone-200">Фото карточки справочника</h3>
+          <p class="text-xs text-stone-500 dark:text-stone-400">
+            До пяти файлов; в запрос уходят только загрузки с устройства (как в форме создания базовой сигары).
+          </p>
+          <FormImageGallerySection
+            v-model="draftBaseImages"
+            variant="bare"
+            tone="dialog"
+            :hide-url-entry="true"
+            show-main-image-star
+            :max-files="5"
+            test-id="cigar-form-dialog-base-gallery"
+            url-input-id="cigar-form-dialog-base-gallery-url"
+            url-help-text="Только файлы."
+            url-help-detail="Ссылки по URL при создании карточки здесь не используются — выберите файлы выше."
+            grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4" />
         </div>
       </div>
       <template #footer>
@@ -555,6 +643,7 @@
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import Message from 'primevue/message';
+  import Textarea from 'primevue/textarea';
   import FormImageGallerySection, { type FormGalleryImageItem } from '@/components/FormImageGallerySection.vue';
 
   interface FormData {
@@ -608,6 +697,11 @@
   const draftStrength = ref<string | null>(null);
   const draftSize = ref('');
   const draftCountry = ref('');
+  const draftWrapper = ref('');
+  const draftBinder = ref('');
+  const draftFiller = ref('');
+  const draftDescription = ref('');
+  const draftBaseImages = ref<FormGalleryImageItem[]>([]);
   const dialogErrors = ref<NewCigarDialogErrors>({});
 
   const maxNewImageUrls = 12;
@@ -697,6 +791,11 @@
     draftStrength.value = null;
     draftSize.value = '';
     draftCountry.value = '';
+    draftWrapper.value = '';
+    draftBinder.value = '';
+    draftFiller.value = '';
+    draftDescription.value = '';
+    draftBaseImages.value = [];
     dialogErrors.value = {};
     void ensureBrandsLoaded();
     newCigarDialogVisible.value = true;
@@ -708,6 +807,11 @@
     draftStrength.value = null;
     draftSize.value = '';
     draftCountry.value = '';
+    draftWrapper.value = '';
+    draftBinder.value = '';
+    draftFiller.value = '';
+    draftDescription.value = '';
+    draftBaseImages.value = [];
     dialogErrors.value = {};
   }
 
@@ -732,6 +836,23 @@
     if (st) fd.append('Strength', st);
     const sz = draftSize.value?.trim();
     if (sz) fd.append('Size', sz);
+    const w = draftWrapper.value?.trim();
+    if (w) fd.append('Wrapper', w);
+    const b = draftBinder.value?.trim();
+    if (b) fd.append('Binder', b);
+    const f = draftFiller.value?.trim();
+    if (f) fd.append('Filler', f);
+    const d = draftDescription.value?.trim();
+    if (d) fd.append('Description', d);
+
+    const imagesToUpload = draftBaseImages.value.filter((img) => img.file && !img.markedForDeletion);
+    imagesToUpload.forEach((img, index) => {
+      if (img.file) {
+        fd.append(`NewImages[${index}].File`, img.file);
+        fd.append(`NewImages[${index}].IsMain`, String(img.isMain ?? false));
+      }
+    });
+
     return fd;
   }
 
