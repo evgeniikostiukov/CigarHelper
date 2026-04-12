@@ -53,7 +53,8 @@ public class DashboardServiceTests
             BrandId = brand.Id,
             CreatedAt = DateTime.UtcNow,
             Strength = "Medium",
-            Size = "Robusto"
+            LengthMm = null,
+            Diameter = null
         };
         db.CigarBases.Add(cb);
         await db.SaveChangesAsync();

@@ -839,7 +839,10 @@ export interface paths {
             Country?: string;
             Description?: string;
             Strength?: string;
-            Size?: string;
+            /** Format: int32 */
+            LengthMm?: number | null;
+            /** Format: int32 */
+            Diameter?: number | null;
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
@@ -1132,7 +1135,10 @@ export interface paths {
             Country?: string;
             Description?: string;
             Strength?: string;
-            Size?: string;
+            /** Format: int32 */
+            LengthMm?: number | null;
+            /** Format: int32 */
+            Diameter?: number | null;
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
@@ -2183,7 +2189,10 @@ export interface components {
       id?: number;
       name?: string | null;
       brand?: components['schemas']['BrandDto'];
-      size?: string | null;
+      /** Format: int32 */
+      lengthMm?: number | null;
+      /** Format: int32 */
+      diameter?: number | null;
       strength?: string | null;
       country?: string | null;
       description?: string | null;
@@ -2213,7 +2222,10 @@ export interface components {
       name?: string | null;
       brand?: components['schemas']['BrandDto'];
       brandName?: string | null;
-      size?: string | null;
+      /** Format: int32 */
+      lengthMm?: number | null;
+      /** Format: int32 */
+      diameter?: number | null;
       strength?: string | null;
       /** Format: double */
       price?: number | null;
@@ -2244,7 +2256,10 @@ export interface components {
       name?: string | null;
       brand?: components['schemas']['BrandDto'];
       brandName?: string | null;
-      size?: string | null;
+      /** Format: int32 */
+      lengthMm?: number | null;
+      /** Format: int32 */
+      diameter?: number | null;
       strength?: string | null;
       /** Format: double */
       price?: number | null;

@@ -159,9 +159,9 @@
                         <div class="font-semibold text-stone-900 dark:text-stone-100">{{ slotProps.option.name }}</div>
                         <div class="text-xs text-stone-500 dark:text-stone-400">
                           <span
-                            v-if="slotProps.option.size"
+                            v-if="slotProps.option.vitolaLabel"
                             class="mr-2"
-                            >{{ slotProps.option.size }}</span
+                            >{{ slotProps.option.vitolaLabel }}</span
                           >
                           <span v-if="slotProps.option.strength">{{
                             getStrengthLabel(slotProps.option.strength)
@@ -466,6 +466,7 @@
   import type { Brand } from '@/services/cigarService';
   import { useAuth } from '@/services/useAuth';
   import { getAuthUserId } from '@/utils/roles';
+  import { formatVitola } from '@/utils/vitola';
 
   /** Единый вариант выбора: каталог (CigarBase) или запись коллекции (UserCigar + CigarBaseId). */
   interface ReviewCigarOption {
@@ -475,7 +476,7 @@
     displayName: string;
     name: string;
     brand: Brand;
-    size?: string | null;
+    vitolaLabel?: string | null;
     strength?: string | null;
     country?: string | null;
   }
@@ -586,6 +587,11 @@
       }
       const brandName = (query.brandName as string) || 'Неизвестный бренд';
 
+      const qLen = query.lengthMm != null ? Number(query.lengthMm) : NaN;
+      const qDia = query.diameter != null ? Number(query.diameter) : NaN;
+      const fromDims = Number.isFinite(qLen) && Number.isFinite(qDia) ? formatVitola(qLen, qDia) : '';
+      const vitolaFromQuery = fromDims || (query.vitola as string) || (query.size as string) || '';
+
       const tempCigar: ReviewCigarOption = {
         cigarBaseId,
         userCigarId: null,
@@ -598,7 +604,7 @@
           createdAt: new Date().toISOString(),
         },
         country: (query.country as string) || '',
-        size: (query.size as string) || '',
+        vitolaLabel: vitolaFromQuery,
         strength: (query.strength as string) || '',
         displayName: `${brandName} ${query.cigarName as string}`,
       };
@@ -611,7 +617,7 @@
       let cigarInfo = `**Сигара:** ${query.cigarName as string}\n`;
       if (query.brandName) cigarInfo += `**Бренд:** ${query.brandName as string}\n`;
       if (query.country) cigarInfo += `**Страна:** ${query.country as string}\n`;
-      if (query.size) cigarInfo += `**Размер:** ${query.size as string}\n`;
+      if (vitolaFromQuery) cigarInfo += `**Размер:** ${vitolaFromQuery}\n`;
       if (query.strength) cigarInfo += `**Крепость:** ${getStrengthLabel(query.strength as string)}\n`;
       if (query.description) cigarInfo += `**Описание:** ${query.description as string}\n`;
       if (query.wrapper) cigarInfo += `**Покровный лист:** ${query.wrapper as string}\n`;
@@ -653,7 +659,7 @@
           createdAt: new Date().toISOString(),
         },
         country: null,
-        size: null,
+        vitolaLabel: null,
         strength: null,
         displayName: `${cigarBrandName} ${review.cigarName || 'Неизвестная сигара'}`,
       };
@@ -851,7 +857,7 @@
           displayName: `${cigar.name} (${cigar.brand.name})`,
           name: cigar.name,
           brand: cigar.brand,
-          size: cigar.size,
+          vitolaLabel: formatVitola(cigar.lengthMm, cigar.diameter),
           strength: cigar.strength,
           country: cigar.country,
         });
@@ -868,7 +874,7 @@
           displayName: `${cigarBase.name} (${cigarBase.brand.name})`,
           name: cigarBase.name,
           brand: cigarBase.brand,
-          size: cigarBase.size,
+          vitolaLabel: formatVitola(cigarBase.lengthMm, cigarBase.diameter),
           strength: cigarBase.strength,
           country: cigarBase.country,
         });

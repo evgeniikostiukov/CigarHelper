@@ -367,9 +367,9 @@
                 </div>
                 <div class="mt-2 flex flex-wrap gap-2">
                   <span
-                    v-if="cigar.size"
+                    v-if="formatVitola(cigar.lengthMm, cigar.diameter)"
                     class="rounded-full bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-800 dark:bg-stone-700/80 dark:text-stone-200">
-                    {{ cigar.size }}
+                    {{ formatVitola(cigar.lengthMm, cigar.diameter) }}
                   </span>
                   <span
                     v-if="cigar.strength"
@@ -471,6 +471,7 @@
   import CigarDetailDialog from '../components/CigarDetailDialog.vue';
   import CigarBaseEditDialog from '../components/CigarBaseEditDialog.vue';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
 
   type ModerationFilterValue = 'moderated' | 'unmoderated';
@@ -614,7 +615,8 @@
       cigar.isModerated,
       cigar.brand?.name,
       cigar.country,
-      cigar.size,
+      cigar.lengthMm,
+      cigar.diameter,
       cigar.strength,
       cigar.wrapper,
       cigar.binder,
@@ -755,7 +757,13 @@
   function writeReview(cigar: CigarBase): void {
     router.push({
       name: 'ReviewCreate',
-      query: { cigarBaseId: String(cigar.id), brandName: cigar.brand.name, cigarName: cigar.name },
+      query: {
+        cigarBaseId: String(cigar.id),
+        brandName: cigar.brand.name,
+        cigarName: cigar.name,
+        ...(cigar.lengthMm != null ? { lengthMm: String(cigar.lengthMm) } : {}),
+        ...(cigar.diameter != null ? { diameter: String(cigar.diameter) } : {}),
+      },
     });
   }
 

@@ -350,7 +350,9 @@
               {{ cigar.brand.name }}
             </p>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-stone-600 dark:text-stone-400">
-              <span v-if="cigar.size">{{ cigar.size }}</span>
+              <span v-if="formatVitola(cigar.lengthMm, cigar.diameter)">{{
+                formatVitola(cigar.lengthMm, cigar.diameter)
+              }}</span>
               <span v-if="cigar.strength">{{ cigar.strength }}</span>
               <span
                 :data-testid="`cigar-card-quantity-${cigar.id}`"
@@ -456,6 +458,7 @@
   import type { Cigar, CigarImage } from '../services/cigarService';
   import { cigarImageInlineDataSrc, orderUserCigarGalleryImages } from '@/utils/cigarImageDisplay';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
 
   type HumidorFilterValue = 'all' | 'in_humidor' | 'outside';
   type SmokedFilterValue = 'all' | 'not_smoked' | 'smoked';
@@ -572,7 +575,9 @@
     return [...fromCatalog, ...extras];
   });
 
-  const sizeOptionsFromData = computed(() => uniqueStringOptions(cigars.value.map((c) => c.size)));
+  const sizeOptionsFromData = computed(() =>
+    uniqueStringOptions(cigars.value.map((c) => formatVitola(c.lengthMm, c.diameter))),
+  );
 
   function matchesFilters(cigar: Cigar): boolean {
     const f = filters.value;
@@ -590,7 +595,7 @@
     if (f.strength != null && (cigar.strength?.trim() ?? '') !== f.strength) {
       return false;
     }
-    if (f.size != null && (cigar.size?.trim() ?? '') !== f.size) {
+    if (f.size != null && formatVitola(cigar.lengthMm, cigar.diameter) !== f.size) {
       return false;
     }
     if (f.humidor === 'in_humidor' && cigar.humidorId == null) {
@@ -687,7 +692,8 @@
       cigar.id,
       cigar.name,
       cigar.brand?.name,
-      cigar.size,
+      cigar.lengthMm,
+      cigar.diameter,
       cigar.strength,
       cigar.quantity,
       cigar.rating,

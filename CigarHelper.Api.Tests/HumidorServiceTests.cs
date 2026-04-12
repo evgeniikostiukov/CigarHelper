@@ -57,7 +57,8 @@ public class HumidorServiceTests
             BrandId = brand.Id,
             CreatedAt = DateTime.UtcNow,
             Strength = "Mild",
-            Size = "Robusto"
+            LengthMm = null,
+            Diameter = null
         };
         db.CigarBases.Add(cb);
         await db.SaveChangesAsync();

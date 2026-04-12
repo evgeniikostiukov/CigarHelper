@@ -22,7 +22,8 @@ export interface CigarBase {
   brand: Brand;
   country: string;
   strength: string;
-  size: string;
+  lengthMm?: number | null;
+  diameter?: number | null;
   wrapper?: string;
   binder?: string;
   filler?: string;
@@ -39,7 +40,8 @@ export interface Cigar {
   name: string;
   brand: Brand;
   country: string | null;
-  size: string | null;
+  lengthMm?: number | null;
+  diameter?: number | null;
   strength: string | null;
   price: number | null;
   rating: number | null;

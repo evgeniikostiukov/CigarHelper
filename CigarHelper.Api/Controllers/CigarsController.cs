@@ -86,7 +86,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -171,7 +172,9 @@ public class CigarsController : ControllerBase
         {
             "name" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name),
             "brandname" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Brand.Name) : query.OrderBy(cb => cb.Brand.Name),
-            "size" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Size) : query.OrderBy(cb => cb.Size),
+            "size" => sortOrder?.ToLower() == "desc"
+                ? query.OrderByDescending(cb => cb.LengthMm).ThenByDescending(cb => cb.Diameter)
+                : query.OrderBy(cb => cb.LengthMm).ThenBy(cb => cb.Diameter),
             "strength" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Strength) : query.OrderBy(cb => cb.Strength),
             "country" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Country) : query.OrderBy(cb => cb.Country),
             _ => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name)
@@ -202,7 +205,8 @@ public class CigarsController : ControllerBase
                         CreatedAt = cb.Brand.CreatedAt,
                         UpdatedAt = cb.Brand.UpdatedAt
                     },
-                    Size = cb.Size,
+                    LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                     Strength = cb.Strength,
                     Country = cb.Country,
                     Description = cb.Description,
@@ -247,7 +251,8 @@ public class CigarsController : ControllerBase
                         CreatedAt = cb.Brand.CreatedAt,
                         UpdatedAt = cb.Brand.UpdatedAt
                     },
-                    Size = cb.Size,
+                    LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                     Strength = cb.Strength,
                     Country = cb.Country,
                     Description = cb.Description,
@@ -639,7 +644,8 @@ public class CigarsController : ControllerBase
             Country = request.Country,
             Description = request.Description,
             Strength = request.Strength,
-            Size = request.Size,
+            LengthMm = request.LengthMm,
+            Diameter = request.Diameter,
             Wrapper = request.Wrapper,
             Binder = request.Binder,
             Filler = request.Filler,
@@ -701,7 +707,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -753,7 +760,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -822,7 +830,8 @@ public class CigarsController : ControllerBase
         cigarBase.Country = request.Country;
         cigarBase.Description = request.Description;
         cigarBase.Strength = request.Strength;
-        cigarBase.Size = request.Size;
+        cigarBase.LengthMm = request.LengthMm;
+        cigarBase.Diameter = request.Diameter;
         cigarBase.Wrapper = request.Wrapper;
         cigarBase.Binder = request.Binder;
         cigarBase.Filler = request.Filler;
@@ -896,7 +905,8 @@ public class CigarsController : ControllerBase
                     CreatedAt = cb.Brand.CreatedAt,
                     UpdatedAt = cb.Brand.UpdatedAt
                 },
-                Size = cb.Size,
+                LengthMm = cb.LengthMm,
+                Diameter = cb.Diameter,
                 Strength = cb.Strength,
                 Country = cb.Country,
                 Description = cb.Description,
@@ -943,7 +953,8 @@ public class CigarsController : ControllerBase
                 LogoBytes = uc.CigarBase.Brand.LogoBytes,
             },
             BrandName = uc.CigarBase.Brand.Name,
-            Size = uc.CigarBase.Size,
+            LengthMm = uc.CigarBase.LengthMm,
+            Diameter = uc.CigarBase.Diameter,
             Strength = uc.CigarBase.Strength,
             Price = uc.Price,
             Rating = uc.Rating,

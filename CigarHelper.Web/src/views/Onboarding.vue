@@ -307,9 +307,9 @@
                       <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
                         {{ cigar.brand?.name }}
                         <span
-                          v-if="cigar.size"
+                          v-if="formatVitola(cigar.lengthMm, cigar.diameter)"
                           class="text-stone-500 dark:text-stone-500"
-                          >· {{ cigar.size }}</span
+                          >· {{ formatVitola(cigar.lengthMm, cigar.diameter) }}</span
                         >
                       </p>
                     </div>
@@ -407,6 +407,7 @@
   import type { Humidor } from '@/services/humidorService';
   import type { CigarBase } from '@/services/cigarService';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import { formatVitola } from '@/utils/vitola';
 
   const router = useRouter();
   const toast = useToast();

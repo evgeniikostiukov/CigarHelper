@@ -92,9 +92,9 @@
                         <div class="text-xs text-stone-500 dark:text-stone-400">
                           <span class="mr-2">{{ slotProps.option.brand.name }}</span>
                           <span
-                            v-if="slotProps.option.size"
+                            v-if="formatVitola(slotProps.option.lengthMm, slotProps.option.diameter)"
                             class="mr-2"
-                            >{{ slotProps.option.size }}</span
+                            >{{ formatVitola(slotProps.option.lengthMm, slotProps.option.diameter) }}</span
                           >
                           <span v-if="slotProps.option.strength">{{
                             getStrengthLabel(slotProps.option.strength)
@@ -481,20 +481,55 @@
                 placeholder="Необязательно"
                 autocomplete="off" />
             </div>
-            <div class="flex flex-col gap-2">
-              <label
-                for="cigar-form-dialog-size"
-                class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                Размер (vitola)
-              </label>
-              <InputText
-                id="cigar-form-dialog-size"
-                v-model="draftSize"
-                data-testid="cigar-form-dialog-size"
-                class="min-h-11 w-full"
-                maxlength="50"
-                placeholder="Например 6×50 или Robusto"
-                autocomplete="off" />
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-2">
+                <label
+                  for="cigar-form-dialog-length"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Длина
+                </label>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                  <InputNumber
+                    id="cigar-form-dialog-length"
+                    v-model="draftLengthInput"
+                    data-testid="cigar-form-dialog-length"
+                    class="w-full sm:min-w-0 sm:flex-1"
+                    input-class="min-h-11 w-full"
+                    :min="1"
+                    :max="draftLengthUnit === 'mm' ? 999 : 30"
+                    :min-fraction-digits="0"
+                    :max-fraction-digits="draftLengthUnit === 'mm' ? 0 : 2"
+                    :use-grouping="false"
+                    placeholder="—" />
+                  <Select
+                    input-id="cigar-form-dialog-length-unit"
+                    :model-value="draftLengthUnit"
+                    class="w-full sm:w-[7.25rem] sm:shrink-0"
+                    label-class="min-h-11"
+                    :options="lengthUnitSelectOptions"
+                    option-label="label"
+                    option-value="value"
+                    data-testid="cigar-form-dialog-length-unit"
+                    @update:model-value="onDraftLengthUnitChange" />
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label
+                  for="cigar-form-dialog-diameter"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Кольцо
+                </label>
+                <InputNumber
+                  id="cigar-form-dialog-diameter"
+                  v-model="draftDiameter"
+                  data-testid="cigar-form-dialog-diameter"
+                  class="w-full"
+                  input-class="min-h-11 w-full"
+                  :min="1"
+                  :max="99"
+                  :use-grouping="false"
+                  placeholder="—" />
+              </div>
             </div>
             <div class="flex flex-col gap-2">
               <label
@@ -635,6 +670,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted, watch } from 'vue';
+  import { useLocalStorage } from '@vueuse/core';
   import { RouterLink, useRoute, useRouter } from 'vue-router';
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
@@ -654,8 +690,15 @@
   import Textarea from 'primevue/textarea';
   import FormImageGallerySection, { type FormGalleryImageItem } from '@/components/FormImageGallerySection.vue';
   import { CIGAR_BASE_CATALOG_PHOTO_HINT } from '@/constants/cigarBaseCatalogPhotoHint';
+  import { formatVitola } from '@/utils/vitola';
+  import {
+    lengthUnitSelectOptions,
+    lengthMmFromInput,
+    convertLengthInputOnUnitChange,
+    type CigarLengthUnit,
+  } from '@/utils/cigarLengthUnit';
 
-  interface FormData {
+  interface CollectionFormFields {
     price: number | null;
     quantity: number;
     rating: number | null;
@@ -704,7 +747,17 @@
   const draftName = ref('');
   const draftBrandId = ref<number | null>(null);
   const draftStrength = ref<string | null>(null);
-  const draftSize = ref('');
+  const draftLengthInput = ref<number | null>(null);
+  const draftLengthUnit = useLocalStorage<CigarLengthUnit>('cigarHelper.cigarLengthUnit', 'mm');
+  const draftDiameter = ref<number | null>(null);
+
+  function onDraftLengthUnitChange(next: CigarLengthUnit | null) {
+    if (next == null) return;
+    const prev = draftLengthUnit.value;
+    if (prev === next) return;
+    draftLengthInput.value = convertLengthInputOnUnitChange(draftLengthInput.value, prev, next);
+    draftLengthUnit.value = next;
+  }
   const draftCountry = ref('');
   const draftWrapper = ref('');
   const draftBinder = ref('');
@@ -717,7 +770,7 @@
 
   const cigarFormImages = ref<FormGalleryImageItem[]>([]);
 
-  const form = ref<FormData>({
+  const form = ref<CollectionFormFields>({
     price: null,
     quantity: 1,
     rating: null,
@@ -798,7 +851,8 @@
     draftName.value = (namePrefill ?? '').trim();
     draftBrandId.value = null;
     draftStrength.value = null;
-    draftSize.value = '';
+    draftLengthInput.value = null;
+    draftDiameter.value = null;
     draftCountry.value = '';
     draftWrapper.value = '';
     draftBinder.value = '';
@@ -814,7 +868,8 @@
     draftName.value = '';
     draftBrandId.value = null;
     draftStrength.value = null;
-    draftSize.value = '';
+    draftLengthInput.value = null;
+    draftDiameter.value = null;
     draftCountry.value = '';
     draftWrapper.value = '';
     draftBinder.value = '';
@@ -843,8 +898,11 @@
     if (c) fd.append('Country', c);
     const st = draftStrength.value?.trim();
     if (st) fd.append('Strength', st);
-    const sz = draftSize.value?.trim();
-    if (sz) fd.append('Size', sz);
+    {
+      const mm = lengthMmFromInput(draftLengthInput.value, draftLengthUnit.value);
+      if (mm != null) fd.append('LengthMm', String(mm));
+    }
+    if (draftDiameter.value != null) fd.append('Diameter', String(draftDiameter.value));
     const w = draftWrapper.value?.trim();
     if (w) fd.append('Wrapper', w);
     const b = draftBinder.value?.trim();

@@ -71,17 +71,51 @@
               class="w-full" />
           </div>
 
-          <div>
-            <label
-              for="size"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Размер
-            </label>
-            <InputText
-              id="size"
-              v-model="form.size"
-              placeholder="Например: 6x50"
-              class="w-full" />
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                for="lengthInput"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Длина
+              </label>
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                <InputNumber
+                  id="lengthInput"
+                  v-model="form.lengthInput"
+                  class="w-full sm:min-w-0 sm:flex-1"
+                  input-class="w-full"
+                  :min="1"
+                  :max="form.lengthUnit === 'mm' ? 999 : 30"
+                  :min-fraction-digits="0"
+                  :max-fraction-digits="form.lengthUnit === 'mm' ? 0 : 2"
+                  :use-grouping="false"
+                  placeholder="—" />
+                <Select
+                  input-id="lengthUnit"
+                  :model-value="form.lengthUnit"
+                  class="w-full sm:w-[7.5rem] sm:shrink-0"
+                  :options="lengthUnitSelectOptions"
+                  option-label="label"
+                  option-value="value"
+                  @update:model-value="onLengthUnitChange" />
+              </div>
+            </div>
+            <div>
+              <label
+                for="diameter"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Кольцо
+              </label>
+              <InputNumber
+                id="diameter"
+                v-model="form.diameter"
+                class="w-full"
+                input-class="w-full"
+                :min="1"
+                :max="99"
+                :use-grouping="false"
+                placeholder="—" />
+            </div>
           </div>
 
           <div>
@@ -207,6 +241,17 @@
   import FormImageGallerySection, { type FormGalleryImageItem } from './FormImageGallerySection.vue';
   import { CIGAR_BASE_CATALOG_PHOTO_HINT } from '@/constants/cigarBaseCatalogPhotoHint';
   import { strengthOptions } from '@/utils/cigarOptions';
+  import InputNumber from 'primevue/inputnumber';
+  import Select from 'primevue/select';
+  import {
+    lengthUnitSelectOptions,
+    readStoredLengthUnit,
+    writeStoredLengthUnit,
+    lengthInputFromMm,
+    lengthMmFromInput,
+    convertLengthInputOnUnitChange,
+    type CigarLengthUnit,
+  } from '@/utils/cigarLengthUnit';
 
   // --- Interfaces and Types ---
 
@@ -216,7 +261,9 @@
     brandId: number | null;
     country: string;
     strength: string;
-    size: string;
+    lengthInput: number | null;
+    lengthUnit: CigarLengthUnit;
+    diameter: number | null;
     wrapper: string | undefined;
     binder: string | undefined;
     filler: string | undefined;
@@ -253,7 +300,9 @@
     brandId: null,
     country: '',
     strength: '',
-    size: '',
+    lengthInput: null,
+    lengthUnit: 'mm',
+    diameter: null,
     wrapper: undefined,
     binder: '',
     filler: '',
@@ -286,14 +335,25 @@
 
   // --- Functions ---
 
+  function onLengthUnitChange(next: CigarLengthUnit | null) {
+    if (next == null) return;
+    const prev = form.lengthUnit;
+    if (prev === next) return;
+    form.lengthInput = convertLengthInputOnUnitChange(form.lengthInput, prev, next);
+    form.lengthUnit = next;
+    writeStoredLengthUnit(next);
+  }
+
   function initializeForm(cigarData: CigarBase | null) {
+    form.lengthUnit = readStoredLengthUnit();
     if (cigarData) {
       form.id = cigarData.id;
       form.name = cigarData.name;
       form.brandId = cigarData.brand.id;
       form.country = cigarData.country;
       form.strength = cigarData.strength;
-      form.size = cigarData.size;
+      form.lengthInput = lengthInputFromMm(cigarData.lengthMm ?? null, form.lengthUnit);
+      form.diameter = cigarData.diameter ?? null;
       form.wrapper = cigarData.wrapper;
       form.binder = cigarData.binder;
       form.filler = cigarData.filler;
@@ -314,7 +374,8 @@
       form.brandId = null;
       form.country = '';
       form.strength = '';
-      form.size = '';
+      form.lengthInput = null;
+      form.diameter = null;
       form.wrapper = '';
       form.binder = '';
       form.filler = '';
@@ -380,7 +441,11 @@
       if (form.brandId) formData.append('BrandId', form.brandId.toString());
       formData.append('Country', form.country);
       formData.append('Strength', form.strength);
-      formData.append('Size', form.size);
+      {
+        const mm = lengthMmFromInput(form.lengthInput, form.lengthUnit);
+        if (mm != null) formData.append('LengthMm', String(mm));
+      }
+      if (form.diameter != null) formData.append('Diameter', String(form.diameter));
       if (form.wrapper) formData.append('Wrapper', form.wrapper);
       if (form.binder) formData.append('Binder', form.binder);
       if (form.filler) formData.append('Filler', form.filler);

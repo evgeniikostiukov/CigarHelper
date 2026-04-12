@@ -24,7 +24,8 @@ public class CreateCigarBaseFormRequest
     public string? Country { get; set; }
     public string? Description { get; set; }
     public string? Strength { get; set; }
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+    public int? Diameter { get; set; }
     public string? Wrapper { get; set; }
     public string? Binder { get; set; }
     public string? Filler { get; set; }
@@ -47,7 +48,8 @@ public class UpdateCigarBaseFormRequest
     public string? Country { get; set; }
     public string? Description { get; set; }
     public string? Strength { get; set; }
-    public string? Size { get; set; }
+    public int? LengthMm { get; set; }
+    public int? Diameter { get; set; }
     public string? Wrapper { get; set; }
     public string? Binder { get; set; }
     public string? Filler { get; set; }

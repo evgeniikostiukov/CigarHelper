@@ -381,11 +381,11 @@ public class ImportCigarsFromCsv
                     {
                         Name = cigarData.Name,
                         BrandId = brand.Id,
-                        Size = ParseSize(cigarData.Size),
                         Country = brand.Country ?? "Неизвестно", // Используем страну бренда
                         IsModerated = true,
                         CreatedAt = DateTime.UtcNow
                     };
+                    ApplyVitolaFromCsvField(cigar, cigarData.Size);
 
                     if (addedCigars.Contains(cigar.Name))
                     {
@@ -826,21 +826,30 @@ public class ImportCigarsFromCsv
         return cigarName;
     }
 
-    private string? ParseSize(string sizeText)
+    /// <summary>
+    /// Заполняет <see cref="CigarBase.LengthMm"/> и <see cref="CigarBase.Diameter"/> из поля CSV:
+    /// «130 мм × 55 RG» или строка вида «AAA x BB» / «AAA×BB».
+    /// </summary>
+    private static void ApplyVitolaFromCsvField(CigarBase cigar, string? sizeText)
     {
-        if (string.IsNullOrEmpty(sizeText))
-            return null;
-            
-        // Извлекаем размеры из текста вида "130 мм × 55 RG"
-        var match = Regex.Match(sizeText, @"(\d+)\s*мм\s*×\s*(\d+)\s*RG");
-        if (match.Success)
+        if (string.IsNullOrWhiteSpace(sizeText))
+            return;
+
+        var t = sizeText.Trim();
+        var mmRg = Regex.Match(t, @"(\d+)\s*мм\s*[×xX]\s*(\d+)\s*RG", RegexOptions.IgnoreCase);
+        if (mmRg.Success)
         {
-            var length = match.Groups[1].Value;
-            var ringGauge = match.Groups[2].Value;
-            return $"{length} × {ringGauge}";
+            cigar.LengthMm = int.Parse(mmRg.Groups[1].Value, CultureInfo.InvariantCulture);
+            cigar.Diameter = int.Parse(mmRg.Groups[2].Value, CultureInfo.InvariantCulture);
+            return;
         }
-        
-        return sizeText;
+
+        var pair = Regex.Match(t, @"^(\d+)\s*[xX×]\s*(\d+)$");
+        if (pair.Success)
+        {
+            cigar.LengthMm = int.Parse(pair.Groups[1].Value, CultureInfo.InvariantCulture);
+            cigar.Diameter = int.Parse(pair.Groups[2].Value, CultureInfo.InvariantCulture);
+        }
     }
 }
 
