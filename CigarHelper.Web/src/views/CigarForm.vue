@@ -585,19 +585,24 @@
         <div class="flex flex-col gap-2">
           <h3 class="text-sm font-semibold text-stone-800 dark:text-stone-200">Фото карточки справочника</h3>
           <p class="text-xs text-stone-500 dark:text-stone-400">
-            До пяти файлов; в запрос уходят только загрузки с устройства (как в форме создания базовой сигары).
+            До пяти кадров: файлы с устройства или ссылки (http/https); сервер скачивает картинки по ссылкам при
+            сохранении.
           </p>
           <FormImageGallerySection
             v-model="draftBaseImages"
             variant="bare"
             tone="dialog"
-            :hide-url-entry="true"
+            url-entry-mode="multi"
             show-main-image-star
             :max-files="5"
+            :max-url-rows="5"
             test-id="cigar-form-dialog-base-gallery"
             url-input-id="cigar-form-dialog-base-gallery-url"
-            url-help-text="Только файлы."
-            url-help-detail="Ссылки по URL при создании карточки здесь не используются — выберите файлы выше."
+            url-rows-test-id="cigar-form-dialog-base-gallery-urls"
+            add-url-row-test-id="cigar-form-dialog-base-add-url-row"
+            apply-urls-to-gallery-test-id="cigar-form-dialog-base-apply-gallery"
+            url-help-text="Файлы ниже или ссылки через «Добавить в галерею» (до пяти кадров)."
+            url-help-detail="Порядок в галерее сохраняется; звёздочка — главное фото карточки."
             grid-class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4" />
         </div>
       </div>
@@ -845,13 +850,23 @@
     const d = draftDescription.value?.trim();
     if (d) fd.append('Description', d);
 
-    const imagesToUpload = draftBaseImages.value.filter((img) => img.file && !img.markedForDeletion);
-    imagesToUpload.forEach((img, index) => {
+    const active = draftBaseImages.value.filter((img) => !img.markedForDeletion);
+    let fileIndex = 0;
+    let urlIndex = 0;
+    for (const img of active) {
       if (img.file) {
-        fd.append(`NewImages[${index}].File`, img.file);
-        fd.append(`NewImages[${index}].IsMain`, String(img.isMain ?? false));
+        fd.append(`NewImages[${fileIndex}].File`, img.file);
+        fd.append(`NewImages[${fileIndex}].IsMain`, String(img.isMain ?? false));
+        fileIndex++;
+        continue;
       }
-    });
+      const rawUrl = img.imageUrl?.trim();
+      if (rawUrl && /^https?:\/\//i.test(rawUrl)) {
+        fd.append(`ImageUrls[${urlIndex}]`, rawUrl);
+        fd.append(`ImageUrlIsMain[${urlIndex}]`, String(img.isMain ?? false));
+        urlIndex++;
+      }
+    }
 
     return fd;
   }

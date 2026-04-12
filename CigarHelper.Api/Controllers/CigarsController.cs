@@ -1,5 +1,6 @@
 using CigarHelper.Api.Helpers;
 using CigarHelper.Api.Models;
+using CigarHelper.Api.Options;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -8,6 +9,7 @@ using CigarHelper.Data.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace CigarHelper.Api.Controllers;
@@ -19,11 +21,16 @@ public class CigarsController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IImageService _imageService;
+    private readonly ImageUploadOptions _imageUpload;
 
-    public CigarsController(AppDbContext context, IImageService imageService)
+    public CigarsController(
+        AppDbContext context,
+        IImageService imageService,
+        IOptions<ImageUploadOptions> imageUploadOptions)
     {
         _context = context;
         _imageService = imageService;
+        _imageUpload = imageUploadOptions.Value;
     }
 
     [HttpGet]
@@ -593,7 +600,9 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPost("bases")]
-    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase([FromForm] CreateCigarBaseFormRequest request)
+    public async Task<ActionResult<CigarBaseDto>> CreateCigarBase(
+        [FromForm] CreateCigarBaseFormRequest request,
+        CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -660,6 +669,15 @@ public class CigarsController : ControllerBase
                     cigarBaseId: cigarBase.Id,
                     userCigarId: null);
             }
+        }
+
+        if (request.ImageUrls is { Count: > 0 })
+        {
+            await AppendCigarBaseImagesFromUrlsAsync(
+                cigarBase.Id,
+                request.ImageUrls,
+                request.ImageUrlIsMain,
+                cancellationToken);
         }
 
         // Возвращаем созданную сигару с данными
@@ -1067,6 +1085,58 @@ public class CigarsController : ControllerBase
         }
 
         return "image/jpeg"; // По умолчанию
+    }
+
+    private async Task AppendCigarBaseImagesFromUrlsAsync(
+        int cigarBaseId,
+        IReadOnlyList<string> urls,
+        IReadOnlyList<bool>? imageUrlIsMain,
+        CancellationToken cancellationToken)
+    {
+        var hasMain = await _context.CigarImages.AsNoTracking()
+            .AnyAsync(i => i.CigarBaseId == cigarBaseId && i.IsMain, cancellationToken);
+
+        for (var i = 0; i < urls.Count; i++)
+        {
+            var raw = urls[i];
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+
+            var url = raw.Trim();
+            var imageBytes = await ImageDownloader.DownloadImageAsync(url);
+            if (imageBytes == null || imageBytes.Length == 0)
+                continue;
+
+            var contentType = GetContentTypeFromUrl(url);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = ImageBinaryValidator.SuggestContentType(imageBytes);
+            if (string.IsNullOrWhiteSpace(contentType))
+                contentType = "image/jpeg";
+
+            if (!ImageBinaryValidator.TryValidate(
+                    imageBytes,
+                    contentType,
+                    imageBytes.Length,
+                    _imageUpload.MaxBytes,
+                    out _))
+                continue;
+
+            var explicitMain = imageUrlIsMain != null && i < imageUrlIsMain.Count && imageUrlIsMain[i];
+            var setMain = explicitMain || !hasMain;
+
+            await _imageService.SaveImageAsync(
+                imageData: imageBytes,
+                contentType: contentType,
+                fileName: GetFileNameFromUrl(url),
+                description: null,
+                isMain: setMain,
+                cigarBaseId: cigarBaseId,
+                userCigarId: null,
+                ct: cancellationToken);
+
+            if (setMain)
+                hasMain = true;
+        }
     }
 
     private static async Task<byte[]> ReadFormFileAsync(IFormFile file)

@@ -31,6 +31,12 @@ public class CreateCigarBaseFormRequest
 
     /// <summary>Загружаемые файлы изображений.</summary>
     public List<NewImageUpload>? NewImages { get; set; }
+
+    /// <summary>URL изображений (http/https); скачиваются на сервере и привязываются к карточке после <see cref="NewImages"/>.</summary>
+    public List<string>? ImageUrls { get; set; }
+
+    /// <summary>Главный кадр по индексу в <see cref="ImageUrls"/> (длина может быть меньше списка URL).</summary>
+    public List<bool>? ImageUrlIsMain { get; set; }
 }
 
 /// <summary>Обновление CigarBase с загрузкой файлов (multipart/form-data).</summary>

@@ -44,15 +44,12 @@ public class CigarImagesController : ControllerBase
     private async Task<bool> UserOwnsUserCigarAsync(int userCigarId, int userId, CancellationToken ct) =>
         await _context.UserCigars.AnyAsync(uc => uc.Id == userCigarId && uc.UserId == userId, ct);
 
-    /// <summary>Скачивает изображение по URL и сохраняет (только staff).</summary>
+    /// <summary>Скачивает изображение по URL и сохраняет (любой авторизованный пользователь).</summary>
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<object>> UploadCigarImageByUrl(
         [FromBody] UploadCigarImageByUrlRequest request,
         CancellationToken cancellationToken)
     {
-        if (!IsStaff())
-            return Forbid();
-
         if (request is null)
             return BadRequest("Тело запроса пустое.");
 
