@@ -593,17 +593,24 @@ public class CigarsController : ControllerBase
     }
 
     [HttpPost("bases")]
-    [Authorize(Roles = "Admin,Moderator")]
     public async Task<ActionResult<CigarBaseDto>> CreateCigarBase([FromForm] CreateCigarBaseFormRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        var isStaff = User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator));
 
         // Проверяем существование бренда
         var brand = await _context.Brands.FindAsync(request.BrandId);
         if (brand == null)
         {
             return BadRequest($"Бренд с ID {request.BrandId} не найден");
+        }
+
+        // Обычные пользователи привязывают карточку только к промодерированному бренду (список — GET .../cigars/brands).
+        if (!isStaff && !brand.IsModerated)
+        {
+            return BadRequest("Выберите бренд из промодерированного списка.");
         }
 
         // Проверяем, не существует ли уже сигара с таким названием и брендом
@@ -627,7 +634,7 @@ public class CigarsController : ControllerBase
             Wrapper = request.Wrapper,
             Binder = request.Binder,
             Filler = request.Filler,
-            IsModerated = User.IsInRole(nameof(Role.Admin)) || User.IsInRole(nameof(Role.Moderator)),
+            IsModerated = isStaff,
             CreatedAt = DateTime.UtcNow
         };
 

@@ -100,6 +100,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-12** — Своя сигара с коллекции: `POST /api/cigars/bases` доступен обычным пользователям (бренд — промодерированный; `IsModerated` у новой карточки — только staff); `CigarForm.vue` — режимы «Из справочника» / «Своя сигара», `createCigarBase` + `createCigar`; тесты API; memory bank.
 - **2026-04-12** — Добавление в коллекцию по немодерированной карточке справочника: `CigarsController.CreateCigar` проверяет только существование `CigarBase` по id (раньше требовалась `IsModerated`); комментарии в `CreateCigarRequest`, `cigarService.ts`; memory bank (`collection-list-views.md`, `code-map.md`).
 - **2026-04-10** — Редактирование обзоров (SPA): `ReviewForm` — режим по маршруту `ReviewEdit`, проверка владельца по `userId`, отключение смены сигары при правке, «Отмена» → карточка обзора; `ReviewList` — кнопка «Редактировать» на своих карточках; роутер — `/reviews/:id/edit` объявлен до `/reviews/:id`.
 - **2026-04-08** — UI: переписаны подсказки галерей (`FormImageGallerySection` + формы/диалог), дашборд (краткий текст + «i»/tooltip), `HumidorDetail` список доступных сигар, пустые состояния и онбординг; `App.vue` fallback «Загрузка…»; memory bank — паттерн tooltip для деталей.

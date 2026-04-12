@@ -16,11 +16,11 @@
           <h1
             id="cigar-form-heading"
             class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
-            Добавить из базы
+            Добавить в коллекцию
           </h1>
           <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-            Выберите сигару из справочника и заполните поля коллекции: цена, количество, оценка, вкус и аромат, при
-            необходимости фото и хьюмидор.
+            Выберите сигару из справочника или добавьте свою карточку (она появится в каталоге после модерации). Затем
+            укажите цену, количество, оценку, вкус и аромат, при необходимости фото и хьюмидор.
           </p>
         </div>
         <Button
@@ -50,86 +50,224 @@
           @submit.prevent="handleSubmit">
           <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
-            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Сигара из справочника</h2>
+            <h2 class="mb-4 text-lg font-semibold text-stone-900 dark:text-rose-50/95">Карточка сигары</h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div class="flex flex-col gap-2 md:col-span-2">
-                <label
-                  for="name"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Название <span class="text-red-600 dark:text-red-400">*</span>
-                </label>
-                <AutoComplete
-                  id="name"
-                  data-testid="cigar-form-name"
-                  :model-value="selectedBase"
-                  :suggestions="filteredCigars"
-                  class="w-full"
-                  input-class="min-h-11 w-full"
-                  :class="{ 'p-invalid': errors.base }"
-                  data-key="id"
-                  option-label="name"
-                  option-group-label="brand"
-                  option-group-children="cigars"
-                  :dropdown="true"
-                  :virtual-scroller-options="{ itemSize: 50 }"
-                  :loading="searchLoading"
-                  :delay="300"
-                  :min-length="0"
-                  placeholder="Выберите сигару из справочника"
-                  @update:model-value="onCigarAutocompleteModelUpdate"
-                  @complete="searchCigars">
-                  <template #optiongroup="slotProps">
-                    <div class="p-2 font-semibold text-stone-800 dark:text-stone-200">
-                      {{ slotProps.option.brand }}
-                    </div>
-                  </template>
-                  <template #option="slotProps">
-                    <div class="flex items-center">
-                      <div>
-                        <div class="font-semibold text-stone-900 dark:text-stone-100">
-                          {{ slotProps.option.name }}
-                        </div>
-                        <div class="text-xs text-stone-500 dark:text-stone-400">
-                          <span class="mr-2">{{ slotProps.option.brand.name }}</span>
-                          <span
-                            v-if="slotProps.option.size"
-                            class="mr-2"
-                            >{{ slotProps.option.size }}</span
-                          >
-                          <span v-if="slotProps.option.strength">{{
-                            getStrengthLabel(slotProps.option.strength)
-                          }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                  <template #empty>
-                    <div class="p-2 text-stone-500 dark:text-stone-400">
-                      {{ searchLoading ? 'Поиск…' : 'Сигары не найдены.' }}
-                    </div>
-                  </template>
-                </AutoComplete>
-                <small
-                  v-if="errors.base"
-                  class="text-sm text-red-600 dark:text-red-400"
-                  >{{ errors.base }}</small
-                >
+                <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Источник</span>
+                <div class="flex flex-wrap gap-2">
+                  <Button
+                    data-testid="cigar-form-source-catalog"
+                    type="button"
+                    label="Из справочника"
+                    class="min-h-11"
+                    :outlined="sourceMode !== 'catalog'"
+                    :severity="sourceMode === 'catalog' ? 'primary' : 'secondary'"
+                    @click="setSourceMode('catalog')" />
+                  <Button
+                    data-testid="cigar-form-source-custom"
+                    type="button"
+                    label="Своя сигара"
+                    class="min-h-11"
+                    :outlined="sourceMode !== 'custom'"
+                    :severity="sourceMode === 'custom' ? 'primary' : 'secondary'"
+                    @click="setSourceMode('custom')" />
+                </div>
+                <small class="text-stone-500 dark:text-stone-400">
+                  Своя карточка сохраняется как непромодерированная и станет видна всем после проверки.
+                </small>
               </div>
 
-              <div class="flex flex-col gap-2 md:col-span-2">
-                <label
-                  for="cigar-form-brand-readonly"
-                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                  Бренд
-                </label>
-                <InputText
-                  id="cigar-form-brand-readonly"
-                  data-testid="cigar-form-brand"
-                  class="min-h-11 w-full"
-                  readonly
-                  :model-value="selectedBase?.brand?.name ?? ''"
-                  placeholder="Появится после выбора сигары" />
-              </div>
+              <template v-if="sourceMode === 'catalog'">
+                <div class="flex flex-col gap-2 md:col-span-2">
+                  <label
+                    for="name"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Название <span class="text-red-600 dark:text-red-400">*</span>
+                  </label>
+                  <AutoComplete
+                    id="name"
+                    data-testid="cigar-form-name"
+                    :model-value="selectedBase"
+                    :suggestions="filteredCigars"
+                    class="w-full"
+                    input-class="min-h-11 w-full"
+                    :class="{ 'p-invalid': errors.base }"
+                    data-key="id"
+                    option-label="name"
+                    option-group-label="brand"
+                    option-group-children="cigars"
+                    :dropdown="true"
+                    :virtual-scroller-options="{ itemSize: 50 }"
+                    :loading="searchLoading"
+                    :delay="300"
+                    :min-length="0"
+                    placeholder="Выберите сигару из справочника"
+                    @update:model-value="onCigarAutocompleteModelUpdate"
+                    @complete="searchCigars">
+                    <template #optiongroup="slotProps">
+                      <div class="p-2 font-semibold text-stone-800 dark:text-stone-200">
+                        {{ slotProps.option.brand }}
+                      </div>
+                    </template>
+                    <template #option="slotProps">
+                      <div class="flex items-center">
+                        <div>
+                          <div class="font-semibold text-stone-900 dark:text-stone-100">
+                            {{ slotProps.option.name }}
+                          </div>
+                          <div class="text-xs text-stone-500 dark:text-stone-400">
+                            <span class="mr-2">{{ slotProps.option.brand.name }}</span>
+                            <span
+                              v-if="slotProps.option.size"
+                              class="mr-2"
+                              >{{ slotProps.option.size }}</span
+                            >
+                            <span v-if="slotProps.option.strength">{{
+                              getStrengthLabel(slotProps.option.strength)
+                            }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                    <template #empty>
+                      <div class="p-2 text-stone-500 dark:text-stone-400">
+                        {{ searchLoading ? 'Поиск…' : 'Сигары не найдены.' }}
+                      </div>
+                    </template>
+                  </AutoComplete>
+                  <small
+                    v-if="errors.base"
+                    class="text-sm text-red-600 dark:text-red-400"
+                    >{{ errors.base }}</small
+                  >
+                </div>
+
+                <div class="flex flex-col gap-2 md:col-span-2">
+                  <label
+                    for="cigar-form-brand-readonly"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Бренд
+                  </label>
+                  <InputText
+                    id="cigar-form-brand-readonly"
+                    data-testid="cigar-form-brand"
+                    class="min-h-11 w-full"
+                    readonly
+                    :model-value="selectedBase?.brand?.name ?? ''"
+                    placeholder="Появится после выбора сигары" />
+                </div>
+              </template>
+
+              <template v-else>
+                <div class="flex flex-col gap-2 md:col-span-2">
+                  <label
+                    for="cigar-form-custom-name"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Название <span class="text-red-600 dark:text-red-400">*</span>
+                  </label>
+                  <InputText
+                    id="cigar-form-custom-name"
+                    v-model="customName"
+                    data-testid="cigar-form-custom-name"
+                    class="min-h-11 w-full"
+                    :class="{ 'p-invalid': errors.customName }"
+                    maxlength="100"
+                    placeholder="Как на этикетке или в каталоге"
+                    autocomplete="off" />
+                  <small
+                    v-if="errors.customName"
+                    class="text-sm text-red-600 dark:text-red-400"
+                    >{{ errors.customName }}</small
+                  >
+                </div>
+
+                <div class="flex flex-col gap-2 md:col-span-2">
+                  <label
+                    for="cigar-form-custom-brand"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Бренд <span class="text-red-600 dark:text-red-400">*</span>
+                  </label>
+                  <Select
+                    id="cigar-form-custom-brand"
+                    v-model="customBrandId"
+                    data-testid="cigar-form-custom-brand"
+                    class="w-full"
+                    label-class="min-h-11"
+                    :options="catalogBrands"
+                    option-label="name"
+                    option-value="id"
+                    placeholder="Выберите бренд"
+                    show-clear
+                    filter
+                    :loading="brandsLoading"
+                    :class="{ 'p-invalid': errors.customBrand }" />
+                  <small
+                    v-if="errors.customBrand"
+                    class="text-sm text-red-600 dark:text-red-400"
+                    >{{ errors.customBrand }}</small
+                  >
+                  <small class="text-stone-500 dark:text-stone-400">
+                    Только промодерированные бренды. Нет нужного —
+                    <RouterLink
+                      class="font-medium text-rose-800 underline underline-offset-2 dark:text-rose-300"
+                      :to="{ name: 'CigarBases' }">
+                      база сигар
+                    </RouterLink>
+                    (при наличии прав).
+                  </small>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <label
+                    for="cigar-form-custom-strength"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Крепость
+                  </label>
+                  <Select
+                    id="cigar-form-custom-strength"
+                    v-model="customStrength"
+                    data-testid="cigar-form-custom-strength"
+                    class="w-full"
+                    label-class="min-h-11"
+                    :options="strengthOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Не указано"
+                    show-clear />
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <label
+                    for="cigar-form-custom-size"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Формат (vitola)
+                  </label>
+                  <InputText
+                    id="cigar-form-custom-size"
+                    v-model="customSize"
+                    data-testid="cigar-form-custom-size"
+                    class="min-h-11 w-full"
+                    maxlength="50"
+                    placeholder="Например Robusto"
+                    autocomplete="off" />
+                </div>
+
+                <div class="flex flex-col gap-2 md:col-span-2">
+                  <label
+                    for="cigar-form-custom-country"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Страна
+                  </label>
+                  <InputText
+                    id="cigar-form-custom-country"
+                    v-model="customCountry"
+                    data-testid="cigar-form-custom-country"
+                    class="min-h-11 w-full"
+                    maxlength="100"
+                    placeholder="Необязательно"
+                    autocomplete="off" />
+                </div>
+              </template>
 
               <div class="flex flex-col gap-2 md:col-span-2">
                 <label
@@ -374,7 +512,7 @@
   import { useToast } from 'primevue/usetoast';
   import cigarService from '@/services/cigarService';
   import humidorService from '@/services/humidorService';
-  import type { CigarBase } from '@/services/cigarService';
+  import type { CigarBase, Brand } from '@/services/cigarService';
   import type { Humidor } from '@/services/humidorService';
   import { strengthOptions } from '@/utils/cigarOptions';
   import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -402,8 +540,12 @@
     cigars: CigarBase[];
   }
 
+  type SourceMode = 'catalog' | 'custom';
+
   interface FormErrors {
     base?: string;
+    customName?: string;
+    customBrand?: string;
   }
 
   const route = useRoute();
@@ -420,6 +562,16 @@
   const selectedBase = ref<CigarBase | null>(null);
   const searchLoading = ref<boolean>(false);
   const searchCache = ref<Map<string, CigarGroup[]>>(new Map());
+
+  const sourceMode = ref<SourceMode>('catalog');
+  const catalogBrands = ref<Brand[]>([]);
+  const brandsLoading = ref(false);
+  const brandsLoaded = ref(false);
+  const customName = ref('');
+  const customBrandId = ref<number | null>(null);
+  const customStrength = ref<string | null>(null);
+  const customSize = ref('');
+  const customCountry = ref('');
 
   const maxNewImageUrls = 12;
 
@@ -475,6 +627,33 @@
     return out;
   }
 
+  async function ensureBrandsLoaded(): Promise<void> {
+    if (brandsLoaded.value) return;
+    brandsLoading.value = true;
+    try {
+      catalogBrands.value = await cigarService.getAllBrands();
+      brandsLoaded.value = true;
+    } catch {
+      toast.add({
+        severity: 'error',
+        summary: 'Ошибка',
+        detail: 'Не удалось загрузить бренды',
+        life: 3000,
+      });
+    } finally {
+      brandsLoading.value = false;
+    }
+  }
+
+  function setSourceMode(mode: SourceMode): void {
+    if (sourceMode.value === mode) return;
+    sourceMode.value = mode;
+    errors.value = {};
+    if (mode === 'custom') {
+      void ensureBrandsLoaded();
+    }
+  }
+
   async function loadHumidors(): Promise<void> {
     humidorsLoading.value = true;
     try {
@@ -493,22 +672,50 @@
 
   function validateForm(): boolean {
     errors.value = {};
-    const id = selectedBase.value?.id;
-    if (id == null || id <= 0 || !selectedBase.value?.name?.trim()) {
-      errors.value.base = 'Выберите сигару из справочника (нельзя вводить произвольное название).';
+    if (sourceMode.value === 'catalog') {
+      const id = selectedBase.value?.id;
+      if (id == null || id <= 0 || !selectedBase.value?.name?.trim()) {
+        errors.value.base = 'Выберите сигару из справочника.';
+      }
+    } else {
+      if (!customName.value?.trim()) {
+        errors.value.customName = 'Укажите название.';
+      }
+      if (customBrandId.value == null) {
+        errors.value.customBrand = 'Выберите бренд.';
+      }
     }
     return Object.keys(errors.value).length === 0;
   }
 
+  function buildCustomCigarBaseFormData(): FormData {
+    const fd = new FormData();
+    fd.append('Name', customName.value.trim());
+    fd.append('BrandId', String(customBrandId.value!));
+    const c = customCountry.value?.trim();
+    if (c) fd.append('Country', c);
+    const st = customStrength.value?.trim();
+    if (st) fd.append('Strength', st);
+    const sz = customSize.value?.trim();
+    if (sz) fd.append('Size', sz);
+    return fd;
+  }
+
   async function handleSubmit(): Promise<void> {
     if (!validateForm()) return;
-    const base = selectedBase.value!;
     saving.value = true;
     saveError.value = null;
     try {
+      let cigarBaseId: number;
+      if (sourceMode.value === 'custom') {
+        const created = await cigarService.createCigarBase(buildCustomCigarBaseFormData());
+        cigarBaseId = created.id;
+      } else {
+        cigarBaseId = selectedBase.value!.id;
+      }
       const urls = await collectImagePayloadUrls();
       await cigarService.createCigar({
-        cigarBaseId: base.id,
+        cigarBaseId,
         price: form.value.price,
         quantity: form.value.quantity ?? 1,
         humidorId: form.value.addToHumidor ? form.value.humidorId : null,
@@ -686,6 +893,7 @@
   async function applyQueryCigarBase(id: number): Promise<void> {
     try {
       const base = await cigarService.getCigarBase(id);
+      sourceMode.value = 'catalog';
       selectedBase.value = base;
     } catch {
       toast.add({
