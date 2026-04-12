@@ -164,6 +164,9 @@
       <!-- Изображения -->
       <div class="space-y-4">
         <h3 class="text-lg font-semibold">Изображения</h3>
+        <p class="text-xs text-gray-600 dark:text-gray-400">
+          {{ CIGAR_BASE_CATALOG_PHOTO_HINT }}
+        </p>
         <FormImageGallerySection
           v-model="form.images"
           variant="bare"
@@ -202,6 +205,7 @@
   import { z } from 'zod';
   import cigarService, { type CigarBase, type Brand } from '@/services/cigarService';
   import FormImageGallerySection, { type FormGalleryImageItem } from './FormImageGallerySection.vue';
+  import { CIGAR_BASE_CATALOG_PHOTO_HINT } from '@/constants/cigarBaseCatalogPhotoHint';
   import { strengthOptions } from '@/utils/cigarOptions';
 
   // --- Interfaces and Types ---

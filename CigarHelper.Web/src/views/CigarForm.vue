@@ -588,6 +588,9 @@
             До пяти кадров: файлы с устройства или ссылки (http/https); сервер скачивает картинки по ссылкам при
             сохранении.
           </p>
+          <p class="text-xs text-stone-600 dark:text-stone-400">
+            {{ CIGAR_BASE_CATALOG_PHOTO_HINT }}
+          </p>
           <FormImageGallerySection
             v-model="draftBaseImages"
             variant="bare"
@@ -650,6 +653,7 @@
   import Message from 'primevue/message';
   import Textarea from 'primevue/textarea';
   import FormImageGallerySection, { type FormGalleryImageItem } from '@/components/FormImageGallerySection.vue';
+  import { CIGAR_BASE_CATALOG_PHOTO_HINT } from '@/constants/cigarBaseCatalogPhotoHint';
 
   interface FormData {
     price: number | null;
