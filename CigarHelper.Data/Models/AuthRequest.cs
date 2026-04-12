@@ -3,6 +3,12 @@ using CigarHelper.Data.Models.Enums;
 
 namespace CigarHelper.Data.Models;
 
+/// <summary>Сообщения валидации для auth/register (единый текст для API и клиента).</summary>
+public static class AuthValidationMessages
+{
+    public const string ConfirmedAge18 = "Подтвердите, что вам исполнилось 18 лет.";
+}
+
 public class LoginRequest
 {
     [Required(ErrorMessage = "Логин обязателен")]
@@ -13,7 +19,7 @@ public class LoginRequest
     public string Password { get; set; } = string.Empty;
 }
 
-public class RegisterRequest
+public class RegisterRequest : IValidatableObject
 {
     [Required(ErrorMessage = "Имя пользователя обязательно")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "Имя пользователя должно быть от 3 до 50 символов")]
@@ -28,6 +34,19 @@ public class RegisterRequest
     [Required(ErrorMessage = "Подтверждение пароля обязательно")]
     [Compare("Password", ErrorMessage = "Пароли не совпадают")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    /// <summary>Подтверждение возраста 18+ (обязательно).</summary>
+    public bool ConfirmedAge18 { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (!ConfirmedAge18)
+        {
+            yield return new ValidationResult(
+                AuthValidationMessages.ConfirmedAge18,
+                [nameof(ConfirmedAge18)]);
+        }
+    }
 }
 
 public class AuthResponse

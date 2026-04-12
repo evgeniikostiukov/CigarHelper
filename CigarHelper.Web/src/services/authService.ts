@@ -23,6 +23,8 @@ export interface RegisterData {
   username?: string;
   password?: string;
   confirmPassword?: string;
+  /** Подтверждение возраста 18+ (обязательно для API). */
+  confirmedAge18?: boolean;
 }
 
 export interface AuthResponse {

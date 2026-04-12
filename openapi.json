@@ -3762,7 +3762,7 @@
       "RegisterRequest": {
         "required": [
           "confirmPassword",
-          "email",
+          "confirmedAge18",
           "password",
           "username"
         ],
@@ -3774,12 +3774,6 @@
             "pattern": "^[a-zA-Z0-9_-]+$",
             "type": "string"
           },
-          "email": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "format": "email"
-          },
           "password": {
             "maxLength": 100,
             "minLength": 6,
@@ -3789,6 +3783,9 @@
           "confirmPassword": {
             "minLength": 1,
             "type": "string"
+          },
+          "confirmedAge18": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

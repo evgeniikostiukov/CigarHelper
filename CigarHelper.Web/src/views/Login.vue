@@ -113,6 +113,30 @@
             </small>
           </div>
 
+          <div
+            v-if="isRegister"
+            class="flex flex-col gap-2">
+            <div class="flex min-h-11 items-start gap-3 touch-manipulation">
+              <Checkbox
+                id="login-age-confirm"
+                v-model="form.confirmedAge18"
+                data-testid="login-age-confirm"
+                :binary="true"
+                input-id="login-age-confirm"
+                :invalid="!!fieldErrors.confirmedAge18" />
+              <label
+                for="login-age-confirm"
+                class="cursor-pointer text-sm leading-snug text-stone-800 dark:text-stone-200">
+                Мне исполнилось 18 лет
+              </label>
+            </div>
+            <small
+              v-if="fieldErrors.confirmedAge18"
+              class="text-sm text-red-600 dark:text-red-400">
+              {{ fieldErrors.confirmedAge18 }}
+            </small>
+          </div>
+
           <Button
             data-testid="login-submit"
             type="submit"
@@ -150,6 +174,7 @@
 <script setup lang="ts">
   import { ref, reactive, watch } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
+  import Checkbox from 'primevue/checkbox';
   import authService from '../services/authService';
   import type { AuthCredentials, RegisterData } from '../services/authService';
 
@@ -157,12 +182,14 @@
     username: string;
     password: string;
     confirmPassword: string;
+    confirmedAge18: boolean;
   }
 
   interface FieldErrors {
     username: string | null;
     password: string | null;
     confirmPassword: string | null;
+    confirmedAge18: string | null;
   }
 
   const router = useRouter();
@@ -176,32 +203,42 @@
     username: '',
     password: '',
     confirmPassword: '',
+    confirmedAge18: false,
   });
 
   const fieldErrors = reactive<FieldErrors>({
     username: null,
     password: null,
     confirmPassword: null,
+    confirmedAge18: null,
   });
 
-  const validateField = (field: keyof LoginForm, value: string): string | null => {
+  const validateField = (field: keyof LoginForm, value: LoginForm[keyof LoginForm]): string | null => {
+    if (field === 'confirmedAge18') {
+      if (isRegister.value && value !== true) {
+        return 'Подтвердите, что вам исполнилось 18 лет.';
+      }
+      return null;
+    }
+
+    const str = typeof value === 'string' ? value : '';
     switch (field) {
       case 'username':
-        if (!value) return 'Логин обязателен';
-        if (!/^[a-zA-Z0-9_-]+$/.test(value)) return 'Недопустимые символы';
-        if (isRegister.value && value.length < 3) return 'Минимум 3 символа';
+        if (!str) return 'Логин обязателен';
+        if (!/^[a-zA-Z0-9_-]+$/.test(str)) return 'Недопустимые символы';
+        if (isRegister.value && str.length < 3) return 'Минимум 3 символа';
         break;
       case 'password':
-        if (!value) return 'Пароль обязателен';
-        if (value.length < 6) return 'Минимум 6 символов';
-        if (isRegister.value && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(value)) {
+        if (!str) return 'Пароль обязателен';
+        if (str.length < 6) return 'Минимум 6 символов';
+        if (isRegister.value && !/^(?=.*[a-z])(?=.*[A-Z0-9]).*$/.test(str)) {
           return 'В пароле нужны строчная латинская буква и хотя бы одна заглавная буква или цифра';
         }
         break;
       case 'confirmPassword':
         if (isRegister.value) {
-          if (!value) return 'Подтверждение пароля обязательно';
-          if (value !== form.password) return 'Пароли не совпадают';
+          if (!str) return 'Подтверждение пароля обязательно';
+          if (str !== form.password) return 'Пароли не совпадают';
         }
         break;
     }
@@ -224,6 +261,7 @@
       username: '',
       password: '',
       confirmPassword: '',
+      confirmedAge18: false,
     });
     clearErrors();
   };
@@ -239,6 +277,7 @@
       username: null,
       password: null,
       confirmPassword: null,
+      confirmedAge18: null,
     });
   };
 
@@ -248,7 +287,7 @@
     let hasError = false;
     for (const field in form) {
       const key = field as keyof LoginForm;
-      if (!isRegister.value && key === 'confirmPassword') {
+      if (!isRegister.value && (key === 'confirmPassword' || key === 'confirmedAge18')) {
         continue;
       }
       const validationError = validateField(key, form[key]);
@@ -267,6 +306,7 @@
           username: form.username,
           password: form.password,
           confirmPassword: form.confirmPassword,
+          confirmedAge18: form.confirmedAge18,
         };
         const response = await authService.register(payload);
         if (!response.success) {

@@ -17,7 +17,8 @@ public class AuthServiceTests
     {
         Username = username,
         Password = ValidPassword,
-        ConfirmPassword = ValidPassword
+        ConfirmPassword = ValidPassword,
+        ConfirmedAge18 = true
     };
 
     private static AppDbContext CreateContext()
@@ -72,6 +73,24 @@ public class AuthServiceTests
 
         Assert.False(res.Success);
         Assert.Equal("Username already taken", res.Message);
+        jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_AgeNotConfirmed_ReturnsFailure()
+    {
+        await using var context = CreateContext();
+        var jwt = new Mock<IJwtService>(MockBehavior.Strict);
+        var sut = new AuthService(context, jwt.Object);
+
+        var req = NewRegisterRequest("agegate");
+        req.ConfirmedAge18 = false;
+
+        var res = await sut.RegisterAsync(req);
+
+        Assert.False(res.Success);
+        Assert.Equal(AuthValidationMessages.ConfirmedAge18, res.Message);
+        Assert.Empty(context.Users);
         jwt.Verify(j => j.GenerateToken(It.IsAny<User>()), Times.Never);
     }
 

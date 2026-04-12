@@ -90,7 +90,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"adm{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -121,7 +122,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"img{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -246,7 +248,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"intr{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         reg.EnsureSuccessStatusCode();
         var body = await reg.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -268,7 +271,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = username,
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
 
@@ -313,7 +317,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"pg{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -363,7 +368,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"p2{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -390,7 +396,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"u{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -415,7 +422,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"u{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
@@ -451,7 +459,8 @@ public class ApiAuthorizationAndContractsIntegrationTests
         {
             Username = $"u{Guid.NewGuid():N}"[..10],
             Password = "abCd12",
-            ConfirmPassword = "abCd12"
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
         });
         registerRes.EnsureSuccessStatusCode();
         var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);

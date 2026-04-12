@@ -100,6 +100,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-12** — Регистрация: чекбокс подтверждения **18+** (`Login.vue`, `confirmedAge18` в `RegisterData`); API — `RegisterRequest.ConfirmedAge18`, `AuthValidationMessages`, валидация + `AuthService`; `openapi.json` / `api.generated.ts`; тесты.
 - **2026-04-12** — Правило Cursor **`.cursor/rules/releases.mdc`**: релиз по запросу — определение patch/minor/major, `npm version`, тег, `npm run changelog`, push тегов; ссылка в **`docs/memory-bank/workflow.md`**.
 - **2026-04-12** — Корень репозитория: **`auto-changelog`** (devDependency), конфиг **`.auto-changelog`**, скрипт **`npm run changelog`** → **`CHANGELOG.md`** (Keep a Changelog, теги `v*`, секция Unreleased); раздел в **`docs/memory-bank/workflow.md`**.
 - **2026-04-12** — Диалог «новая базовая сигара» в `CigarForm`: все поля `CreateCigarBaseFormRequest` + галерея файлов; `FormImageGallerySection` — проп `hideUrlEntry`.
