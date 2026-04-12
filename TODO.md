@@ -100,6 +100,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-12** — Корень репозитория: **`auto-changelog`** (devDependency), конфиг **`.auto-changelog`**, скрипт **`npm run changelog`** → **`CHANGELOG.md`** (Keep a Changelog, теги `v*`, секция Unreleased); раздел в **`docs/memory-bank/workflow.md`**.
 - **2026-04-12** — Диалог «новая базовая сигара» в `CigarForm`: все поля `CreateCigarBaseFormRequest` + галерея файлов; `FormImageGallerySection` — проп `hideUrlEntry`.
 - **2026-04-12** — `CigarForm`: добавление новой карточки в справочник через кнопки в выпадающем списке (`#footer` при пустом поиске, `#empty` при нуле результатов), диалог вместо переключателя режима; memory bank.
 - **2026-04-12** — Своя сигара с коллекции: `POST /api/cigars/bases` доступен обычным пользователям (бренд — промодерированный; `IsModerated` у новой карточки — только staff); `CigarForm.vue` — режимы «Из справочника» / «Своя сигара», `createCigarBase` + `createCigar`; тесты API; memory bank.

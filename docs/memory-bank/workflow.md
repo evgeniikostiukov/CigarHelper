@@ -135,6 +135,10 @@ dotnet test CigarHelper.sln
 
 Детали по фронту и прокси: [frontend/workflow.md](./frontend/workflow.md).
 
+## Changelog (auto-changelog)
+
+В корне репозитория: **`npm run changelog`** — пересобирает [`CHANGELOG.md`](../../CHANGELOG.md) по истории git и тегам (шаблон Keep a Changelog, настройки в [`.auto-changelog`](../../.auto-changelog)). Перед релизом или после значимых коммитов имеет смысл обновить файл и закоммитить его вместе с тегом версии. Нужен **git** в `PATH` (локально обычно так и есть; в минимальной среде без git команда упадёт с `spawn git ENOENT`).
+
 ## Продакшен
 
 Чеклист по хостам, CORS, секретам и Npgsql см. в [../security-refactor-memory-bank.md](../security-refactor-memory-bank.md) (раздел про выкат и `appsettings.Production.json`).
