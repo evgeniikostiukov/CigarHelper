@@ -6,7 +6,7 @@ namespace CigarHelper.Api.Storage;
 
 /// <summary>
 /// Реализация <see cref="IThumbnailGenerator"/> на базе SixLabors.ImageSharp.
-/// Выдаёт WebP — хороший баланс сжатия и совместимости.
+/// Перед ресайзом применяет EXIF Orientation (часто у фото с телефонов), затем WebP.
 /// </summary>
 public sealed class ImageSharpThumbnailGenerator : IThumbnailGenerator
 {
@@ -17,6 +17,7 @@ public sealed class ImageSharpThumbnailGenerator : IThumbnailGenerator
         CancellationToken ct = default)
     {
         using var image = Image.Load(sourceData);
+        image.Mutate(x => x.AutoOrient());
 
         var (origW, origH) = (image.Width, image.Height);
         if (origW > maxWidth || origH > maxHeight)
