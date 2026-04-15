@@ -16,7 +16,7 @@
 | `views/*.vue` | Страницы |
 | `views/Home.vue` | Главная `/`: тот же визуальный каркас, см. [collection-list-views.md](./collection-list-views.md) |
 | `views/Login.vue` | Вход и регистрация `/login` (`meta.public: true`), см. [collection-list-views.md](./collection-list-views.md) |
-| `views/Dashboard.vue`, `views/HumidorList.vue`, `views/HumidorDetail.vue`, `views/Profile.vue`, `views/PublicUserProfile.vue`, `views/PublicHumidorDetail.vue`, `views/HumidorForm.vue`, `views/CigarList.vue`, `views/CigarForm.vue`, `views/CigarCollectionEdit.vue`, `views/CigarDetail.vue`, `views/CigarBases.vue`, `views/ReviewList.vue`, `views/ReviewDetail.vue`, `views/ReviewForm.vue`, `views/Brands.vue`, `views/AdminLayout.vue`, `views/AdminDashboard.vue`, `views/AdminUsers.vue`, `views/AdminImages.vue` | Дашборд-сводка, коллекция (добавление из базы / правка личных полей), профиль, публичный профиль и публичный хьюмидор, база, обзоры, админ-панель (`/admin`: обзор, пользователи, изображения в хранилище), бренды: единый стиль, см. [collection-list-views.md](./collection-list-views.md) |
+| `views/Dashboard.vue`, `views/HumidorList.vue`, `views/HumidorDetail.vue`, `views/Profile.vue`, `views/PublicUserProfile.vue`, `views/PublicHumidorDetail.vue`, `views/HumidorForm.vue`, `views/CigarList.vue`, `views/CigarForm.vue`, `views/CigarCollectionEdit.vue`, `views/CigarDetail.vue`, `views/CigarBases.vue`, `views/ReviewList.vue`, `views/ReviewDetail.vue`, `views/ReviewForm.vue`, `views/Brands.vue`, `views/AdminLayout.vue`, `views/AdminDashboard.vue`, `views/AdminUsers.vue`, `views/AdminImages.vue`, `views/AdminCigarComments.vue`, `views/AdminDeletedReviews.vue` | Дашборд-сводка, коллекция, профиль, публичные страницы, база, обзоры, бренды; админ (`/admin`: обзор, пользователи, изображения, комментарии, удалённые обзоры `/admin/reviews-deleted`): единый стиль, см. [collection-list-views.md](./collection-list-views.md) |
 | `components/*.vue` | Переиспользуемые блоки (диалоги, редактор, загрузка изображений) |
 | `assets/main.css` | Глобальные стили |
 
@@ -41,13 +41,13 @@
 
 - Публичные: `/`, `/login` (`meta.public`), `/u/:username`, `/u/:username/humidors/:humidorId`, список/деталь отзывов `/reviews`, `/reviews/:id`.
 - Требуют auth: `/dashboard` (сводка), профиль, хьюмидоры, сигары, формы, каталог-базы `/cigar-bases`, справочник брендов `/brands` (просмотр всем залогиненным; кнопки создания/редактирования/удаления — только **Admin**/**Moderator** в UI), создание/редактирование отзывов.
-- Требуют **Admin** (или Moderator для части `/admin`): вложенные `/admin`, `/admin/users`, `/admin/images` (родитель `/admin` с `AdminLayout`); `/brands` к этому не относится.
+- Требуют **Admin** (или Moderator для части `/admin`): вложенные `/admin`, `/admin/users`, `/admin/images`, `/admin/comments`, `/admin/reviews-deleted` (родитель `/admin` с `AdminLayout`); `/brands` к этому не относится.
 
 Guards: неавторизованный → `/login?redirect=…`; авторизованный на `/login` → `/`; без нужной роли на admin-маршруты → `/`.
 
 ## Сервисы API (именование)
 
-Имена файлов по домену: `dashboardService`, `profileService`, `adminUsersService`, `humidorService`, `reviewService`, `cigarService`, `authService`. Точные пути REST дублировать в документе не обязательно — смотреть вызовы `api.get/post/...` в соответствующих файлах.
+Имена файлов по домену: `dashboardService`, `profileService`, `adminUsersService`, `adminCigarCommentsService`, `adminDeletedReviewsService`, `humidorService`, `reviewService`, `cigarService`, `authService`. Точные пути REST дублировать в документе не обязательно — смотреть вызовы `api.get/post/...` в соответствующих файлах.
 
 ## Компоненты
 

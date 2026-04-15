@@ -143,6 +143,10 @@ public class AdminDeletedReviewRowDto
     public string Title { get; set; } = string.Empty;
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>Публичный профиль автора (для ссылок в админ-UI).</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
     public int CigarBaseId { get; set; }
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;

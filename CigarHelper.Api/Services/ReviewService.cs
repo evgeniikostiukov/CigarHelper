@@ -295,6 +295,7 @@ public class ReviewService : IReviewService
                 Title = r.Title,
                 UserId = r.UserId,
                 Username = r.User.Username,
+                IsAuthorProfilePublic = r.User.IsProfilePublic,
                 CigarBaseId = r.CigarBaseId,
                 CigarName = r.CigarBase.Name,
                 CigarBrand = r.CigarBase.Brand.Name,

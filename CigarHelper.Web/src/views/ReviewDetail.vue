@@ -386,8 +386,9 @@
 
   const confirmDelete = (): void => {
     confirm.require({
-      message: 'Вы уверены, что хотите удалить этот обзор? Это действие нельзя отменить.',
-      header: 'Подтверждение удаления',
+      message:
+        'Обзор будет скрыт из списков и по ссылке для всех. Запись останется в системе; вернуть обзор может только администратор.',
+      header: 'Удалить обзор',
       icon: 'pi pi-exclamation-triangle',
       rejectClass: 'p-button-secondary p-button-outlined',
       acceptClass: 'p-button-danger',
@@ -400,7 +401,7 @@
           toast.add({
             severity: 'success',
             summary: 'Успешно',
-            detail: 'Обзор удален',
+            detail: 'Обзор скрыт',
             life: 3000,
           });
           await router.push({ name: 'ReviewList' });
