@@ -37,6 +37,8 @@ public class Review
     public UserCigar? Cigar { get; set; }
     
     public ICollection<ReviewImage> Images { get; set; } = new List<ReviewImage>();
+
+    public ICollection<ReviewComment> Comments { get; set; } = new List<ReviewComment>();
     
     [MaxLength(50)]
     public string? SmokingExperience { get; set; }

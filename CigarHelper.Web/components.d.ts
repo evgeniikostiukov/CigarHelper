@@ -33,6 +33,7 @@ declare module 'vue' {
     Password: typeof import('primevue/password')['default']
     PublicProfileAuthorBlock: typeof import('./src/components/PublicProfileAuthorBlock.vue')['default']
     Rating: typeof import('primevue/rating')['default']
+    ReviewCommentsPanel: typeof import('./src/components/ReviewCommentsPanel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('primevue/select')['default']

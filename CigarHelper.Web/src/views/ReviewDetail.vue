@@ -284,6 +284,11 @@
             v-html="sanitizedContent" />
         </section>
 
+        <ReviewCommentsPanel
+          v-if="review"
+          :review-id="review.id"
+          data-testid="review-detail-comments" />
+
         <footer
           class="flex flex-col gap-3 border-t border-stone-200/80 pt-6 dark:border-stone-700/80 sm:flex-row sm:items-center sm:justify-between">
           <Button
@@ -294,13 +299,24 @@
             severity="secondary"
             outlined
             @click="router.push({ name: 'ReviewList' })" />
-          <Button
-            data-testid="review-detail-cigar"
-            class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
-            :label="review.userCigarId ? 'Открыть сигару в коллекции' : 'Открыть в каталоге'"
-            icon="pi pi-arrow-right"
-            icon-pos="right"
-            @click="goToCigar" />
+          <div class="flex w-full flex-col gap-2 sm:order-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button
+              v-if="isCurrentUserReview && review.userCigarId"
+              data-testid="review-detail-cigar-collection"
+              class="min-h-12 w-full touch-manipulation sm:w-auto"
+              label="Моя запись в коллекции"
+              icon="pi pi-box"
+              severity="secondary"
+              outlined
+              @click="goToUserCigarInCollection" />
+            <Button
+              data-testid="review-detail-cigar-catalog"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:w-auto"
+              label="Открыть в каталоге"
+              icon="pi pi-arrow-right"
+              icon-pos="right"
+              @click="goToCigarBaseInCatalog" />
+          </div>
         </footer>
       </article>
     </div>
@@ -319,6 +335,7 @@
   import { sanitizeReviewBodyForDisplay } from '@/utils/reviewContentDisplay';
   import { getAuthUserId } from '@/utils/roles';
   import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
+  import ReviewCommentsPanel from '@/components/ReviewCommentsPanel.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -339,16 +356,29 @@
     review.value?.content ? sanitizeReviewBodyForDisplay(review.value.content) : '',
   );
 
-  const goToCigar = (): void => {
+  /** Карточка базовой сигары в справочнике (диалог на `CigarBases` через query). */
+  const goToCigarBaseInCatalog = (): void => {
     if (!review.value) return;
-    if (review.value.userCigarId != null) {
-      void router.push({ name: 'CigarDetail', params: { id: String(review.value.userCigarId) } });
+    const id = review.value.cigarBaseId;
+    if (!Number.isFinite(id) || id <= 0) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Нет привязки к каталогу',
+        detail: 'Для этого обзора не указана базовая сигара.',
+        life: 4000,
+      });
       return;
     }
     void router.push({
       name: 'CigarBases',
-      query: { selectedCigarBaseId: String(review.value.cigarBaseId) },
+      query: { selectedCigarBaseId: String(id) },
     });
+  };
+
+  /** Только для автора: его запись UserCigar (не использовать для чужих обзоров). */
+  const goToUserCigarInCollection = (): void => {
+    if (!review.value?.userCigarId) return;
+    void router.push({ name: 'CigarDetail', params: { id: String(review.value.userCigarId) } });
   };
 
   const loadReview = async (): Promise<void> => {

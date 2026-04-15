@@ -20,13 +20,15 @@
 | `ReviewsController` | Обзоры: `POST` с `cigarBaseId` и опционально `userCigarId` (запись коллекции); `GET` списка — `cigarBaseId` / `userCigarId` / `userId` (без строк с `DeletedAt`). Автор: `DELETE` — мягкое удаление (`DeletedAt`). |
 | `AdminReviewsController` | Staff (`Admin`, `Moderator`): `GET /api/admin/reviews/deleted` — удалённые обзоры; `POST .../{id}/restore` — снять удаление. |
 | `CigarCommentsController` | Комментарии к `CigarBase` и к чужим `UserCigar` в публичной коллекции: `GET/POST/DELETE api/cigarcomments` (публичный список только **одобренные**; у обычных пользователей новые — **на модерации**) |
+| `ReviewCommentsController` | Комментарии к **не удалённому** обзору: `GET/POST/DELETE api/reviewcomments?reviewId=` / тело с `reviewId` (список — **AllowAnonymous**, только **одобренные**; создание — JWT; модерация staff) |
 | `AdminCigarCommentsController` | Очередь модерации: `GET/POST …/api/admin/cigar-comments` и `…/{id}/approve` / `reject` (роли **Admin**, **Moderator**) |
+| `AdminReviewCommentsController` | Очередь модерации комментариев к обзорам: `GET …/api/admin/review-comments`, `POST …/{id}/approve` / `reject` (**Admin**, **Moderator**) |
 | `CigarImagesController` | Изображения сигар (авторизация, владение, роли) |
 
 ## API — сервисы и прочее
 
 - `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
-- `CigarHelper.Api/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
+- `CigarHelper.Api/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, `CigarCommentService`, `ReviewCommentService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
 - `CigarHelper.Api/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`; **`CigarImageStorageWriter`** — общая запись оригинала + миниатюры (API и CSV-импорт).
 - `CigarHelper.Api/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
 - `CigarHelper.Api/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
@@ -55,7 +57,7 @@
 ## Data (`CigarHelper.Data/`)
 
 - `Data/AppDbContext.cs` — DbSets и Fluent API.
-- `Models/` — сущности; таблица **`CigarComments`** — комментарии (ровно одна из связей: `CigarBaseId` или `UserCigarId`).
+- `Models/` — сущности; таблица **`CigarComments`** — комментарии (ровно одна из связей: `CigarBaseId` или `UserCigarId`); **`ReviewComments`** — комментарии к обзору (`ReviewId`, модерация тем же enum, что и у сигар).
 - `Migrations/` — EF Core миграции.
 - `Data/DesignTimeDbContextFactory.cs` — design-time для `dotnet ef`.
 
