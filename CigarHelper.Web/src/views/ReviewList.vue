@@ -244,7 +244,7 @@
                 <span class="shrink-0 text-stone-500 dark:text-stone-500">· {{ formatDate(review.createdAt) }}</span>
               </div>
               <p
-                class="line-clamp-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
+                class="line-clamp-3 min-w-0 max-w-full break-words text-sm leading-relaxed text-stone-700 [overflow-wrap:anywhere] dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
                 {{ excerptPlain(review.summary) }}
               </p>
             </div>

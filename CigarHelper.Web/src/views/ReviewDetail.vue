@@ -7,7 +7,7 @@
     <div
       class="review-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
-    <div class="relative z-[1] mx-auto max-w-4xl">
+    <div class="relative z-[1] mx-auto min-w-0 max-w-4xl">
       <div
         v-if="loading"
         class="min-h-[20rem] space-y-5"
@@ -66,7 +66,7 @@
 
       <article
         v-else-if="review"
-        class="review-detail-enter space-y-6 sm:space-y-8"
+        class="review-detail-enter min-w-0 space-y-6 sm:space-y-8"
         data-testid="review-detail-content">
         <nav
           class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-stone-600 dark:text-stone-400"
@@ -271,7 +271,7 @@
         </div>
 
         <section
-          class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+          class="min-w-0 rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
           data-testid="review-detail-body"
           aria-labelledby="review-detail-body-heading">
           <h2
@@ -280,7 +280,7 @@
             Текст обзора
           </h2>
           <div
-            class="review-detail-prose prose-stone max-w-none dark:prose-invert"
+            class="review-detail-prose prose-stone min-w-0 max-w-full break-words dark:prose-invert [overflow-wrap:anywhere]"
             v-html="sanitizedContent" />
         </section>
 
@@ -460,9 +460,14 @@
     overflow: hidden;
   }
 
+  :deep(.review-detail-prose) {
+    overflow-wrap: anywhere;
+  }
+
   :deep(.review-detail-prose p) {
     margin-bottom: 1rem;
     line-height: 1.65;
+    overflow-wrap: anywhere;
   }
 
   :deep(.review-detail-prose h1),
