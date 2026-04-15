@@ -2515,6 +2515,9 @@ export interface components {
       rating?: number;
       /** Format: date-time */
       createdAt?: string;
+      username?: string;
+      isAuthorProfilePublic?: boolean;
+      userAvatarUrl?: string | null;
     };
     RegisterRequest: {
       username: string;

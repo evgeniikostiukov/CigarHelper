@@ -67,6 +67,16 @@ public class RecentReviewDto
     public int Rating { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>Логин автора обзора (для ссылки на публичный профиль при <see cref="IsAuthorProfilePublic"/>).</summary>
+    [Required]
+    [MaxLength(50)]
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>Можно ли открыть публичный профиль автора.</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
+    public string? UserAvatarUrl { get; set; }
 }
 
 public class CigarTimelinePointDto

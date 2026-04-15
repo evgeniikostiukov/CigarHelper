@@ -19,6 +19,9 @@ export interface RecentReview {
   cigarBrand: string;
   rating: number;
   createdAt: string;
+  username: string;
+  isAuthorProfilePublic: boolean;
+  userAvatarUrl: string | null;
 }
 
 export interface CigarTimelinePoint {
@@ -70,6 +73,9 @@ function normalizeSummary(d: ApiDashboardSummary): DashboardSummary {
       cigarBrand: r.cigarBrand,
       rating: r.rating ?? 0,
       createdAt: r.createdAt ?? '',
+      username: r.username ?? '',
+      isAuthorProfilePublic: r.isAuthorProfilePublic === true,
+      userAvatarUrl: r.userAvatarUrl ?? null,
     })),
     timeline: (d.timeline ?? []).map((t) => ({
       period: t.period ?? '',

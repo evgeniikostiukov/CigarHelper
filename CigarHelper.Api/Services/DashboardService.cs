@@ -83,8 +83,6 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         var recentReviews = await _context.Reviews
-            .Include(r => r.CigarBase)
-            .ThenInclude(cb => cb.Brand)
             .Where(r => r.UserId == userId)
             .OrderByDescending(r => r.CreatedAt)
             .Take(5)
@@ -95,7 +93,10 @@ public class DashboardService : IDashboardService
                 Rating = r.Rating,
                 CigarName = r.CigarBase.Name,
                 CigarBrand = r.CigarBase.Brand.Name,
-                CreatedAt = r.CreatedAt
+                CreatedAt = r.CreatedAt,
+                Username = r.User.Username,
+                IsAuthorProfilePublic = r.User.IsProfilePublic,
+                UserAvatarUrl = r.User.AvatarUrl
             })
             .ToListAsync();
 

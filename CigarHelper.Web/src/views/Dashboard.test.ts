@@ -36,6 +36,9 @@ const PrimeStubs = {
   Skeleton: {
     template: '<div data-stub="skeleton" />',
   },
+  Avatar: {
+    template: '<span data-stub="avatar" />',
+  },
 };
 
 describe('Dashboard.vue', () => {
@@ -64,6 +67,9 @@ describe('Dashboard.vue', () => {
           cigarBrand: 'X',
           rating: 9,
           createdAt: '2026-03-30T10:00:00.000Z',
+          username: 'dashboard_user',
+          isAuthorProfilePublic: true,
+          userAvatarUrl: null,
         },
       ],
       timeline: [{ period: '2026-03', purchasedCount: 3, smokedCount: 1 }],
@@ -80,7 +86,13 @@ describe('Dashboard.vue', () => {
 
     const w = mount(Dashboard, {
       global: {
-        stubs: PrimeStubs,
+        stubs: {
+          ...PrimeStubs,
+          PublicProfileAuthorBlock: {
+            props: ['username'],
+            template: '<span data-testid="dashboard-review-author">{{ username }}</span>',
+          },
+        },
       },
     });
 
@@ -94,6 +106,7 @@ describe('Dashboard.vue', () => {
     expect(w.get('[data-testid="dashboard-reminder-4"]').text()).toContain('Не трогали 52');
     expect(w.get('[data-testid="dashboard-brands-item-10"]').text()).toContain('X');
     expect(w.get('[data-testid="dashboard-review-100"]').text()).toContain('Отличная сигара');
+    expect(w.get('[data-testid="dashboard-review-author"]').text()).toContain('dashboard_user');
   });
 
   it('renders error state when load fails', async () => {
@@ -128,6 +141,9 @@ describe('Dashboard.vue', () => {
           cigarBrand: 'B',
           rating: 7,
           createdAt: '2026-03-30T10:00:00.000Z',
+          username: 'u',
+          isAuthorProfilePublic: false,
+          userAvatarUrl: null,
         },
       ],
       timeline: [],
@@ -136,7 +152,13 @@ describe('Dashboard.vue', () => {
 
     const w = mount(Dashboard, {
       global: {
-        stubs: PrimeStubs,
+        stubs: {
+          ...PrimeStubs,
+          PublicProfileAuthorBlock: {
+            props: ['username'],
+            template: '<span data-testid="dashboard-review-author">{{ username }}</span>',
+          },
+        },
       },
     });
 

@@ -122,6 +122,12 @@ describe('RecentReviewDto', () => {
     expectTypeOf<RecentReviewDto['id']>().toEqualTypeOf<number | undefined>();
     expectTypeOf<RecentReviewDto['rating']>().toEqualTypeOf<number | undefined>();
   });
+
+  it('поля автора для PublicProfileAuthorBlock', () => {
+    expectTypeOf<RecentReviewDto['username']>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<RecentReviewDto['isAuthorProfilePublic']>().toEqualTypeOf<boolean | undefined>();
+    expectTypeOf<RecentReviewDto['userAvatarUrl']>().toEqualTypeOf<string | null | undefined>();
+  });
 });
 
 // ── HumidorDto ─────────────────────────────────────────────────────────────
