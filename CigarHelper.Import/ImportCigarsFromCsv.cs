@@ -463,12 +463,12 @@ public class ImportCigarsFromCsv
         try
         {
             // Проверяем URL на валидность
-            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri uri))
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) || uri is null)
             {
                 _logger.LogError($"Неверный URL изображения: {imageUrl}");
                 return null;
             }
-            
+
             // Скачиваем изображение
             var response = await _httpClient.GetAsync(uri);
             if (!response.IsSuccessStatusCode)
@@ -506,7 +506,7 @@ public class ImportCigarsFromCsv
     
     private string GetFileNameFromUrl(string url)
     {
-        if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri is not null)
         {
             var fileName = Path.GetFileName(uri.LocalPath);
             if (!string.IsNullOrEmpty(fileName))
@@ -520,7 +520,7 @@ public class ImportCigarsFromCsv
     
     private string GetContentTypeFromUrl(string url)
     {
-        if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+        if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri is not null)
         {
             var extension = Path.GetExtension(uri.LocalPath).ToLower();
             switch (extension)

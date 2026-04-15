@@ -340,7 +340,7 @@ public class CigarsBasesPaginatedIntegrationTests
         var page = await res.Content.ReadFromJsonAsync<PaginatedResult<CigarBaseDto>>(JsonOptions);
         Assert.NotNull(page?.Items);
         Assert.DoesNotContain(page!.Items, x => x.Name == moderatedName);
-        var hit = Assert.Single(page.Items.Where(x => x.Name == unmoderatedName));
+        var hit = Assert.Single(page.Items, x => x.Name == unmoderatedName);
         Assert.False(hit.IsModerated);
     }
 }
