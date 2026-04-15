@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { computed, ref, watch } from 'vue';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import Textarea from 'primevue/textarea';
   import Button from 'primevue/button';
   import { useToast } from 'primevue/usetoast';
@@ -183,7 +184,12 @@
           class="rounded-xl border border-stone-200/80 bg-white/90 px-3 py-2.5 dark:border-stone-600/70 dark:bg-stone-900/60"
           :data-testid="`cigar-comment-${c.id}`">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <span class="text-sm font-medium text-rose-900 dark:text-rose-200/90">{{ c.authorUsername }}</span>
+            <PublicProfileAuthorBlock
+              :username="c.authorUsername"
+              :is-author-profile-public="c.isAuthorProfilePublic === true"
+              :show-avatar="false"
+              name-class="text-sm font-medium text-rose-900 dark:text-rose-200/90"
+              link-class="text-rose-900 dark:text-rose-200/90 hover:text-rose-950 dark:hover:text-rose-50" />
             <time
               class="text-xs text-stone-500 dark:text-stone-400"
               :datetime="c.createdAt">

@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CigarHelper.Api.Models;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -278,6 +279,59 @@ public class ApiAuthorizationAndContractsIntegrationTests
 
         using var res = await client.GetAsync($"/api/public/users/{username}");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicUsers_GetVisibility_WhenPrivate_ReturnsOkWithFalse()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        const string username = "visprivuser";
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = username,
+            Password = "abCd12",
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
+        });
+        registerRes.EnsureSuccessStatusCode();
+
+        using var res = await client.GetAsync($"/api/public/users/{username}/visibility");
+        res.EnsureSuccessStatusCode();
+        var dto = await res.Content.ReadFromJsonAsync<PublicProfileVisibilityDto>(JsonOptions);
+        Assert.NotNull(dto);
+        Assert.False(dto!.IsVisible);
+    }
+
+    [Fact]
+    public async Task PublicUsers_GetVisibility_WhenPublic_ReturnsOkWithTrue()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+
+        const string username = "vispubuser";
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
+            db.Users.Add(new User
+            {
+                Username = username,
+                Email = "vispubuser@example.com",
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                CreatedAt = DateTime.UtcNow,
+                IsProfilePublic = true
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        using var res = await client.GetAsync($"/api/public/users/{username}/visibility");
+        res.EnsureSuccessStatusCode();
+        var dto = await res.Content.ReadFromJsonAsync<PublicProfileVisibilityDto>(JsonOptions);
+        Assert.NotNull(dto);
+        Assert.True(dto!.IsVisible);
     }
 
     [Fact]

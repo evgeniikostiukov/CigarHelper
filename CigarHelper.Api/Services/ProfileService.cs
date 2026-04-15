@@ -136,6 +136,12 @@ public class ProfileService : IProfileService
         return new ChangePasswordResponse { Success = true, Message = "Пароль изменён" };
     }
 
+    public async Task<bool> IsPublicProfileVisibleAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+        return user != null && user.IsProfilePublic;
+    }
+
     public async Task<PublicProfileDto?> GetPublicProfileAsync(string username, CancellationToken cancellationToken = default)
     {
         var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);

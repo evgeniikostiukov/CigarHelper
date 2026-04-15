@@ -10,6 +10,10 @@ public class ReviewDto
     public int Rating { get; set; }
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>Можно ли открыть публичный профиль автора (<c>/u/{Username}</c>).</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
     public string? UserAvatarUrl { get; set; }
 
     /// <summary>Каталожная сигара.</summary>
@@ -41,7 +45,10 @@ public class ReviewListItemDto
     public int Rating { get; set; }
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
-    
+
+    /// <summary>Можно ли открыть публичный профиль автора.</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
     //TODO: Сделать аватарку пользователя на обзоре
     // public byte[]? UserAvatarBytes { get; set; }
     public string CigarName { get; set; } = string.Empty;

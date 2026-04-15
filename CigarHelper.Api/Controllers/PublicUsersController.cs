@@ -22,6 +22,14 @@ public class PublicUsersController : ControllerBase
         _profileService = profileService;
     }
 
+    [HttpGet("{username}/visibility")]
+    [ProducesResponseType(typeof(PublicProfileVisibilityDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PublicProfileVisibilityDto>> GetVisibility(string username, CancellationToken cancellationToken)
+    {
+        var visible = await _profileService.IsPublicProfileVisibleAsync(username, cancellationToken);
+        return Ok(new PublicProfileVisibilityDto { IsVisible = visible });
+    }
+
     [HttpGet("{username}")]
     [ProducesResponseType(typeof(PublicProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

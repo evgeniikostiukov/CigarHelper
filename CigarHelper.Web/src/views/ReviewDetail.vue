@@ -127,20 +127,15 @@
           </div>
           <div
             class="flex flex-col gap-4 rounded-2xl border border-stone-200/90 bg-white/95 p-4 shadow-md shadow-stone-900/5 sm:flex-row sm:items-center sm:justify-between sm:p-5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50">
-            <div class="flex min-w-0 items-center gap-3">
-              <Avatar
-                :image="review.userAvatarUrl || '/img/default-avatar.png'"
-                size="large"
-                shape="circle"
-                :aria-label="`Автор: ${review.username}`" />
-              <div class="min-w-0">
-                <p class="truncate text-lg font-semibold text-stone-900 dark:text-rose-50/95">
-                  {{ review.username }}
-                </p>
-                <p class="text-sm text-stone-600 dark:text-stone-400">
-                  {{ formatDate(review.createdAt) }}
-                </p>
-              </div>
+            <div class="flex min-w-0 flex-1 items-center">
+              <PublicProfileAuthorBlock
+                :username="review.username"
+                :is-author-profile-public="review.isAuthorProfilePublic === true"
+                :avatar-url="review.userAvatarUrl ?? null"
+                avatar-size="large"
+                name-class="text-lg font-semibold text-stone-900 dark:text-rose-50/95 group-hover/author:text-stone-900 dark:group-hover/author:text-rose-50/95">
+                <template #meta>{{ formatDate(review.createdAt) }}</template>
+              </PublicProfileAuthorBlock>
             </div>
             <div class="flex shrink-0 flex-wrap items-center gap-2">
               <span class="text-sm font-medium text-stone-600 dark:text-stone-400">Оценка</span>
@@ -323,6 +318,7 @@
   import DOMPurify from 'dompurify';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
   import { getAuthUserId } from '@/utils/roles';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
 
   const route = useRoute();
   const router = useRouter();

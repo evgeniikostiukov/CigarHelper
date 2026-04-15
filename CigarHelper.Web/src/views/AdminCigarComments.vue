@@ -68,7 +68,15 @@
         <Column
           field="authorUsername"
           header="Автор"
-          sortable />
+          sortable>
+          <template #body="{ data }">
+            <PublicProfileAuthorBlock
+              :username="data.authorUsername"
+              :is-author-profile-public="data.isAuthorProfilePublic === true"
+              :show-avatar="false"
+              name-class="text-sm" />
+          </template>
+        </Column>
         <Column header="Контекст">
           <template #body="{ data }">
             <span class="text-stone-600 dark:text-stone-400">{{ data.targetSummary }}</span>
@@ -129,6 +137,7 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import Button from 'primevue/button';
   import Column from 'primevue/column';
   import DataTable from 'primevue/datatable';

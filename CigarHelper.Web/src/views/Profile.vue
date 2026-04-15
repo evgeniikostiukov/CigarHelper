@@ -248,6 +248,7 @@
   import authService from '@/services/authService';
   import * as profileApi from '@/services/profileService';
   import type { MyProfile, ChangePasswordResponse } from '@/services/profileService';
+  import { publicUserProfileLocation } from '@/utils/publicProfileRoute';
 
   const router = useRouter();
   const toast = useToast();
@@ -283,7 +284,7 @@
 
   function goPublicPreview(): void {
     if (!form.username.trim()) return;
-    router.push({ name: 'PublicUserProfile', params: { username: form.username.trim() } });
+    router.push(publicUserProfileLocation(form.username.trim()));
   }
 
   function restartOnboarding(): void {

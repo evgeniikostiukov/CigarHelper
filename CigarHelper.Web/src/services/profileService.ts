@@ -63,6 +63,43 @@ export async function getPublicProfile(username: string): Promise<PublicProfile>
   return data;
 }
 
+export interface PublicProfileVisibility {
+  isVisible: boolean;
+}
+
+const visibilityCache = new Map<string, { expiresAt: number; isVisible: boolean }>();
+const VISIBILITY_TTL_MS = 60_000;
+
+/** Лёгкая проверка публичности профиля (кэш + префетч по hover). */
+export async function getPublicProfileVisibility(username: string): Promise<boolean> {
+  const key = username.trim();
+  if (!key) return false;
+  const now = Date.now();
+  const hit = visibilityCache.get(key);
+  if (hit && hit.expiresAt > now) {
+    return hit.isVisible;
+  }
+  try {
+    const { data } = await api.get<PublicProfileVisibility>(`/public/users/${encodeURIComponent(key)}/visibility`);
+    const isVisible = !!data?.isVisible;
+    visibilityCache.set(key, { isVisible, expiresAt: now + VISIBILITY_TTL_MS });
+    return isVisible;
+  } catch {
+    visibilityCache.set(key, { isVisible: false, expiresAt: now + VISIBILITY_TTL_MS });
+    return false;
+  }
+}
+
+/** Префетч видимости (без await) — вызывать с @mouseenter на ссылке автора. */
+export function prefetchPublicProfileVisibility(username: string): void {
+  const key = username.trim();
+  if (!key) return;
+  const now = Date.now();
+  const hit = visibilityCache.get(key);
+  if (hit && hit.expiresAt > now) return;
+  void getPublicProfileVisibility(key);
+}
+
 export async function getPublicHumidor(username: string, humidorId: number): Promise<Humidor> {
   const { data } = await api.get<Humidor>(`/public/users/${encodeURIComponent(username)}/humidors/${humidorId}`);
   return data;

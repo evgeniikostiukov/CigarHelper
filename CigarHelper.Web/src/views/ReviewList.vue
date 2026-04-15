@@ -177,6 +177,7 @@
               review.cigarName,
               review.username,
               review.userId,
+              review.isAuthorProfilePublic,
               review.createdAt,
               review.summary,
               review.imageCount,
@@ -235,14 +236,11 @@
               </div>
               <p class="text-sm text-stone-600 dark:text-stone-400">{{ review.cigarBrand }} · {{ review.cigarName }}</p>
               <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
-                <Avatar
-                  image="/img/default-avatar.png"
-                  size="small"
-                  shape="circle"
-                  :aria-label="`Автор: ${review.username}`" />
-                <span class="min-w-0 font-medium text-stone-800 dark:text-stone-200 truncate">{{
-                  review.username
-                }}</span>
+                <PublicProfileAuthorBlock
+                  :username="review.username"
+                  :is-author-profile-public="review.isAuthorProfilePublic === true"
+                  overlay-card-mode
+                  avatar-size="small" />
                 <span class="shrink-0 text-stone-500 dark:text-stone-500">· {{ formatDate(review.createdAt) }}</span>
               </div>
               <p
@@ -284,6 +282,7 @@
   import { useAuth } from '@/services/useAuth';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
   import { getAuthUserId } from '@/utils/roles';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import type { ReviewListItem } from '../services/reviewService';
 
   const { isAuthenticated, user } = useAuth();

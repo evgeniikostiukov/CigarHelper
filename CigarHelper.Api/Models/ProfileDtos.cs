@@ -66,3 +66,12 @@ public class PublicProfileDto
     public DateTime? LastLogin { get; set; }
     public IReadOnlyList<HumidorResponseDto> Humidors { get; set; } = [];
 }
+
+/// <summary>
+/// Лёгкий ответ для префетча: виден ли публичный профиль (пользователь есть и IsProfilePublic).
+/// Не различает «нет пользователя» и «профиль закрыт» — в обоих случаях IsVisible = false.
+/// </summary>
+public class PublicProfileVisibilityDto
+{
+    public bool IsVisible { get; set; }
+}
