@@ -9,6 +9,235 @@
     "version": "v1"
   },
   "paths": {
+    "/api/admin/cigar-comments": {
+      "get": {
+        "tags": [
+          "AdminCigarComments"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCigarCommentRowDtoPaginatedResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/cigar-comments/{id}/approve": {
+      "post": {
+        "tags": [
+          "AdminCigarComments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/cigar-comments/{id}/reject": {
+      "post": {
+        "tags": [
+          "AdminCigarComments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/cigar-images": {
+      "get": {
+        "tags": [
+          "AdminCigarImages"
+        ],
+        "summary": "Все загруженные изображения каталога и коллекций (таблица CigarImages, внешнее хранилище).",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 24
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedCigarImagesAdminResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedCigarImagesAdminResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedCigarImagesAdminResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reviews/deleted": {
+      "get": {
+        "tags": [
+          "AdminReviews"
+        ],
+        "summary": "Список обзоров, мягко удалённых авторами (для восстановления).",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDeletedReviewRowDtoPaginatedResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/reviews/{id}/restore": {
+      "post": {
+        "tags": [
+          "AdminReviews"
+        ],
+        "summary": "Восстановить обзор (снять мягкое удаление).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -271,10 +500,10 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Продлевает JWT по действующему Bearer-токену",
+        "summary": "Выдаёт новый JWT по действующему Bearer-токену (продление сессии при повторном открытии клиента).",
         "responses": {
           "200": {
-            "description": "Новый токен выдан",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -284,11 +513,11 @@
             }
           },
           "401": {
-            "description": "Токен недействителен или пользователь не найден",
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponse"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -508,12 +737,142 @@
         }
       }
     },
+    "/api/CigarComments": {
+      "get": {
+        "tags": [
+          "CigarComments"
+        ],
+        "summary": "Список комментариев к справочной сигаре или к чужой записи в публичной коллекции.",
+        "parameters": [
+          {
+            "name": "cigarBaseId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userCigarId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CigarCommentDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "CigarComments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCigarCommentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCigarCommentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCigarCommentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CigarCommentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/CigarComments/{id}": {
+      "delete": {
+        "tags": [
+          "CigarComments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/CigarImages/upload-by-url": {
       "post": {
         "tags": [
           "CigarImages"
         ],
-        "summary": "Скачивает изображение по URL и сохраняет (только staff).",
+        "summary": "Скачивает изображение по URL и сохраняет (любой авторизованный пользователь).",
         "requestBody": {
           "content": {
             "application/json": {
@@ -976,13 +1335,11 @@
                   },
                   "LengthMm": {
                     "type": "integer",
-                    "format": "int32",
-                    "nullable": true
+                    "format": "int32"
                   },
                   "Diameter": {
                     "type": "integer",
-                    "format": "int32",
-                    "nullable": true
+                    "format": "int32"
                   },
                   "Wrapper": {
                     "type": "string"
@@ -999,6 +1356,20 @@
                       "$ref": "#/components/schemas/NewImageUpload"
                     },
                     "description": "Загружаемые файлы изображений."
+                  },
+                  "ImageUrls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "URL изображений (http/https); скачиваются на сервере и привязываются к карточке после CigarHelper.Api.Models.CreateCigarBaseFormRequest.NewImages."
+                  },
+                  "ImageUrlIsMain": {
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    },
+                    "description": "Главный кадр по индексу в CigarHelper.Api.Models.CreateCigarBaseFormRequest.ImageUrls (длина может быть меньше списка URL)."
                   }
                 }
               },
@@ -1034,6 +1405,12 @@
                   "style": "form"
                 },
                 "NewImages": {
+                  "style": "form"
+                },
+                "ImageUrls": {
+                  "style": "form"
+                },
+                "ImageUrlIsMain": {
                   "style": "form"
                 }
               }
@@ -1128,6 +1505,22 @@
           },
           {
             "name": "excludeBinaryMedia",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "unmoderatedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "withoutImagesOnly",
             "in": "query",
             "schema": {
               "type": "boolean",
@@ -1456,13 +1849,11 @@
                   },
                   "LengthMm": {
                     "type": "integer",
-                    "format": "int32",
-                    "nullable": true
+                    "format": "int32"
                   },
                   "Diameter": {
                     "type": "integer",
-                    "format": "int32",
-                    "nullable": true
+                    "format": "int32"
                   },
                   "Wrapper": {
                     "type": "string"
@@ -2140,6 +2531,35 @@
         }
       }
     },
+    "/api/public/users/{username}/visibility": {
+      "get": {
+        "tags": [
+          "PublicUsers"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicProfileVisibilityDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/public/users/{username}": {
       "get": {
         "tags": [
@@ -2244,9 +2664,18 @@
             }
           },
           {
-            "name": "cigarId",
+            "name": "cigarBaseId",
             "in": "query",
-            "description": "Фильтр по сигаре (опционально)",
+            "description": "Фильтр по каталожной сигаре (CigarBase)",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userCigarId",
+            "in": "query",
+            "description": "Фильтр по записи коллекции (UserCigar)",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2463,7 +2892,7 @@
         "tags": [
           "Reviews"
         ],
-        "summary": "Удаляет обзор",
+        "summary": "Мягкое удаление обзора автором (строка остаётся в БД, публично не отображается; восстановление — staff через `/api/admin/reviews/.../restore`).",
         "parameters": [
           {
             "name": "id",
@@ -2564,6 +2993,146 @@
   },
   "components": {
     "schemas": {
+      "AdminCigarCommentRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authorUsername": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
+          "cigarBaseId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userCigarId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetSummary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminCigarCommentRowDtoPaginatedResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminCigarCommentRowDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDeletedReviewRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "cigarBaseId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cigarName": {
+            "type": "string",
+            "nullable": true
+          },
+          "cigarBrand": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminDeletedReviewRowDtoPaginatedResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminDeletedReviewRowDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "AdminUserListItemDto": {
         "type": "object",
         "properties": {
@@ -2746,6 +3315,9 @@
             "type": "string",
             "nullable": true
           },
+          "isModerated": {
+            "type": "boolean"
+          },
           "brand": {
             "$ref": "#/components/schemas/BrandDto"
           },
@@ -2873,12 +3445,66 @@
             "format": "int32",
             "nullable": true
           },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
           "imageUrl": {
             "type": "string",
             "nullable": true
           }
         },
         "additionalProperties": false
+      },
+      "CigarCommentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authorUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authorUsername": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
+          "cigarBaseId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userCigarId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "moderationStatus": {
+            "$ref": "#/components/schemas/CigarCommentModerationStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CigarCommentModerationStatus": {
+        "enum": [
+          "Pending",
+          "Approved",
+          "Rejected"
+        ],
+        "type": "string"
       },
       "CigarImageDto": {
         "type": "object",
@@ -2969,9 +3595,17 @@
             "format": "int32",
             "nullable": true
           },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
           "imageUrl": {
             "type": "string",
             "nullable": true
+          },
+          "cigarBaseId": {
+            "type": "integer",
+            "format": "int32"
           },
           "country": {
             "type": "string",
@@ -3039,10 +3673,6 @@
             "type": "string",
             "nullable": true
           },
-          "quantity": {
-            "type": "integer",
-            "format": "int32"
-          },
           "images": {
             "type": "array",
             "items": {
@@ -3107,6 +3737,30 @@
           },
           "isModerated": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateCigarCommentRequest": {
+        "required": [
+          "body"
+        ],
+        "type": "object",
+        "properties": {
+          "cigarBaseId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userCigarId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -3230,7 +3884,7 @@
       },
       "CreateReviewRequest": {
         "required": [
-          "cigarId",
+          "cigarBaseId",
           "content",
           "rating",
           "title"
@@ -3252,9 +3906,14 @@
             "type": "integer",
             "format": "int32"
           },
-          "cigarId": {
+          "cigarBaseId": {
             "type": "integer",
             "format": "int32"
+          },
+          "userCigarId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "smokingExperience": {
             "type": "string",
@@ -3603,15 +4262,15 @@
       },
       "LoginRequest": {
         "required": [
-          "email",
-          "password"
+          "password",
+          "username"
         ],
         "type": "object",
         "properties": {
-          "email": {
+          "username": {
+            "maxLength": 50,
             "minLength": 1,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           "password": {
             "minLength": 1,
@@ -3704,6 +4363,32 @@
         },
         "additionalProperties": false
       },
+      "PagedCigarImagesAdminResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CigarImageDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Пагинированный список изображений сигар (хранилище MinIO/LocalFile) для админ-панели."
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -3757,11 +4442,22 @@
         },
         "additionalProperties": false
       },
+      "PublicProfileVisibilityDto": {
+        "type": "object",
+        "properties": {
+          "isVisible": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Лёгкий ответ для префетча: виден ли публичный профиль (пользователь есть и IsProfilePublic).\r\nНе различает «нет пользователя» и «профиль закрыт» — в обоих случаях IsVisible = false."
+      },
       "RecentReviewDto": {
         "required": [
           "cigarBrand",
           "cigarName",
-          "title"
+          "title",
+          "username"
         ],
         "type": "object",
         "properties": {
@@ -3793,6 +4489,18 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "username": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
+          "userAvatarUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3800,7 +4508,6 @@
       "RegisterRequest": {
         "required": [
           "confirmPassword",
-          "confirmedAge18",
           "password",
           "username"
         ],
@@ -3855,13 +4562,21 @@
             "type": "string",
             "nullable": true
           },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
           "userAvatarUrl": {
             "type": "string",
             "nullable": true
           },
-          "cigarId": {
+          "cigarBaseId": {
             "type": "integer",
             "format": "int32"
+          },
+          "userCigarId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "cigarName": {
             "type": "string",
@@ -3971,6 +4686,9 @@
             "type": "string",
             "nullable": true
           },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
           "cigarName": {
             "type": "string",
             "nullable": true
@@ -3978,6 +4696,10 @@
           "cigarBrand": {
             "type": "string",
             "nullable": true
+          },
+          "cigarBaseId": {
+            "type": "integer",
+            "format": "int32"
           },
           "mainImageBytes": {
             "type": "string",
@@ -4179,7 +4901,6 @@
       },
       "UpdateProfileRequest": {
         "required": [
-          "email",
           "username"
         ],
         "type": "object",
@@ -4194,7 +4915,8 @@
             "maxLength": 100,
             "minLength": 0,
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "nullable": true
           },
           "isProfilePublic": {
             "type": "boolean"
@@ -4428,6 +5150,15 @@
   ],
   "tags": [
     {
+      "name": "AdminCigarComments"
+    },
+    {
+      "name": "AdminCigarImages"
+    },
+    {
+      "name": "AdminReviews"
+    },
+    {
       "name": "AdminUsers"
     },
     {
@@ -4435,6 +5166,9 @@
     },
     {
       "name": "Brands"
+    },
+    {
+      "name": "CigarComments"
     },
     {
       "name": "CigarImages"
