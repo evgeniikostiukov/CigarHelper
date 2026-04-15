@@ -83,7 +83,7 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         var recentReviews = await _context.Reviews
-            .Where(r => r.UserId == userId)
+            .Where(r => r.UserId == userId && r.DeletedAt == null)
             .OrderByDescending(r => r.CreatedAt)
             .Take(5)
             .Select(r => new RecentReviewDto

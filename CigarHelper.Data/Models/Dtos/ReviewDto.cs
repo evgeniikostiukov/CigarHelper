@@ -134,4 +134,18 @@ public class UpdateReviewRequest
     
     // Список идентификаторов изображений для удаления
     public List<int>? ImageIdsToRemove { get; set; }
-} 
+}
+
+/// <summary>Строка списка удалённых обзоров для staff (админка / модерация).</summary>
+public class AdminDeletedReviewRowDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public int UserId { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public int CigarBaseId { get; set; }
+    public string CigarName { get; set; } = string.Empty;
+    public string CigarBrand { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+}

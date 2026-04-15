@@ -64,4 +64,7 @@ public class Review
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>Мягкое удаление автором; null — обзор активен.</summary>
+    public DateTime? DeletedAt { get; set; }
 } 

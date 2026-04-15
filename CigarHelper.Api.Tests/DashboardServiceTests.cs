@@ -224,6 +224,24 @@ public class DashboardServiceTests
     }
 
     [Fact]
+    public async Task GetUserDashboardSummaryAsync_RecentReviews_ExcludesSoftDeleted()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db, "SD");
+        var h = await SeedHumidorAsync(db, user.Id, capacity: 10);
+        var uc = await SeedUserCigarAsync(db, user.Id, cb.Id, h.Id, rating: 8);
+        var review = await SeedReviewAsync(db, user.Id, uc, DateTime.UtcNow);
+        review.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        var sut = new DashboardService(db);
+        var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
+
+        Assert.Empty(summary.RecentReviews);
+    }
+
+    [Fact]
     public async Task GetUserDashboardSummaryAsync_RecentReviewsIncludeAuthorProfileFields()
     {
         await using var db = CreateContext();

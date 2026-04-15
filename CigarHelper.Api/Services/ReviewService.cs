@@ -14,10 +14,14 @@ public interface IReviewService
     Task<ReviewDto> CreateReviewAsync(int currentUserId, CreateReviewRequest request);
     Task<ReviewDto?> UpdateReviewAsync(int id, int currentUserId, UpdateReviewRequest request);
     Task<bool> DeleteReviewAsync(int id, int currentUserId);
+    Task<PaginatedResult<AdminDeletedReviewRowDto>> GetDeletedReviewsForStaffAsync(int page, int pageSize);
+    Task<bool> RestoreReviewByStaffAsync(int id);
 }
 
 public class ReviewService : IReviewService
 {
+    private const int MaxStaffReviewListPageSize = 100;
+
     private readonly AppDbContext _context;
 
     public ReviewService(AppDbContext context)
@@ -28,6 +32,7 @@ public class ReviewService : IReviewService
     public async Task<List<ReviewListItemDto>> GetReviewsAsync(int? userId = null, int? cigarBaseId = null, int? userCigarId = null)
     {
         var query = _context.Reviews
+            .Where(r => r.DeletedAt == null)
             .Include(r => r.User)
             .Include(r => r.CigarBase)
             .ThenInclude(cb => cb.Brand)
@@ -75,6 +80,7 @@ public class ReviewService : IReviewService
     public async Task<ReviewDto?> GetReviewByIdAsync(int id)
     {
         var review = await _context.Reviews
+            .Where(r => r.DeletedAt == null)
             .Include(r => r.User)
             .Include(r => r.CigarBase)
             .ThenInclude(cb => cb.Brand)
@@ -187,6 +193,7 @@ public class ReviewService : IReviewService
     public async Task<ReviewDto?> UpdateReviewAsync(int id, int currentUserId, UpdateReviewRequest request)
     {
         var review = await _context.Reviews
+            .Where(r => r.DeletedAt == null)
             .Include(r => r.Images)
             .FirstOrDefaultAsync(r => r.Id == id);
 
@@ -259,9 +266,63 @@ public class ReviewService : IReviewService
             throw new UnauthorizedAccessException("Вы можете удалять только свои обзоры");
         }
 
-        _context.Reviews.Remove(review);
+        if (review.DeletedAt != null)
+        {
+            return true;
+        }
+
+        review.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
+        return true;
+    }
+
+    public async Task<PaginatedResult<AdminDeletedReviewRowDto>> GetDeletedReviewsForStaffAsync(int page, int pageSize)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, MaxStaffReviewListPageSize);
+
+        var query = _context.Reviews.AsNoTracking().Where(r => r.DeletedAt != null);
+        var total = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(r => r.DeletedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(r => new AdminDeletedReviewRowDto
+            {
+                Id = r.Id,
+                Title = r.Title,
+                UserId = r.UserId,
+                Username = r.User.Username,
+                CigarBaseId = r.CigarBaseId,
+                CigarName = r.CigarBase.Name,
+                CigarBrand = r.CigarBase.Brand.Name,
+                CreatedAt = r.CreatedAt,
+                DeletedAt = r.DeletedAt
+            })
+            .ToListAsync();
+
+        return new PaginatedResult<AdminDeletedReviewRowDto>
+        {
+            Items = items,
+            TotalCount = total,
+            Page = page,
+            PageSize = pageSize,
+            TotalPages = (int)Math.Ceiling(total / (double)pageSize),
+        };
+    }
+
+    public async Task<bool> RestoreReviewByStaffAsync(int id)
+    {
+        var review = await _context.Reviews.FindAsync(id);
+        if (review == null || review.DeletedAt == null)
+        {
+            return false;
+        }
+
+        review.DeletedAt = null;
+        await _context.SaveChangesAsync();
         return true;
     }
 }
