@@ -315,8 +315,8 @@
   import reviewService from '../services/reviewService';
   import type { Review } from '../services/reviewService';
   import authService from '../services/authService';
-  import DOMPurify from 'dompurify';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import { sanitizeReviewBodyForDisplay } from '@/utils/reviewContentDisplay';
   import { getAuthUserId } from '@/utils/roles';
   import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
 
@@ -335,17 +335,9 @@
     return uid !== null && uid === review.value.userId;
   });
 
-  const sanitizedContent = computed(() => {
-    if (!review.value?.content) return '';
-    const rawHtml = review.value.content
-      .split('\n')
-      .filter((p) => p.trim().length > 0)
-      .map((p) => `<p>${p}</p>`)
-      .join('');
-    return DOMPurify.sanitize(rawHtml, {
-      USE_PROFILES: { html: true },
-    });
-  });
+  const sanitizedContent = computed(() =>
+    review.value?.content ? sanitizeReviewBodyForDisplay(review.value.content) : '',
+  );
 
   const goToCigar = (): void => {
     if (!review.value) return;
@@ -479,6 +471,22 @@
     margin-bottom: 0.75rem;
     margin-top: 1.25rem;
     font-weight: 600;
+  }
+
+  :deep(.review-detail-prose a) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    color: rgb(159 18 57);
+  }
+
+  :deep(.dark .review-detail-prose a) {
+    color: rgb(254 205 211);
+  }
+
+  :deep(.review-detail-prose img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
   }
 
   .review-detail-gallery-item {

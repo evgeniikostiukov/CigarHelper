@@ -245,7 +245,7 @@
               </div>
               <p
                 class="line-clamp-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
-                {{ review.summary ?? '' }}
+                {{ excerptPlain(review.summary) }}
               </p>
             </div>
 
@@ -281,6 +281,7 @@
   import reviewService from '../services/reviewService';
   import { useAuth } from '@/services/useAuth';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import { plainTextReviewExcerpt } from '@/utils/reviewContentDisplay';
   import { getAuthUserId } from '@/utils/roles';
   import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import type { ReviewListItem } from '../services/reviewService';
@@ -370,6 +371,10 @@
     filters.brand = null;
     filters.minRating = null;
   };
+
+  function excerptPlain(summary: string | null | undefined): string {
+    return plainTextReviewExcerpt(summary ?? '', 220);
+  }
 
   onMounted(fetchReviews);
 </script>

@@ -12,7 +12,7 @@
 | `services/useAuth.ts` | Композабл для Vue: `isAuthenticated`, `user`, `logout` |
 | `services/*Service.ts` | Доменные вызовы API (профиль, сигары, хьюмидоры, отзывы, админ) |
 | `utils/roles.ts` | Роли из JWT |
-| `utils/imageUtils.ts`, `cigarOptions.ts` | Вспомогательные утилиты |
+| `utils/imageUtils.ts`, `cigarOptions.ts`, `utils/reviewContentDisplay.ts` | Утилиты; вывод текста обзора: plain excerpt для списка, DOMPurify + `DOMParser` для тела на `ReviewDetail` |
 | `views/*.vue` | Страницы |
 | `views/Home.vue` | Главная `/`: тот же визуальный каркас, см. [collection-list-views.md](./collection-list-views.md) |
 | `views/Login.vue` | Вход и регистрация `/login` (`meta.public: true`), см. [collection-list-views.md](./collection-list-views.md) |
