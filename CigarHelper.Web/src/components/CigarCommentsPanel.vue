@@ -8,12 +8,17 @@
   import { hasAnyRole } from '@/utils/roles';
   import * as cigarCommentApi from '@/services/cigarCommentService';
 
-  const props = defineProps<{
-    /** Цель: запись справочника */
-    cigarBaseId?: number;
-    /** Цель: экземпляр в чужой публичной коллекции */
-    userCigarId?: number;
-  }>();
+  const props = withDefaults(
+    defineProps<{
+      /** Цель: запись справочника */
+      cigarBaseId?: number;
+      /** Цель: экземпляр в чужой публичной коллекции */
+      userCigarId?: number;
+      /** false — скрыть ввод и кнопку отправки (напр. комментарии к своей публичной коллекции). */
+      allowNewComments?: boolean;
+    }>(),
+    { allowNewComments: true },
+  );
 
   const { isAuthenticated, user } = useAuth();
   const toast = useToast();
@@ -63,6 +68,9 @@
   );
 
   async function submit(): Promise<void> {
+    if (!props.allowNewComments) {
+      return;
+    }
     if (!isAuthenticated.value) {
       toast.add({
         severity: 'warn',
@@ -127,14 +135,14 @@
     <h3 class="mb-3 text-base font-semibold text-stone-900 dark:text-rose-50/95">Комментарии</h3>
 
     <p
-      v-if="!isAuthenticated && hasTarget"
+      v-if="!isAuthenticated && hasTarget && allowNewComments"
       class="mb-3 text-sm text-stone-600 dark:text-stone-400">
       Войдите в аккаунт, чтобы оставить комментарий. Просмотр доступен всем.
     </p>
 
     <template v-if="hasTarget">
       <div
-        v-if="isAuthenticated"
+        v-if="isAuthenticated && allowNewComments"
         class="mb-4 flex flex-col gap-2">
         <label
           for="cigar-comment-body"
