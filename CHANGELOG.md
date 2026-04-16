@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.1.0...HEAD)
+## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.0...HEAD)
+
+## [v2.2.0](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.1.0...v2.2.0) - 2026-04-16
+
+### Commits
+
+- feat(reviews): axis scores and catalog filters by review aggregates [`1f1968b`](https://github.com/evgeniikostiukov/CigarHelper/commit/1f1968ba86dc1dcc82f6a9a9f8f80fd9a2641602)
+- feat(api): cigar image compression and resilient MinIO [`92a8545`](https://github.com/evgeniikostiukov/CigarHelper/commit/92a8545d8e876f4b3852819e0a81ee9806ffc441)
+- feat(web): optional countly stack, sdk, and catalog similar draft [`7d8b1af`](https://github.com/evgeniikostiukov/CigarHelper/commit/7d8b1af7b706bb6fe21153b7e12324dd3be27fe5)
+- feat(api): profile avatar upload and public URLs [`7f15d7f`](https://github.com/evgeniikostiukov/CigarHelper/commit/7f15d7f6254a58e8d3fb5a73f2f9c8da6dcceb80)
+- feat(web): profile avatar upload and review list avatars [`c4cb882`](https://github.com/evgeniikostiukov/CigarHelper/commit/c4cb8823fbff09c392512dd4accd930ee75e5218)
+- feat(web): quieter cigar image requests and client compress [`c4359fa`](https://github.com/evgeniikostiukov/CigarHelper/commit/c4359fab0f6591eb39eecfd7cd3c232c8c028b5c)
+- feat(web): hide public humidor self-comment composer [`5efd4cb`](https://github.com/evgeniikostiukov/CigarHelper/commit/5efd4cb489fcd78ddce56a779c26446de5affee0)
+- docs: sync TODO and code-map for images and comments [`3b99e71`](https://github.com/evgeniikostiukov/CigarHelper/commit/3b99e7133cd2221b5ae65f965c7b6a66dbad52ad)
+- chore(repo): release 2.2.0 [`b5365fa`](https://github.com/evgeniikostiukov/CigarHelper/commit/b5365fa6516312c219bddf1238515655f4a658ad)
 
 ## [v2.1.0](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.0.0...v2.1.0) - 2026-04-15
 
@@ -18,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat(web): админка удалённых обзоров и DTO профиля автора [`c038c55`](https://github.com/evgeniikostiukov/CigarHelper/commit/c038c55e112b3841c5767450c2a50a75f54ec3d5)
 - fix(web): корректный вывод HTML/текста обзоров [`afbbebe`](https://github.com/evgeniikostiukov/CigarHelper/commit/afbbebea57bb667a7d614d3edf7614dbc4701e9c)
 - feat(dashboard): author row for recent reviews [`4b64080`](https://github.com/evgeniikostiukov/CigarHelper/commit/4b64080ffe6b20fbc54063ea6bbf47c4b8f1a56d)
+- docs(changelog): sync for v2.1.0 [`f38ac72`](https://github.com/evgeniikostiukov/CigarHelper/commit/f38ac728440be84afedd7d8ad8aa86089b69cfbe)
 - docs(changelog): sync for v2.0.0 [`418f5d8`](https://github.com/evgeniikostiukov/CigarHelper/commit/418f5d873510183fac1ec9bbf3271d2380f324dc)
 - fix(import,tests): resolve nullable and xUnit analyzer warnings [`ea5134c`](https://github.com/evgeniikostiukov/CigarHelper/commit/ea5134cbc6a42775bc459e0a8c72ac707ac0c970)
 - fix(web): перенос длинных строк в тексте обзора [`744626b`](https://github.com/evgeniikostiukov/CigarHelper/commit/744626b194a5d4a9441f971807134dfe7910186e)
