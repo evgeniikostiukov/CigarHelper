@@ -1,10 +1,11 @@
 import DOMPurify from 'dompurify';
+import type { Config } from 'dompurify';
 
 /** Типичный вывод TipTap StarterKit и окружения «документ». */
 const LOOKS_LIKE_HTML_FRAGMENT =
   /<\s*(?:p|div|br|h[1-6]|ul|ol|li|strong|em|b|i|u|s|blockquote|pre|code|a|img|span|hr)\b/i;
 
-const PURIFY_REVIEW_BODY: DOMPurify.Config = {
+const PURIFY_REVIEW_BODY = {
   USE_PROFILES: { html: true },
   ADD_TAGS: ['img'],
   ADD_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'width', 'height', 'class', 'loading', 'decoding'],
@@ -25,7 +26,7 @@ const PURIFY_REVIEW_BODY: DOMPurify.Config = {
     'template',
   ],
   FORBID_ATTR: [/^on/i],
-};
+} as unknown as Config;
 
 /**
  * Разбирает строку как HTML и возвращает innerHTML тела документа
@@ -80,7 +81,7 @@ function plainTextToSanitizedParagraphs(text: string): string {
     .filter(Boolean);
   if (lines.length === 0) return '';
   const html = lines.map((line) => `<p>${escapeHtmlText(line)}</p>`).join('');
-  return DOMPurify.sanitize(html, PURIFY_REVIEW_BODY);
+  return String(DOMPurify.sanitize(html, PURIFY_REVIEW_BODY));
 }
 
 /**
@@ -94,5 +95,5 @@ export function sanitizeReviewBodyForDisplay(raw: string): string {
     return plainTextToSanitizedParagraphs(fragment);
   }
 
-  return DOMPurify.sanitize(fragment, PURIFY_REVIEW_BODY);
+  return String(DOMPurify.sanitize(fragment, PURIFY_REVIEW_BODY));
 }

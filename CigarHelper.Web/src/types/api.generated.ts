@@ -1269,6 +1269,13 @@ export interface paths {
           search?: string;
           brandId?: number;
           strength?: string;
+          minReviewBody?: number;
+          maxReviewBody?: number;
+          minReviewAroma?: number;
+          maxReviewAroma?: number;
+          minReviewPairings?: number;
+          maxReviewPairings?: number;
+          minReviewScoredCount?: number;
           excludeBinaryMedia?: boolean;
           unmoderatedOnly?: boolean;
           withoutImagesOnly?: boolean;
@@ -2675,6 +2682,14 @@ export interface components {
       binder?: string | null;
       filler?: string | null;
       images?: components['schemas']['CigarImageDto'][] | null;
+      /** Format: double */
+      reviewAvgBodyStrength?: number | null;
+      /** Format: double */
+      reviewAvgAromaScore?: number | null;
+      /** Format: double */
+      reviewAvgPairingsScore?: number | null;
+      /** Format: int32 */
+      reviewScoredReviewCount?: number;
       /** Format: date-time */
       createdAt?: string;
       /** Format: date-time */
@@ -2866,6 +2881,12 @@ export interface components {
       venue?: string | null;
       /** Format: date-time */
       smokingDate?: string | null;
+      /** Format: int32 */
+      bodyStrengthScore?: number | null;
+      /** Format: int32 */
+      aromaScore?: number | null;
+      /** Format: int32 */
+      pairingsScore?: number | null;
       images?: components['schemas']['CreateReviewImageRequest'][] | null;
     };
     DashboardSummaryDto: {
@@ -3076,6 +3097,12 @@ export interface components {
       /** Format: int32 */
       draw?: number | null;
       venue?: string | null;
+      /** Format: int32 */
+      bodyStrengthScore?: number | null;
+      /** Format: int32 */
+      aromaScore?: number | null;
+      /** Format: int32 */
+      pairingsScore?: number | null;
       /** Format: date-time */
       smokingDate?: string;
       /** Format: date-time */
@@ -3195,6 +3222,12 @@ export interface components {
       venue?: string | null;
       /** Format: date-time */
       smokingDate?: string | null;
+      /** Format: int32 */
+      bodyStrengthScore?: number | null;
+      /** Format: int32 */
+      aromaScore?: number | null;
+      /** Format: int32 */
+      pairingsScore?: number | null;
       imagesToAdd?: components['schemas']['CreateReviewImageRequest'][] | null;
       imageIdsToRemove?: number[] | null;
     };

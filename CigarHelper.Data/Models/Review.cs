@@ -48,14 +48,26 @@ public class Review
     
     [MaxLength(50)]
     public string? Taste { get; set; }
-    
-    [MaxLength(50)]
+
+    /// <summary>Субъективная сила/тело (1–10), для агрегатов в каталоге; не путать с каталожной крепостью.</summary>
+    [Range(1, 10)]
+    public int? BodyStrengthScore { get; set; }
+
+    /// <summary>Числовая ось аромата (1–10); строковое <see cref="Aroma"/> — текстовая заметка.</summary>
+    [Range(1, 10)]
+    public int? AromaScore { get; set; }
+
+    /// <summary>Сочетания (напитки/еда), субъективная ось 1–10.</summary>
+    [Range(1, 10)]
+    public int? PairingsScore { get; set; }
+
+    [Range(1, 5)]
     public int? Construction { get; set; }
-    
-    [MaxLength(50)]
+
+    [Range(1, 5)]
     public int? BurnQuality { get; set; }
-    
-    [MaxLength(50)]
+
+    [Range(1, 5)]
     public int? Draw { get; set; }
     
     [MaxLength(100)]

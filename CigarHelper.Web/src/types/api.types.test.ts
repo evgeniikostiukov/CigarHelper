@@ -68,6 +68,13 @@ describe('CigarBaseDto', () => {
   it('содержит вложенный brand', () => {
     expectTypeOf<CigarBaseDto['brand']>().toEqualTypeOf<BrandDto | undefined>();
   });
+
+  it('содержит агрегаты отзывов по осям и счётчик', () => {
+    expectTypeOf<CigarBaseDto['reviewAvgBodyStrength']>().toEqualTypeOf<number | null | undefined>();
+    expectTypeOf<CigarBaseDto['reviewAvgAromaScore']>().toEqualTypeOf<number | null | undefined>();
+    expectTypeOf<CigarBaseDto['reviewAvgPairingsScore']>().toEqualTypeOf<number | null | undefined>();
+    expectTypeOf<CigarBaseDto['reviewScoredReviewCount']>().toEqualTypeOf<number | undefined>();
+  });
 });
 
 // ── BrandDto ───────────────────────────────────────────────────────────────
@@ -124,7 +131,7 @@ describe('RecentReviewDto', () => {
   });
 
   it('поля автора для PublicProfileAuthorBlock', () => {
-    expectTypeOf<RecentReviewDto['username']>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<RecentReviewDto['username']>().toEqualTypeOf<string>();
     expectTypeOf<RecentReviewDto['isAuthorProfilePublic']>().toEqualTypeOf<boolean | undefined>();
     expectTypeOf<RecentReviewDto['userAvatarUrl']>().toEqualTypeOf<string | null | undefined>();
   });

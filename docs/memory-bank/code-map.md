@@ -15,7 +15,7 @@
 | `AdminCigarImagesController` | `GET /api/admin/cigar-images` — пагинированный список всех `CigarImages` (только роль Admin) |
 | `PublicUsersController` | Публичные данные пользователей |
 | `BrandsController` | Бренды: `GET` — любой JWT; `POST` / `PUT` / `DELETE` — только **Admin**, **Moderator** |
-| `CigarsController` | Каталог / сигары; чтение баз (`GET .../bases`, `.../paginated`, `.../bases/{id}`, `.../brands`) — любой JWT; **`POST .../bases`** — любой JWT: карточка `IsModerated` только у **Admin**/**Moderator**; обычный пользователь может создать запись с **промодерированным** брендом (`GET .../brands`); **`PUT .../bases/{id}`** — только **Admin**, **Moderator**; `unmoderatedOnly=true` только для staff; **`POST /api/cigars`** — коллекция по любому существующему `CigarBaseId`; `CigarResponseDto.Images` — merged (`LoadMergedUserCigarGalleriesAsync`) |
+| `CigarsController` | Каталог / сигары; чтение баз (`GET .../bases`, `.../paginated`, `.../bases/{id}`, `.../brands`) — любой JWT; **`GET .../bases/paginated`** — фильтры по средним осям отзывов (`minReviewBody` / `maxReviewBody`, аромат, сочетания, `minReviewScoredCount`) и сортировка `reviewAvgBodyStrength` / `reviewAvgAromaScore` / `reviewAvgPairingsScore` / `reviewScoredReviewCount`; **`POST .../bases`** — любой JWT: карточка `IsModerated` только у **Admin**/**Moderator**; обычный пользователь может создать запись с **промодерированным** брендом (`GET .../brands`); **`PUT .../bases/{id}`** — только **Admin**, **Moderator**; `unmoderatedOnly=true` только для staff; **`POST /api/cigars`** — коллекция по любому существующему `CigarBaseId`; `CigarResponseDto.Images` — merged (`LoadMergedUserCigarGalleriesAsync`) |
 | `HumidorsController` | Хьюмидоры пользователя |
 | `ReviewsController` | Обзоры: `POST` с `cigarBaseId` и опционально `userCigarId` (запись коллекции); `GET` списка — `cigarBaseId` / `userCigarId` / `userId` (без строк с `DeletedAt`). Автор: `DELETE` — мягкое удаление (`DeletedAt`). |
 | `AdminReviewsController` | Staff (`Admin`, `Moderator`): `GET /api/admin/reviews/deleted` — удалённые обзоры; `POST .../{id}/restore` — снять удаление. |
@@ -28,7 +28,7 @@
 ## API — сервисы и прочее
 
 - `Program.cs`: эндпоинты **`GET /health`** (liveness) и **`GET /health/ready`** (готовность + EF к БД).
-- `CigarHelper.Api/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService`, `CigarCommentService`, `ReviewCommentService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
+- `CigarHelper.Api/Services/` — `AuthService`, `JwtService`, `ProfileService`, `AdminUserService`, `HumidorService`, `ReviewService` (после create/update/delete/restore обзора — `CigarBaseReviewStatsRefresher` пересчитывает средние оси на `CigarBase`), `CigarCommentService`, `ReviewCommentService`, **`ImageService`** (оркестрация: validate → store → thumbnail) и др.
 - `CigarHelper.Api/Storage/` — **`IImageStorageProvider`** + реализации **`MinioImageStorageProvider`** / `LocalFileImageStorage`; **`IThumbnailGenerator`** + `ImageSharpThumbnailGenerator`; **`CigarImageStorageWriter`** — общая запись оригинала + миниатюры (API и CSV-импорт).
 - `CigarHelper.Api/Helpers/` — `ImageBinaryValidator` (проверка бинарных изображений), `ImageDownloader`.
 - `CigarHelper.Api/Options/` — сильно типизированные опции конфигурации (`ImageUploadOptions`, **`ImageStorageOptions`**).
@@ -58,7 +58,7 @@
 ## Data (`CigarHelper.Data/`)
 
 - `Data/AppDbContext.cs` — DbSets и Fluent API.
-- `Models/` — сущности; таблица **`CigarComments`** — комментарии (ровно одна из связей: `CigarBaseId` или `UserCigarId`); **`ReviewComments`** — комментарии к обзору (`ReviewId`, модерация тем же enum, что и у сигар).
+- `Models/` — сущности; **`Review`**: опциональные числовые оси 1–10 `BodyStrengthScore`, `AromaScore`, `PairingsScore` (текстовые `Aroma`/`Taste` — заметки); **`CigarBase`**: денормализованные `ReviewAvgBodyStrength`, `ReviewAvgAromaScore`, `ReviewAvgPairingsScore`, `ReviewScoredReviewCount`; таблица **`CigarComments`** — комментарии (ровно одна из связей: `CigarBaseId` или `UserCigarId`); **`ReviewComments`** — комментарии к обзору (`ReviewId`, модерация тем же enum, что и у сигар).
 - `Migrations/` — EF Core миграции.
 - `Data/DesignTimeDbContextFactory.cs` — design-time для `dotnet ef`.
 

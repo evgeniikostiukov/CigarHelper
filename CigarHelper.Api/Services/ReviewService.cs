@@ -124,6 +124,9 @@ public class ReviewService : IReviewService
             BurnQuality = review.BurnQuality,
             Draw = review.Draw,
             Venue = review.Venue,
+            BodyStrengthScore = review.BodyStrengthScore,
+            AromaScore = review.AromaScore,
+            PairingsScore = review.PairingsScore,
             SmokingDate = review.SmokingDate,
             CreatedAt = review.CreatedAt,
             UpdatedAt = review.UpdatedAt
@@ -171,6 +174,9 @@ public class ReviewService : IReviewService
             BurnQuality = request.BurnQuality,
             Draw = request.Draw,
             Venue = request.Venue,
+            BodyStrengthScore = request.BodyStrengthScore,
+            AromaScore = request.AromaScore,
+            PairingsScore = request.PairingsScore,
             SmokingDate = request.SmokingDate ?? DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow
         };
@@ -191,6 +197,8 @@ public class ReviewService : IReviewService
 
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
+
+        await CigarBaseReviewStatsRefresher.RefreshAsync(_context, review.CigarBaseId);
 
         return (await GetReviewByIdAsync(review.Id))!;
     }
@@ -222,6 +230,9 @@ public class ReviewService : IReviewService
         review.BurnQuality = request.BurnQuality;
         review.Draw = request.Draw;
         review.Venue = request.Venue;
+        review.BodyStrengthScore = request.BodyStrengthScore;
+        review.AromaScore = request.AromaScore;
+        review.PairingsScore = request.PairingsScore;
         review.SmokingDate = request.SmokingDate ?? review.SmokingDate;
         review.UpdatedAt = DateTime.UtcNow;
 
@@ -254,6 +265,8 @@ public class ReviewService : IReviewService
 
         await _context.SaveChangesAsync();
 
+        await CigarBaseReviewStatsRefresher.RefreshAsync(_context, review.CigarBaseId);
+
         return await GetReviewByIdAsync(review.Id);
     }
 
@@ -276,8 +289,11 @@ public class ReviewService : IReviewService
             return true;
         }
 
+        var cigarBaseId = review.CigarBaseId;
         review.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
+
+        await CigarBaseReviewStatsRefresher.RefreshAsync(_context, cigarBaseId);
 
         return true;
     }
@@ -327,8 +343,12 @@ public class ReviewService : IReviewService
             return false;
         }
 
+        var cigarBaseId = review.CigarBaseId;
         review.DeletedAt = null;
         await _context.SaveChangesAsync();
+
+        await CigarBaseReviewStatsRefresher.RefreshAsync(_context, cigarBaseId);
+
         return true;
     }
 }

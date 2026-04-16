@@ -38,6 +38,18 @@ public class CigarBaseDto
     public List<CigarImageDto>? Images { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>Средняя субъективная сила/тело по отзывам (1–10), null если нет оценок по этой оси.</summary>
+    public decimal? ReviewAvgBodyStrength { get; set; }
+
+    /// <summary>Средняя числовая ось аромата по отзывам.</summary>
+    public decimal? ReviewAvgAromaScore { get; set; }
+
+    /// <summary>Средняя ось сочетаний по отзывам.</summary>
+    public decimal? ReviewAvgPairingsScore { get; set; }
+
+    /// <summary>Число неудалённых отзывов с хотя бы одной из трёх осей.</summary>
+    public int ReviewScoredReviewCount { get; set; }
 }
 
 public class CigarResponseDto : CigarBriefDto

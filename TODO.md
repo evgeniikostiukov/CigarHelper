@@ -93,7 +93,7 @@
 - [ ] Контрактные тесты фронт↔бэк (Pact и т.п.) — если интеграционных тестов API станет недостаточно.
 - [ ] Сценарии доступности (axe в Playwright) для публичных страниц.
 - [ ] **Соц/каталог:** публичные подборки, подписки, лента активности — только если появится явный продуктовый фокус (MVP без перегруза).
-- [ ] **Отзывы:** оси оценок (сила, аромат, сочетания) и фильтры/сортировки в каталоге по ним.
+- [x] **Отзывы:** оси оценок (сила, аромат, сочетания) и фильтры/сортировки в каталоге по ним.
 - [ ] **PWA / офлайн:** минимум — кэш списков и очередь действий при появлении мобильного сценария.
 - [ ] **Монетизация (если актуально):** лимиты по тарифам (хьюмидоры, фото, объём) под покрытие хостинга.
 - [ ] **Комментарии (расширение):** жалобы пользователей на комментарии; простой антиспам (чёрный список / эвристики); rate limit на `POST /api/cigarcomments` по IP и/или по пользователю; уведомления модераторам (email/push).
@@ -110,6 +110,7 @@
 
 ## Журнал выполненного
 
+- **2026-04-16** — **Отзывы / каталог:** опциональные оси 1–10 `BodyStrengthScore`, `AromaScore`, `PairingsScore` на `Review`; денормализованные средние и `ReviewScoredReviewCount` на `CigarBase`; `CigarBaseReviewStatsRefresher` после create/update/delete/restore; `GET .../bases/paginated` — фильтры `minReviewBody`… и сортировки по средним; миграция `AddReviewAxisScoresAndCigarBaseReviewStats` + SQL backfill; OpenAPI / `api.generated.ts`; `ReviewForm`, `CigarBases` (фильтры + сортировка), блок средних в `CigarDetailDialog`; тесты `ReviewServiceTests`, `CigarsBasesPaginatedIntegrationTests`; правки типов `reviewContentDisplay` (DOMPurify `Config`, `TrustedHTML` → string).
 - **2026-04-16** — Публичный хьюмидор: при просмотре **своей** публичной коллекции под своим логином в `CigarCommentsPanel` скрыты поле ввода и кнопка «Отправить» (`allowNewComments`, `PublicHumidorDetail` + сравнение `unique_name` с `username` в URL).
 - **2026-04-16** — «Мои сигары» и прочие экраны: при недоступности MinIO/ошибках раздачи картинок список не засоряется глобальными toast — `skipGlobalErrorNotification` в `api.ts` для blob-запросов к `cigarimages`; `CigarImagesController` ловит исключения чтения из хранилища и отдаёт 404 вместо 500; правка `r?.src?.startsWith` в `CigarDetail.vue` при отмене загрузки галереи.
 - **2026-04-16** — **Корень:** первый `GET /api/cigars` тянул `IImageService` → singleton `MinioImageStorageProvider` → `EnsureBucketExistsAsync` бросал при недоступном MinIO и ронял весь список; в `MinioImageStorageProvider` обёрнут вызов в try/log. В `api.ts` дополнительно без toast для любых ошибок по URL `cigarimages/{id}/thumbnail|data`.

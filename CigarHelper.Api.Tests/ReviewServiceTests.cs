@@ -583,4 +583,79 @@ public class ReviewServiceTests
 
         Assert.False(ok);
     }
+
+    [Fact]
+    public async Task CreateReviewAsync_WithAxisScores_RefreshesCigarBaseAggregates()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+        var req = BuildCreateRequest(cb.Id, "Axes", "Body text here long enough", rating: 8);
+        req.BodyStrengthScore = 4;
+        req.AromaScore = 8;
+        req.PairingsScore = 6;
+
+        await sut.CreateReviewAsync(user.Id, req);
+
+        var b = await db.CigarBases.AsNoTracking().SingleAsync(x => x.Id == cb.Id);
+        Assert.Equal(4m, b.ReviewAvgBodyStrength);
+        Assert.Equal(8m, b.ReviewAvgAromaScore);
+        Assert.Equal(6m, b.ReviewAvgPairingsScore);
+        Assert.Equal(1, b.ReviewScoredReviewCount);
+    }
+
+    [Fact]
+    public async Task CreateReviewAsync_PartialAxisScores_AveragesOnlyPresentAxes()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+        var r1 = BuildCreateRequest(cb.Id, "A", "Body text here long enough", rating: 5);
+        r1.BodyStrengthScore = 2;
+        r1.AromaScore = null;
+        r1.PairingsScore = null;
+        await sut.CreateReviewAsync(user.Id, r1);
+        var r2 = BuildCreateRequest(cb.Id, "B", "Body text here long enough too", rating: 6);
+        r2.BodyStrengthScore = 8;
+        r2.AromaScore = 10;
+        r2.PairingsScore = null;
+        await sut.CreateReviewAsync(user.Id, r2);
+
+        var b = await db.CigarBases.AsNoTracking().SingleAsync(x => x.Id == cb.Id);
+        Assert.Equal(5m, b.ReviewAvgBodyStrength);
+        Assert.Equal(10m, b.ReviewAvgAromaScore);
+        Assert.Null(b.ReviewAvgPairingsScore);
+        Assert.Equal(2, b.ReviewScoredReviewCount);
+    }
+
+    [Fact]
+    public async Task DeleteReviewAsync_RefreshesAggregatesWhenLastScoredReviewRemoved()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var sut = Sut(db);
+        var dto = await sut.CreateReviewAsync(user.Id, new CreateReviewRequest
+        {
+            Title = "One",
+            Content = "Body text here long enough",
+            Rating = 7,
+            CigarBaseId = cb.Id,
+            UserCigarId = cigar.Id,
+            BodyStrengthScore = 9,
+            AromaScore = 9,
+            PairingsScore = 9,
+            Images = new List<CreateReviewImageRequest>()
+        });
+        await sut.DeleteReviewAsync(dto.Id, user.Id);
+
+        var b = await db.CigarBases.AsNoTracking().SingleAsync(x => x.Id == cb.Id);
+        Assert.Null(b.ReviewAvgBodyStrength);
+        Assert.Null(b.ReviewAvgAromaScore);
+        Assert.Null(b.ReviewAvgPairingsScore);
+        Assert.Equal(0, b.ReviewScoredReviewCount);
+    }
 }

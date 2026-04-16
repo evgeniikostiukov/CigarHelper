@@ -32,6 +32,13 @@ public class ReviewDto
     public int? BurnQuality { get; set; }
     public int? Draw { get; set; }
     public string? Venue { get; set; }
+
+    public int? BodyStrengthScore { get; set; }
+
+    public int? AromaScore { get; set; }
+
+    public int? PairingsScore { get; set; }
+
     public DateTime SmokingDate { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -96,7 +103,16 @@ public class CreateReviewRequest
     public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
-    
+
+    [Range(1, 10)]
+    public int? BodyStrengthScore { get; set; }
+
+    [Range(1, 10)]
+    public int? AromaScore { get; set; }
+
+    [Range(1, 10)]
+    public int? PairingsScore { get; set; }
+
     public List<CreateReviewImageRequest> Images { get; set; } = new List<CreateReviewImageRequest>();
 }
 
@@ -129,7 +145,16 @@ public class UpdateReviewRequest
     public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
-    
+
+    [Range(1, 10)]
+    public int? BodyStrengthScore { get; set; }
+
+    [Range(1, 10)]
+    public int? AromaScore { get; set; }
+
+    [Range(1, 10)]
+    public int? PairingsScore { get; set; }
+
     // Список изображений для добавления
     public List<CreateReviewImageRequest>? ImagesToAdd { get; set; }
     

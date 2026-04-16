@@ -31,6 +31,11 @@ export interface CigarBase {
   images?: CigarImage[];
   brandLogoBytes?: string;
   brandLogoUrl?: string;
+  /** Средние по отзывам (1–10), не каталожная крепость. */
+  reviewAvgBodyStrength?: number | null;
+  reviewAvgAromaScore?: number | null;
+  reviewAvgPairingsScore?: number | null;
+  reviewScoredReviewCount?: number;
 }
 
 export interface Cigar {

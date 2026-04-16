@@ -49,6 +49,9 @@ export interface Review {
   burnQuality?: number;
   draw?: number;
   venue?: string;
+  bodyStrengthScore?: number | null;
+  aromaScore?: number | null;
+  pairingsScore?: number | null;
 }
 
 export interface CreateReviewDto {
@@ -65,6 +68,9 @@ export interface CreateReviewDto {
   burnQuality?: number;
   draw?: number;
   venue?: string;
+  bodyStrengthScore?: number | null;
+  aromaScore?: number | null;
+  pairingsScore?: number | null;
   images?: { imageData: string; caption?: string }[];
 }
 

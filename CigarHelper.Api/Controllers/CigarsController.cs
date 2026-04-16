@@ -109,7 +109,11 @@ public class CigarsController : ControllerBase
                         HasThumbnail = img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
-                UpdatedAt = cb.UpdatedAt
+                UpdatedAt = cb.UpdatedAt,
+                ReviewAvgBodyStrength = cb.ReviewAvgBodyStrength,
+                ReviewAvgAromaScore = cb.ReviewAvgAromaScore,
+                ReviewAvgPairingsScore = cb.ReviewAvgPairingsScore,
+                ReviewScoredReviewCount = cb.ReviewScoredReviewCount
             })
             .OrderBy(cb => cb.Name)
             .ToListAsync();
@@ -126,6 +130,13 @@ public class CigarsController : ControllerBase
         [FromQuery] string? search = null,
         [FromQuery] int? brandId = null,
         [FromQuery] string? strength = null,
+        [FromQuery] decimal? minReviewBody = null,
+        [FromQuery] decimal? maxReviewBody = null,
+        [FromQuery] decimal? minReviewAroma = null,
+        [FromQuery] decimal? maxReviewAroma = null,
+        [FromQuery] decimal? minReviewPairings = null,
+        [FromQuery] decimal? maxReviewPairings = null,
+        [FromQuery] int? minReviewScoredCount = null,
         [FromQuery] bool excludeBinaryMedia = false,
         [FromQuery] bool unmoderatedOnly = false,
         [FromQuery] bool withoutImagesOnly = false)
@@ -164,20 +175,49 @@ public class CigarsController : ControllerBase
             query = query.Where(cb => !cb.Images.Any(img => img.StoragePath != null));
         }
 
+        if (minReviewBody.HasValue)
+            query = query.Where(cb => cb.ReviewAvgBodyStrength != null && cb.ReviewAvgBodyStrength >= minReviewBody.Value);
+        if (maxReviewBody.HasValue)
+            query = query.Where(cb => cb.ReviewAvgBodyStrength != null && cb.ReviewAvgBodyStrength <= maxReviewBody.Value);
+        if (minReviewAroma.HasValue)
+            query = query.Where(cb => cb.ReviewAvgAromaScore != null && cb.ReviewAvgAromaScore >= minReviewAroma.Value);
+        if (maxReviewAroma.HasValue)
+            query = query.Where(cb => cb.ReviewAvgAromaScore != null && cb.ReviewAvgAromaScore <= maxReviewAroma.Value);
+        if (minReviewPairings.HasValue)
+            query = query.Where(cb => cb.ReviewAvgPairingsScore != null && cb.ReviewAvgPairingsScore >= minReviewPairings.Value);
+        if (maxReviewPairings.HasValue)
+            query = query.Where(cb => cb.ReviewAvgPairingsScore != null && cb.ReviewAvgPairingsScore <= maxReviewPairings.Value);
+        if (minReviewScoredCount.HasValue)
+            query = query.Where(cb => cb.ReviewScoredReviewCount >= minReviewScoredCount.Value);
+
         // Получаем общее количество записей
         var totalCount = await query.CountAsync();
+
+        var desc = sortOrder?.ToLower() == "desc";
 
         // Применяем сортировку
         query = sortField?.ToLower() switch
         {
-            "name" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name),
-            "brandname" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Brand.Name) : query.OrderBy(cb => cb.Brand.Name),
-            "size" => sortOrder?.ToLower() == "desc"
+            "name" => desc ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name),
+            "brandname" => desc ? query.OrderByDescending(cb => cb.Brand.Name) : query.OrderBy(cb => cb.Brand.Name),
+            "size" => desc
                 ? query.OrderByDescending(cb => cb.LengthMm).ThenByDescending(cb => cb.Diameter)
                 : query.OrderBy(cb => cb.LengthMm).ThenBy(cb => cb.Diameter),
-            "strength" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Strength) : query.OrderBy(cb => cb.Strength),
-            "country" => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Country) : query.OrderBy(cb => cb.Country),
-            _ => sortOrder?.ToLower() == "desc" ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name)
+            "strength" => desc ? query.OrderByDescending(cb => cb.Strength) : query.OrderBy(cb => cb.Strength),
+            "country" => desc ? query.OrderByDescending(cb => cb.Country) : query.OrderBy(cb => cb.Country),
+            "reviewavgbodystrength" => desc
+                ? query.OrderBy(cb => cb.ReviewAvgBodyStrength == null ? 1 : 0).ThenByDescending(cb => cb.ReviewAvgBodyStrength)
+                : query.OrderBy(cb => cb.ReviewAvgBodyStrength == null ? 1 : 0).ThenBy(cb => cb.ReviewAvgBodyStrength),
+            "reviewavgaromascore" => desc
+                ? query.OrderBy(cb => cb.ReviewAvgAromaScore == null ? 1 : 0).ThenByDescending(cb => cb.ReviewAvgAromaScore)
+                : query.OrderBy(cb => cb.ReviewAvgAromaScore == null ? 1 : 0).ThenBy(cb => cb.ReviewAvgAromaScore),
+            "reviewavgpairingsscore" => desc
+                ? query.OrderBy(cb => cb.ReviewAvgPairingsScore == null ? 1 : 0).ThenByDescending(cb => cb.ReviewAvgPairingsScore)
+                : query.OrderBy(cb => cb.ReviewAvgPairingsScore == null ? 1 : 0).ThenBy(cb => cb.ReviewAvgPairingsScore),
+            "reviewscoredreviewcount" => desc
+                ? query.OrderByDescending(cb => cb.ReviewScoredReviewCount)
+                : query.OrderBy(cb => cb.ReviewScoredReviewCount),
+            _ => desc ? query.OrderByDescending(cb => cb.Name) : query.OrderBy(cb => cb.Name)
         };
 
         // Пагинация: без excludeBinaryMedia тянем bytea логотипов брендов; фото сигар только метаданные + ключи в MinIO.
@@ -228,7 +268,11 @@ public class CigarsController : ControllerBase
                             HasThumbnail = img.ThumbnailPath != null
                         }).ToList(),
                     CreatedAt = cb.CreatedAt,
-                    UpdatedAt = cb.UpdatedAt
+                    UpdatedAt = cb.UpdatedAt,
+                    ReviewAvgBodyStrength = cb.ReviewAvgBodyStrength,
+                    ReviewAvgAromaScore = cb.ReviewAvgAromaScore,
+                    ReviewAvgPairingsScore = cb.ReviewAvgPairingsScore,
+                    ReviewScoredReviewCount = cb.ReviewScoredReviewCount
                 })
                 .ToListAsync();
         }
@@ -274,7 +318,11 @@ public class CigarsController : ControllerBase
                             HasThumbnail = img.ThumbnailPath != null
                         }).ToList(),
                     CreatedAt = cb.CreatedAt,
-                    UpdatedAt = cb.UpdatedAt
+                    UpdatedAt = cb.UpdatedAt,
+                    ReviewAvgBodyStrength = cb.ReviewAvgBodyStrength,
+                    ReviewAvgAromaScore = cb.ReviewAvgAromaScore,
+                    ReviewAvgPairingsScore = cb.ReviewAvgPairingsScore,
+                    ReviewScoredReviewCount = cb.ReviewScoredReviewCount
                 })
                 .ToListAsync();
         }
@@ -730,7 +778,11 @@ public class CigarsController : ControllerBase
                         HasThumbnail = img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
-                UpdatedAt = cb.UpdatedAt
+                UpdatedAt = cb.UpdatedAt,
+                ReviewAvgBodyStrength = cb.ReviewAvgBodyStrength,
+                ReviewAvgAromaScore = cb.ReviewAvgAromaScore,
+                ReviewAvgPairingsScore = cb.ReviewAvgPairingsScore,
+                ReviewScoredReviewCount = cb.ReviewScoredReviewCount
             })
             .FirstOrDefaultAsync();
 
@@ -783,7 +835,11 @@ public class CigarsController : ControllerBase
                         HasThumbnail = img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
-                UpdatedAt = cb.UpdatedAt
+                UpdatedAt = cb.UpdatedAt,
+                ReviewAvgBodyStrength = cb.ReviewAvgBodyStrength,
+                ReviewAvgAromaScore = cb.ReviewAvgAromaScore,
+                ReviewAvgPairingsScore = cb.ReviewAvgPairingsScore,
+                ReviewScoredReviewCount = cb.ReviewScoredReviewCount
             })
             .FirstOrDefaultAsync();
 
@@ -928,7 +984,11 @@ public class CigarsController : ControllerBase
                         HasThumbnail = img.ThumbnailPath != null
                     }).ToList(),
                 CreatedAt = cb.CreatedAt,
-                UpdatedAt = cb.UpdatedAt
+                UpdatedAt = cb.UpdatedAt,
+                ReviewAvgBodyStrength = cb.ReviewAvgBodyStrength,
+                ReviewAvgAromaScore = cb.ReviewAvgAromaScore,
+                ReviewAvgPairingsScore = cb.ReviewAvgPairingsScore,
+                ReviewScoredReviewCount = cb.ReviewScoredReviewCount
             })
             .FirstOrDefaultAsync();
 

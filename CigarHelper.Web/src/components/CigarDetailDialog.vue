@@ -228,6 +228,35 @@
               {{ getStrengthLabel(cigar.strength) }}
             </span>
           </div>
+          <div
+            v-if="(cigar.reviewScoredReviewCount ?? 0) > 0"
+            class="rounded-lg border border-stone-200/80 bg-stone-50/90 p-3 dark:border-stone-600/60 dark:bg-stone-900/50"
+            data-testid="cigar-detail-review-stats">
+            <h4 class="mb-2 text-sm font-semibold text-stone-800 dark:text-stone-200">По отзывам (средние 1–10)</h4>
+            <p class="mb-2 text-xs text-stone-600 dark:text-stone-400">
+              Отзывов с хотя бы одной осью: {{ cigar.reviewScoredReviewCount }}
+            </p>
+            <dl class="space-y-1 text-sm">
+              <div
+                v-if="cigar.reviewAvgBodyStrength != null"
+                class="flex justify-between gap-2">
+                <dt class="text-stone-600 dark:text-stone-400">Сила / тело</dt>
+                <dd class="font-medium tabular-nums">{{ cigar.reviewAvgBodyStrength?.toFixed(1) }}</dd>
+              </div>
+              <div
+                v-if="cigar.reviewAvgAromaScore != null"
+                class="flex justify-between gap-2">
+                <dt class="text-stone-600 dark:text-stone-400">Аромат</dt>
+                <dd class="font-medium tabular-nums">{{ cigar.reviewAvgAromaScore?.toFixed(1) }}</dd>
+              </div>
+              <div
+                v-if="cigar.reviewAvgPairingsScore != null"
+                class="flex justify-between gap-2">
+                <dt class="text-stone-600 dark:text-stone-400">Сочетания</dt>
+                <dd class="font-medium tabular-nums">{{ cigar.reviewAvgPairingsScore?.toFixed(1) }}</dd>
+              </div>
+            </dl>
+          </div>
         </div>
 
         <div class="space-y-4">

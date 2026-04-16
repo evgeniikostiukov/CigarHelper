@@ -1504,6 +1504,62 @@
             }
           },
           {
+            "name": "minReviewBody",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "maxReviewBody",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "minReviewAroma",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "maxReviewAroma",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "minReviewPairings",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "maxReviewPairings",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "minReviewScoredCount",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "excludeBinaryMedia",
             "in": "query",
             "schema": {
@@ -3362,6 +3418,25 @@
             },
             "nullable": true
           },
+          "reviewAvgBodyStrength": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "reviewAvgAromaScore": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "reviewAvgPairingsScore": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "reviewScoredReviewCount": {
+            "type": "integer",
+            "format": "int32"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -3949,6 +4024,27 @@
           "smokingDate": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "bodyStrengthScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aromaScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pairingsScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "images": {
@@ -4624,6 +4720,27 @@
             "type": "string",
             "nullable": true
           },
+          "bodyStrengthScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aromaScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pairingsScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "smokingDate": {
             "type": "string",
             "format": "date-time"
@@ -5001,6 +5118,27 @@
           "smokingDate": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "bodyStrengthScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aromaScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pairingsScore": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "imagesToAdd": {
