@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.0...HEAD)
+## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.1...HEAD)
+
+## [v2.2.1](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.0...v2.2.1) - 2026-04-16
+
+### Commits
+
+- fix(docker): gate web on API TCP healthcheck [`23414ca`](https://github.com/evgeniikostiukov/CigarHelper/commit/23414ca5d09e668d1588fabbdb88234767c54c5f)
+- chore(repo): release 2.2.1 [`ea15eda`](https://github.com/evgeniikostiukov/CigarHelper/commit/ea15eda07d8b40517d57f25a45bf522b84069257)
 
 ## [v2.2.0](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.1.0...v2.2.0) - 2026-04-16
 
@@ -18,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat(web): profile avatar upload and review list avatars [`c4cb882`](https://github.com/evgeniikostiukov/CigarHelper/commit/c4cb8823fbff09c392512dd4accd930ee75e5218)
 - feat(web): quieter cigar image requests and client compress [`c4359fa`](https://github.com/evgeniikostiukov/CigarHelper/commit/c4359fab0f6591eb39eecfd7cd3c232c8c028b5c)
 - feat(web): hide public humidor self-comment composer [`5efd4cb`](https://github.com/evgeniikostiukov/CigarHelper/commit/5efd4cb489fcd78ddce56a779c26446de5affee0)
+- docs(changelog): sync for v2.2.0 [`432b286`](https://github.com/evgeniikostiukov/CigarHelper/commit/432b28680ffaf944a359ecb09e5da454d0d88fab)
 - docs: sync TODO and code-map for images and comments [`3b99e71`](https://github.com/evgeniikostiukov/CigarHelper/commit/3b99e7133cd2221b5ae65f965c7b6a66dbad52ad)
 - chore(repo): release 2.2.0 [`b5365fa`](https://github.com/evgeniikostiukov/CigarHelper/commit/b5365fa6516312c219bddf1238515655f4a658ad)
 
