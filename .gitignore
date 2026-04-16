@@ -13,6 +13,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# Cursor IDE (локальные планы агента)
+.cursor/plans/
+
 # Visual Studio files
 .vs/
 .vscode/
