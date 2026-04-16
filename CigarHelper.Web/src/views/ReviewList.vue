@@ -239,6 +239,7 @@
                 <PublicProfileAuthorBlock
                   :username="review.username"
                   :is-author-profile-public="review.isAuthorProfilePublic === true"
+                  :avatar-url="review.userAvatarUrl ?? null"
                   overlay-card-mode
                   avatar-size="small" />
                 <span class="shrink-0 text-stone-500 dark:text-stone-500">· {{ formatDate(review.createdAt) }}</span>

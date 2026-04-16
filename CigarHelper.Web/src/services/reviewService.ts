@@ -16,6 +16,7 @@ export interface ReviewListItem {
   username: string;
   /** С сервера: виден ли публичный профиль автора. */
   isAuthorProfilePublic?: boolean;
+  userAvatarUrl?: string | null;
   cigarBaseId: number;
   cigarName: string;
   cigarBrand: string;

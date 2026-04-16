@@ -7,6 +7,8 @@ export interface MyProfile {
   email: string;
   role: string;
   isProfilePublic: boolean;
+  /** Относительный путь `/api/users/{id}/avatar` или внешний URL. */
+  avatarUrl?: string | null;
   createdAt: string;
   lastLogin: string | null;
 }
@@ -26,6 +28,7 @@ export interface UpdateProfileResponse {
 
 export interface PublicProfile {
   username: string;
+  avatarUrl?: string | null;
   createdAt: string;
   lastLogin: string | null;
   humidors: Humidor[];
@@ -55,6 +58,18 @@ export async function updateProfile(payload: UpdateProfilePayload): Promise<Upda
 
 export async function changePassword(payload: ChangePasswordPayload): Promise<ChangePasswordResponse> {
   const { data } = await api.post<ChangePasswordResponse>('/profile/change-password', payload);
+  return data;
+}
+
+export async function uploadProfileAvatar(file: File): Promise<MyProfile> {
+  const body = new FormData();
+  body.append('file', file);
+  const { data } = await api.post<MyProfile>('/profile/avatar', body);
+  return data;
+}
+
+export async function deleteProfileAvatar(): Promise<MyProfile> {
+  const { data } = await api.delete<MyProfile>('/profile/avatar');
   return data;
 }
 

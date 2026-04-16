@@ -54,20 +54,29 @@
 
       <template v-else-if="data">
         <header class="pb-6 sm:pb-8">
-          <div class="min-w-0">
-            <p
-              class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
-              Публичный профиль
-            </p>
-            <h1
-              id="public-profile-heading"
-              class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
-              {{ data.username }}
-            </h1>
-            <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
-              На сайте с {{ formatDate(data.createdAt) }}
-              <span v-if="data.lastLogin"> · Последняя активность: {{ formatDate(data.lastLogin) }}</span>
-            </p>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <Avatar
+              v-if="publicAvatarSrc"
+              :image="publicAvatarSrc"
+              size="xlarge"
+              shape="circle"
+              class="shrink-0 ring-2 ring-rose-200/50 dark:ring-rose-900/45"
+              :aria-label="`Аватар ${data.username}`" />
+            <div class="min-w-0 flex-1">
+              <p
+                class="mb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-rose-900/65 dark:text-rose-200/55">
+                Публичный профиль
+              </p>
+              <h1
+                id="public-profile-heading"
+                class="text-balance text-3xl font-semibold tracking-tight text-stone-900 dark:text-rose-50/95 sm:text-4xl">
+                {{ data.username }}
+              </h1>
+              <p class="mt-1.5 max-w-xl text-pretty text-sm text-stone-600 dark:text-stone-400">
+                На сайте с {{ formatDate(data.createdAt) }}
+                <span v-if="data.lastLogin"> · Последняя активность: {{ formatDate(data.lastLogin) }}</span>
+              </p>
+            </div>
           </div>
         </header>
 
@@ -158,8 +167,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, watch } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import { RouterLink, useRoute, useRouter } from 'vue-router';
+  import Avatar from 'primevue/avatar';
   import * as profileApi from '@/services/profileService';
   import type { PublicProfile } from '@/services/profileService';
   import humidorService from '@/services/humidorService';
@@ -170,6 +180,14 @@
   const loading = ref(true);
   const error = ref<string | null>(null);
   const data = ref<PublicProfile | null>(null);
+  const publicAvatarBuster = ref(0);
+
+  const publicAvatarSrc = computed(() => {
+    const u = data.value?.avatarUrl;
+    if (!u) return null;
+    if (/^https?:\/\//i.test(u)) return u;
+    return `${u}?v=${publicAvatarBuster.value}`;
+  });
 
   function formatDate(iso: string): string {
     try {
@@ -186,6 +204,7 @@
     const username = route.params.username as string;
     try {
       data.value = await profileApi.getPublicProfile(username);
+      publicAvatarBuster.value++;
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Ошибка загрузки публичного профиля:', err);
