@@ -2,7 +2,6 @@ import { createApp } from 'vue';
 import { definePreset } from '@primeuix/styled';
 import App from './App.vue';
 import router from './router';
-import { initCountly, trackCountlyPageView } from './analytics/countly';
 /* PrimeIcons: импорт из TS, чтобы Vite переписал url(./fonts/*) в собранные ассеты (не через @import в main.css + Tailwind). */
 import 'primeicons/primeicons.css';
 import './assets/main.css';
@@ -12,8 +11,6 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 
 const app = createApp(App);
-
-initCountly();
 
 /** Тёплая светлая тема: акцент rose, поверхности stone вместо холодного slate. */
 const CigarAura = definePreset(Aura, {
@@ -69,9 +66,6 @@ const CigarAura = definePreset(Aura, {
 });
 
 app.use(router);
-router.afterEach((to) => {
-  trackCountlyPageView(to.fullPath);
-});
 
 app.use(PrimeVue, {
   theme: {

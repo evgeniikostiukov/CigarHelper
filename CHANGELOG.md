@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.1...HEAD)
 
+### Removed
+
+- Countly: отдельный `docker-compose`, nginx-конфиг, Web SDK (`countly-sdk-web`), прокси `/i` и `/o` в Vite, связанные env и разделы документации.
+
 ## [v2.2.1](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.0...v2.2.1) - 2026-04-16
 
 ### Commits

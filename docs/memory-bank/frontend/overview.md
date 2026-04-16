@@ -8,7 +8,7 @@
 
 - **Vue 3** (Composition API, `<script setup>`, TypeScript).
 - **Vue Router 4** — история `createWebHistory`, guards по `meta.requiresAuth`, `requiresAdmin`, опционально `requiresAnyRole`.
-- **Vite** — алиас `@` → `src/`, auto-import PrimeVue через `unplugin-vue-components` + `PrimeVueResolver`, Vue DevTools в dev; опционально **Countly Web SDK** (`countly-sdk-web`, `src/analytics/countly.ts`, переменные `VITE_COUNTLY_*`, прокси `/i` и `/o` в dev).
+- **Vite** — алиас `@` → `src/`, auto-import PrimeVue через `unplugin-vue-components` + `PrimeVueResolver`, Vue DevTools в dev.
 - **PrimeVue 4** + **@primeuix/themes** (база Aura, кастомный пресет в `main.ts` — см. ниже), иконки PrimeIcons.
 - **Tailwind CSS 4** + **tailwindcss-primeui**, PostCSS.
 - **Axios** — единый клиент `src/services/api.ts`, `baseURL: '/api'`.
@@ -39,7 +39,7 @@
 
 ## Точка входа
 
-- `src/main.ts` — приложение, router, Countly (если заданы env), PrimeVue (тема, слои CSS), ConfirmationService, ToastService.
+- `src/main.ts` — приложение, router, PrimeVue (тема, слои CSS), ConfirmationService, ToastService.
 - `src/App.vue` — Menubar, `router-view` в `Suspense`, Toast/ConfirmDialog, меню и выход.
 
 ## Аутентификация

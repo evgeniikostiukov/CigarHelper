@@ -17,17 +17,6 @@ npm run dev
 
 По умолчанию Vite: **порт 3000**, `host: true` (доступ в LAN). Запросы к **`/api/*`** проксируются на **`http://localhost:5184`** — перед этим поднять API (`dotnet run` для `CigarHelper.Api`) на этом порту или поправить `vite.config.js` → `server.proxy['/api'].target`.
 
-### Countly (опционально)
-
-1. Поднять Countly локально: в корне репозитория **`docker compose -f docker-compose.countly.yml up -d`** (см. [../docker.md](../../docker.md)).
-2. В панели Countly создать приложение типа **Web**, скопировать **App Key**.
-3. В **`CigarHelper.Web/`** скопировать **`.env.example` → `.env.local`** (файл в `.gitignore`) и задать:
-   - **`VITE_COUNTLY_APP_KEY`** — ключ из панели;
-   - **`VITE_COUNTLY_URL=http://localhost:3000`** — тот же origin, что и dev-сервер Vite, чтобы SDK ходил на **`/i`** и **`/o`** без CORS; в **`vite.config.js`** эти пути проксируются на **`VITE_COUNTLY_PROXY_TARGET`** (по умолчанию `http://localhost:8888`).
-4. Перезапустить **`npm run dev`**. Просмотры страниц для SPA пишутся в **`router.afterEach`** (`src/main.ts` + `src/analytics/countly.ts`).
-
-Для **`vite preview`** или продакшена без общего reverse proxy задайте **`VITE_COUNTLY_URL`** на публичный URL сервера Countly (и настройте CORS на стороне Countly при необходимости).
-
 ## Сборка и превью
 
 ```bash

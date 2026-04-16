@@ -38,7 +38,6 @@
     "@tiptap/vue-3": "^3.21.0",
     "@vueuse/core": "^14.2.1",
     "axios": "^1.14.0",
-    "countly-sdk-web": "^26.1.1",
     "dompurify": "^3.3.3",
     "jwt-decode": "^4.0.0",
     "primeicons": "^7.0.0",
