@@ -272,6 +272,26 @@ public class DashboardServiceTests
     }
 
     [Fact]
+    public async Task GetUserDashboardSummaryAsync_RecentReviews_MapStorageAvatarToApiPath()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        user.AvatarUrl = "deadbeef0000_pic.png";
+        await db.SaveChangesAsync();
+
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db, "Av");
+        var h = await SeedHumidorAsync(db, user.Id, 10);
+        var uc = await SeedUserCigarAsync(db, user.Id, cb.Id, h.Id);
+        await SeedReviewAsync(db, user.Id, uc, DateTime.UtcNow);
+
+        var sut = new DashboardService(db);
+        var summary = await sut.GetUserDashboardSummaryAsync(user.Id);
+
+        var rr = Assert.Single(summary.RecentReviews);
+        Assert.Equal($"/api/users/{user.Id}/avatar", rr.UserAvatarUrl);
+    }
+
+    [Fact]
     public async Task GetUserDashboardSummaryAsync_ComputesAverageDaysToSmokeAndStaleReminders()
     {
         await using var db = CreateContext();

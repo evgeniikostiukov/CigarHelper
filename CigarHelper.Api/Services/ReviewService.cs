@@ -67,6 +67,11 @@ public class ReviewService : IReviewService
                 UserId = r.UserId,
                 Username = r.User.Username,
                 IsAuthorProfilePublic = r.User.IsProfilePublic,
+                UserAvatarUrl = r.User.AvatarUrl == null || r.User.AvatarUrl == ""
+                    ? null
+                    : (r.User.AvatarUrl.ToLower().StartsWith("http://") || r.User.AvatarUrl.ToLower().StartsWith("https://"))
+                        ? r.User.AvatarUrl
+                        : "/api/users/" + r.User.Id.ToString() + "/avatar",
                 CigarName = r.CigarBase.Name,
                 CigarBrand = r.CigarBase.Brand.Name,
                 CigarBaseId = r.CigarBaseId,
@@ -101,7 +106,7 @@ public class ReviewService : IReviewService
             UserId = review.UserId,
             Username = review.User.Username,
             IsAuthorProfilePublic = review.User.IsProfilePublic,
-            UserAvatarUrl = review.User.AvatarUrl,
+            UserAvatarUrl = UserAvatarPublicUrls.ToPublicUrl(review.User.Id, review.User.AvatarUrl),
             CigarBaseId = review.CigarBaseId,
             UserCigarId = review.CigarId,
             CigarName = review.CigarBase.Name,

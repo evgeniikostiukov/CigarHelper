@@ -96,7 +96,11 @@ public class DashboardService : IDashboardService
                 CreatedAt = r.CreatedAt,
                 Username = r.User.Username,
                 IsAuthorProfilePublic = r.User.IsProfilePublic,
-                UserAvatarUrl = r.User.AvatarUrl
+                UserAvatarUrl = r.User.AvatarUrl == null || r.User.AvatarUrl == ""
+                    ? null
+                    : (r.User.AvatarUrl.ToLower().StartsWith("http://") || r.User.AvatarUrl.ToLower().StartsWith("https://"))
+                        ? r.User.AvatarUrl
+                        : "/api/users/" + r.User.Id.ToString() + "/avatar"
             })
             .ToListAsync();
 

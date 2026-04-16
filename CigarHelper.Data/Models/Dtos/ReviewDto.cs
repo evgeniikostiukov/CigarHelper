@@ -49,8 +49,9 @@ public class ReviewListItemDto
     /// <summary>Можно ли открыть публичный профиль автора.</summary>
     public bool IsAuthorProfilePublic { get; set; }
 
-    //TODO: Сделать аватарку пользователя на обзоре
-    // public byte[]? UserAvatarBytes { get; set; }
+    /// <summary>Внешний URL или <c>/api/users/{userId}/avatar</c>.</summary>
+    public string? UserAvatarUrl { get; set; }
+
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;
 
