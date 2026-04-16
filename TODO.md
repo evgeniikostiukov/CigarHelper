@@ -83,7 +83,7 @@
 - [ ] **Каталог:** регламент периодического обновления данных (import/scraper), дедуп и при необходимости версионирование записей `CigarBase`.
 - [x] **Медиа:** миниатюры, политика хранения изображений (локально vs объектное хранилище) при росте нагрузки и объёма.
 - [x] **Медиа:** MinIO-провайдер (`MinioImageStorageProvider`) через официальный SDK `Minio 7.x`; docker-compose сервис `minio` (порты 9000/9001); бакет создаётся автоматически при старте API.
-- [ ] **Медиа / сжатие:** добиться лучшего соотношения **размер ↔ качество** для загружаемых и сохраняемых картинок: политика для оригинала и миниатюры (WebP/при необходимости AVIF, параметры encoder, макс. стороны, субсэмплинг), правки в `ImageService` / `ImageSharpThumbnailGenerator` (и импорт), значения в `appsettings`/опциях; опционально пред-сжатие во фронте перед `multipart`; перекодирование уже лежащих в хранилище — отдельным решением.
+- [x] **Медиа / сжатие:** политика `ImageStorage:Compression` (оригинал + миниатюра, WebP/AVIF для оригинала через NeoSolve + avifenc, VP8-параметры для WebP, лимиты сторон, GIF preserve); пайплайн `CigarImageOriginalPipeline` + `ImageSharpRasterEncoder`, `ImageSharpThumbnailGenerator`, `CigarImageStorageWriter`, Import; опционально `maybeCompressImageFileForUpload` во фронте. **Перекодирование уже лежащих объектов** — отдельная задача/утилита.
 
 ---
 
@@ -110,6 +110,9 @@
 
 ## Журнал выполненного
 
+- **2026-04-16** — Публичный хьюмидор: при просмотре **своей** публичной коллекции под своим логином в `CigarCommentsPanel` скрыты поле ввода и кнопка «Отправить» (`allowNewComments`, `PublicHumidorDetail` + сравнение `unique_name` с `username` в URL).
+- **2026-04-16** — «Мои сигары» и прочие экраны: при недоступности MinIO/ошибках раздачи картинок список не засоряется глобальными toast — `skipGlobalErrorNotification` в `api.ts` для blob-запросов к `cigarimages`; `CigarImagesController` ловит исключения чтения из хранилища и отдаёт 404 вместо 500; правка `r?.src?.startsWith` в `CigarDetail.vue` при отмене загрузки галереи.
+- **2026-04-16** — **Корень:** первый `GET /api/cigars` тянул `IImageService` → singleton `MinioImageStorageProvider` → `EnsureBucketExistsAsync` бросал при недоступном MinIO и ронял весь список; в `MinioImageStorageProvider` обёрнут вызов в try/log. В `api.ts` дополнительно без toast для любых ошибок по URL `cigarimages/{id}/thumbnail|data`.
 - **2026-04-12** — Регистрация: чекбокс подтверждения **18+** (`Login.vue`, `confirmedAge18` в `RegisterData`); API — `RegisterRequest.ConfirmedAge18`, `AuthValidationMessages`, валидация + `AuthService`; `openapi.json` / `api.generated.ts`; тесты.
 - **2026-04-12** — Правило Cursor **`.cursor/rules/releases.mdc`**: релиз по запросу — определение patch/minor/major, `npm version`, тег, `npm run changelog`, push тегов; ссылка в **`docs/memory-bank/workflow.md`**.
 - **2026-04-12** — Корень репозитория: **`auto-changelog`** (devDependency), конфиг **`.auto-changelog`**, скрипт **`npm run changelog`** → **`CHANGELOG.md`** (Keep a Changelog, теги `v*`, секция Unreleased); раздел в **`docs/memory-bank/workflow.md`**.

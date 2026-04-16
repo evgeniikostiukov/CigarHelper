@@ -47,11 +47,12 @@
 
 При добавлении провайдера — реализовать `IImageStorageProvider` и зарегистрировать в `Program.cs`.
 
-### Миниатюры
+### Миниатюры и сжатие
 
-- Генерируются автоматически при загрузке/обновлении изображения через `IImageService`.
-- Формат: WebP, ограничение 320×320 px (конфиг: `ImageStorage:ThumbnailMaxWidth/Height`).
-- Эндпоинты: `GET /api/cigar-images/{id}/data` (оригинал) и `GET /api/cigar-images/{id}/thumbnail` (WebP).
+- Генерируются при сохранении через `CigarImageStorageWriter` + `IThumbnailGenerator` из **уже подготовленного** оригинала (после политики `ImageStorage:Compression`).
+- Формат: WebP; лимиты и качество — `ImageStorage:Compression:Thumbnail` и при нулевых `MaxWidth`/`MaxHeight` — устаревшие `ImageStorage:ThumbnailMaxWidth/Height` (по умолчанию 320×320).
+- Оригинал: по умолчанию перекодирование в **AVIF** (пакет NeoSolve + `avifenc` в выходном каталоге) с вписыванием в 2048×2048; `Compression:Original:Format` = `WebP` | `Avif` | `KeepOriginal`; параметр **`AvifCqLevel`** (0–63, меньше — лучше качество). `Format: KeepOriginal` — байты как у клиента. GIF при `PreserveGifAsOriginal: true` не перекодируются (анимация).
+- Эндпоинты: `GET /api/cigar-images/{id}/data` (оригинал, MIME из БД) и `GET /api/cigar-images/{id}/thumbnail` (WebP).
 - `CigarImageDto.HasThumbnail = true` означает наличие миниатюры.
 
 ## Data (`CigarHelper.Data/`)
