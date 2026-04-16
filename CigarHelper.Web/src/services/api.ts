@@ -1,9 +1,29 @@
-import axios, { type AxiosInstance, isAxiosError } from 'axios';
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, isAxiosError } from 'axios';
 import { notifyApiError } from './apiErrorNotifier';
 
 const api: AxiosInstance = axios.create({
   baseURL: '/api',
 });
+
+/** Запросы превью/оригинала сигар — сбой хранилища не должен давать глобальные toast (даже если флаг не прокинули). */
+function isOptionalCigarImageBinaryRequest(config: InternalAxiosRequestConfig | undefined): boolean {
+  const raw = config?.url ?? '';
+  if (!raw) {
+    return false;
+  }
+  try {
+    const path = raw.includes('://') ? new URL(raw).pathname : raw;
+    if (/(^|\/)cigarimages\/\d+\/(thumbnail|data)(?:\?|$)/.test(path)) {
+      return true;
+    }
+    return /(^|\/)users\/\d+\/avatar(?:\?|$)/.test(path);
+  } catch {
+    if (/(^|\/)cigarimages\/\d+\/(thumbnail|data)(?:\?|$)/.test(raw)) {
+      return true;
+    }
+    return /(^|\/)users\/\d+\/avatar(?:\?|$)/.test(raw);
+  }
+}
 
 // Add a request interceptor to include the auth token in every request
 api.interceptors.request.use(
@@ -23,6 +43,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
+    if (
+      isAxiosError(error) &&
+      (error.config?.skipGlobalErrorNotification === true || isOptionalCigarImageBinaryRequest(error.config))
+    ) {
+      return Promise.reject(error);
+    }
+
     if (isAxiosError(error) && error.response?.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');

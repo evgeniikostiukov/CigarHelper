@@ -252,6 +252,7 @@
     convertLengthInputOnUnitChange,
     type CigarLengthUnit,
   } from '@/utils/cigarLengthUnit';
+  import { maybeCompressImageFileForUpload } from '@/utils/imageClientCompress';
 
   // --- Interfaces and Types ---
 
@@ -452,12 +453,14 @@
       if (form.description) formData.append('Description', form.description);
 
       const imagesToUpload = form.images.filter((img) => img.file && !img.markedForDeletion);
-      imagesToUpload.forEach((img, index) => {
+      for (let index = 0; index < imagesToUpload.length; index++) {
+        const img = imagesToUpload[index];
         if (img.file) {
-          formData.append(`NewImages[${index}].File`, img.file);
+          const file = await maybeCompressImageFileForUpload(img.file);
+          formData.append(`NewImages[${index}].File`, file);
           formData.append(`NewImages[${index}].IsMain`, String(img.isMain ?? false));
         }
-      });
+      }
 
       const imagesToUpdate = form.images.filter((img) => img.id && !img.markedForDeletion && img.isExisting);
       imagesToUpdate.forEach((img, index) => {

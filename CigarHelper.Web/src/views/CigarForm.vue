@@ -697,6 +697,7 @@
     convertLengthInputOnUnitChange,
     type CigarLengthUnit,
   } from '@/utils/cigarLengthUnit';
+  import { maybeCompressImageFileForUpload } from '@/utils/imageClientCompress';
 
   interface CollectionFormFields {
     price: number | null;
@@ -890,7 +891,7 @@
     return Object.keys(dialogErrors.value).length === 0;
   }
 
-  function buildDraftCigarBaseFormData(): FormData {
+  async function buildDraftCigarBaseFormData(): Promise<FormData> {
     const fd = new FormData();
     fd.append('Name', draftName.value.trim());
     fd.append('BrandId', String(draftBrandId.value!));
@@ -917,7 +918,8 @@
     let urlIndex = 0;
     for (const img of active) {
       if (img.file) {
-        fd.append(`NewImages[${fileIndex}].File`, img.file);
+        const file = await maybeCompressImageFileForUpload(img.file);
+        fd.append(`NewImages[${fileIndex}].File`, file);
         fd.append(`NewImages[${fileIndex}].IsMain`, String(img.isMain ?? false));
         fileIndex++;
         continue;
@@ -937,7 +939,7 @@
     if (!validateNewCigarDialog()) return;
     newCigarSaving.value = true;
     try {
-      const created = await cigarService.createCigarBase(buildDraftCigarBaseFormData());
+      const created = await cigarService.createCigarBase(await buildDraftCigarBaseFormData());
       selectedBase.value = created;
       newCigarDialogVisible.value = false;
       searchCache.value = new Map();
