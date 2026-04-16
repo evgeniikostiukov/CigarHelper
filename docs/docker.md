@@ -46,6 +46,8 @@ dotnet ef database update --project CigarHelper.Data/CigarHelper.Data.csproj --s
 docker compose --profile full up -d --build
 ```
 
+Контейнер **web** стартует только после **healthy** у **api** (проверка, что порт **8080** уже принимает TCP-соединения — после миграций и старта Kestrel), чтобы nginx не отдавал 502 на первые запросы к `/api/*`.
+
 - **SPA:** `http://localhost:<WEB_PORT>` (по умолчанию `http://localhost:8080`)
 - **API напрямую (Swagger и отладка):** `http://localhost:<API_HOST_PORT>` (по умолчанию `5184`), путь Swagger обычно `/swagger`
 - **MinIO Console:** `http://localhost:9001`

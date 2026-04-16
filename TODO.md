@@ -236,4 +236,5 @@
 - **2026-04-15** — Админка: страница «Удалённые обзоры» (`AdminDeletedReviews.vue`, `/admin/reviews-deleted`), `adminDeletedReviewsService`; в DTO staff добавлено `IsAuthorProfilePublic`; тексты подтверждения удаления в `ReviewDetail.vue`; `docs/memory-bank/frontend/code-map.md`.
 - **2026-04-15** — Обзоры UI: `reviewContentDisplay.ts` (plain excerpt для карточек, санитизированный HTML для тела); `ReviewList.vue` / `ReviewDetail.vue`; Vitest `reviewContentDisplay.test.ts`.
 - **2026-04-15** — Комментарии к обзорам: `ReviewComment`, миграция `AddReviewComments`, `ReviewCommentsController` / `AdminReviewCommentsController`, `ReviewCommentService`; UI `ReviewCommentsPanel.vue`, `ReviewDetail.vue`, админка `AdminReviewComments.vue`; `ReviewCommentsIntegrationTests`; `docs/memory-bank/code-map.md`.
+- **2026-04-16** — Docker: в `docker-compose.yml` у `api` — `healthcheck` (TCP `127.0.0.1:8080` через bash), у `web` — `depends_on.api.condition: service_healthy` (убирает 502 на старте: nginx до поднятия Kestrel после миграций); `docs/docker.md` — краткое пояснение.
 
