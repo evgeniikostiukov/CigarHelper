@@ -158,3 +158,21 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml --profile 
 ## Продакшен (общие замечания)
 
 Базовый `docker-compose.yml` рассчитан на **локальную** и **демо**-среду. Для боя используйте сильные секреты, HTTPS на edge, при необходимости чеклисты [security-refactor-memory-bank.md](./security-refactor-memory-bank.md) и [memory-bank/security-deploy-checklist.md](./memory-bank/security-deploy-checklist.md).
+
+## Countly (отдельный Compose)
+
+В репозитории есть **`docker-compose.countly.yml`** — Community Edition (MongoDB, API, frontend, nginx). Проект Compose задан как **`cigarhelper-countly`**, чтобы контейнеры не смешивались в `docker compose ps` с основным стеком из того же каталога.
+
+Запуск из корня:
+
+```bash
+docker compose -f docker-compose.countly.yml up -d
+```
+
+- **Панель и базовый URL для SDK:** `http://localhost:8888` (порт задаётся переменной **`COUNTLY_HOST_PORT`**, по умолчанию `8888`).
+- **Vue SPA:** переменные `VITE_COUNTLY_*` и прокси в dev — [memory-bank/frontend/workflow.md](./memory-bank/frontend/workflow.md) (раздел Countly), шаблон **`CigarHelper.Web/.env.example`**.
+- **Первый заход:** мастер создания администратора и настройки сервера.
+- **Остановка:** `docker compose -f docker-compose.countly.yml down` (данные MongoDB в томе `cigarhelper-countly_countly-mongodb-data`; полное удаление данных: `down -v`).
+- Конфиг nginx для прокси: **`docker/countly/nginx.server.conf`**.
+
+На Windows, если `docker compose` ругается на **`docker-credential-desktop`**, добавьте в `PATH` каталог `C:\Program Files\Docker\Docker\resources\bin` (или запускайте Compose из **Docker Desktop** / терминала, где PATH уже настроен).

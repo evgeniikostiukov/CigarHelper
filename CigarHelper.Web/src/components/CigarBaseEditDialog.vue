@@ -276,11 +276,14 @@
 
   interface Props {
     cigar?: CigarBase | null;
+    /** Шаблон для «Создать похожую»: новая запись, поля скопированы, id нет. Не используется вместе с `cigar`. */
+    prefillSimilar?: CigarBase | null;
     visible: boolean;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     cigar: null,
+    prefillSimilar: null,
     visible: false,
   });
 
@@ -362,7 +365,7 @@
       form.images =
         cigarData.images?.map((img) => ({
           id: img.id,
-          preview: `/api/cigarimages/${img.id}`,
+          preview: `/api/cigarimages/${img.id}/thumbnail`,
           caption: '',
           isMain: img.isMain,
           isExisting: true,
@@ -383,6 +386,24 @@
       form.description = '';
       form.images = [];
     }
+    errors.value = {};
+  }
+
+  /** Новая карточка по образцу: копируем каталожные поля, без id и без привязки к чужим изображениям. */
+  function initializeFormFromSimilar(source: CigarBase) {
+    form.lengthUnit = readStoredLengthUnit();
+    form.id = null;
+    form.name = source.name ?? '';
+    form.brandId = source.brand?.id ?? null;
+    form.country = source.country ?? '';
+    form.strength = source.strength ?? '';
+    form.lengthInput = lengthInputFromMm(source.lengthMm ?? null, form.lengthUnit);
+    form.diameter = source.diameter ?? null;
+    form.wrapper = source.wrapper ?? '';
+    form.binder = source.binder ?? '';
+    form.filler = source.filler ?? '';
+    form.description = source.description ?? '';
+    form.images = [];
     errors.value = {};
   }
 
@@ -424,6 +445,15 @@
     return true;
   }
 
+  function isValidHttpUrl(raw: string): boolean {
+    try {
+      const parsed = new URL(raw.trim());
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
   async function saveCigar() {
     if (!validateForm()) {
       toast.add({
@@ -452,13 +482,25 @@
       if (form.filler) formData.append('Filler', form.filler);
       if (form.description) formData.append('Description', form.description);
 
-      const imagesToUpload = form.images.filter((img) => img.file && !img.markedForDeletion);
-      for (let index = 0; index < imagesToUpload.length; index++) {
-        const img = imagesToUpload[index];
+      const activeImages = form.images.filter((img) => !img.markedForDeletion);
+      let newImageFileIndex = 0;
+      let newImageUrlIndex = 0;
+      for (const img of activeImages) {
         if (img.file) {
           const file = await maybeCompressImageFileForUpload(img.file);
-          formData.append(`NewImages[${index}].File`, file);
-          formData.append(`NewImages[${index}].IsMain`, String(img.isMain ?? false));
+          formData.append(`NewImages[${newImageFileIndex}].File`, file);
+          formData.append(`NewImages[${newImageFileIndex}].IsMain`, String(img.isMain ?? false));
+          newImageFileIndex++;
+          continue;
+        }
+        /** Пока нет id CigarBase, upload-by-url не привязывает к карточке; при создании — ImageUrls (как в CigarForm). */
+        if (!isEditing.value) {
+          const rawUrl = img.imageUrl?.trim();
+          if (rawUrl && isValidHttpUrl(rawUrl)) {
+            formData.append(`ImageUrls[${newImageUrlIndex}]`, rawUrl);
+            formData.append(`ImageUrlIsMain[${newImageUrlIndex}]`, String(!!img.isMain));
+            newImageUrlIndex++;
+          }
         }
       }
 
@@ -515,13 +557,37 @@
   }
 
   async function resolveCigarBaseUrlImport(url: string): Promise<FormGalleryImageItem | null> {
+    const trimmed = url.trim();
+    if (!isValidHttpUrl(trimmed)) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Ссылка',
+        detail: 'Укажите корректный адрес с протоколом http или https.',
+        life: 4000,
+      });
+      return null;
+    }
+
+    const active = form.images.filter((img) => !img.markedForDeletion);
+    const isFirst = active.length === 0;
+
+    /** Без id базы upload-by-url создаёт «сироту», не попадающую в POST создания — откладываем до ImageUrls. */
+    if (form.id == null) {
+      return {
+        preview: trimmed,
+        imageUrl: trimmed,
+        caption: '',
+        isMain: isFirst,
+        isExisting: false,
+        markedForDeletion: false,
+      };
+    }
+
     try {
-      const response = await cigarService.uploadImageByUrl(url, form.id);
-      const active = form.images.filter((img) => !img.markedForDeletion);
-      const isFirst = active.length === 0;
+      const response = await cigarService.uploadImageByUrl(trimmed, form.id);
       return {
         id: response.id,
-        preview: `/api/cigarimages/${response.id}`,
+        preview: `/api/cigarimages/${response.id}/thumbnail`,
         caption: '',
         isMain: isFirst,
         isExisting: true,
@@ -546,7 +612,13 @@
     (newValue) => {
       if (newValue) {
         nextTick(() => {
-          initializeForm(props.cigar);
+          if (props.cigar) {
+            initializeForm(props.cigar);
+          } else if (props.prefillSimilar) {
+            initializeFormFromSimilar(props.prefillSimilar);
+          } else {
+            initializeForm(null);
+          }
           if (brands.value.length === 0) {
             fetchBrands();
           }

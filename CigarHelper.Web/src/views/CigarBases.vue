@@ -572,6 +572,7 @@
       v-if="canMutateCatalog"
       v-model:visible="showEditDialog"
       :cigar="editingCigar"
+      :prefill-similar="similarTemplateCigar"
       @saved="onCigarSaved" />
   </section>
 </template>
@@ -592,6 +593,7 @@
   import { strengthOptions } from '@/utils/cigarOptions';
   import { formatVitola } from '@/utils/vitola';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
+  import { buildCatalogSimilarDraftSnapshot, CATALOG_SIMILAR_DRAFT_STORAGE_KEY } from '@/utils/catalogSimilarDraft';
 
   type ModerationFilterValue = 'moderated' | 'unmoderated';
 
@@ -665,6 +667,8 @@
   const selectedCigar = ref<CigarBase>();
   const showEditDialog = ref<boolean>(false);
   const editingCigar = ref<CigarBase>();
+  /** Шаблон для «Создать похожую» в диалоге каталога (только staff). */
+  const similarTemplateCigar = ref<CigarBase | undefined>(undefined);
 
   const filters = ref<Filters>({
     search: '',
@@ -867,6 +871,7 @@
   }
 
   function openNewCatalogEntryDialog(): void {
+    similarTemplateCigar.value = undefined;
     showDetailDialog.value = false;
     showEditDialog.value = true;
     editingCigar.value = undefined;
@@ -881,15 +886,29 @@
   }
 
   function createSimilarCigar(cigar: CigarBase): void {
+    showDetailDialog.value = false;
+    if (canMutateCatalog.value) {
+      editingCigar.value = undefined;
+      similarTemplateCigar.value = { ...cigar };
+      showEditDialog.value = true;
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        CATALOG_SIMILAR_DRAFT_STORAGE_KEY,
+        JSON.stringify(buildCatalogSimilarDraftSnapshot(cigar)),
+      );
+    } catch {
+      /* storage quota / private mode */
+    }
     router.push({
       name: 'CigarNew',
-      query: {
-        cigarBaseId: String(cigar.id),
-      },
+      query: { openNewCatalogFromSimilar: '1' },
     });
   }
 
   function editBaseCigar(cigar: CigarBase): void {
+    similarTemplateCigar.value = undefined;
     editingCigar.value = { ...cigar };
     showDetailDialog.value = false;
     showEditDialog.value = true;
@@ -1037,6 +1056,12 @@
       filters.value.moderationFilter = 'moderated';
       pagination.value.first = 0;
       void loadCigars();
+    }
+  });
+
+  watch(showEditDialog, (open) => {
+    if (!open) {
+      similarTemplateCigar.value = undefined;
     }
   });
 </script>

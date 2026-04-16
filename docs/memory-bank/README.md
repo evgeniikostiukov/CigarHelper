@@ -7,7 +7,7 @@
 | [overview.md](./overview.md) | Продукт, стек, домен, ветка, связь с документом по безопасности |
 | [code-map.md](./code-map.md) | Проекты, контроллеры, сервисы, Data, Import, тесты |
 | [workflow.md](./workflow.md) | Конфиг, секреты, запуск, миграции, команды, E2E (Playwright) |
-| [../docker.md](../docker.md) | Запуск Postgres + MinIO + API + фронт в Docker Compose (`--profile full`) |
+| [../docker.md](../docker.md) | Запуск Postgres + MinIO + API + фронт в Docker Compose (`--profile full`); опционально Countly (`docker-compose.countly.yml`) |
 | [frontend/README.md](./frontend/README.md) | SPA **CigarHelper.Web** (Vue 3, Vite, PrimeVue) |
 
 Детальный аудит и пошаговый security-рефакторинг: [../security-refactor-memory-bank.md](../security-refactor-memory-bank.md).

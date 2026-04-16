@@ -694,9 +694,11 @@
   import {
     lengthUnitSelectOptions,
     lengthMmFromInput,
+    lengthInputFromMm,
     convertLengthInputOnUnitChange,
     type CigarLengthUnit,
   } from '@/utils/cigarLengthUnit';
+  import { type CatalogSimilarDraftSnapshot, CATALOG_SIMILAR_DRAFT_STORAGE_KEY } from '@/utils/catalogSimilarDraft';
   import { maybeCompressImageFileForUpload } from '@/utils/imageClientCompress';
 
   interface CollectionFormFields {
@@ -876,6 +878,21 @@
     draftBinder.value = '';
     draftFiller.value = '';
     draftDescription.value = '';
+    draftBaseImages.value = [];
+    dialogErrors.value = {};
+  }
+
+  function applyCatalogSimilarDraftToNewDialog(snap: CatalogSimilarDraftSnapshot): void {
+    draftName.value = snap.name ?? '';
+    draftBrandId.value = snap.brandId ?? null;
+    draftCountry.value = snap.country?.trim() ?? '';
+    draftStrength.value = snap.strength?.trim() ? snap.strength : null;
+    draftLengthInput.value = lengthInputFromMm(snap.lengthMm ?? null, draftLengthUnit.value);
+    draftDiameter.value = snap.diameter ?? null;
+    draftWrapper.value = snap.wrapper?.trim() ?? '';
+    draftBinder.value = snap.binder?.trim() ?? '';
+    draftFiller.value = snap.filler?.trim() ?? '';
+    draftDescription.value = snap.description?.trim() ?? '';
     draftBaseImages.value = [];
     dialogErrors.value = {};
   }
@@ -1186,6 +1203,32 @@
 
   onMounted(() => {
     void loadHumidors();
+
+    const similarOpen = route.query.openNewCatalogFromSimilar === '1';
+    if (similarOpen) {
+      const raw = sessionStorage.getItem(CATALOG_SIMILAR_DRAFT_STORAGE_KEY);
+      sessionStorage.removeItem(CATALOG_SIMILAR_DRAFT_STORAGE_KEY);
+      if (raw) {
+        try {
+          const snap = JSON.parse(raw) as CatalogSimilarDraftSnapshot;
+          applyCatalogSimilarDraftToNewDialog(snap);
+          newCigarDialogVisible.value = true;
+          void ensureBrandsLoaded();
+        } catch {
+          toast.add({
+            severity: 'warn',
+            summary: 'Справочник',
+            detail: 'Не удалось восстановить черновик похожей сигары.',
+            life: 4000,
+          });
+        }
+      }
+      const nextQuery = { ...route.query } as Record<string, string | string[] | undefined>;
+      delete nextQuery.openNewCatalogFromSimilar;
+      void router.replace({ query: nextQuery });
+      return;
+    }
+
     const q = route.query.cigarBaseId as string | undefined;
     if (q) {
       const id = parseInt(q, 10);

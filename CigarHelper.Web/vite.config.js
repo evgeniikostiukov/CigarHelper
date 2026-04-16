@@ -14,6 +14,7 @@ export default defineConfig(({ command, mode }) => {
   // Поэтому по умолчанию держим выключенным и включаем только явным флагом.
   const enableDevTools = (env.VITE_ENABLE_DEVTOOLS ?? '0') === '1' && (command === 'serve' || command === 'dev');
   const isDevCommand = command === 'serve' || command === 'dev';
+  const countlyProxyTarget = env.VITE_COUNTLY_PROXY_TARGET || 'http://localhost:8888';
 
   return {
     define: {
@@ -56,6 +57,17 @@ export default defineConfig(({ command, mode }) => {
       proxy: {
         '/api': {
           target: 'http://localhost:5184',
+          changeOrigin: true,
+          secure: false,
+        },
+        // Countly SDK шлёт на `/i` и `/o` относительно `VITE_COUNTLY_URL` — в dev тот же origin (порт Vite) избегает CORS.
+        '/i': {
+          target: countlyProxyTarget,
+          changeOrigin: true,
+          secure: false,
+        },
+        '/o': {
+          target: countlyProxyTarget,
           changeOrigin: true,
           secure: false,
         },

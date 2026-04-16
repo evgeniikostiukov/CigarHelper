@@ -38,14 +38,15 @@
     "@tiptap/vue-3": "^3.21.0",
     "@vueuse/core": "^14.2.1",
     "axios": "^1.14.0",
+    "countly-sdk-web": "^26.1.1",
     "dompurify": "^3.3.3",
     "jwt-decode": "^4.0.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",
     "tailwindcss-primeui": "^0.6.1",
-    "zod": "^3.25.0",
     "vue": "^3.5.31",
-    "vue-router": "^5.0.4"
+    "vue-router": "^5.0.4",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
