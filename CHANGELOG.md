@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.1...HEAD)
+## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.3.0...HEAD)
 
-### Removed
+## [v2.3.0](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.1...v2.3.0) - 2026-04-17
 
-- Countly: отдельный `docker-compose`, nginx-конфиг, Web SDK (`countly-sdk-web`), прокси `/i` и `/o` в Vite, связанные env и разделы документации.
+### Commits
+
+- chore(repo): remove Countly stack and Web SDK [`622db27`](https://github.com/evgeniikostiukov/CigarHelper/commit/622db279d3966726959aa8993f15f2234972f1ad)
+- docs(changelog): sync for v2.2.1 [`8c02046`](https://github.com/evgeniikostiukov/CigarHelper/commit/8c020461603babde406f89423f091f0a3a0e433e)
+- chore(repo): release 2.3.0 [`967c8d7`](https://github.com/evgeniikostiukov/CigarHelper/commit/967c8d701e88434896502fa341043cd5edfd79ab)
+- chore(git): ignore Cursor plan files [`fb5b290`](https://github.com/evgeniikostiukov/CigarHelper/commit/fb5b290173fc5447b74cfb0366a5c4435d9c272d)
 
 ## [v2.2.1](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.0...v2.2.1) - 2026-04-16
 
