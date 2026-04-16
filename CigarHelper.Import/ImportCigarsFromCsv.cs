@@ -534,6 +534,8 @@ public class ImportCigarsFromCsv
                     return "image/gif";
                 case ".webp":
                     return "image/webp";
+                case ".avif":
+                    return "image/avif";
             }
         }
         

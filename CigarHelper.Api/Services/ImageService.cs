@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace CigarHelper.Api.Services;
 
 /// <summary>
-/// Оркестрирует сохранение изображений: валидация → MinIO/файлы → миниатюра WebP.
+/// Оркестрирует сохранение изображений: валидация → MinIO/файлы → перекодирование оригинала и миниатюра по <c>ImageStorage:Compression</c>.
 /// </summary>
 public sealed class ImageService : IImageService
 {

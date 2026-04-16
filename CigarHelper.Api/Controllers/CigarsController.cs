@@ -1092,6 +1092,8 @@ public class CigarsController : ControllerBase
                     return "image/gif";
                 case ".webp":
                     return "image/webp";
+                case ".avif":
+                    return "image/avif";
             }
         }
 

@@ -36,14 +36,22 @@ public sealed class MinioImageStorageProvider : IImageStorageProvider, IAsyncDis
     /// </summary>
     public async Task EnsureBucketExistsAsync(CancellationToken ct = default)
     {
-        var exists = await _client.BucketExistsAsync(
-            new BucketExistsArgs().WithBucket(_bucketName), ct);
-
-        if (!exists)
+        try
         {
-            await _client.MakeBucketAsync(
-                new MakeBucketArgs().WithBucket(_bucketName), ct);
-            _logger.LogInformation("MinIO: создан бакет {Bucket}", _bucketName);
+            var exists = await _client.BucketExistsAsync(
+                new BucketExistsArgs().WithBucket(_bucketName), ct);
+
+            if (!exists)
+            {
+                await _client.MakeBucketAsync(
+                    new MakeBucketArgs().WithBucket(_bucketName), ct);
+                _logger.LogInformation("MinIO: создан бакет {Bucket}", _bucketName);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Не блокируем остальной API (список сигар и т.д.): изображения просто не отдадутся, пока MinIO недоступен.
+            _logger.LogWarning(ex, "MinIO: не удалось проверить или создать бакет {Bucket}", _bucketName);
         }
     }
 
@@ -121,6 +129,7 @@ public sealed class MinioImageStorageProvider : IImageStorageProvider, IAsyncDis
             ".png" => "image/png",
             ".gif" => "image/gif",
             ".webp" => "image/webp",
+            ".avif" => "image/avif",
             _ => "application/octet-stream"
         };
 }

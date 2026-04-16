@@ -17,6 +17,14 @@ public class ImageBinaryValidatorTests
         (byte)'W', (byte)'E', (byte)'B', (byte)'P'
     ];
 
+    /// <summary>Минимальный префикс ftyp avif (размер произвольный, дальше не читаем).</summary>
+    private static readonly byte[] AvifFtypHeader =
+    [
+        0, 0, 0, 0x1C,
+        (byte)'f', (byte)'t', (byte)'y', (byte)'p',
+        (byte)'a', (byte)'v', (byte)'i', (byte)'f',
+    ];
+
     [Fact]
     public void TryValidate_NullOrEmptyData_Succeeds()
     {
@@ -91,5 +99,23 @@ public class ImageBinaryValidatorTests
     {
         Assert.Equal("image/png", ImageBinaryValidator.SuggestContentType(PngHeader));
         Assert.Equal("image/webp", ImageBinaryValidator.SuggestContentType(WebpHeader));
+    }
+
+    [Fact]
+    public void SuggestContentType_AvifFtyp()
+    {
+        Assert.Equal("image/avif", ImageBinaryValidator.SuggestContentType(AvifFtypHeader));
+    }
+
+    [Fact]
+    public void TryValidate_AvifWithMatchingMime_Succeeds()
+    {
+        Assert.True(ImageBinaryValidator.TryValidate(
+            AvifFtypHeader,
+            "image/avif",
+            AvifFtypHeader.LongLength,
+            10_000,
+            out var err));
+        Assert.Null(err);
     }
 }

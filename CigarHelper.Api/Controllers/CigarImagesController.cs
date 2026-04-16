@@ -9,6 +9,7 @@ using CigarHelper.Data.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CigarHelper.Api.Controllers;
@@ -21,15 +22,18 @@ public class CigarImagesController : ControllerBase
     private readonly AppDbContext _context;
     private readonly ImageUploadOptions _uploadOptions;
     private readonly IImageService _imageService;
+    private readonly ILogger<CigarImagesController> _logger;
 
     public CigarImagesController(
         AppDbContext context,
         IOptions<ImageUploadOptions> uploadOptions,
-        IImageService imageService)
+        IImageService imageService,
+        ILogger<CigarImagesController> logger)
     {
         _context = context;
         _uploadOptions = uploadOptions.Value;
         _imageService = imageService;
+        _logger = logger;
     }
 
     private int GetCurrentUserId()
@@ -181,11 +185,19 @@ public class CigarImagesController : ControllerBase
                 return NotFound();
         }
 
-        var (data, contentType) = await _imageService.GetImageDataAsync(image, cancellationToken);
-        if (data == null || data.Length == 0)
-            return NotFound("Бинарные данные изображения отсутствуют.");
+        try
+        {
+            var (data, contentType) = await _imageService.GetImageDataAsync(image, cancellationToken);
+            if (data == null || data.Length == 0)
+                return NotFound("Бинарные данные изображения отсутствуют.");
 
-        return File(data, contentType);
+            return File(data, contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Не удалось прочитать изображение {ImageId} из хранилища.", id);
+            return NotFound("Данные изображения временно недоступны.");
+        }
     }
 
     /// <summary>Отдаёт миниатюру изображения (WebP, 320×320 max). CigarBase-изображения публичны; UserCigar — только владелец или staff.</summary>
@@ -204,24 +216,32 @@ public class CigarImagesController : ControllerBase
                 return NotFound();
         }
 
-        var thumbData = await _imageService.GetThumbnailDataAsync(image, cancellationToken);
-        if (thumbData == null || thumbData.Length == 0)
+        try
         {
-            // Если миниатюры нет — возвращаем оригинал
-            var (origData, origType) = await _imageService.GetImageDataAsync(image, cancellationToken);
-            if (origData == null || origData.Length == 0)
-                return NotFound("Данные изображения отсутствуют.");
+            var thumbData = await _imageService.GetThumbnailDataAsync(image, cancellationToken);
+            if (thumbData == null || thumbData.Length == 0)
+            {
+                // Если миниатюры нет — возвращаем оригинал
+                var (origData, origType) = await _imageService.GetImageDataAsync(image, cancellationToken);
+                if (origData == null || origData.Length == 0)
+                    return NotFound("Данные изображения отсутствуют.");
+
+                if (image.CigarBaseId.HasValue)
+                    Response.Headers.CacheControl = "public, max-age=86400";
+
+                return File(origData, origType);
+            }
 
             if (image.CigarBaseId.HasValue)
                 Response.Headers.CacheControl = "public, max-age=86400";
 
-            return File(origData, origType);
+            return File(thumbData, "image/webp");
         }
-
-        if (image.CigarBaseId.HasValue)
-            Response.Headers.CacheControl = "public, max-age=86400";
-
-        return File(thumbData, "image/webp");
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Не удалось прочитать миниатюру/оригинал {ImageId} из хранилища.", id);
+            return NotFound("Данные изображения временно недоступны.");
+        }
     }
 
     [HttpPost]
@@ -445,6 +465,7 @@ public class CigarImagesController : ControllerBase
             ".png" => "image/png",
             ".gif" => "image/gif",
             ".webp" => "image/webp",
+            ".avif" => "image/avif",
             _ => "image/jpeg"
         };
     }
