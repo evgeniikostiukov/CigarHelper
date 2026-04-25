@@ -154,6 +154,27 @@
               >{{ review.cigarBrand }} · {{ review.cigarName }}</strong
             >
           </div>
+          <div
+            v-if="hasCigarCatalogBlock"
+            class="rounded-xl border border-stone-200/80 bg-white/90 px-4 py-3 text-sm text-stone-700 shadow-sm dark:border-stone-600/80 dark:bg-stone-900/60 dark:text-stone-200"
+            data-testid="review-detail-cigar-catalog-snapshot">
+            <p
+              v-if="vitolaDimensionsLabel"
+              class="mb-1.5">
+              <span class="font-medium text-stone-900 dark:text-stone-100">Размер:</span>
+              {{ vitolaDimensionsLabel }}
+            </p>
+            <p
+              v-if="review.cigarCountry"
+              class="mb-1.5">
+              <span class="font-medium text-stone-900 dark:text-stone-100">Страна:</span>
+              {{ review.cigarCountry }}
+            </p>
+            <p v-if="cigarBlendLine">
+              <span class="font-medium text-stone-900 dark:text-stone-100">Обёртка / связка / наполнитель:</span>
+              {{ cigarBlendLine }}
+            </p>
+          </div>
         </header>
 
         <div
@@ -220,6 +241,48 @@
                 <span class="font-medium text-stone-900 dark:text-stone-100">Вкус:</span>
                 {{ review.taste }}
               </li>
+            </ul>
+            <div
+              v-if="hasReviewAxisScores"
+              class="mt-5 border-t border-stone-200/80 pt-5 dark:border-stone-600/80"
+              data-testid="review-detail-axis-scores">
+              <h3 class="mb-1 flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-rose-50/95">
+                <i
+                  class="pi pi-chart-line text-rose-800/80 dark:text-rose-400/90"
+                  aria-hidden="true" />
+                Оси по отзыву
+              </h3>
+              <p class="mb-3 text-xs text-stone-600 dark:text-stone-400">
+                Субъективные шкалы для средних в каталоге; не путайте с крепостью из карточки справочника.
+              </p>
+              <ul class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                <li
+                  v-if="review.bodyStrengthScore != null"
+                  class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сила / тело</span>
+                  <Tag
+                    :value="`${review.bodyStrengthScore}/10`"
+                    severity="secondary" />
+                </li>
+                <li
+                  v-if="review.aromaScore != null"
+                  class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Аромат (число)</span>
+                  <Tag
+                    :value="`${review.aromaScore}/10`"
+                    severity="secondary" />
+                </li>
+                <li
+                  v-if="review.pairingsScore != null"
+                  class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сочетания</span>
+                  <Tag
+                    :value="`${review.pairingsScore}/10`"
+                    severity="secondary" />
+                </li>
+              </ul>
+            </div>
+            <ul class="space-y-4 text-sm text-stone-700 dark:text-stone-300">
               <li
                 v-if="review.construction"
                 class="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -265,6 +328,12 @@
               <li>
                 <span class="font-medium text-stone-900 dark:text-stone-100">Дата дегустации:</span>
                 {{ formatDate(review.smokingDate) }}
+              </li>
+              <li
+                v-if="review.smokingDurationMinutes != null"
+                data-testid="review-detail-smoking-duration">
+                <span class="font-medium text-stone-900 dark:text-stone-100">Время курения:</span>
+                {{ review.smokingDurationMinutes }} мин
               </li>
             </ul>
           </section>
@@ -350,6 +419,38 @@
     if (!review.value) return false;
     const uid = getAuthUserId(authService.state.user);
     return uid !== null && uid === review.value.userId;
+  });
+
+  const vitolaDimensionsLabel = computed(() => {
+    const r = review.value;
+    if (!r) return null;
+    if (r.cigarLengthMm != null && r.cigarDiameter != null) {
+      return `${r.cigarLengthMm} × ${r.cigarDiameter}`;
+    }
+    if (r.cigarLengthMm != null) return `${r.cigarLengthMm} мм`;
+    if (r.cigarDiameter != null) return `${r.cigarDiameter} RG`;
+    return null;
+  });
+
+  const cigarBlendLine = computed(() => {
+    const r = review.value;
+    if (!r) return null;
+    const parts = [r.cigarWrapper, r.cigarBinder, r.cigarFiller].filter(
+      (x): x is string => typeof x === 'string' && x.trim().length > 0,
+    );
+    return parts.length ? parts.join(' / ') : null;
+  });
+
+  const hasCigarCatalogBlock = computed(() => {
+    const r = review.value;
+    if (!r) return false;
+    return Boolean(vitolaDimensionsLabel.value || (r.cigarCountry && r.cigarCountry.trim()) || cigarBlendLine.value);
+  });
+
+  const hasReviewAxisScores = computed(() => {
+    const r = review.value;
+    if (!r) return false;
+    return r.bodyStrengthScore != null || r.aromaScore != null || r.pairingsScore != null;
   });
 
   const sanitizedContent = computed(() =>

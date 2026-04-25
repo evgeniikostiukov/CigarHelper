@@ -36,6 +36,12 @@ export interface Review {
   userCigarId?: number | null;
   cigarName: string;
   cigarBrand: string;
+  cigarCountry?: string | null;
+  cigarLengthMm?: number | null;
+  cigarDiameter?: number | null;
+  cigarWrapper?: string | null;
+  cigarBinder?: string | null;
+  cigarFiller?: string | null;
   username: string;
   isAuthorProfilePublic?: boolean;
   userAvatarUrl?: string;
@@ -52,6 +58,7 @@ export interface Review {
   bodyStrengthScore?: number | null;
   aromaScore?: number | null;
   pairingsScore?: number | null;
+  smokingDurationMinutes?: number | null;
 }
 
 export interface CreateReviewDto {
@@ -71,6 +78,7 @@ export interface CreateReviewDto {
   bodyStrengthScore?: number | null;
   aromaScore?: number | null;
   pairingsScore?: number | null;
+  smokingDurationMinutes?: number | null;
   images?: { imageData: string; caption?: string }[];
 }
 

@@ -2882,6 +2882,8 @@ export interface components {
       /** Format: date-time */
       smokingDate?: string | null;
       /** Format: int32 */
+      smokingDurationMinutes?: number | null;
+      /** Format: int32 */
       bodyStrengthScore?: number | null;
       /** Format: int32 */
       aromaScore?: number | null;
@@ -3086,6 +3088,14 @@ export interface components {
       userCigarId?: number | null;
       cigarName?: string | null;
       cigarBrand?: string | null;
+      cigarCountry?: string | null;
+      /** Format: int32 */
+      cigarLengthMm?: number | null;
+      /** Format: int32 */
+      cigarDiameter?: number | null;
+      cigarWrapper?: string | null;
+      cigarBinder?: string | null;
+      cigarFiller?: string | null;
       images?: components['schemas']['ReviewImageDto'][] | null;
       smokingExperience?: string | null;
       aroma?: string | null;
@@ -3105,6 +3115,8 @@ export interface components {
       pairingsScore?: number | null;
       /** Format: date-time */
       smokingDate?: string;
+      /** Format: int32 */
+      smokingDurationMinutes?: number | null;
       /** Format: date-time */
       createdAt?: string;
       /** Format: date-time */
@@ -3222,6 +3234,8 @@ export interface components {
       venue?: string | null;
       /** Format: date-time */
       smokingDate?: string | null;
+      /** Format: int32 */
+      smokingDurationMinutes?: number | null;
       /** Format: int32 */
       bodyStrengthScore?: number | null;
       /** Format: int32 */

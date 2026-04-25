@@ -187,15 +187,18 @@
                   Средние по отзывам — субъективные шкалы 1–10; это не «Крепость» из карточки справочника выше.
                 </p>
                 <div
-                  class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                  class="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
                   data-testid="cigar-bases-review-filters">
-                  <div class="flex flex-col gap-2">
-                    <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сила / тело (среднее)</span>
-                    <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex min-w-0 flex-col gap-2">
+                    <span class="min-w-0 break-words text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Сила / тело (среднее)
+                    </span>
+                    <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
                       <InputNumber
                         v-model="filters.reviewBodyMin"
                         data-testid="cigar-bases-filter-review-body-min"
-                        class="w-full min-w-0 flex-1"
+                        class="min-w-0 w-full"
+                        fluid
                         input-class="min-h-11"
                         :min="1"
                         :max="10"
@@ -204,11 +207,12 @@
                         placeholder="от"
                         show-clear
                         @update:model-value="onFilterChange" />
-                      <span class="text-stone-400">—</span>
+                      <span class="shrink-0 self-center text-stone-400">—</span>
                       <InputNumber
                         v-model="filters.reviewBodyMax"
                         data-testid="cigar-bases-filter-review-body-max"
-                        class="w-full min-w-0 flex-1"
+                        class="min-w-0 w-full"
+                        fluid
                         input-class="min-h-11"
                         :min="1"
                         :max="10"
@@ -219,13 +223,16 @@
                         @update:model-value="onFilterChange" />
                     </div>
                   </div>
-                  <div class="flex flex-col gap-2">
-                    <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Аромат (среднее)</span>
-                    <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex min-w-0 flex-col gap-2">
+                    <span class="min-w-0 break-words text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Аромат (среднее)
+                    </span>
+                    <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
                       <InputNumber
                         v-model="filters.reviewAromaMin"
                         data-testid="cigar-bases-filter-review-aroma-min"
-                        class="w-full min-w-0 flex-1"
+                        class="min-w-0 w-full"
+                        fluid
                         input-class="min-h-11"
                         :min="1"
                         :max="10"
@@ -234,11 +241,12 @@
                         placeholder="от"
                         show-clear
                         @update:model-value="onFilterChange" />
-                      <span class="text-stone-400">—</span>
+                      <span class="shrink-0 self-center text-stone-400">—</span>
                       <InputNumber
                         v-model="filters.reviewAromaMax"
                         data-testid="cigar-bases-filter-review-aroma-max"
-                        class="w-full min-w-0 flex-1"
+                        class="min-w-0 w-full"
+                        fluid
                         input-class="min-h-11"
                         :min="1"
                         :max="10"
@@ -249,13 +257,16 @@
                         @update:model-value="onFilterChange" />
                     </div>
                   </div>
-                  <div class="flex flex-col gap-2">
-                    <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сочетания (среднее)</span>
-                    <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex min-w-0 flex-col gap-2">
+                    <span class="min-w-0 break-words text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Сочетания (среднее)
+                    </span>
+                    <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
                       <InputNumber
                         v-model="filters.reviewPairingsMin"
                         data-testid="cigar-bases-filter-review-pairings-min"
-                        class="w-full min-w-0 flex-1"
+                        class="min-w-0 w-full"
+                        fluid
                         input-class="min-h-11"
                         :min="1"
                         :max="10"
@@ -264,11 +275,12 @@
                         placeholder="от"
                         show-clear
                         @update:model-value="onFilterChange" />
-                      <span class="text-stone-400">—</span>
+                      <span class="shrink-0 self-center text-stone-400">—</span>
                       <InputNumber
                         v-model="filters.reviewPairingsMax"
                         data-testid="cigar-bases-filter-review-pairings-max"
-                        class="w-full min-w-0 flex-1"
+                        class="min-w-0 w-full"
+                        fluid
                         input-class="min-h-11"
                         :min="1"
                         :max="10"
@@ -279,7 +291,7 @@
                         @update:model-value="onFilterChange" />
                     </div>
                   </div>
-                  <div class="flex flex-col gap-2 sm:col-span-2 lg:col-span-1">
+                  <div class="flex min-w-0 flex-col gap-2 sm:col-span-2 lg:col-span-1">
                     <label
                       for="cigar-bases-filter-review-min-count"
                       class="text-xs font-medium text-stone-600 dark:text-stone-400">

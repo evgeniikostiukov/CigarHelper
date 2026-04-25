@@ -381,6 +381,27 @@
                     class="w-full"
                     input-class="min-h-11 w-full" />
                 </div>
+                <div class="flex flex-col gap-2">
+                  <label
+                    for="smokingDurationMinutes"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Время курения (мин)
+                  </label>
+                  <InputNumber
+                    id="smokingDurationMinutes"
+                    v-model="form.smokingDurationMinutes"
+                    data-testid="review-form-smoking-duration"
+                    class="w-full"
+                    input-class="min-h-11"
+                    placeholder="Например: 90"
+                    :min="1"
+                    :max="720"
+                    :min-fraction-digits="0"
+                    :max-fraction-digits="0"
+                    show-buttons
+                    button-layout="horizontal"
+                    show-clear />
+                </div>
               </div>
               <div class="space-y-4">
                 <div class="flex flex-col gap-2">
@@ -576,6 +597,7 @@
     aromaScore: number | null;
     pairingsScore: number | null;
     smokingDate: Date | null;
+    smokingDurationMinutes: number | null;
     images: FormGalleryImageItem[];
   }
 
@@ -615,6 +637,13 @@
     aromaScore?: number | null;
     pairingsScore?: number | null;
     smokingDate?: string;
+    smokingDurationMinutes?: number | null;
+    cigarCountry?: string | null;
+    cigarLengthMm?: number | null;
+    cigarDiameter?: number | null;
+    cigarWrapper?: string | null;
+    cigarBinder?: string | null;
+    cigarFiller?: string | null;
     images: ReviewImageApiDto[];
   }
 
@@ -651,6 +680,7 @@
       aromaScore: null,
       pairingsScore: null,
       smokingDate: new Date(),
+      smokingDurationMinutes: null,
       images: [],
     };
   }
@@ -745,8 +775,11 @@
           isModerated: true,
           createdAt: new Date().toISOString(),
         },
-        country: null,
-        vitolaLabel: null,
+        country: review.cigarCountry ?? null,
+        vitolaLabel:
+          review.cigarLengthMm != null && review.cigarDiameter != null
+            ? formatVitola(review.cigarLengthMm, review.cigarDiameter)
+            : null,
         strength: null,
         displayName: `${cigarBrandName} ${review.cigarName || 'Неизвестная сигара'}`,
       };
@@ -768,6 +801,7 @@
       form.aromaScore = review.aromaScore ?? null;
       form.pairingsScore = review.pairingsScore ?? null;
       form.smokingDate = review.smokingDate ? new Date(review.smokingDate) : null;
+      form.smokingDurationMinutes = review.smokingDurationMinutes ?? null;
       form.images = review.images.map((img) => {
         const b64 = img.imageBytes?.trim() ?? '';
         return {
@@ -880,6 +914,7 @@
         aromaScore: form.aromaScore,
         pairingsScore: form.pairingsScore,
         smokingDate: form.smokingDate ? form.smokingDate.toISOString() : null,
+        smokingDurationMinutes: form.smokingDurationMinutes,
       };
 
       if (isEditing.value && route.name === 'ReviewEdit' && route.params.id) {
