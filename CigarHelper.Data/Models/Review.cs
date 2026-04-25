@@ -74,6 +74,9 @@ public class Review
     public string? Venue { get; set; }
     
     public DateTime SmokingDate { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Длительность сессии курения в минутах (опционально).</summary>
+    public int? SmokingDurationMinutes { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     

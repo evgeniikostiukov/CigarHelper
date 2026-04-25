@@ -24,6 +24,20 @@ public class ReviewDto
 
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;
+
+    /// <summary>Снимок полей справочника базовой сигары на момент ответа API.</summary>
+    public string? CigarCountry { get; set; }
+
+    public int? CigarLengthMm { get; set; }
+
+    public int? CigarDiameter { get; set; }
+
+    public string? CigarWrapper { get; set; }
+
+    public string? CigarBinder { get; set; }
+
+    public string? CigarFiller { get; set; }
+
     public List<ReviewImageDto> Images { get; set; } = new List<ReviewImageDto>();
     public string? SmokingExperience { get; set; }
     public string? Aroma { get; set; }
@@ -40,6 +54,10 @@ public class ReviewDto
     public int? PairingsScore { get; set; }
 
     public DateTime SmokingDate { get; set; }
+
+    /// <summary>Длительность курения в минутах.</summary>
+    public int? SmokingDurationMinutes { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }
@@ -104,6 +122,9 @@ public class CreateReviewRequest
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
 
+    [Range(1, 720)]
+    public int? SmokingDurationMinutes { get; set; }
+
     [Range(1, 10)]
     public int? BodyStrengthScore { get; set; }
 
@@ -145,6 +166,9 @@ public class UpdateReviewRequest
     public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
+
+    [Range(1, 720)]
+    public int? SmokingDurationMinutes { get; set; }
 
     [Range(1, 10)]
     public int? BodyStrengthScore { get; set; }
