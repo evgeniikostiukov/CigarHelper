@@ -39,7 +39,17 @@ public static class ImageSharpRasterEncoder
         var cq = Math.Clamp(profile.AvifCqLevel, 0, 63);
         var encoder = new AVIFEncoder { CQLevel = cq };
         using var ms = new MemoryStream();
-        await image.SaveAsync(ms, encoder, ct);
+        try
+        {
+            await image.SaveAsync(ms, encoder, ct);
+        }
+        catch (FileNotFoundException ex) when (ex.FileName?.Contains(".avif", StringComparison.Ordinal) == true)
+        {
+            // NeoSolve calls avifenc, then opens the output under /tmp; missing file = avifenc did not run or did not link (no codec .so in minimal Linux images).
+            throw new InvalidOperationException(
+                "AVIF encoding failed: avifenc did not produce an output file. On Linux, install the shared libraries for the bundled native/avifenc binary (Debian: libaom3, libdav1d6, libgav1-0, libyuv0, libpng, libjpeg, libsvtav1enc1, …) or set ImageStorage to WebP/KeepOriginal. The API Dockerfile includes these dependencies.",
+                ex);
+        }
         return ms.ToArray();
     }
 
