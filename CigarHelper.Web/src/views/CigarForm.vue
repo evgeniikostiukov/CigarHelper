@@ -611,7 +611,7 @@
                 class="w-full min-h-[6rem]"
                 :rows="4"
                 :auto-resize="true"
-                maxlength="500"
+                maxlength="3000"
                 placeholder="Необязательно" />
             </div>
           </div>

@@ -21,7 +21,7 @@ public class CigarBase
     [MaxLength(100)]
     public string? Country { get; set; }
     
-    [MaxLength(500)]
+    [MaxLength(3000)]
     public string? Description { get; set; }
     
     [MaxLength(50)]

@@ -131,6 +131,7 @@ public class CreateCigarBaseRequest
 
     public string? Country { get; set; }
 
+    [MaxLength(3000)]
     public string? Description { get; set; }
 
     public string? Strength { get; set; }
@@ -158,6 +159,7 @@ public class UpdateCigarBaseRequest
 
     public string? Country { get; set; }
 
+    [MaxLength(3000)]
     public string? Description { get; set; }
 
     public string? Strength { get; set; }

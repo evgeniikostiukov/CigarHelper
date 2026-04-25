@@ -190,6 +190,7 @@
               placeholder="Введите описание сигары"
               class="w-full"
               :rows="4"
+              maxlength="3000"
               :autoResize="true" />
           </div>
         </div>

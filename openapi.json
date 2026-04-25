@@ -164,6 +164,111 @@
         }
       }
     },
+    "/api/admin/review-comments": {
+      "get": {
+        "tags": [
+          "AdminReviewComments"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminReviewCommentRowDtoPaginatedResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/review-comments/{id}/approve": {
+      "post": {
+        "tags": [
+          "AdminReviewComments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/review-comments/{id}/reject": {
+      "post": {
+        "tags": [
+          "AdminReviewComments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/reviews/deleted": {
       "get": {
         "tags": [
@@ -1328,6 +1433,7 @@
                     "type": "string"
                   },
                   "Description": {
+                    "maxLength": 3000,
                     "type": "string"
                   },
                   "Strength": {
@@ -1898,6 +2004,7 @@
                     "type": "string"
                   },
                   "Description": {
+                    "maxLength": 3000,
                     "type": "string"
                   },
                   "Strength": {
@@ -2587,6 +2694,74 @@
         }
       }
     },
+    "/api/Profile/avatar": {
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Загрузка аватара (JPEG/PNG/WebP/AVIF/GIF), сохраняется как WebP до 384 px по длинной стороне.",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Удалить загруженный аватар (внешний URL в поле не трогаем — только сброс ключа в хранилище).",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/public/users/{username}/visibility": {
       "get": {
         "tags": [
@@ -2689,6 +2864,128 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ReviewComments": {
+      "get": {
+        "tags": [
+          "ReviewComments"
+        ],
+        "summary": "Список одобренных комментариев к обзору (только не удалённые обзоры).",
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewCommentDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ReviewComments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewCommentRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewCommentRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewCommentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewCommentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ReviewComments/{id}": {
+      "delete": {
+        "tags": [
+          "ReviewComments"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
           },
           "404": {
             "description": "Not Found",
@@ -3045,6 +3342,29 @@
           }
         }
       }
+    },
+    "/api/users/{id}/avatar": {
+      "get": {
+        "tags": [
+          "UserAvatars"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3136,6 +3456,9 @@
             "type": "string",
             "nullable": true
           },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
           "cigarBaseId": {
             "type": "integer",
             "format": "int32"
@@ -3167,6 +3490,68 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AdminDeletedReviewRowDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminReviewCommentRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authorUsername": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
+          "reviewId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetSummary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminReviewCommentRowDtoPaginatedResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminReviewCommentRowDto"
             },
             "nullable": true
           },
@@ -3418,6 +3803,15 @@
             },
             "nullable": true
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "reviewAvgBodyStrength": {
             "type": "number",
             "format": "double",
@@ -3436,15 +3830,6 @@
           "reviewScoredReviewCount": {
             "type": "integer",
             "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3940,6 +4325,25 @@
         },
         "additionalProperties": false
       },
+      "CreateReviewCommentRequest": {
+        "required": [
+          "body",
+          "reviewId"
+        ],
+        "type": "object",
+        "properties": {
+          "reviewId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreateReviewImageRequest": {
         "required": [
           "imageUrl"
@@ -4414,6 +4818,11 @@
           "isProfilePublic": {
             "type": "boolean"
           },
+          "avatarUrl": {
+            "type": "string",
+            "description": "Внешний URL или относительный путь `/api/users/{id}/avatar` для загруженного файла.",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -4526,6 +4935,11 @@
             "type": "string",
             "nullable": true
           },
+          "avatarUrl": {
+            "type": "string",
+            "description": "Внешний URL или `/api/users/{id}/avatar`.",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -4634,6 +5048,42 @@
           },
           "confirmedAge18": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReviewCommentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reviewId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authorUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authorUsername": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAuthorProfilePublic": {
+            "type": "boolean"
+          },
+          "moderationStatus": {
+            "$ref": "#/components/schemas/CigarCommentModerationStatus"
           }
         },
         "additionalProperties": false
@@ -4754,22 +5204,16 @@
             "nullable": true
           },
           "bodyStrengthScore": {
-            "maximum": 10,
-            "minimum": 1,
             "type": "integer",
             "format": "int32",
             "nullable": true
           },
           "aromaScore": {
-            "maximum": 10,
-            "minimum": 1,
             "type": "integer",
             "format": "int32",
             "nullable": true
           },
           "pairingsScore": {
-            "maximum": 10,
-            "minimum": 1,
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -4779,8 +5223,6 @@
             "format": "date-time"
           },
           "smokingDurationMinutes": {
-            "maximum": 720,
-            "minimum": 1,
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -4845,6 +5287,10 @@
           },
           "isAuthorProfilePublic": {
             "type": "boolean"
+          },
+          "userAvatarUrl": {
+            "type": "string",
+            "nullable": true
           },
           "cigarName": {
             "type": "string",
@@ -5341,6 +5787,9 @@
       "name": "AdminCigarImages"
     },
     {
+      "name": "AdminReviewComments"
+    },
+    {
       "name": "AdminReviews"
     },
     {
@@ -5374,10 +5823,16 @@
       "name": "PublicUsers"
     },
     {
+      "name": "ReviewComments"
+    },
+    {
       "name": "Reviews"
     },
     {
       "name": "Search"
+    },
+    {
+      "name": "UserAvatars"
     }
   ]
 }
