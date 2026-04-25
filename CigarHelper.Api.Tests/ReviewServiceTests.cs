@@ -56,6 +56,12 @@ public class ReviewServiceTests
         {
             Name = $"C_{tag}",
             BrandId = brand.Id,
+            Country = "NI",
+            LengthMm = 152,
+            Diameter = 52,
+            Wrapper = "Nic",
+            Binder = "Nic",
+            Filler = "Nic",
             CreatedAt = DateTime.UtcNow
         };
         db.CigarBases.Add(cb);
@@ -255,6 +261,12 @@ public class ReviewServiceTests
         Assert.Equal(user.Username, dto.Username);
         Assert.Equal(cb.Name, dto.CigarName);
         Assert.Equal(brand.Name, dto.CigarBrand);
+        Assert.Equal("NI", dto.CigarCountry);
+        Assert.Equal(152, dto.CigarLengthMm);
+        Assert.Equal(52, dto.CigarDiameter);
+        Assert.Equal("Nic", dto.CigarWrapper);
+        Assert.Equal("Nic", dto.CigarBinder);
+        Assert.Equal("Nic", dto.CigarFiller);
     }
 
     [Fact]
@@ -268,6 +280,31 @@ public class ReviewServiceTests
             sut.CreateReviewAsync(user.Id, BuildCreateRequest(404, "Tit", "Content here long enough")));
 
         Assert.Contains("404", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CreateReviewAsync_WithSmokingDurationMinutes_PersistsAndReturnsInDto()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+
+        var dto = await sut.CreateReviewAsync(
+            user.Id,
+            new CreateReviewRequest
+            {
+                Title = "Dur",
+                Content = "Body long enough for validation rules here.",
+                Rating = 8,
+                CigarBaseId = cb.Id,
+                SmokingDurationMinutes = 91,
+                Images = new List<CreateReviewImageRequest>()
+            });
+
+        Assert.Equal(91, dto.SmokingDurationMinutes);
+        var row = await db.Reviews.AsNoTracking().SingleAsync(r => r.Id == dto.Id);
+        Assert.Equal(91, row.SmokingDurationMinutes);
     }
 
     [Fact]

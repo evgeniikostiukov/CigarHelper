@@ -4026,6 +4026,13 @@
             "format": "date-time",
             "nullable": true
           },
+          "smokingDurationMinutes": {
+            "maximum": 720,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "bodyStrengthScore": {
             "maximum": 10,
             "minimum": 1,
@@ -4682,6 +4689,32 @@
             "type": "string",
             "nullable": true
           },
+          "cigarCountry": {
+            "type": "string",
+            "nullable": true
+          },
+          "cigarLengthMm": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cigarDiameter": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cigarWrapper": {
+            "type": "string",
+            "nullable": true
+          },
+          "cigarBinder": {
+            "type": "string",
+            "nullable": true
+          },
+          "cigarFiller": {
+            "type": "string",
+            "nullable": true
+          },
           "images": {
             "type": "array",
             "items": {
@@ -4744,6 +4777,13 @@
           "smokingDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "smokingDurationMinutes": {
+            "maximum": 720,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "createdAt": {
             "type": "string",
@@ -5118,6 +5158,13 @@
           "smokingDate": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "smokingDurationMinutes": {
+            "maximum": 720,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "bodyStrengthScore": {

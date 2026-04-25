@@ -111,6 +111,12 @@ public class ReviewService : IReviewService
             UserCigarId = review.CigarId,
             CigarName = review.CigarBase.Name,
             CigarBrand = review.CigarBase.Brand.Name,
+            CigarCountry = review.CigarBase.Country,
+            CigarLengthMm = review.CigarBase.LengthMm,
+            CigarDiameter = review.CigarBase.Diameter,
+            CigarWrapper = review.CigarBase.Wrapper,
+            CigarBinder = review.CigarBase.Binder,
+            CigarFiller = review.CigarBase.Filler,
             Images = review.Images.Select(i => new ReviewImageDto
             {
                 Id = i.Id,
@@ -128,6 +134,7 @@ public class ReviewService : IReviewService
             AromaScore = review.AromaScore,
             PairingsScore = review.PairingsScore,
             SmokingDate = review.SmokingDate,
+            SmokingDurationMinutes = review.SmokingDurationMinutes,
             CreatedAt = review.CreatedAt,
             UpdatedAt = review.UpdatedAt
         };
@@ -178,6 +185,7 @@ public class ReviewService : IReviewService
             AromaScore = request.AromaScore,
             PairingsScore = request.PairingsScore,
             SmokingDate = request.SmokingDate ?? DateTime.UtcNow,
+            SmokingDurationMinutes = request.SmokingDurationMinutes,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -234,6 +242,7 @@ public class ReviewService : IReviewService
         review.AromaScore = request.AromaScore;
         review.PairingsScore = request.PairingsScore;
         review.SmokingDate = request.SmokingDate ?? review.SmokingDate;
+        review.SmokingDurationMinutes = request.SmokingDurationMinutes;
         review.UpdatedAt = DateTime.UtcNow;
 
         if (request.ImageIdsToRemove != null && request.ImageIdsToRemove.Any())
