@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.3.0...HEAD)
+## [Unreleased](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.3.1...HEAD)
+
+## [v2.3.1](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.3.0...v2.3.1) - 2026-04-25
+
+### Commits
+
+- feat(cigar-base): raise catalog description limit to 3000 [`e038e7d`](https://github.com/evgeniikostiukov/CigarHelper/commit/e038e7d99ef8451e0b53e2041062ccccef9dd3c1)
+- feat(data): add smoking duration minutes to reviews [`4074deb`](https://github.com/evgeniikostiukov/CigarHelper/commit/4074debc12b8f2088a4cb8c9362f7d88f16d3412)
+- feat(web): show and edit review smoking duration [`2cfc39e`](https://github.com/evgeniikostiukov/CigarHelper/commit/2cfc39e4fbafc6c6e4dff621e723ab144ad127dc)
+- feat(scraper): age gate, optional login, puppeteer flags [`6febf02`](https://github.com/evgeniikostiukov/CigarHelper/commit/6febf02ea9eb7eedaaea22a0368a1622aaa55f5f)
+- feat(api): expose review smoking duration in service and OpenAPI [`855dd77`](https://github.com/evgeniikostiukov/CigarHelper/commit/855dd777eb361615a9cf4c228699c6e89670c18e)
+- fix(api): install avifenc runtime deps in Docker and clarify AVIF errors [`ab51fbf`](https://github.com/evgeniikostiukov/CigarHelper/commit/ab51fbf409f8bfb66bbc19efec620f8a2f79edc4)
+- docs(changelog): sync for v2.3.0 [`351bd59`](https://github.com/evgeniikostiukov/CigarHelper/commit/351bd59dd0050fe240901add3abd93cfd7b97788)
+- chore(repo): release 2.3.1 [`9d7bf1e`](https://github.com/evgeniikostiukov/CigarHelper/commit/9d7bf1e566521a548dc6c156aa3f368a06d6cfa2)
+- chore: ignore xlsx files [`852855b`](https://github.com/evgeniikostiukov/CigarHelper/commit/852855b5e63b4d73763add256e71e37a11c9221a)
+- chore(docker): set restart policy to unless-stopped [`6261798`](https://github.com/evgeniikostiukov/CigarHelper/commit/62617985fbe473ace347d93db25d05d69ae7a8b1)
 
 ## [v2.3.0](https://github.com/evgeniikostiukov/CigarHelper/compare/v2.2.1...v2.3.0) - 2026-04-17
 
