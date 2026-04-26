@@ -7,7 +7,8 @@ COPY CigarHelper.sln ./
 COPY CigarHelper.Api/CigarHelper.Api.csproj CigarHelper.Api/
 COPY CigarHelper.Data/CigarHelper.Data.csproj CigarHelper.Data/
 
-RUN dotnet restore CigarHelper.Api/CigarHelper.Api.csproj
+# -r linux-x64 обязателен: иначе publish -r linux-x64 --no-restore падает с NETSDK1047 (нет target в project.assets.json).
+RUN dotnet restore CigarHelper.Api/CigarHelper.Api.csproj -r linux-x64
 
 COPY CigarHelper.Api/ CigarHelper.Api/
 COPY CigarHelper.Data/ CigarHelper.Data/
