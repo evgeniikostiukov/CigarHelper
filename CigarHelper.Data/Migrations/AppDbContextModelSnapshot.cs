@@ -92,6 +92,9 @@ namespace CigarHelper.Data.Migrations
                     b.Property<int?>("Diameter")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("Diameter")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Filler")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");

@@ -2597,10 +2597,8 @@ export interface paths {
         query?: {
           /** @description Фильтр по пользователю (опционально) */
           userId?: number;
-          /** @description Фильтр по каталожной сигаре (CigarBase) */
-          cigarBaseId?: number;
-          /** @description Фильтр по записи коллекции (UserCigar) */
-          userCigarId?: number;
+          /** @description Фильтр по сигаре (опционально) */
+          cigarId?: number;
         };
         header?: never;
         path?: never;
@@ -3253,9 +3251,7 @@ export interface components {
       /** Format: int32 */
       rating: number;
       /** Format: int32 */
-      cigarBaseId: number;
-      /** Format: int32 */
-      userCigarId?: number | null;
+      cigarId: number;
       smokingExperience?: string | null;
       aroma?: string | null;
       taste?: string | null;
@@ -3488,9 +3484,7 @@ export interface components {
       isAuthorProfilePublic?: boolean;
       userAvatarUrl?: string | null;
       /** Format: int32 */
-      cigarBaseId?: number;
-      /** Format: int32 */
-      userCigarId?: number | null;
+      cigarId?: number;
       cigarName?: string | null;
       cigarBrand?: string | null;
       cigarCountry?: string | null;
@@ -3548,8 +3542,6 @@ export interface components {
       userAvatarUrl?: string | null;
       cigarName?: string | null;
       cigarBrand?: string | null;
-      /** Format: int32 */
-      cigarBaseId?: number;
       /** Format: byte */
       mainImageBytes?: string | null;
       /** Format: int32 */
