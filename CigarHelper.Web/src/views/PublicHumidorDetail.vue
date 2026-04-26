@@ -225,7 +225,8 @@
         data-testid="public-humidor-comments-dialog">
         <CigarCommentsPanel
           v-if="commentsUserCigarId != null"
-          :user-cigar-id="commentsUserCigarId" />
+          :user-cigar-id="commentsUserCigarId"
+          :allow-new-comments="!isViewingOwnPublicHumidor" />
       </Dialog>
     </div>
   </section>
@@ -243,6 +244,7 @@
   import Skeleton from 'primevue/skeleton';
   import Dialog from 'primevue/dialog';
   import CigarCommentsPanel from '@/components/CigarCommentsPanel.vue';
+  import { useAuth } from '@/services/useAuth';
   import humidorService from '@/services/humidorService';
   import * as profileApi from '@/services/profileService';
   import type { Humidor } from '@/services/humidorService';
@@ -256,6 +258,7 @@
 
   const route = useRoute();
   const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
 
   const loading = ref(true);
   const error = ref<string | null>(null);
@@ -266,6 +269,13 @@
   const commentsDialogTitle = ref('Комментарии');
 
   const ownerUsername = computed(() => route.params.username as string);
+
+  /** Своя публичная коллекция — комментировать собственные сигары в UI не даём. */
+  const isViewingOwnPublicHumidor = computed(() => {
+    const owner = ownerUsername.value?.trim().toLowerCase() ?? '';
+    const me = user.value?.unique_name?.trim().toLowerCase() ?? '';
+    return isAuthenticated.value && owner.length > 0 && me.length > 0 && owner === me;
+  });
 
   const cigarCount = computed(() => humidor.value?.cigars?.length ?? 0);
 

@@ -46,6 +46,8 @@ dotnet ef database update --project CigarHelper.Data/CigarHelper.Data.csproj --s
 docker compose --profile full up -d --build
 ```
 
+Контейнер **web** стартует только после **healthy** у **api** (проверка, что порт **8080** уже принимает TCP-соединения — после миграций и старта Kestrel), чтобы nginx не отдавал 502 на первые запросы к `/api/*`.
+
 - **SPA:** `http://localhost:<WEB_PORT>` (по умолчанию `http://localhost:8080`)
 - **API напрямую (Swagger и отладка):** `http://localhost:<API_HOST_PORT>` (по умолчанию `5184`), путь Swagger обычно `/swagger`
 - **MinIO Console:** `http://localhost:9001`
@@ -158,3 +160,5 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml --profile 
 ## Продакшен (общие замечания)
 
 Базовый `docker-compose.yml` рассчитан на **локальную** и **демо**-среду. Для боя используйте сильные секреты, HTTPS на edge, при необходимости чеклисты [security-refactor-memory-bank.md](./security-refactor-memory-bank.md) и [memory-bank/security-deploy-checklist.md](./memory-bank/security-deploy-checklist.md).
+
+На Windows, если `docker compose` ругается на **`docker-credential-desktop`**, добавьте в `PATH` каталог `C:\Program Files\Docker\Docker\resources\bin` (или запускайте Compose из **Docker Desktop** / терминала, где PATH уже настроен).

@@ -66,16 +66,20 @@ public class Program
         }
         
         // Проверяем родительскую директорию
-        string parentPath = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).FullName, "cigarday.csv");
-        if (File.Exists(parentPath))
+        var baseParent = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory);
+        if (baseParent != null)
         {
-            return parentPath;
+            string parentPath = Path.Combine(baseParent.FullName, "cigarday.csv");
+            if (File.Exists(parentPath))
+            {
+                return parentPath;
+            }
         }
-        
+
         // Если файл не найден, запрашиваем путь у пользователя
         Console.WriteLine("Не удалось найти CSV файл с данными о сигарах.");
         Console.Write("Пожалуйста, укажите полный путь к CSV файлу: ");
-        string path = Console.ReadLine();
+        string? path = Console.ReadLine();
         
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
         {

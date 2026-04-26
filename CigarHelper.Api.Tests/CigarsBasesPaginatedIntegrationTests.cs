@@ -340,7 +340,73 @@ public class CigarsBasesPaginatedIntegrationTests
         var page = await res.Content.ReadFromJsonAsync<PaginatedResult<CigarBaseDto>>(JsonOptions);
         Assert.NotNull(page?.Items);
         Assert.DoesNotContain(page!.Items, x => x.Name == moderatedName);
-        var hit = Assert.Single(page.Items.Where(x => x.Name == unmoderatedName));
+        var hit = Assert.Single(page.Items, x => x.Name == unmoderatedName);
         Assert.False(hit.IsModerated);
+    }
+
+    [Fact]
+    public async Task GetCigarBasesPaginated_ReviewStatsFilters_ReturnsMatchingModeratedBases()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        const string highBodyName = "High_Body_Review_Filter";
+        const string lowBodyName = "Low_Body_Review_Filter";
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var brand = new Brand
+            {
+                Name = $"BrR_{Guid.NewGuid():N}"[..16],
+                CreatedAt = DateTime.UtcNow,
+                IsModerated = true
+            };
+            db.Brands.Add(brand);
+            await db.SaveChangesAsync();
+
+            db.CigarBases.Add(new CigarBase
+            {
+                Name = highBodyName,
+                BrandId = brand.Id,
+                IsModerated = true,
+                CreatedAt = DateTime.UtcNow,
+                ReviewAvgBodyStrength = 8.5m,
+                ReviewAvgAromaScore = 7m,
+                ReviewAvgPairingsScore = 6m,
+                ReviewScoredReviewCount = 3
+            });
+            db.CigarBases.Add(new CigarBase
+            {
+                Name = lowBodyName,
+                BrandId = brand.Id,
+                IsModerated = true,
+                CreatedAt = DateTime.UtcNow,
+                ReviewAvgBodyStrength = 3m,
+                ReviewAvgAromaScore = 4m,
+                ReviewAvgPairingsScore = 5m,
+                ReviewScoredReviewCount = 2
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"u{Guid.NewGuid():N}"[..12],
+            Password = "abCd12",
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var authBody = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(authBody?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBody.Token);
+
+        using var res = await client.GetAsync(
+            "/api/cigars/bases/paginated?page=1&pageSize=100&minReviewBody=8&maxReviewBody=9&minReviewScoredCount=2");
+        res.EnsureSuccessStatusCode();
+        var page = await res.Content.ReadFromJsonAsync<PaginatedResult<CigarBaseDto>>(JsonOptions);
+        Assert.NotNull(page?.Items);
+        Assert.Contains(page!.Items, x => x.Name == highBodyName);
+        Assert.DoesNotContain(page.Items, x => x.Name == lowBodyName);
     }
 }

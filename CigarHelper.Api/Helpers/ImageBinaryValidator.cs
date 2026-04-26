@@ -8,7 +8,8 @@ public static class ImageBinaryValidator
         "image/jpeg",
         "image/png",
         "image/gif",
-        "image/webp"
+        "image/webp",
+        "image/avif"
     };
 
     public static bool IsRecognizedImage(ReadOnlySpan<byte> data) =>
@@ -25,6 +26,7 @@ public static class ImageBinaryValidator
             ImageFormat.Png => "image/png",
             ImageFormat.Gif => "image/gif",
             ImageFormat.Webp => "image/webp",
+            ImageFormat.Avif => "image/avif",
             _ => null
         };
 
@@ -58,7 +60,7 @@ public static class ImageBinaryValidator
         var format = DetectFormat(imageData);
         if (format == ImageFormat.Unknown)
         {
-            error = "Файл не распознан как поддерживаемое изображение (JPEG, PNG, GIF, WebP).";
+            error = "Файл не распознан как поддерживаемое изображение (JPEG, PNG, GIF, WebP, AVIF).";
             return false;
         }
 
@@ -93,7 +95,8 @@ public static class ImageBinaryValidator
         Jpeg,
         Png,
         Gif,
-        Webp
+        Webp,
+        Avif
     }
 
     private static ImageFormat DetectFormat(ReadOnlySpan<byte> d)
@@ -125,6 +128,18 @@ public static class ImageBinaryValidator
             && d[10] == (byte)'B'
             && d[11] == (byte)'P')
             return ImageFormat.Webp;
+
+        // ISO BMFF: size(4) + "ftyp" + major brand "avif"
+        if (d.Length >= 12
+            && d[4] == (byte)'f'
+            && d[5] == (byte)'t'
+            && d[6] == (byte)'y'
+            && d[7] == (byte)'p'
+            && d[8] == (byte)'a'
+            && d[9] == (byte)'v'
+            && d[10] == (byte)'i'
+            && d[11] == (byte)'f')
+            return ImageFormat.Avif;
 
         return ImageFormat.Unknown;
     }

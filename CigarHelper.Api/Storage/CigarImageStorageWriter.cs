@@ -16,20 +16,27 @@ public static class CigarImageStorageWriter
         ImageStorageOptions options,
         CancellationToken ct = default)
     {
-        image.FileSize = data.Length;
+        var (blob, suggestedFileName, contentType) = await CigarImageOriginalPipeline.PrepareOriginalAsync(
+            data,
+            image.FileName,
+            image.ContentType,
+            options,
+            ct);
 
-        image.StoragePath = await storage.SaveAsync(data, image.FileName ?? "image", ct)
+        image.FileName = suggestedFileName;
+        image.ContentType = contentType;
+        image.FileSize = blob.Length;
+
+        image.StoragePath = await storage.SaveAsync(blob, suggestedFileName, ct)
             ?? throw new InvalidOperationException("Хранилище не вернуло ключ объекта для изображения.");
 
         try
         {
-            var thumbData = await thumbnails.GenerateAsync(
-                data,
-                options.ThumbnailMaxWidth,
-                options.ThumbnailMaxHeight,
-                ct);
-
-            var thumbFileName = "thumb_" + (image.FileName ?? "image") + ".webp";
+            var thumbData = await thumbnails.GenerateAsync(blob, options, ct);
+            var thumbStem = Path.GetFileNameWithoutExtension(suggestedFileName);
+            if (thumbStem.Length == 0)
+                thumbStem = "image";
+            var thumbFileName = "thumb_" + thumbStem + ".webp";
             image.ThumbnailPath = await storage.SaveAsync(thumbData, thumbFileName, ct);
         }
         catch

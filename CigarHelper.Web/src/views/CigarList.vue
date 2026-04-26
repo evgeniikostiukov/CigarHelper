@@ -654,7 +654,10 @@
       await Promise.all(
         idsToFetch.map(async (imageId) => {
           try {
-            const { data } = await api.get<Blob>(`cigarimages/${imageId}/thumbnail`, { responseType: 'blob' });
+            const { data } = await api.get<Blob>(`cigarimages/${imageId}/thumbnail`, {
+              responseType: 'blob',
+              skipGlobalErrorNotification: true,
+            });
             const objectUrl = URL.createObjectURL(data);
             if (gen !== listThumbLoadGen) {
               URL.revokeObjectURL(objectUrl);

@@ -10,6 +10,10 @@ public class ReviewDto
     public int Rating { get; set; }
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>Можно ли открыть публичный профиль автора (<c>/u/{Username}</c>).</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
     public string? UserAvatarUrl { get; set; }
 
     /// <summary>Каталожная сигара.</summary>
@@ -20,6 +24,20 @@ public class ReviewDto
 
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;
+
+    /// <summary>Снимок полей справочника базовой сигары на момент ответа API.</summary>
+    public string? CigarCountry { get; set; }
+
+    public int? CigarLengthMm { get; set; }
+
+    public int? CigarDiameter { get; set; }
+
+    public string? CigarWrapper { get; set; }
+
+    public string? CigarBinder { get; set; }
+
+    public string? CigarFiller { get; set; }
+
     public List<ReviewImageDto> Images { get; set; } = new List<ReviewImageDto>();
     public string? SmokingExperience { get; set; }
     public string? Aroma { get; set; }
@@ -28,7 +46,18 @@ public class ReviewDto
     public int? BurnQuality { get; set; }
     public int? Draw { get; set; }
     public string? Venue { get; set; }
+
+    public int? BodyStrengthScore { get; set; }
+
+    public int? AromaScore { get; set; }
+
+    public int? PairingsScore { get; set; }
+
     public DateTime SmokingDate { get; set; }
+
+    /// <summary>Длительность курения в минутах.</summary>
+    public int? SmokingDurationMinutes { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }
@@ -41,9 +70,13 @@ public class ReviewListItemDto
     public int Rating { get; set; }
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
-    
-    //TODO: Сделать аватарку пользователя на обзоре
-    // public byte[]? UserAvatarBytes { get; set; }
+
+    /// <summary>Можно ли открыть публичный профиль автора.</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
+    /// <summary>Внешний URL или <c>/api/users/{userId}/avatar</c>.</summary>
+    public string? UserAvatarUrl { get; set; }
+
     public string CigarName { get; set; } = string.Empty;
     public string CigarBrand { get; set; } = string.Empty;
 
@@ -88,7 +121,19 @@ public class CreateReviewRequest
     public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
-    
+
+    [Range(1, 720)]
+    public int? SmokingDurationMinutes { get; set; }
+
+    [Range(1, 10)]
+    public int? BodyStrengthScore { get; set; }
+
+    [Range(1, 10)]
+    public int? AromaScore { get; set; }
+
+    [Range(1, 10)]
+    public int? PairingsScore { get; set; }
+
     public List<CreateReviewImageRequest> Images { get; set; } = new List<CreateReviewImageRequest>();
 }
 
@@ -121,10 +166,40 @@ public class UpdateReviewRequest
     public int? Draw { get; set; }
     public string? Venue { get; set; }
     public DateTime? SmokingDate { get; set; }
-    
+
+    [Range(1, 720)]
+    public int? SmokingDurationMinutes { get; set; }
+
+    [Range(1, 10)]
+    public int? BodyStrengthScore { get; set; }
+
+    [Range(1, 10)]
+    public int? AromaScore { get; set; }
+
+    [Range(1, 10)]
+    public int? PairingsScore { get; set; }
+
     // Список изображений для добавления
     public List<CreateReviewImageRequest>? ImagesToAdd { get; set; }
     
     // Список идентификаторов изображений для удаления
     public List<int>? ImageIdsToRemove { get; set; }
-} 
+}
+
+/// <summary>Строка списка удалённых обзоров для staff (админка / модерация).</summary>
+public class AdminDeletedReviewRowDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public int UserId { get; set; }
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>Публичный профиль автора (для ссылок в админ-UI).</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
+    public int CigarBaseId { get; set; }
+    public string CigarName { get; set; } = string.Empty;
+    public string CigarBrand { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+}

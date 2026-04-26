@@ -14,6 +14,9 @@ export interface ReviewListItem {
   rating: number;
   userId: number;
   username: string;
+  /** С сервера: виден ли публичный профиль автора. */
+  isAuthorProfilePublic?: boolean;
+  userAvatarUrl?: string | null;
   cigarBaseId: number;
   cigarName: string;
   cigarBrand: string;
@@ -33,7 +36,14 @@ export interface Review {
   userCigarId?: number | null;
   cigarName: string;
   cigarBrand: string;
+  cigarCountry?: string | null;
+  cigarLengthMm?: number | null;
+  cigarDiameter?: number | null;
+  cigarWrapper?: string | null;
+  cigarBinder?: string | null;
+  cigarFiller?: string | null;
   username: string;
+  isAuthorProfilePublic?: boolean;
   userAvatarUrl?: string;
   createdAt: string;
   smokingDate: string;
@@ -45,6 +55,10 @@ export interface Review {
   burnQuality?: number;
   draw?: number;
   venue?: string;
+  bodyStrengthScore?: number | null;
+  aromaScore?: number | null;
+  pairingsScore?: number | null;
+  smokingDurationMinutes?: number | null;
 }
 
 export interface CreateReviewDto {
@@ -61,6 +75,10 @@ export interface CreateReviewDto {
   burnQuality?: number;
   draw?: number;
   venue?: string;
+  bodyStrengthScore?: number | null;
+  aromaScore?: number | null;
+  pairingsScore?: number | null;
+  smokingDurationMinutes?: number | null;
   images?: { imageData: string; caption?: string }[];
 }
 

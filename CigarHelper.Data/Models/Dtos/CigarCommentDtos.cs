@@ -10,6 +10,10 @@ public class CigarCommentDto
     public DateTime CreatedAt { get; set; }
     public int AuthorUserId { get; set; }
     public string AuthorUsername { get; set; } = string.Empty;
+
+    /// <summary>Можно ли открыть публичный профиль автора.</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
     public int? CigarBaseId { get; set; }
     public int? UserCigarId { get; set; }
     public CigarCommentModerationStatus ModerationStatus { get; set; }
@@ -22,6 +26,10 @@ public class AdminCigarCommentRowDto
     public string Body { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public string AuthorUsername { get; set; } = string.Empty;
+
+    /// <summary>Можно ли открыть публичный профиль автора.</summary>
+    public bool IsAuthorProfilePublic { get; set; }
+
     public int? CigarBaseId { get; set; }
     public int? UserCigarId { get; set; }
     public string TargetSummary { get; set; } = string.Empty;

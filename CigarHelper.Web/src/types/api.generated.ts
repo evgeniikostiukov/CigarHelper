@@ -4,6 +4,383 @@
  */
 
 export interface paths {
+  '/api/admin/cigar-comments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          page?: number;
+          pageSize?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AdminCigarCommentRowDtoPaginatedResult'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/cigar-comments/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/cigar-comments/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/cigar-images': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Все загруженные изображения каталога и коллекций (таблица CigarImages, внешнее хранилище). */
+    get: {
+      parameters: {
+        query?: {
+          page?: number;
+          pageSize?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'text/plain': components['schemas']['PagedCigarImagesAdminResponse'];
+            'application/json': components['schemas']['PagedCigarImagesAdminResponse'];
+            'text/json': components['schemas']['PagedCigarImagesAdminResponse'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/review-comments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          page?: number;
+          pageSize?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AdminReviewCommentRowDtoPaginatedResult'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/review-comments/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/review-comments/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/reviews/deleted': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Список обзоров, мягко удалённых авторами (для восстановления). */
+    get: {
+      parameters: {
+        query?: {
+          page?: number;
+          pageSize?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['AdminDeletedReviewRowDtoPaginatedResult'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/admin/reviews/{id}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Восстановить обзор (снять мягкое удаление). */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/admin/users': {
     parameters: {
       query?: never;
@@ -234,7 +611,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Продлевает JWT по действующему Bearer-токену */
+    /** Выдаёт новый JWT по действующему Bearer-токену (продление сессии при повторном открытии клиента). */
     post: {
       parameters: {
         query?: never;
@@ -244,7 +621,7 @@ export interface paths {
       };
       requestBody?: never;
       responses: {
-        /** @description Новый токен выдан */
+        /** @description OK */
         200: {
           headers: {
             [name: string]: unknown;
@@ -253,13 +630,13 @@ export interface paths {
             'application/json': components['schemas']['AuthResponse'];
           };
         };
-        /** @description Токен недействителен или пользователь не найден */
+        /** @description Unauthorized */
         401: {
           headers: {
             [name: string]: unknown;
           };
           content: {
-            'application/json': components['schemas']['AuthResponse'];
+            'application/json': components['schemas']['ProblemDetails'];
           };
         };
         /** @description Too Many Requests */
@@ -430,6 +807,132 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/CigarComments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Список комментариев к справочной сигаре или к чужой записи в публичной коллекции. */
+    get: {
+      parameters: {
+        query?: {
+          cigarBaseId?: number;
+          userCigarId?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CigarCommentDto'][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['CreateCigarCommentRequest'];
+          'text/json': components['schemas']['CreateCigarCommentRequest'];
+          'application/*+json': components['schemas']['CreateCigarCommentRequest'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['CigarCommentDto'];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/CigarComments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/CigarImages/upload-by-url': {
     parameters: {
       query?: never;
@@ -439,7 +942,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** Скачивает изображение по URL и сохраняет (только staff). */
+    /** Скачивает изображение по URL и сохраняет (любой авторизованный пользователь). */
     post: {
       parameters: {
         query?: never;
@@ -840,14 +1343,18 @@ export interface paths {
             Description?: string;
             Strength?: string;
             /** Format: int32 */
-            LengthMm?: number | null;
+            LengthMm?: number;
             /** Format: int32 */
-            Diameter?: number | null;
+            Diameter?: number;
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
             /** @description Загружаемые файлы изображений. */
             NewImages?: components['schemas']['NewImageUpload'][];
+            /** @description URL изображений (http/https); скачиваются на сервере и привязываются к карточке после CigarHelper.Api.Models.CreateCigarBaseFormRequest.NewImages. */
+            ImageUrls?: string[];
+            /** @description Главный кадр по индексу в CigarHelper.Api.Models.CreateCigarBaseFormRequest.ImageUrls (длина может быть меньше списка URL). */
+            ImageUrlIsMain?: boolean[];
           };
         };
       };
@@ -888,7 +1395,16 @@ export interface paths {
           search?: string;
           brandId?: number;
           strength?: string;
+          minReviewBody?: number;
+          maxReviewBody?: number;
+          minReviewAroma?: number;
+          maxReviewAroma?: number;
+          minReviewPairings?: number;
+          maxReviewPairings?: number;
+          minReviewScoredCount?: number;
           excludeBinaryMedia?: boolean;
+          unmoderatedOnly?: boolean;
+          withoutImagesOnly?: boolean;
         };
         header?: never;
         path?: never;
@@ -1136,9 +1652,9 @@ export interface paths {
             Description?: string;
             Strength?: string;
             /** Format: int32 */
-            LengthMm?: number | null;
+            LengthMm?: number;
             /** Format: int32 */
-            Diameter?: number | null;
+            Diameter?: number;
             Wrapper?: string;
             Binder?: string;
             Filler?: string;
@@ -1741,6 +2257,115 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/Profile/avatar': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Загрузка аватара (JPEG/PNG/WebP/AVIF/GIF), сохраняется как WebP до 384 px по длинной стороне. */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'multipart/form-data': {
+            /** Format: binary */
+            file?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['MyProfileDto'];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    /** Удалить загруженный аватар (внешний URL в поле не трогаем — только сброс ключа в хранилище). */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['MyProfileDto'];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/public/users/{username}/visibility': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          username: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['PublicProfileVisibilityDto'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/public/users/{username}': {
     parameters: {
       query?: never;
@@ -1829,6 +2454,131 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/ReviewComments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Список одобренных комментариев к обзору (только не удалённые обзоры). */
+    get: {
+      parameters: {
+        query?: {
+          reviewId?: number;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ReviewCommentDto'][];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['CreateReviewCommentRequest'];
+          'text/json': components['schemas']['CreateReviewCommentRequest'];
+          'application/*+json': components['schemas']['CreateReviewCommentRequest'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ReviewCommentDto'];
+          };
+        };
+        /** @description Bad Request */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/ReviewComments/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description No Content */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ProblemDetails'];
+          };
+        };
+      };
+    };
     options?: never;
     head?: never;
     patch?: never;
@@ -2028,7 +2778,7 @@ export interface paths {
       };
     };
     post?: never;
-    /** Удаляет обзор */
+    /** Мягкое удаление обзора автором (строка остаётся в БД, публично не отображается; восстановление — staff через `/api/admin/reviews/.../restore`). */
     delete: {
       parameters: {
         query?: never;
@@ -2126,10 +2876,121 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/users/{id}/avatar': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: number;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description OK */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    AdminCigarCommentRowDto: {
+      /** Format: int32 */
+      id?: number;
+      body?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+      authorUsername?: string | null;
+      isAuthorProfilePublic?: boolean;
+      /** Format: int32 */
+      cigarBaseId?: number | null;
+      /** Format: int32 */
+      userCigarId?: number | null;
+      targetSummary?: string | null;
+    };
+    AdminCigarCommentRowDtoPaginatedResult: {
+      items?: components['schemas']['AdminCigarCommentRowDto'][] | null;
+      /** Format: int32 */
+      totalCount?: number;
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
+    AdminDeletedReviewRowDto: {
+      /** Format: int32 */
+      id?: number;
+      title?: string | null;
+      /** Format: int32 */
+      userId?: number;
+      username?: string | null;
+      isAuthorProfilePublic?: boolean;
+      /** Format: int32 */
+      cigarBaseId?: number;
+      cigarName?: string | null;
+      cigarBrand?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      deletedAt?: string | null;
+    };
+    AdminDeletedReviewRowDtoPaginatedResult: {
+      items?: components['schemas']['AdminDeletedReviewRowDto'][] | null;
+      /** Format: int32 */
+      totalCount?: number;
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
+    AdminReviewCommentRowDto: {
+      /** Format: int32 */
+      id?: number;
+      body?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+      authorUsername?: string | null;
+      isAuthorProfilePublic?: boolean;
+      /** Format: int32 */
+      reviewId?: number;
+      targetSummary?: string | null;
+    };
+    AdminReviewCommentRowDtoPaginatedResult: {
+      items?: components['schemas']['AdminReviewCommentRowDto'][] | null;
+      /** Format: int32 */
+      totalCount?: number;
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
     AdminUserListItemDto: {
       /** Format: int32 */
       id?: number;
@@ -2188,6 +3049,7 @@ export interface components {
       /** Format: int32 */
       id?: number;
       name?: string | null;
+      isModerated?: boolean;
       brand?: components['schemas']['BrandDto'];
       /** Format: int32 */
       lengthMm?: number | null;
@@ -2204,6 +3066,14 @@ export interface components {
       createdAt?: string;
       /** Format: date-time */
       updatedAt?: string | null;
+      /** Format: double */
+      reviewAvgBodyStrength?: number | null;
+      /** Format: double */
+      reviewAvgAromaScore?: number | null;
+      /** Format: double */
+      reviewAvgPairingsScore?: number | null;
+      /** Format: int32 */
+      reviewScoredReviewCount?: number;
     };
     CigarBaseDtoPaginatedResult: {
       items?: components['schemas']['CigarBaseDto'][] | null;
@@ -2231,8 +3101,28 @@ export interface components {
       price?: number | null;
       /** Format: int32 */
       rating?: number | null;
+      /** Format: int32 */
+      quantity?: number;
       imageUrl?: string | null;
     };
+    CigarCommentDto: {
+      /** Format: int32 */
+      id?: number;
+      body?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: int32 */
+      authorUserId?: number;
+      authorUsername?: string | null;
+      isAuthorProfilePublic?: boolean;
+      /** Format: int32 */
+      cigarBaseId?: number | null;
+      /** Format: int32 */
+      userCigarId?: number | null;
+      moderationStatus?: components['schemas']['CigarCommentModerationStatus'];
+    };
+    /** @enum {string} */
+    CigarCommentModerationStatus: 'Pending' | 'Approved' | 'Rejected';
     CigarImageDto: {
       /** Format: int32 */
       id?: number;
@@ -2265,7 +3155,11 @@ export interface components {
       price?: number | null;
       /** Format: int32 */
       rating?: number | null;
+      /** Format: int32 */
+      quantity?: number;
       imageUrl?: string | null;
+      /** Format: int32 */
+      cigarBaseId?: number;
       country?: string | null;
       description?: string | null;
       wrapper?: string | null;
@@ -2289,8 +3183,6 @@ export interface components {
       readonly isSmoked?: boolean;
       taste?: string | null;
       aroma?: string | null;
-      /** Format: int32 */
-      quantity?: number;
       images?: components['schemas']['CigarImageDto'][] | null;
     };
     CigarTimelinePointDto: {
@@ -2306,6 +3198,13 @@ export interface components {
       description?: string | null;
       logoUrl?: string | null;
       isModerated?: boolean;
+    };
+    CreateCigarCommentRequest: {
+      /** Format: int32 */
+      cigarBaseId?: number | null;
+      /** Format: int32 */
+      userCigarId?: number | null;
+      body: string;
     };
     CreateCigarImageRequest: {
       fileName?: string | null;
@@ -2337,6 +3236,11 @@ export interface components {
       imageUrl?: string | null;
       imageUrls?: string[] | null;
     };
+    CreateReviewCommentRequest: {
+      /** Format: int32 */
+      reviewId: number;
+      body: string;
+    };
     CreateReviewImageRequest: {
       imageUrl: string;
       caption?: string | null;
@@ -2360,6 +3264,14 @@ export interface components {
       venue?: string | null;
       /** Format: date-time */
       smokingDate?: string | null;
+      /** Format: int32 */
+      smokingDurationMinutes?: number | null;
+      /** Format: int32 */
+      bodyStrengthScore?: number | null;
+      /** Format: int32 */
+      aromaScore?: number | null;
+      /** Format: int32 */
+      pairingsScore?: number | null;
       images?: components['schemas']['CreateReviewImageRequest'][] | null;
     };
     DashboardSummaryDto: {
@@ -2452,8 +3364,7 @@ export interface components {
       humidity?: number | null;
     };
     LoginRequest: {
-      /** Format: email */
-      email: string;
+      username: string;
       password: string;
     };
     MarkCigarSmokedRequest: {
@@ -2467,6 +3378,8 @@ export interface components {
       email?: string | null;
       role?: components['schemas']['Role'];
       isProfilePublic?: boolean;
+      /** @description Внешний URL или относительный путь `/api/users/{id}/avatar` для загруженного файла. */
+      avatarUrl?: string | null;
       /** Format: date-time */
       createdAt?: string;
       /** Format: date-time */
@@ -2487,6 +3400,16 @@ export interface components {
       /** Format: int32 */
       pageSize?: number;
     };
+    /** @description Пагинированный список изображений сигар (хранилище MinIO/LocalFile) для админ-панели. */
+    PagedCigarImagesAdminResponse: {
+      items?: components['schemas']['CigarImageDto'][] | null;
+      /** Format: int32 */
+      totalCount?: number;
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      pageSize?: number;
+    };
     ProblemDetails: {
       type?: string | null;
       title?: string | null;
@@ -2499,11 +3422,20 @@ export interface components {
     };
     PublicProfileDto: {
       username?: string | null;
+      /** @description Внешний URL или `/api/users/{id}/avatar`. */
+      avatarUrl?: string | null;
       /** Format: date-time */
       createdAt?: string;
       /** Format: date-time */
       lastLogin?: string | null;
       humidors?: components['schemas']['HumidorResponseDto'][] | null;
+    };
+    /**
+     * @description Лёгкий ответ для префетча: виден ли публичный профиль (пользователь есть и IsProfilePublic).
+     *     Не различает «нет пользователя» и «профиль закрыт» — в обоих случаях IsVisible = false.
+     */
+    PublicProfileVisibilityDto: {
+      isVisible?: boolean;
     };
     RecentReviewDto: {
       /** Format: int32 */
@@ -2515,12 +3447,29 @@ export interface components {
       rating?: number;
       /** Format: date-time */
       createdAt?: string;
+      username: string;
+      isAuthorProfilePublic?: boolean;
+      userAvatarUrl?: string | null;
     };
     RegisterRequest: {
       username: string;
       password: string;
       confirmPassword: string;
-      confirmedAge18: boolean;
+      confirmedAge18?: boolean;
+    };
+    ReviewCommentDto: {
+      /** Format: int32 */
+      id?: number;
+      /** Format: int32 */
+      reviewId?: number;
+      body?: string | null;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: int32 */
+      authorUserId?: number;
+      authorUsername?: string | null;
+      isAuthorProfilePublic?: boolean;
+      moderationStatus?: components['schemas']['CigarCommentModerationStatus'];
     };
     ReviewDto: {
       /** Format: int32 */
@@ -2532,11 +3481,20 @@ export interface components {
       /** Format: int32 */
       userId?: number;
       username?: string | null;
+      isAuthorProfilePublic?: boolean;
       userAvatarUrl?: string | null;
       /** Format: int32 */
       cigarId?: number;
       cigarName?: string | null;
       cigarBrand?: string | null;
+      cigarCountry?: string | null;
+      /** Format: int32 */
+      cigarLengthMm?: number | null;
+      /** Format: int32 */
+      cigarDiameter?: number | null;
+      cigarWrapper?: string | null;
+      cigarBinder?: string | null;
+      cigarFiller?: string | null;
       images?: components['schemas']['ReviewImageDto'][] | null;
       smokingExperience?: string | null;
       aroma?: string | null;
@@ -2548,8 +3506,16 @@ export interface components {
       /** Format: int32 */
       draw?: number | null;
       venue?: string | null;
+      /** Format: int32 */
+      bodyStrengthScore?: number | null;
+      /** Format: int32 */
+      aromaScore?: number | null;
+      /** Format: int32 */
+      pairingsScore?: number | null;
       /** Format: date-time */
       smokingDate?: string;
+      /** Format: int32 */
+      smokingDurationMinutes?: number | null;
       /** Format: date-time */
       createdAt?: string;
       /** Format: date-time */
@@ -2572,6 +3538,8 @@ export interface components {
       /** Format: int32 */
       userId?: number;
       username?: string | null;
+      isAuthorProfilePublic?: boolean;
+      userAvatarUrl?: string | null;
       cigarName?: string | null;
       cigarBrand?: string | null;
       /** Format: byte */
@@ -2638,7 +3606,7 @@ export interface components {
     UpdateProfileRequest: {
       username: string;
       /** Format: email */
-      email: string;
+      email?: string | null;
       isProfilePublic?: boolean;
     };
     UpdateProfileResponse: {
@@ -2664,6 +3632,14 @@ export interface components {
       venue?: string | null;
       /** Format: date-time */
       smokingDate?: string | null;
+      /** Format: int32 */
+      smokingDurationMinutes?: number | null;
+      /** Format: int32 */
+      bodyStrengthScore?: number | null;
+      /** Format: int32 */
+      aromaScore?: number | null;
+      /** Format: int32 */
+      pairingsScore?: number | null;
       imagesToAdd?: components['schemas']['CreateReviewImageRequest'][] | null;
       imageIdsToRemove?: number[] | null;
     };

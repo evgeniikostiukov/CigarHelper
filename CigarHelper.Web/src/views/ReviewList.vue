@@ -177,6 +177,7 @@
               review.cigarName,
               review.username,
               review.userId,
+              review.isAuthorProfilePublic,
               review.createdAt,
               review.summary,
               review.imageCount,
@@ -235,19 +236,17 @@
               </div>
               <p class="text-sm text-stone-600 dark:text-stone-400">{{ review.cigarBrand }} · {{ review.cigarName }}</p>
               <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
-                <Avatar
-                  image="/img/default-avatar.png"
-                  size="small"
-                  shape="circle"
-                  :aria-label="`Автор: ${review.username}`" />
-                <span class="min-w-0 font-medium text-stone-800 dark:text-stone-200 truncate">{{
-                  review.username
-                }}</span>
+                <PublicProfileAuthorBlock
+                  :username="review.username"
+                  :is-author-profile-public="review.isAuthorProfilePublic === true"
+                  :avatar-url="review.userAvatarUrl ?? null"
+                  overlay-card-mode
+                  avatar-size="small" />
                 <span class="shrink-0 text-stone-500 dark:text-stone-500">· {{ formatDate(review.createdAt) }}</span>
               </div>
               <p
-                class="line-clamp-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
-                {{ review.summary ?? '' }}
+                class="line-clamp-3 min-w-0 max-w-full break-words text-sm leading-relaxed text-stone-700 [overflow-wrap:anywhere] dark:text-stone-300 pt-1 border-t border-stone-100 dark:border-stone-700/80">
+                {{ excerptPlain(review.summary) }}
               </p>
             </div>
 
@@ -283,7 +282,9 @@
   import reviewService from '../services/reviewService';
   import { useAuth } from '@/services/useAuth';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import { plainTextReviewExcerpt } from '@/utils/reviewContentDisplay';
   import { getAuthUserId } from '@/utils/roles';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import type { ReviewListItem } from '../services/reviewService';
 
   const { isAuthenticated, user } = useAuth();
@@ -371,6 +372,10 @@
     filters.brand = null;
     filters.minRating = null;
   };
+
+  function excerptPlain(summary: string | null | undefined): string {
+    return plainTextReviewExcerpt(summary ?? '', 220);
+  }
 
   onMounted(fetchReviews);
 </script>

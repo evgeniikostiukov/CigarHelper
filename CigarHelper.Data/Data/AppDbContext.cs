@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<ReviewImage> ReviewImages { get; set; } = null!;
     public DbSet<CigarImage> CigarImages { get; set; } = null!;
     public DbSet<CigarComment> CigarComments { get; set; } = null!;
+    public DbSet<ReviewComment> ReviewComments { get; set; } = null!;
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -170,6 +171,27 @@ public class AppDbContext : DbContext
             entity.ToTable(t => t.HasCheckConstraint(
                 "CK_CigarComments_SingleTarget",
                 "(\"CigarBaseId\" IS NOT NULL AND \"UserCigarId\" IS NULL) OR (\"CigarBaseId\" IS NULL AND \"UserCigarId\" IS NOT NULL)"));
+        });
+
+        modelBuilder.Entity<ReviewComment>(entity =>
+        {
+            entity.HasOne(c => c.Author)
+                .WithMany()
+                .HasForeignKey(c => c.AuthorUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.Review)
+                .WithMany(r => r.Comments)
+                .HasForeignKey(c => c.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.ModeratedBy)
+                .WithMany()
+                .HasForeignKey(c => c.ModeratedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasIndex(c => c.ReviewId);
+            entity.HasIndex(c => c.ModerationStatus);
         });
     }
 } 

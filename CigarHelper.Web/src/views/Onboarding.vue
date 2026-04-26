@@ -214,14 +214,6 @@
                       Вместимость: {{ createdHumidor.capacity }} сигар
                     </p>
                   </div>
-                  <!-- <Button
-                    data-testid="onboarding-open-humidor"
-                    class="min-h-11 touch-manipulation"
-                    severity="secondary"
-                    outlined
-                    icon="pi pi-external-link"
-                    label="Открыть"
-                    @click="router.push({ name: 'HumidorDetail', params: { id: String(createdHumidor.id) } })" /> -->
                 </div>
               </div>
 

@@ -324,6 +324,15 @@
                       <p class="truncate text-sm font-semibold text-stone-900 dark:text-rose-50/95">
                         {{ review.title }}
                       </p>
+                      <div class="mt-1 text-xs text-stone-600 dark:text-stone-400">
+                        <PublicProfileAuthorBlock
+                          :username="review.username"
+                          :is-author-profile-public="review.isAuthorProfilePublic === true"
+                          :avatar-url="review.userAvatarUrl"
+                          overlay-card-mode
+                          avatar-size="small"
+                          name-class="text-xs font-medium" />
+                      </div>
                       <p class="mt-0.5 truncate text-xs text-stone-600 dark:text-stone-400">
                         {{ review.cigarBrand }} · {{ review.cigarName }}
                       </p>
@@ -426,6 +435,7 @@
   import Message from 'primevue/message';
   import ProgressBar from 'primevue/progressbar';
   import Skeleton from 'primevue/skeleton';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import dashboardService, { type DashboardSummary } from '@/services/dashboardService';
 
   const dashboardMetricInfoBtnClass =

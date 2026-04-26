@@ -7,7 +7,7 @@
     <div
       class="review-detail-grain pointer-events-none absolute inset-0 rounded-[inherit] opacity-[0.35] dark:opacity-20" />
 
-    <div class="relative z-[1] mx-auto max-w-4xl">
+    <div class="relative z-[1] mx-auto min-w-0 max-w-4xl">
       <div
         v-if="loading"
         class="min-h-[20rem] space-y-5"
@@ -66,7 +66,7 @@
 
       <article
         v-else-if="review"
-        class="review-detail-enter space-y-6 sm:space-y-8"
+        class="review-detail-enter min-w-0 space-y-6 sm:space-y-8"
         data-testid="review-detail-content">
         <nav
           class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-stone-600 dark:text-stone-400"
@@ -127,20 +127,15 @@
           </div>
           <div
             class="flex flex-col gap-4 rounded-2xl border border-stone-200/90 bg-white/95 p-4 shadow-md shadow-stone-900/5 sm:flex-row sm:items-center sm:justify-between sm:p-5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50">
-            <div class="flex min-w-0 items-center gap-3">
-              <Avatar
-                :image="review.userAvatarUrl || '/img/default-avatar.png'"
-                size="large"
-                shape="circle"
-                :aria-label="`Автор: ${review.username}`" />
-              <div class="min-w-0">
-                <p class="truncate text-lg font-semibold text-stone-900 dark:text-rose-50/95">
-                  {{ review.username }}
-                </p>
-                <p class="text-sm text-stone-600 dark:text-stone-400">
-                  {{ formatDate(review.createdAt) }}
-                </p>
-              </div>
+            <div class="flex min-w-0 flex-1 items-center">
+              <PublicProfileAuthorBlock
+                :username="review.username"
+                :is-author-profile-public="review.isAuthorProfilePublic === true"
+                :avatar-url="review.userAvatarUrl ?? null"
+                avatar-size="large"
+                name-class="text-lg font-semibold text-stone-900 dark:text-rose-50/95 group-hover/author:text-stone-900 dark:group-hover/author:text-rose-50/95">
+                <template #meta>{{ formatDate(review.createdAt) }}</template>
+              </PublicProfileAuthorBlock>
             </div>
             <div class="flex shrink-0 flex-wrap items-center gap-2">
               <span class="text-sm font-medium text-stone-600 dark:text-stone-400">Оценка</span>
@@ -158,6 +153,27 @@
             <strong class="font-semibold text-stone-900 dark:text-rose-50/95"
               >{{ review.cigarBrand }} · {{ review.cigarName }}</strong
             >
+          </div>
+          <div
+            v-if="hasCigarCatalogBlock"
+            class="rounded-xl border border-stone-200/80 bg-white/90 px-4 py-3 text-sm text-stone-700 shadow-sm dark:border-stone-600/80 dark:bg-stone-900/60 dark:text-stone-200"
+            data-testid="review-detail-cigar-catalog-snapshot">
+            <p
+              v-if="vitolaDimensionsLabel"
+              class="mb-1.5">
+              <span class="font-medium text-stone-900 dark:text-stone-100">Размер:</span>
+              {{ vitolaDimensionsLabel }}
+            </p>
+            <p
+              v-if="review.cigarCountry"
+              class="mb-1.5">
+              <span class="font-medium text-stone-900 dark:text-stone-100">Страна:</span>
+              {{ review.cigarCountry }}
+            </p>
+            <p v-if="cigarBlendLine">
+              <span class="font-medium text-stone-900 dark:text-stone-100">Обёртка / связка / наполнитель:</span>
+              {{ cigarBlendLine }}
+            </p>
           </div>
         </header>
 
@@ -225,6 +241,48 @@
                 <span class="font-medium text-stone-900 dark:text-stone-100">Вкус:</span>
                 {{ review.taste }}
               </li>
+            </ul>
+            <div
+              v-if="hasReviewAxisScores"
+              class="mt-5 border-t border-stone-200/80 pt-5 dark:border-stone-600/80"
+              data-testid="review-detail-axis-scores">
+              <h3 class="mb-1 flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-rose-50/95">
+                <i
+                  class="pi pi-chart-line text-rose-800/80 dark:text-rose-400/90"
+                  aria-hidden="true" />
+                Оси по отзыву
+              </h3>
+              <p class="mb-3 text-xs text-stone-600 dark:text-stone-400">
+                Субъективные шкалы для средних в каталоге; не путайте с крепостью из карточки справочника.
+              </p>
+              <ul class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                <li
+                  v-if="review.bodyStrengthScore != null"
+                  class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сила / тело</span>
+                  <Tag
+                    :value="`${review.bodyStrengthScore}/10`"
+                    severity="secondary" />
+                </li>
+                <li
+                  v-if="review.aromaScore != null"
+                  class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Аромат (число)</span>
+                  <Tag
+                    :value="`${review.aromaScore}/10`"
+                    severity="secondary" />
+                </li>
+                <li
+                  v-if="review.pairingsScore != null"
+                  class="flex flex-wrap items-center gap-2">
+                  <span class="text-xs font-medium text-stone-600 dark:text-stone-400">Сочетания</span>
+                  <Tag
+                    :value="`${review.pairingsScore}/10`"
+                    severity="secondary" />
+                </li>
+              </ul>
+            </div>
+            <ul class="space-y-4 text-sm text-stone-700 dark:text-stone-300">
               <li
                 v-if="review.construction"
                 class="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -271,12 +329,18 @@
                 <span class="font-medium text-stone-900 dark:text-stone-100">Дата дегустации:</span>
                 {{ formatDate(review.smokingDate) }}
               </li>
+              <li
+                v-if="review.smokingDurationMinutes != null"
+                data-testid="review-detail-smoking-duration">
+                <span class="font-medium text-stone-900 dark:text-stone-100">Время курения:</span>
+                {{ review.smokingDurationMinutes }} мин
+              </li>
             </ul>
           </section>
         </div>
 
         <section
-          class="rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
+          class="min-w-0 rounded-2xl border border-stone-200/90 bg-white/95 p-5 shadow-md shadow-stone-900/5 dark:border-stone-700/90 dark:bg-stone-900/85 dark:shadow-black/50 sm:p-6"
           data-testid="review-detail-body"
           aria-labelledby="review-detail-body-heading">
           <h2
@@ -285,9 +349,14 @@
             Текст обзора
           </h2>
           <div
-            class="review-detail-prose prose-stone max-w-none dark:prose-invert"
+            class="review-detail-prose prose-stone min-w-0 max-w-full break-words dark:prose-invert [overflow-wrap:anywhere]"
             v-html="sanitizedContent" />
         </section>
+
+        <ReviewCommentsPanel
+          v-if="review"
+          :review-id="review.id"
+          data-testid="review-detail-comments" />
 
         <footer
           class="flex flex-col gap-3 border-t border-stone-200/80 pt-6 dark:border-stone-700/80 sm:flex-row sm:items-center sm:justify-between">
@@ -299,13 +368,24 @@
             severity="secondary"
             outlined
             @click="router.push({ name: 'ReviewList' })" />
-          <Button
-            data-testid="review-detail-cigar"
-            class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:order-2 sm:w-auto"
-            :label="review.userCigarId ? 'Открыть сигару в коллекции' : 'Открыть в каталоге'"
-            icon="pi pi-arrow-right"
-            icon-pos="right"
-            @click="goToCigar" />
+          <div class="flex w-full flex-col gap-2 sm:order-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+            <Button
+              v-if="isCurrentUserReview && review.userCigarId"
+              data-testid="review-detail-cigar-collection"
+              class="min-h-12 w-full touch-manipulation sm:w-auto"
+              label="Моя запись в коллекции"
+              icon="pi pi-box"
+              severity="secondary"
+              outlined
+              @click="goToUserCigarInCollection" />
+            <Button
+              data-testid="review-detail-cigar-catalog"
+              class="min-h-12 w-full touch-manipulation shadow-md shadow-rose-900/10 dark:shadow-black/40 sm:w-auto"
+              label="Открыть в каталоге"
+              icon="pi pi-arrow-right"
+              icon-pos="right"
+              @click="goToCigarBaseInCatalog" />
+          </div>
         </footer>
       </article>
     </div>
@@ -320,9 +400,11 @@
   import reviewService from '../services/reviewService';
   import type { Review } from '../services/reviewService';
   import authService from '../services/authService';
-  import DOMPurify from 'dompurify';
   import { reviewImageInlineDataSrc } from '@/utils/reviewImageDisplay';
+  import { sanitizeReviewBodyForDisplay } from '@/utils/reviewContentDisplay';
   import { getAuthUserId } from '@/utils/roles';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
+  import ReviewCommentsPanel from '@/components/ReviewCommentsPanel.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -339,28 +421,65 @@
     return uid !== null && uid === review.value.userId;
   });
 
-  const sanitizedContent = computed(() => {
-    if (!review.value?.content) return '';
-    const rawHtml = review.value.content
-      .split('\n')
-      .filter((p) => p.trim().length > 0)
-      .map((p) => `<p>${p}</p>`)
-      .join('');
-    return DOMPurify.sanitize(rawHtml, {
-      USE_PROFILES: { html: true },
-    });
+  const vitolaDimensionsLabel = computed(() => {
+    const r = review.value;
+    if (!r) return null;
+    if (r.cigarLengthMm != null && r.cigarDiameter != null) {
+      return `${r.cigarLengthMm} × ${r.cigarDiameter}`;
+    }
+    if (r.cigarLengthMm != null) return `${r.cigarLengthMm} мм`;
+    if (r.cigarDiameter != null) return `${r.cigarDiameter} RG`;
+    return null;
   });
 
-  const goToCigar = (): void => {
+  const cigarBlendLine = computed(() => {
+    const r = review.value;
+    if (!r) return null;
+    const parts = [r.cigarWrapper, r.cigarBinder, r.cigarFiller].filter(
+      (x): x is string => typeof x === 'string' && x.trim().length > 0,
+    );
+    return parts.length ? parts.join(' / ') : null;
+  });
+
+  const hasCigarCatalogBlock = computed(() => {
+    const r = review.value;
+    if (!r) return false;
+    return Boolean(vitolaDimensionsLabel.value || (r.cigarCountry && r.cigarCountry.trim()) || cigarBlendLine.value);
+  });
+
+  const hasReviewAxisScores = computed(() => {
+    const r = review.value;
+    if (!r) return false;
+    return r.bodyStrengthScore != null || r.aromaScore != null || r.pairingsScore != null;
+  });
+
+  const sanitizedContent = computed(() =>
+    review.value?.content ? sanitizeReviewBodyForDisplay(review.value.content) : '',
+  );
+
+  /** Карточка базовой сигары в справочнике (диалог на `CigarBases` через query). */
+  const goToCigarBaseInCatalog = (): void => {
     if (!review.value) return;
-    if (review.value.userCigarId != null) {
-      void router.push({ name: 'CigarDetail', params: { id: String(review.value.userCigarId) } });
+    const id = review.value.cigarBaseId;
+    if (!Number.isFinite(id) || id <= 0) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Нет привязки к каталогу',
+        detail: 'Для этого обзора не указана базовая сигара.',
+        life: 4000,
+      });
       return;
     }
     void router.push({
       name: 'CigarBases',
-      query: { selectedCigarBaseId: String(review.value.cigarBaseId) },
+      query: { selectedCigarBaseId: String(id) },
     });
+  };
+
+  /** Только для автора: его запись UserCigar (не использовать для чужих обзоров). */
+  const goToUserCigarInCollection = (): void => {
+    if (!review.value?.userCigarId) return;
+    void router.push({ name: 'CigarDetail', params: { id: String(review.value.userCigarId) } });
   };
 
   const loadReview = async (): Promise<void> => {
@@ -390,8 +509,9 @@
 
   const confirmDelete = (): void => {
     confirm.require({
-      message: 'Вы уверены, что хотите удалить этот обзор? Это действие нельзя отменить.',
-      header: 'Подтверждение удаления',
+      message:
+        'Обзор будет скрыт из списков и по ссылке для всех. Запись останется в системе; вернуть обзор может только администратор.',
+      header: 'Удалить обзор',
       icon: 'pi pi-exclamation-triangle',
       rejectClass: 'p-button-secondary p-button-outlined',
       acceptClass: 'p-button-danger',
@@ -404,7 +524,7 @@
           toast.add({
             severity: 'success',
             summary: 'Успешно',
-            detail: 'Обзор удален',
+            detail: 'Обзор скрыт',
             life: 3000,
           });
           await router.push({ name: 'ReviewList' });
@@ -471,9 +591,14 @@
     overflow: hidden;
   }
 
+  :deep(.review-detail-prose) {
+    overflow-wrap: anywhere;
+  }
+
   :deep(.review-detail-prose p) {
     margin-bottom: 1rem;
     line-height: 1.65;
+    overflow-wrap: anywhere;
   }
 
   :deep(.review-detail-prose h1),
@@ -482,6 +607,22 @@
     margin-bottom: 0.75rem;
     margin-top: 1.25rem;
     font-weight: 600;
+  }
+
+  :deep(.review-detail-prose a) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    color: rgb(159 18 57);
+  }
+
+  :deep(.dark .review-detail-prose a) {
+    color: rgb(254 205 211);
+  }
+
+  :deep(.review-detail-prose img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
   }
 
   .review-detail-gallery-item {

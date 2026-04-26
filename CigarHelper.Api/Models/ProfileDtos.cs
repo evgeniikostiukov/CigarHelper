@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using CigarHelper.Api.Helpers;
+using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
 using CigarHelper.Data.Models.Enums;
 
@@ -11,8 +13,24 @@ public class MyProfileDto
     public string Email { get; set; } = string.Empty;
     public Role Role { get; set; }
     public bool IsProfilePublic { get; set; }
+
+    /// <summary>Внешний URL или относительный путь <c>/api/users/{id}/avatar</c> для загруженного файла.</summary>
+    public string? AvatarUrl { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLogin { get; set; }
+
+    public static MyProfileDto FromUser(User u) => new()
+    {
+        Id = u.Id,
+        Username = u.Username,
+        Email = u.Email ?? string.Empty,
+        Role = u.Role,
+        IsProfilePublic = u.IsProfilePublic,
+        AvatarUrl = UserAvatarPublicUrls.ToPublicUrl(u.Id, u.AvatarUrl),
+        CreatedAt = u.CreatedAt,
+        LastLogin = u.LastLogin,
+    };
 }
 
 public class UpdateProfileRequest
@@ -62,7 +80,20 @@ public class ChangePasswordResponse
 public class PublicProfileDto
 {
     public string Username { get; set; } = string.Empty;
+
+    /// <summary>Внешний URL или <c>/api/users/{id}/avatar</c>.</summary>
+    public string? AvatarUrl { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLogin { get; set; }
     public IReadOnlyList<HumidorResponseDto> Humidors { get; set; } = [];
+}
+
+/// <summary>
+/// Лёгкий ответ для префетча: виден ли публичный профиль (пользователь есть и IsProfilePublic).
+/// Не различает «нет пользователя» и «профиль закрыт» — в обоих случаях IsVisible = false.
+/// </summary>
+public class PublicProfileVisibilityDto
+{
+    public bool IsVisible { get; set; }
 }

@@ -122,6 +122,7 @@
                         :src="slotProps.data.src"
                         :alt="cigar.name"
                         class="cigar-detail-gallery-img"
+                        draggable="false"
                         loading="lazy"
                         decoding="async" />
                     </div>
@@ -520,7 +521,10 @@
           return null;
         }
         try {
-          const { data } = await api.get<Blob>(`cigarimages/${img.id}/data`, { responseType: 'blob' });
+          const { data } = await api.get<Blob>(`cigarimages/${img.id}/data`, {
+            responseType: 'blob',
+            skipGlobalErrorNotification: true,
+          });
           return { id: img.id, src: URL.createObjectURL(data) };
         } catch (err) {
           if (import.meta.env.DEV) {
@@ -533,7 +537,7 @@
 
     if (gen !== galleryLoadGen) {
       for (const r of results) {
-        if (r?.src.startsWith('blob:')) {
+        if (r?.src?.startsWith('blob:')) {
           URL.revokeObjectURL(r.src);
         }
       }
@@ -676,11 +680,18 @@
     max-height: min(70vh, 100%);
     object-fit: contain;
     object-position: center;
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .cigar-detail-carousel :deep(.p-carousel-content),
   .cigar-detail-carousel :deep(.p-carousel-container) {
     height: 100%;
+  }
+
+  /* Горизонтальный свайп PrimeVue: вертикаль — скролл страницы, горизонталь — смена слайда */
+  .cigar-detail-carousel :deep(.p-carousel-viewport) {
+    touch-action: pan-y pinch-zoom;
   }
 
   .cigar-detail-grain {

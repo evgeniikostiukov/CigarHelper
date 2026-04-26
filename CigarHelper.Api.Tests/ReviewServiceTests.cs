@@ -56,6 +56,12 @@ public class ReviewServiceTests
         {
             Name = $"C_{tag}",
             BrandId = brand.Id,
+            Country = "NI",
+            LengthMm = 152,
+            Diameter = 52,
+            Wrapper = "Nic",
+            Binder = "Nic",
+            Filler = "Nic",
             CreatedAt = DateTime.UtcNow
         };
         db.CigarBases.Add(cb);
@@ -255,6 +261,12 @@ public class ReviewServiceTests
         Assert.Equal(user.Username, dto.Username);
         Assert.Equal(cb.Name, dto.CigarName);
         Assert.Equal(brand.Name, dto.CigarBrand);
+        Assert.Equal("NI", dto.CigarCountry);
+        Assert.Equal(152, dto.CigarLengthMm);
+        Assert.Equal(52, dto.CigarDiameter);
+        Assert.Equal("Nic", dto.CigarWrapper);
+        Assert.Equal("Nic", dto.CigarBinder);
+        Assert.Equal("Nic", dto.CigarFiller);
     }
 
     [Fact]
@@ -268,6 +280,31 @@ public class ReviewServiceTests
             sut.CreateReviewAsync(user.Id, BuildCreateRequest(404, "Tit", "Content here long enough")));
 
         Assert.Contains("404", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CreateReviewAsync_WithSmokingDurationMinutes_PersistsAndReturnsInDto()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+
+        var dto = await sut.CreateReviewAsync(
+            user.Id,
+            new CreateReviewRequest
+            {
+                Title = "Dur",
+                Content = "Body long enough for validation rules here.",
+                Rating = 8,
+                CigarBaseId = cb.Id,
+                SmokingDurationMinutes = 91,
+                Images = new List<CreateReviewImageRequest>()
+            });
+
+        Assert.Equal(91, dto.SmokingDurationMinutes);
+        var row = await db.Reviews.AsNoTracking().SingleAsync(r => r.Id == dto.Id);
+        Assert.Equal(91, row.SmokingDurationMinutes);
     }
 
     [Fact]
@@ -429,7 +466,7 @@ public class ReviewServiceTests
     }
 
     [Fact]
-    public async Task DeleteReviewAsync_Owner_DeletesReview_AndCascadeImages()
+    public async Task DeleteReviewAsync_Owner_SoftDeletes_KeepsRowAndImages()
     {
         await using var db = CreateContext();
         var user = await SeedUserAsync(db);
@@ -448,7 +485,214 @@ public class ReviewServiceTests
         var ok = await sut.DeleteReviewAsync(rev.Id, user.Id);
 
         Assert.True(ok);
-        Assert.False(await db.Reviews.AnyAsync(r => r.Id == rev.Id));
-        Assert.False(await db.ReviewImages.AnyAsync(i => i.ReviewId == rev.Id));
+        var row = await db.Reviews.AsNoTracking().SingleAsync(r => r.Id == rev.Id);
+        Assert.NotNull(row.DeletedAt);
+        Assert.True(await db.ReviewImages.AnyAsync(i => i.ReviewId == rev.Id));
+    }
+
+    [Fact]
+    public async Task DeleteReviewAsync_Owner_AlreadySoftDeleted_ReturnsTrue()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "X", "y", DateTime.UtcNow);
+        rev.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        var sut = Sut(db);
+
+        var ok = await sut.DeleteReviewAsync(rev.Id, user.Id);
+
+        Assert.True(ok);
+    }
+
+    [Fact]
+    public async Task GetReviewsAsync_ExcludesSoftDeleted()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Active", "a", DateTime.UtcNow);
+        var gone = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Hidden", "b", DateTime.UtcNow.AddMinutes(-1));
+        gone.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        var sut = Sut(db);
+
+        var list = await sut.GetReviewsAsync();
+
+        Assert.Single(list);
+        Assert.Equal("Active", list[0].Title);
+    }
+
+    [Fact]
+    public async Task GetReviewByIdAsync_SoftDeleted_ReturnsNull()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Gone", "x", DateTime.UtcNow);
+        rev.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        var sut = Sut(db);
+
+        var dto = await sut.GetReviewByIdAsync(rev.Id);
+
+        Assert.Null(dto);
+    }
+
+    [Fact]
+    public async Task UpdateReviewAsync_SoftDeleted_ReturnsNull()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Old", "x", DateTime.UtcNow);
+        rev.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        var sut = Sut(db);
+
+        var dto = await sut.UpdateReviewAsync(rev.Id, user.Id, new UpdateReviewRequest
+        {
+            Title = "New",
+            Content = "y",
+            Rating = 5
+        });
+
+        Assert.Null(dto);
+    }
+
+    [Fact]
+    public async Task GetDeletedReviewsForStaffAsync_ReturnsOnlyDeleted_OrderedByDeletedAtDesc()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Live", "a", DateTime.UtcNow);
+        var d1 = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "D1", "b", DateTime.UtcNow.AddHours(-2));
+        d1.DeletedAt = DateTime.UtcNow.AddHours(-2);
+        var d2 = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "D2", "c", DateTime.UtcNow.AddHours(-3));
+        d2.DeletedAt = DateTime.UtcNow.AddHours(-1);
+        await db.SaveChangesAsync();
+        var sut = Sut(db);
+
+        var page = await sut.GetDeletedReviewsForStaffAsync(1, 20);
+
+        Assert.Equal(2, page.TotalCount);
+        Assert.Equal(new[] { d2.Id, d1.Id }, page.Items.Select(x => x.Id).ToArray());
+    }
+
+    [Fact]
+    public async Task RestoreReviewByStaffAsync_WhenDeleted_ClearsDeletedAt_AndReviewReappearsInPublicList()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Back", "z", DateTime.UtcNow);
+        rev.DeletedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        var sut = Sut(db);
+
+        var ok = await sut.RestoreReviewByStaffAsync(rev.Id);
+
+        Assert.True(ok);
+        Assert.Null((await db.Reviews.AsNoTracking().SingleAsync(r => r.Id == rev.Id)).DeletedAt);
+        var list = await sut.GetReviewsAsync();
+        Assert.Contains(list, x => x.Id == rev.Id);
+    }
+
+    [Fact]
+    public async Task RestoreReviewByStaffAsync_NotDeleted_ReturnsFalse()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var rev = await SeedReviewAsync(db, user.Id, cb.Id, cigar.Id, "Live", "z", DateTime.UtcNow);
+        var sut = Sut(db);
+
+        var ok = await sut.RestoreReviewByStaffAsync(rev.Id);
+
+        Assert.False(ok);
+    }
+
+    [Fact]
+    public async Task CreateReviewAsync_WithAxisScores_RefreshesCigarBaseAggregates()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+        var req = BuildCreateRequest(cb.Id, "Axes", "Body text here long enough", rating: 8);
+        req.BodyStrengthScore = 4;
+        req.AromaScore = 8;
+        req.PairingsScore = 6;
+
+        await sut.CreateReviewAsync(user.Id, req);
+
+        var b = await db.CigarBases.AsNoTracking().SingleAsync(x => x.Id == cb.Id);
+        Assert.Equal(4m, b.ReviewAvgBodyStrength);
+        Assert.Equal(8m, b.ReviewAvgAromaScore);
+        Assert.Equal(6m, b.ReviewAvgPairingsScore);
+        Assert.Equal(1, b.ReviewScoredReviewCount);
+    }
+
+    [Fact]
+    public async Task CreateReviewAsync_PartialAxisScores_AveragesOnlyPresentAxes()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var sut = Sut(db);
+        var r1 = BuildCreateRequest(cb.Id, "A", "Body text here long enough", rating: 5);
+        r1.BodyStrengthScore = 2;
+        r1.AromaScore = null;
+        r1.PairingsScore = null;
+        await sut.CreateReviewAsync(user.Id, r1);
+        var r2 = BuildCreateRequest(cb.Id, "B", "Body text here long enough too", rating: 6);
+        r2.BodyStrengthScore = 8;
+        r2.AromaScore = 10;
+        r2.PairingsScore = null;
+        await sut.CreateReviewAsync(user.Id, r2);
+
+        var b = await db.CigarBases.AsNoTracking().SingleAsync(x => x.Id == cb.Id);
+        Assert.Equal(5m, b.ReviewAvgBodyStrength);
+        Assert.Equal(10m, b.ReviewAvgAromaScore);
+        Assert.Null(b.ReviewAvgPairingsScore);
+        Assert.Equal(2, b.ReviewScoredReviewCount);
+    }
+
+    [Fact]
+    public async Task DeleteReviewAsync_RefreshesAggregatesWhenLastScoredReviewRemoved()
+    {
+        await using var db = CreateContext();
+        var user = await SeedUserAsync(db);
+        var (_, cb) = await SeedBrandAndCigarBaseAsync(db);
+        var cigar = await SeedUserCigarAsync(db, user.Id, cb.Id);
+        var sut = Sut(db);
+        var dto = await sut.CreateReviewAsync(user.Id, new CreateReviewRequest
+        {
+            Title = "One",
+            Content = "Body text here long enough",
+            Rating = 7,
+            CigarBaseId = cb.Id,
+            UserCigarId = cigar.Id,
+            BodyStrengthScore = 9,
+            AromaScore = 9,
+            PairingsScore = 9,
+            Images = new List<CreateReviewImageRequest>()
+        });
+        await sut.DeleteReviewAsync(dto.Id, user.Id);
+
+        var b = await db.CigarBases.AsNoTracking().SingleAsync(x => x.Id == cb.Id);
+        Assert.Null(b.ReviewAvgBodyStrength);
+        Assert.Null(b.ReviewAvgAromaScore);
+        Assert.Null(b.ReviewAvgPairingsScore);
+        Assert.Equal(0, b.ReviewScoredReviewCount);
     }
 }

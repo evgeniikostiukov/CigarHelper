@@ -335,7 +335,10 @@
     for (const img of imgs) {
       let preview = TRANSPARENT_PIXEL;
       try {
-        const { data } = await api.get<Blob>(`cigarimages/${img.id}/thumbnail`, { responseType: 'blob' });
+        const { data } = await api.get<Blob>(`cigarimages/${img.id}/thumbnail`, {
+          responseType: 'blob',
+          skipGlobalErrorNotification: true,
+        });
         preview = URL.createObjectURL(data);
       } catch {
         /* миниатюра необязательна */

@@ -10,4 +10,7 @@ public interface IProfileService
     Task<ChangePasswordResponse> ChangePasswordAsync(int userId, ChangePasswordRequest request, CancellationToken cancellationToken = default);
     Task<PublicProfileDto?> GetPublicProfileAsync(string username, CancellationToken cancellationToken = default);
     Task<HumidorDetailResponseDto?> GetPublicHumidorAsync(string username, int humidorId, CancellationToken cancellationToken = default);
+
+    /// <summary>Проверка без загрузки хьюмидоров — для префетча клиентом.</summary>
+    Task<bool> IsPublicProfileVisibleAsync(string username, CancellationToken cancellationToken = default);
 }

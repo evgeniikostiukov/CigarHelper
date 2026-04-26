@@ -86,8 +86,11 @@ namespace CigarHelper.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
+                    b.Property<int?>("Diameter")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("Diameter")
                         .HasColumnType("integer");
@@ -110,6 +113,18 @@ namespace CigarHelper.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<decimal?>("ReviewAvgAromaScore")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("ReviewAvgBodyStrength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("ReviewAvgPairingsScore")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ReviewScoredReviewCount")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Strength")
                         .HasMaxLength(50)
@@ -290,8 +305,13 @@ namespace CigarHelper.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int?>("AromaScore")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("BodyStrengthScore")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("BurnQuality")
-                        .HasMaxLength(50)
                         .HasColumnType("integer");
 
                     b.Property<int>("CigarBaseId")
@@ -301,7 +321,6 @@ namespace CigarHelper.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int?>("Construction")
-                        .HasMaxLength(50)
                         .HasColumnType("integer");
 
                     b.Property<string>("Content")
@@ -311,8 +330,13 @@ namespace CigarHelper.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int?>("Draw")
-                        .HasMaxLength(50)
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PairingsScore")
                         .HasColumnType("integer");
 
                     b.Property<int>("Rating")
@@ -320,6 +344,9 @@ namespace CigarHelper.Data.Migrations
 
                     b.Property<DateTime>("SmokingDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("SmokingDurationMinutes")
+                        .HasColumnType("integer");
 
                     b.Property<string>("SmokingExperience")
                         .HasMaxLength(50)
@@ -353,6 +380,50 @@ namespace CigarHelper.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("CigarHelper.Data.Models.ReviewComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ModeratedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ModerationStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorUserId");
+
+                    b.HasIndex("ModeratedByUserId");
+
+                    b.HasIndex("ModerationStatus");
+
+                    b.HasIndex("ReviewId");
+
+                    b.ToTable("ReviewComments");
                 });
 
             modelBuilder.Entity("CigarHelper.Data.Models.ReviewImage", b =>
@@ -593,6 +664,32 @@ namespace CigarHelper.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CigarHelper.Data.Models.ReviewComment", b =>
+                {
+                    b.HasOne("CigarHelper.Data.Models.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CigarHelper.Data.Models.User", "ModeratedBy")
+                        .WithMany()
+                        .HasForeignKey("ModeratedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CigarHelper.Data.Models.Review", "Review")
+                        .WithMany("Comments")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("ModeratedBy");
+
+                    b.Navigation("Review");
+                });
+
             modelBuilder.Entity("CigarHelper.Data.Models.ReviewImage", b =>
                 {
                     b.HasOne("CigarHelper.Data.Models.Review", "Review")
@@ -651,6 +748,8 @@ namespace CigarHelper.Data.Migrations
 
             modelBuilder.Entity("CigarHelper.Data.Models.Review", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("Images");
                 });
 

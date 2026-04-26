@@ -76,6 +76,7 @@ public class ProfileServiceTests
         Assert.Equal("me", dto.Username);
         Assert.Equal("me@example.com", dto.Email);
         Assert.Equal(Role.User, dto.Role);
+        Assert.Null(dto.AvatarUrl);
     }
 
     [Fact]

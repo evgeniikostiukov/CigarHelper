@@ -21,7 +21,7 @@ public class CigarBase
     [MaxLength(100)]
     public string? Country { get; set; }
     
-    [MaxLength(500)]
+    [MaxLength(3000)]
     public string? Description { get; set; }
     
     [MaxLength(50)]
@@ -46,7 +46,22 @@ public class CigarBase
     public string? ImageUrl { get; set; }
     
     public bool IsModerated { get; set; } = false;
-    
+
+    /// <summary>Среднее <see cref="Review.BodyStrengthScore"/> по неудалённым отзывам с заполненной осью.</summary>
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal? ReviewAvgBodyStrength { get; set; }
+
+    /// <summary>Среднее <see cref="Review.AromaScore"/>.</summary>
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal? ReviewAvgAromaScore { get; set; }
+
+    /// <summary>Среднее <see cref="Review.PairingsScore"/>.</summary>
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal? ReviewAvgPairingsScore { get; set; }
+
+    /// <summary>Число неудалённых отзывов с хотя бы одной из трёх числовых осей.</summary>
+    public int ReviewScoredReviewCount { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? UpdatedAt { get; set; }

@@ -13,6 +13,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# Cursor IDE (локальные планы агента)
+.cursor/plans/
+
 # Visual Studio files
 .vs/
 .vscode/
@@ -61,3 +64,5 @@ test-results/
 # openapi.json — источник правды (Swashbuckle CLI из сборки API).
 # api.generated.ts — сгенерированные TypeScript-типы (npm run generate:api).
 # Оба файла нужны CI без запуска API. Обновлять при изменении контрактов:
+
+*.xlsx

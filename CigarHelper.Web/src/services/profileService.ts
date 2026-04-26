@@ -7,6 +7,8 @@ export interface MyProfile {
   email: string;
   role: string;
   isProfilePublic: boolean;
+  /** Относительный путь `/api/users/{id}/avatar` или внешний URL. */
+  avatarUrl?: string | null;
   createdAt: string;
   lastLogin: string | null;
 }
@@ -26,6 +28,7 @@ export interface UpdateProfileResponse {
 
 export interface PublicProfile {
   username: string;
+  avatarUrl?: string | null;
   createdAt: string;
   lastLogin: string | null;
   humidors: Humidor[];
@@ -58,9 +61,58 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<Ch
   return data;
 }
 
+export async function uploadProfileAvatar(file: File): Promise<MyProfile> {
+  const body = new FormData();
+  body.append('file', file);
+  const { data } = await api.post<MyProfile>('/profile/avatar', body);
+  return data;
+}
+
+export async function deleteProfileAvatar(): Promise<MyProfile> {
+  const { data } = await api.delete<MyProfile>('/profile/avatar');
+  return data;
+}
+
 export async function getPublicProfile(username: string): Promise<PublicProfile> {
   const { data } = await api.get<PublicProfile>(`/public/users/${encodeURIComponent(username)}`);
   return data;
+}
+
+export interface PublicProfileVisibility {
+  isVisible: boolean;
+}
+
+const visibilityCache = new Map<string, { expiresAt: number; isVisible: boolean }>();
+const VISIBILITY_TTL_MS = 60_000;
+
+/** Лёгкая проверка публичности профиля (кэш + префетч по hover). */
+export async function getPublicProfileVisibility(username: string): Promise<boolean> {
+  const key = username.trim();
+  if (!key) return false;
+  const now = Date.now();
+  const hit = visibilityCache.get(key);
+  if (hit && hit.expiresAt > now) {
+    return hit.isVisible;
+  }
+  try {
+    const { data } = await api.get<PublicProfileVisibility>(`/public/users/${encodeURIComponent(key)}/visibility`);
+    const isVisible = !!data?.isVisible;
+    visibilityCache.set(key, { isVisible, expiresAt: now + VISIBILITY_TTL_MS });
+    return isVisible;
+  } catch {
+    visibilityCache.set(key, { isVisible: false, expiresAt: now + VISIBILITY_TTL_MS });
+    return false;
+  }
+}
+
+/** Префетч видимости (без await) — вызывать с @mouseenter на ссылке автора. */
+export function prefetchPublicProfileVisibility(username: string): void {
+  const key = username.trim();
+  if (!key) return;
+  const now = Date.now();
+  const hit = visibilityCache.get(key);
+  if (hit && hit.expiresAt > now) return;
+  void getPublicProfileVisibility(key);
 }
 
 export async function getPublicHumidor(username: string, humidorId: number): Promise<Humidor> {

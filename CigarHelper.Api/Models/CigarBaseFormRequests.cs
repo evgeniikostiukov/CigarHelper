@@ -22,6 +22,7 @@ public class CreateCigarBaseFormRequest
     [Required] public string Name { get; set; } = string.Empty;
     [Required] public int BrandId { get; set; }
     public string? Country { get; set; }
+    [MaxLength(3000)]
     public string? Description { get; set; }
     public string? Strength { get; set; }
     public int? LengthMm { get; set; }
@@ -46,6 +47,7 @@ public class UpdateCigarBaseFormRequest
     [Required] public string Name { get; set; } = string.Empty;
     [Required] public int BrandId { get; set; }
     public string? Country { get; set; }
+    [MaxLength(3000)]
     public string? Description { get; set; }
     public string? Strength { get; set; }
     public int? LengthMm { get; set; }

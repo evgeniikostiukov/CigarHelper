@@ -239,7 +239,9 @@ builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IHumidorService, HumidorService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ICigarCommentService, CigarCommentService>();
+builder.Services.AddScoped<IReviewCommentService, ReviewCommentService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IUserAvatarService, UserAvatarService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 

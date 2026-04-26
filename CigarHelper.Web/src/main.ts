@@ -66,6 +66,7 @@ const CigarAura = definePreset(Aura, {
 });
 
 app.use(router);
+
 app.use(PrimeVue, {
   theme: {
     preset: CigarAura,

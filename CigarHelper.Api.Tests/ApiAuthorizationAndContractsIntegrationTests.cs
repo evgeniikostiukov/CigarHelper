@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CigarHelper.Api.Models;
 using CigarHelper.Api.Services;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
@@ -281,6 +282,59 @@ public class ApiAuthorizationAndContractsIntegrationTests
     }
 
     [Fact]
+    public async Task PublicUsers_GetVisibility_WhenPrivate_ReturnsOkWithFalse()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        const string username = "visprivuser";
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = username,
+            Password = "abCd12",
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
+        });
+        registerRes.EnsureSuccessStatusCode();
+
+        using var res = await client.GetAsync($"/api/public/users/{username}/visibility");
+        res.EnsureSuccessStatusCode();
+        var dto = await res.Content.ReadFromJsonAsync<PublicProfileVisibilityDto>(JsonOptions);
+        Assert.NotNull(dto);
+        Assert.False(dto!.IsVisible);
+    }
+
+    [Fact]
+    public async Task PublicUsers_GetVisibility_WhenPublic_ReturnsOkWithTrue()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+
+        const string username = "vispubuser";
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            JwtService.CreatePasswordHash("abCd12", out var hash, out var salt);
+            db.Users.Add(new User
+            {
+                Username = username,
+                Email = "vispubuser@example.com",
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                CreatedAt = DateTime.UtcNow,
+                IsProfilePublic = true
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        using var res = await client.GetAsync($"/api/public/users/{username}/visibility");
+        res.EnsureSuccessStatusCode();
+        var dto = await res.Content.ReadFromJsonAsync<PublicProfileVisibilityDto>(JsonOptions);
+        Assert.NotNull(dto);
+        Assert.True(dto!.IsVisible);
+    }
+
+    [Fact]
     public async Task PublicUsers_GetProfile_WhenPublic_ReturnsOk()
     {
         await using var factory = new AuthIntegrationWebAppFactory();
@@ -519,5 +573,152 @@ public class ApiAuthorizationAndContractsIntegrationTests
             IsModerated = true
         });
         Assert.Equal(HttpStatusCode.Created, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminReviews_Deleted_Get_WithoutToken_Returns401()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        using var res = await client.GetAsync("/api/admin/reviews/deleted?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminReviews_Deleted_Get_AsRegularUser_Returns403()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        using var client = factory.CreateClient();
+
+        var registerRes = await client.PostAsJsonAsync("/api/Auth/register", new RegisterRequest
+        {
+            Username = $"rv{Guid.NewGuid():N}"[..10],
+            Password = "abCd12",
+            ConfirmPassword = "abCd12",
+            ConfirmedAge18 = true
+        });
+        registerRes.EnsureSuccessStatusCode();
+        var auth = await registerRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(auth?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        using var res = await client.GetAsync("/api/admin/reviews/deleted?page=1&pageSize=10");
+        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminReviews_Restore_AsAdmin_Returns204_AndReviewAppearsInPublicList()
+    {
+        await using var factory = new AuthIntegrationWebAppFactory();
+        var adminUsername = $"ar{Guid.NewGuid():N}"[..10];
+        var adminEmail = $"{Guid.NewGuid():N}@admin.rev.ci";
+        int reviewId;
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            JwtService.CreatePasswordHash("abCd12", out var adminHash, out var adminSalt);
+            JwtService.CreatePasswordHash("abCd12", out var ownerHash, out var ownerSalt);
+            var owner = new User
+            {
+                Username = $"own{Guid.NewGuid():N}"[..10],
+                Email = $"{Guid.NewGuid():N}@o.rev.ci",
+                PasswordHash = ownerHash,
+                PasswordSalt = ownerSalt,
+                CreatedAt = DateTime.UtcNow,
+                Role = Role.User
+            };
+            db.Users.Add(owner);
+            await db.SaveChangesAsync();
+
+            db.Users.Add(new User
+            {
+                Username = adminUsername,
+                Email = adminEmail,
+                PasswordHash = adminHash,
+                PasswordSalt = adminSalt,
+                CreatedAt = DateTime.UtcNow,
+                Role = Role.Admin
+            });
+            await db.SaveChangesAsync();
+
+            var brand = new Brand
+            {
+                Name = $"Br_{Guid.NewGuid():N}"[..14],
+                CreatedAt = DateTime.UtcNow,
+                IsModerated = true
+            };
+            db.Brands.Add(brand);
+            await db.SaveChangesAsync();
+
+            var cb = new CigarBase
+            {
+                Name = "RestoreReview CB",
+                BrandId = brand.Id,
+                IsModerated = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.CigarBases.Add(cb);
+            await db.SaveChangesAsync();
+
+            var uc = new UserCigar
+            {
+                UserId = owner.Id,
+                CigarBaseId = cb.Id,
+                Quantity = 1,
+                PurchasedAt = DateTime.UtcNow,
+                LastTouchedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.UserCigars.Add(uc);
+            await db.SaveChangesAsync();
+
+            var review = new Review
+            {
+                UserId = owner.Id,
+                CigarBaseId = cb.Id,
+                CigarId = uc.Id,
+                Title = "Soft deleted for restore",
+                Content = "Content long enough for any validation",
+                Rating = 7,
+                SmokingDate = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                DeletedAt = DateTime.UtcNow
+            };
+            db.Reviews.Add(review);
+            await db.SaveChangesAsync();
+            reviewId = review.Id;
+        }
+
+        using var client = factory.CreateClient();
+
+        using (var listBefore = await client.GetAsync("/api/Reviews"))
+        {
+            listBefore.EnsureSuccessStatusCode();
+            var before = await listBefore.Content.ReadFromJsonAsync<List<ReviewListItemDto>>(JsonOptions);
+            Assert.NotNull(before);
+            Assert.DoesNotContain(before, r => r.Id == reviewId);
+        }
+
+        var loginRes = await client.PostAsJsonAsync("/api/Auth/login", new LoginRequest
+        {
+            Username = adminUsername,
+            Password = "abCd12"
+        });
+        loginRes.EnsureSuccessStatusCode();
+        var authBody = await loginRes.Content.ReadFromJsonAsync<AuthResponse>(JsonOptions);
+        Assert.NotNull(authBody?.Token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authBody.Token);
+
+        using var restore = await client.PostAsync($"/api/admin/reviews/{reviewId}/restore", null);
+        Assert.Equal(HttpStatusCode.NoContent, restore.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = null;
+        using var listAfter = await client.GetAsync("/api/Reviews");
+        listAfter.EnsureSuccessStatusCode();
+        var after = await listAfter.Content.ReadFromJsonAsync<List<ReviewListItemDto>>(JsonOptions);
+        Assert.NotNull(after);
+        Assert.Contains(after, r => r.Id == reviewId);
     }
 }

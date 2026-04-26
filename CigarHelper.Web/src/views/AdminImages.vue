@@ -233,7 +233,10 @@
   /** Открыть оригинал в новой вкладке (запрос с Bearer через fetch + blob URL). */
   async function openOriginal(id: number): Promise<void> {
     try {
-      const { data } = await api.get<Blob>(`cigarimages/${id}/data`, { responseType: 'blob' });
+      const { data } = await api.get<Blob>(`cigarimages/${id}/data`, {
+        responseType: 'blob',
+        skipGlobalErrorNotification: true,
+      });
       const blobUrl = URL.createObjectURL(data);
       const w = window.open(blobUrl, '_blank', 'noopener,noreferrer');
       if (!w) {
@@ -266,7 +269,10 @@
       await Promise.all(
         list.map(async (img) => {
           try {
-            const { data } = await api.get<Blob>(`cigarimages/${img.id}/thumbnail`, { responseType: 'blob' });
+            const { data } = await api.get<Blob>(`cigarimages/${img.id}/thumbnail`, {
+              responseType: 'blob',
+              skipGlobalErrorNotification: true,
+            });
             const objectUrl = URL.createObjectURL(data);
             if (gen !== thumbLoadGen) {
               URL.revokeObjectURL(objectUrl);

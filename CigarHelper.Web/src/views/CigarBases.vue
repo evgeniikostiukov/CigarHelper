@@ -49,7 +49,8 @@
               </h2>
               <p
                 class="mt-1.5 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 dark:text-stone-300 sm:text-base">
-                Уточните выдачу по названию, бренду, крепости или отметьте «Нет изображения».
+                Уточните выдачу по названию, бренду, крепости из справочника, средним оценкам по отзывам (1–10) или
+                отметьте «Нет изображения».
               </p>
             </div>
           </div>
@@ -180,6 +181,137 @@
                   class="cursor-pointer text-sm text-stone-700 dark:text-stone-300 leading-none select-none">
                   Нет изображения
                 </label>
+              </div>
+              <div class="lg:col-span-12">
+                <p class="mb-3 text-xs leading-relaxed text-stone-600 dark:text-stone-400">
+                  Средние по отзывам — субъективные шкалы 1–10; это не «Крепость» из карточки справочника выше.
+                </p>
+                <div
+                  class="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                  data-testid="cigar-bases-review-filters">
+                  <div class="flex min-w-0 flex-col gap-2">
+                    <span class="min-w-0 break-words text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Сила / тело (среднее)
+                    </span>
+                    <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                      <InputNumber
+                        v-model="filters.reviewBodyMin"
+                        data-testid="cigar-bases-filter-review-body-min"
+                        class="min-w-0 w-full"
+                        fluid
+                        input-class="min-h-11"
+                        :min="1"
+                        :max="10"
+                        :min-fraction-digits="0"
+                        :max-fraction-digits="2"
+                        placeholder="от"
+                        show-clear
+                        @update:model-value="onFilterChange" />
+                      <span class="shrink-0 self-center text-stone-400">—</span>
+                      <InputNumber
+                        v-model="filters.reviewBodyMax"
+                        data-testid="cigar-bases-filter-review-body-max"
+                        class="min-w-0 w-full"
+                        fluid
+                        input-class="min-h-11"
+                        :min="1"
+                        :max="10"
+                        :min-fraction-digits="0"
+                        :max-fraction-digits="2"
+                        placeholder="до"
+                        show-clear
+                        @update:model-value="onFilterChange" />
+                    </div>
+                  </div>
+                  <div class="flex min-w-0 flex-col gap-2">
+                    <span class="min-w-0 break-words text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Аромат (среднее)
+                    </span>
+                    <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                      <InputNumber
+                        v-model="filters.reviewAromaMin"
+                        data-testid="cigar-bases-filter-review-aroma-min"
+                        class="min-w-0 w-full"
+                        fluid
+                        input-class="min-h-11"
+                        :min="1"
+                        :max="10"
+                        :min-fraction-digits="0"
+                        :max-fraction-digits="2"
+                        placeholder="от"
+                        show-clear
+                        @update:model-value="onFilterChange" />
+                      <span class="shrink-0 self-center text-stone-400">—</span>
+                      <InputNumber
+                        v-model="filters.reviewAromaMax"
+                        data-testid="cigar-bases-filter-review-aroma-max"
+                        class="min-w-0 w-full"
+                        fluid
+                        input-class="min-h-11"
+                        :min="1"
+                        :max="10"
+                        :min-fraction-digits="0"
+                        :max-fraction-digits="2"
+                        placeholder="до"
+                        show-clear
+                        @update:model-value="onFilterChange" />
+                    </div>
+                  </div>
+                  <div class="flex min-w-0 flex-col gap-2">
+                    <span class="min-w-0 break-words text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Сочетания (среднее)
+                    </span>
+                    <div class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                      <InputNumber
+                        v-model="filters.reviewPairingsMin"
+                        data-testid="cigar-bases-filter-review-pairings-min"
+                        class="min-w-0 w-full"
+                        fluid
+                        input-class="min-h-11"
+                        :min="1"
+                        :max="10"
+                        :min-fraction-digits="0"
+                        :max-fraction-digits="2"
+                        placeholder="от"
+                        show-clear
+                        @update:model-value="onFilterChange" />
+                      <span class="shrink-0 self-center text-stone-400">—</span>
+                      <InputNumber
+                        v-model="filters.reviewPairingsMax"
+                        data-testid="cigar-bases-filter-review-pairings-max"
+                        class="min-w-0 w-full"
+                        fluid
+                        input-class="min-h-11"
+                        :min="1"
+                        :max="10"
+                        :min-fraction-digits="0"
+                        :max-fraction-digits="2"
+                        placeholder="до"
+                        show-clear
+                        @update:model-value="onFilterChange" />
+                    </div>
+                  </div>
+                  <div class="flex min-w-0 flex-col gap-2 sm:col-span-2 lg:col-span-1">
+                    <label
+                      for="cigar-bases-filter-review-min-count"
+                      class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                      Мин. число отзывов с осями
+                    </label>
+                    <InputNumber
+                      id="cigar-bases-filter-review-min-count"
+                      v-model="filters.reviewMinScoredCount"
+                      data-testid="cigar-bases-filter-review-min-count"
+                      class="w-full max-w-xs"
+                      input-class="min-h-11"
+                      :min="0"
+                      :max="9999"
+                      :min-fraction-digits="0"
+                      :max-fraction-digits="0"
+                      show-clear
+                      placeholder="например 2"
+                      @update:model-value="onFilterChange" />
+                  </div>
+                </div>
               </div>
             </form>
 
@@ -452,6 +584,7 @@
       v-if="canMutateCatalog"
       v-model:visible="showEditDialog"
       :cigar="editingCigar"
+      :prefill-similar="similarTemplateCigar"
       @saved="onCigarSaved" />
   </section>
 </template>
@@ -468,9 +601,11 @@
   import type { PageState } from 'primevue/paginator';
   import CigarDetailDialog from '../components/CigarDetailDialog.vue';
   import CigarBaseEditDialog from '../components/CigarBaseEditDialog.vue';
+  import InputNumber from 'primevue/inputnumber';
   import { strengthOptions } from '@/utils/cigarOptions';
   import { formatVitola } from '@/utils/vitola';
   import { arrayBufferToBase64 } from '@/utils/imageUtils';
+  import { buildCatalogSimilarDraftSnapshot, CATALOG_SIMILAR_DRAFT_STORAGE_KEY } from '@/utils/catalogSimilarDraft';
 
   type ModerationFilterValue = 'moderated' | 'unmoderated';
 
@@ -481,6 +616,13 @@
     moderationFilter: ModerationFilterValue;
     /** Только записи без файла в хранилище (нет CigarImage с StoragePath). */
     noImageOnly: boolean;
+    reviewBodyMin: number | null;
+    reviewBodyMax: number | null;
+    reviewAromaMin: number | null;
+    reviewAromaMax: number | null;
+    reviewPairingsMin: number | null;
+    reviewPairingsMax: number | null;
+    reviewMinScoredCount: number | null;
   }
 
   interface Pagination {
@@ -506,6 +648,10 @@
     { label: 'Размер', value: 'size' },
     { label: 'Крепость', value: 'strength' },
     { label: 'Страна', value: 'country' },
+    { label: 'Ср. сила/тело по отзывам', value: 'reviewavgbodystrength' },
+    { label: 'Ср. аромат по отзывам', value: 'reviewavgaromascore' },
+    { label: 'Ср. сочетания по отзывам', value: 'reviewavgpairingsscore' },
+    { label: 'Число отзывов с осями', value: 'reviewscoredreviewcount' },
   ];
 
   const sortOrderOptions: { label: string; value: 1 | -1 }[] = [
@@ -533,6 +679,8 @@
   const selectedCigar = ref<CigarBase>();
   const showEditDialog = ref<boolean>(false);
   const editingCigar = ref<CigarBase>();
+  /** Шаблон для «Создать похожую» в диалоге каталога (только staff). */
+  const similarTemplateCigar = ref<CigarBase | undefined>(undefined);
 
   const filters = ref<Filters>({
     search: '',
@@ -540,6 +688,13 @@
     strength: null,
     moderationFilter: 'moderated',
     noImageOnly: false,
+    reviewBodyMin: null,
+    reviewBodyMax: null,
+    reviewAromaMin: null,
+    reviewAromaMax: null,
+    reviewPairingsMin: null,
+    reviewPairingsMax: null,
+    reviewMinScoredCount: null,
   });
 
   const sortField = ref<string>('name');
@@ -562,7 +717,14 @@
       f.brand != null ||
       f.strength != null ||
       f.moderationFilter === 'unmoderated' ||
-      f.noImageOnly
+      f.noImageOnly ||
+      f.reviewBodyMin != null ||
+      f.reviewBodyMax != null ||
+      f.reviewAromaMin != null ||
+      f.reviewAromaMax != null ||
+      f.reviewPairingsMin != null ||
+      f.reviewPairingsMax != null ||
+      f.reviewMinScoredCount != null
     );
   });
 
@@ -636,6 +798,13 @@
       strength: null,
       moderationFilter: 'moderated',
       noImageOnly: false,
+      reviewBodyMin: null,
+      reviewBodyMax: null,
+      reviewAromaMin: null,
+      reviewAromaMax: null,
+      reviewPairingsMin: null,
+      reviewPairingsMax: null,
+      reviewMinScoredCount: null,
     };
     pagination.value.first = 0;
     if (searchTimeout) {
@@ -664,6 +833,14 @@
       if (filters.value.noImageOnly) {
         params.withoutImagesOnly = true;
       }
+      const f = filters.value;
+      if (f.reviewBodyMin != null) params.minReviewBody = f.reviewBodyMin;
+      if (f.reviewBodyMax != null) params.maxReviewBody = f.reviewBodyMax;
+      if (f.reviewAromaMin != null) params.minReviewAroma = f.reviewAromaMin;
+      if (f.reviewAromaMax != null) params.maxReviewAroma = f.reviewAromaMax;
+      if (f.reviewPairingsMin != null) params.minReviewPairings = f.reviewPairingsMin;
+      if (f.reviewPairingsMax != null) params.maxReviewPairings = f.reviewPairingsMax;
+      if (f.reviewMinScoredCount != null) params.minReviewScoredCount = f.reviewMinScoredCount;
       const result: PaginatedResult<CigarBase> = await cigarService.getCigarBasesPaginated(params);
       cigars.value = result.items || [];
       pagination.value.totalRecords = result.totalCount || 0;
@@ -706,6 +883,7 @@
   }
 
   function openNewCatalogEntryDialog(): void {
+    similarTemplateCigar.value = undefined;
     showDetailDialog.value = false;
     showEditDialog.value = true;
     editingCigar.value = undefined;
@@ -720,15 +898,29 @@
   }
 
   function createSimilarCigar(cigar: CigarBase): void {
+    showDetailDialog.value = false;
+    if (canMutateCatalog.value) {
+      editingCigar.value = undefined;
+      similarTemplateCigar.value = { ...cigar };
+      showEditDialog.value = true;
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        CATALOG_SIMILAR_DRAFT_STORAGE_KEY,
+        JSON.stringify(buildCatalogSimilarDraftSnapshot(cigar)),
+      );
+    } catch {
+      /* storage quota / private mode */
+    }
     router.push({
       name: 'CigarNew',
-      query: {
-        cigarBaseId: String(cigar.id),
-      },
+      query: { openNewCatalogFromSimilar: '1' },
     });
   }
 
   function editBaseCigar(cigar: CigarBase): void {
+    similarTemplateCigar.value = undefined;
     editingCigar.value = { ...cigar };
     showDetailDialog.value = false;
     showEditDialog.value = true;
@@ -876,6 +1068,12 @@
       filters.value.moderationFilter = 'moderated';
       pagination.value.first = 0;
       void loadCigars();
+    }
+  });
+
+  watch(showEditDialog, (open) => {
+    if (!open) {
+      similarTemplateCigar.value = undefined;
     }
   });
 </script>

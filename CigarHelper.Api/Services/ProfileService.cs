@@ -2,6 +2,7 @@ using CigarHelper.Api.Models;
 using CigarHelper.Data.Data;
 using CigarHelper.Data.Models;
 using CigarHelper.Data.Models.Dtos;
+using CigarHelper.Api.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -136,6 +137,12 @@ public class ProfileService : IProfileService
         return new ChangePasswordResponse { Success = true, Message = "Пароль изменён" };
     }
 
+    public async Task<bool> IsPublicProfileVisibleAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+        return user != null && user.IsProfilePublic;
+    }
+
     public async Task<PublicProfileDto?> GetPublicProfileAsync(string username, CancellationToken cancellationToken = default)
     {
         var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
@@ -149,6 +156,7 @@ public class ProfileService : IProfileService
         return new PublicProfileDto
         {
             Username = user.Username,
+            AvatarUrl = UserAvatarPublicUrls.ToPublicUrl(user.Id, user.AvatarUrl),
             CreatedAt = user.CreatedAt,
             LastLogin = user.LastLogin,
             Humidors = humidors,
@@ -166,14 +174,5 @@ public class ProfileService : IProfileService
         return await _humidorService.GetHumidorById(humidorId, user.Id);
     }
 
-    private static MyProfileDto MapToMyProfile(User u) => new()
-    {
-        Id = u.Id,
-        Username = u.Username,
-        Email = u.Email ?? string.Empty,
-        Role = u.Role,
-        IsProfilePublic = u.IsProfilePublic,
-        CreatedAt = u.CreatedAt,
-        LastLogin = u.LastLogin,
-    };
+    private static MyProfileDto MapToMyProfile(User u) => MyProfileDto.FromUser(u);
 }

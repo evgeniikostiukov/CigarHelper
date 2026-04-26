@@ -70,6 +70,51 @@
           <p class="mb-5 text-sm text-stone-600 dark:text-stone-400">
             Эти поля видны только вам; публичная страница показывает то, что вы разрешили ниже.
           </p>
+          <div
+            class="mb-6 flex flex-col gap-4 border-b border-stone-200/80 pb-6 dark:border-stone-700/60 sm:flex-row sm:items-center">
+            <Avatar
+              :image="avatarPreviewSrc"
+              size="xlarge"
+              shape="circle"
+              class="shrink-0 ring-2 ring-rose-200/50 dark:ring-rose-900/45"
+              aria-label="Ваш аватар" />
+            <div class="flex min-w-0 flex-1 flex-col gap-3">
+              <p class="text-sm text-stone-600 dark:text-stone-400">
+                Фото профиля в списках обзоров и на публичной странице (если включена). Форматы: JPEG, PNG, WebP, AVIF,
+                GIF.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <input
+                  ref="avatarFileInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+                  class="sr-only"
+                  data-testid="profile-avatar-input"
+                  @change="onAvatarFileChange" />
+                <Button
+                  data-testid="profile-avatar-upload"
+                  class="min-h-11 touch-manipulation"
+                  label="Выбрать файл"
+                  icon="pi pi-upload"
+                  severity="secondary"
+                  outlined
+                  :loading="avatarUploading"
+                  :disabled="avatarUploading"
+                  @click="avatarFileInput?.click()" />
+                <Button
+                  v-if="profile?.avatarUrl"
+                  data-testid="profile-avatar-remove"
+                  class="min-h-11 touch-manipulation"
+                  label="Убрать аватар"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  outlined
+                  :loading="avatarRemoving"
+                  :disabled="avatarRemoving || avatarUploading"
+                  @click="removeAvatar" />
+              </div>
+            </div>
+          </div>
           <div class="flex flex-col gap-5">
             <div class="flex flex-col gap-2">
               <label
@@ -236,10 +281,11 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive, onMounted } from 'vue';
+  import { ref, reactive, onMounted, computed } from 'vue';
   import { useRouter } from 'vue-router';
   import axios from 'axios';
   import { useToast } from 'primevue/usetoast';
+  import Avatar from 'primevue/avatar';
   import Button from 'primevue/button';
   import InputText from 'primevue/inputtext';
   import InputSwitch from 'primevue/inputswitch';
@@ -248,6 +294,7 @@
   import authService from '@/services/authService';
   import * as profileApi from '@/services/profileService';
   import type { MyProfile, ChangePasswordResponse } from '@/services/profileService';
+  import { publicUserProfileLocation } from '@/utils/publicProfileRoute';
 
   const router = useRouter();
   const toast = useToast();
@@ -273,6 +320,18 @@
 
   const fieldErrors = reactive<Record<string, string>>({});
 
+  const avatarFileInput = ref<HTMLInputElement | null>(null);
+  const avatarBuster = ref(0);
+  const avatarUploading = ref(false);
+  const avatarRemoving = ref(false);
+
+  const avatarPreviewSrc = computed(() => {
+    const u = profile.value?.avatarUrl;
+    if (!u) return '/img/default-avatar.png';
+    if (/^https?:\/\//i.test(u)) return u;
+    return `${u}?v=${avatarBuster.value}`;
+  });
+
   function formatDate(iso: string): string {
     try {
       return new Date(iso).toLocaleString('ru-RU');
@@ -283,7 +342,7 @@
 
   function goPublicPreview(): void {
     if (!form.username.trim()) return;
-    router.push({ name: 'PublicUserProfile', params: { username: form.username.trim() } });
+    router.push(publicUserProfileLocation(form.username.trim()));
   }
 
   function restartOnboarding(): void {
@@ -303,6 +362,7 @@
     try {
       const p = await profileApi.getMyProfile();
       profile.value = p;
+      avatarBuster.value++;
       form.username = p.username;
       form.email = p.email;
       form.isProfilePublic = p.isProfilePublic;
@@ -399,6 +459,47 @@
       toast.add({ severity: 'error', summary: 'Ошибка', detail: msg, life: 4000 });
     } finally {
       pwdLoading.value = false;
+    }
+  }
+
+  async function onAvatarFileChange(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    avatarUploading.value = true;
+    try {
+      const updated = await profileApi.uploadProfileAvatar(file);
+      profile.value = updated;
+      avatarBuster.value++;
+      toast.add({ severity: 'success', summary: 'Аватар', detail: 'Изображение сохранено.', life: 2500 });
+    } catch (err) {
+      const msg =
+        axios.isAxiosError(err) && err.response?.data && typeof err.response.data === 'object'
+          ? String((err.response.data as { message?: string }).message ?? '')
+          : '';
+      toast.add({
+        severity: 'error',
+        summary: 'Аватар',
+        detail: msg || 'Не удалось загрузить файл.',
+        life: 4000,
+      });
+    } finally {
+      avatarUploading.value = false;
+    }
+  }
+
+  async function removeAvatar(): Promise<void> {
+    avatarRemoving.value = true;
+    try {
+      const updated = await profileApi.deleteProfileAvatar();
+      profile.value = updated;
+      avatarBuster.value++;
+      toast.add({ severity: 'success', summary: 'Аватар', detail: 'Удалён.', life: 2500 });
+    } catch {
+      toast.add({ severity: 'error', summary: 'Аватар', detail: 'Не удалось удалить.', life: 4000 });
+    } finally {
+      avatarRemoving.value = false;
     }
   }
 

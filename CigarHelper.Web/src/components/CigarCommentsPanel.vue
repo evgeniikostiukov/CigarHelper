@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { computed, ref, watch } from 'vue';
+  import PublicProfileAuthorBlock from '@/components/PublicProfileAuthorBlock.vue';
   import Textarea from 'primevue/textarea';
   import Button from 'primevue/button';
   import { useToast } from 'primevue/usetoast';
@@ -7,12 +8,17 @@
   import { hasAnyRole } from '@/utils/roles';
   import * as cigarCommentApi from '@/services/cigarCommentService';
 
-  const props = defineProps<{
-    /** Цель: запись справочника */
-    cigarBaseId?: number;
-    /** Цель: экземпляр в чужой публичной коллекции */
-    userCigarId?: number;
-  }>();
+  const props = withDefaults(
+    defineProps<{
+      /** Цель: запись справочника */
+      cigarBaseId?: number;
+      /** Цель: экземпляр в чужой публичной коллекции */
+      userCigarId?: number;
+      /** false — скрыть ввод и кнопку отправки (напр. комментарии к своей публичной коллекции). */
+      allowNewComments?: boolean;
+    }>(),
+    { allowNewComments: true },
+  );
 
   const { isAuthenticated, user } = useAuth();
   const toast = useToast();
@@ -62,6 +68,9 @@
   );
 
   async function submit(): Promise<void> {
+    if (!props.allowNewComments) {
+      return;
+    }
     if (!isAuthenticated.value) {
       toast.add({
         severity: 'warn',
@@ -126,14 +135,14 @@
     <h3 class="mb-3 text-base font-semibold text-stone-900 dark:text-rose-50/95">Комментарии</h3>
 
     <p
-      v-if="!isAuthenticated && hasTarget"
+      v-if="!isAuthenticated && hasTarget && allowNewComments"
       class="mb-3 text-sm text-stone-600 dark:text-stone-400">
       Войдите в аккаунт, чтобы оставить комментарий. Просмотр доступен всем.
     </p>
 
     <template v-if="hasTarget">
       <div
-        v-if="isAuthenticated"
+        v-if="isAuthenticated && allowNewComments"
         class="mb-4 flex flex-col gap-2">
         <label
           for="cigar-comment-body"
@@ -183,7 +192,12 @@
           class="rounded-xl border border-stone-200/80 bg-white/90 px-3 py-2.5 dark:border-stone-600/70 dark:bg-stone-900/60"
           :data-testid="`cigar-comment-${c.id}`">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <span class="text-sm font-medium text-rose-900 dark:text-rose-200/90">{{ c.authorUsername }}</span>
+            <PublicProfileAuthorBlock
+              :username="c.authorUsername"
+              :is-author-profile-public="c.isAuthorProfilePublic === true"
+              :show-avatar="false"
+              name-class="text-sm font-medium text-rose-900 dark:text-rose-200/90"
+              link-class="text-rose-900 dark:text-rose-200/90 hover:text-rose-950 dark:hover:text-rose-50" />
             <time
               class="text-xs text-stone-500 dark:text-stone-400"
               :datetime="c.createdAt">

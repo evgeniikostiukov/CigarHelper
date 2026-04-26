@@ -251,6 +251,83 @@
           </div>
 
           <div
+            class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6"
+            data-testid="review-form-axis-scores">
+            <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
+              <i
+                class="pi pi-chart-line text-rose-700 dark:text-rose-400"
+                aria-hidden="true" />
+              Оси по отзыву (необязательно, 1–10)
+            </h2>
+            <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">
+              Субъективные шкалы для средних в каталоге; не путайте с крепостью из карточки справочника. Поля можно
+              очистить.
+            </p>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <div class="flex flex-col gap-2">
+                <label
+                  for="review-body-strength-score"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Сила / тело
+                </label>
+                <InputNumber
+                  id="review-body-strength-score"
+                  v-model="form.bodyStrengthScore"
+                  data-testid="review-form-body-strength-score"
+                  class="w-full"
+                  input-class="min-h-11"
+                  :min="1"
+                  :max="10"
+                  :min-fraction-digits="0"
+                  :max-fraction-digits="0"
+                  show-buttons
+                  button-layout="horizontal"
+                  show-clear />
+              </div>
+              <div class="flex flex-col gap-2">
+                <label
+                  for="review-aroma-score"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Аромат (число)
+                </label>
+                <InputNumber
+                  id="review-aroma-score"
+                  v-model="form.aromaScore"
+                  data-testid="review-form-aroma-score"
+                  class="w-full"
+                  input-class="min-h-11"
+                  :min="1"
+                  :max="10"
+                  :min-fraction-digits="0"
+                  :max-fraction-digits="0"
+                  show-buttons
+                  button-layout="horizontal"
+                  show-clear />
+              </div>
+              <div class="flex flex-col gap-2">
+                <label
+                  for="review-pairings-score"
+                  class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                  Сочетания
+                </label>
+                <InputNumber
+                  id="review-pairings-score"
+                  v-model="form.pairingsScore"
+                  data-testid="review-form-pairings-score"
+                  class="w-full"
+                  input-class="min-h-11"
+                  :min="1"
+                  :max="10"
+                  :min-fraction-digits="0"
+                  :max-fraction-digits="0"
+                  show-buttons
+                  button-layout="horizontal"
+                  show-clear />
+              </div>
+            </div>
+          </div>
+
+          <div
             class="rounded-xl border border-stone-200/70 bg-stone-50/50 p-5 dark:border-stone-700/60 dark:bg-stone-950/35 sm:p-6">
             <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-rose-50/95">
               <i
@@ -304,13 +381,34 @@
                     class="w-full"
                     input-class="min-h-11 w-full" />
                 </div>
+                <div class="flex flex-col gap-2">
+                  <label
+                    for="smokingDurationMinutes"
+                    class="text-xs font-medium text-stone-600 dark:text-stone-400">
+                    Время курения (мин)
+                  </label>
+                  <InputNumber
+                    id="smokingDurationMinutes"
+                    v-model="form.smokingDurationMinutes"
+                    data-testid="review-form-smoking-duration"
+                    class="w-full"
+                    input-class="min-h-11"
+                    placeholder="Например: 90"
+                    :min="1"
+                    :max="720"
+                    :min-fraction-digits="0"
+                    :max-fraction-digits="0"
+                    show-buttons
+                    button-layout="horizontal"
+                    show-clear />
+                </div>
               </div>
               <div class="space-y-4">
                 <div class="flex flex-col gap-2">
                   <label
                     for="aroma"
                     class="text-xs font-medium text-stone-600 dark:text-stone-400">
-                    Аромат
+                    Аромат (текст)
                   </label>
                   <InputText
                     id="aroma"
@@ -458,6 +556,7 @@
   } from 'primevue/autocomplete';
   import Slider from 'primevue/slider';
   import Calendar from 'primevue/calendar';
+  import InputNumber from 'primevue/inputnumber';
   import InputText from 'primevue/inputtext';
   import Button from 'primevue/button';
   import Toast from 'primevue/toast';
@@ -494,7 +593,11 @@
     burnQuality: number;
     draw: number;
     venue: string;
+    bodyStrengthScore: number | null;
+    aromaScore: number | null;
+    pairingsScore: number | null;
     smokingDate: Date | null;
+    smokingDurationMinutes: number | null;
     images: FormGalleryImageItem[];
   }
 
@@ -530,7 +633,17 @@
     burnQuality?: number;
     draw?: number;
     venue?: string;
+    bodyStrengthScore?: number | null;
+    aromaScore?: number | null;
+    pairingsScore?: number | null;
     smokingDate?: string;
+    smokingDurationMinutes?: number | null;
+    cigarCountry?: string | null;
+    cigarLengthMm?: number | null;
+    cigarDiameter?: number | null;
+    cigarWrapper?: string | null;
+    cigarBinder?: string | null;
+    cigarFiller?: string | null;
     images: ReviewImageApiDto[];
   }
 
@@ -563,7 +676,11 @@
       burnQuality: 3,
       draw: 3,
       venue: '',
+      bodyStrengthScore: null,
+      aromaScore: null,
+      pairingsScore: null,
       smokingDate: new Date(),
+      smokingDurationMinutes: null,
       images: [],
     };
   }
@@ -658,8 +775,11 @@
           isModerated: true,
           createdAt: new Date().toISOString(),
         },
-        country: null,
-        vitolaLabel: null,
+        country: review.cigarCountry ?? null,
+        vitolaLabel:
+          review.cigarLengthMm != null && review.cigarDiameter != null
+            ? formatVitola(review.cigarLengthMm, review.cigarDiameter)
+            : null,
         strength: null,
         displayName: `${cigarBrandName} ${review.cigarName || 'Неизвестная сигара'}`,
       };
@@ -677,7 +797,11 @@
       form.burnQuality = review.burnQuality || 3;
       form.draw = review.draw || 3;
       form.venue = review.venue || '';
+      form.bodyStrengthScore = review.bodyStrengthScore ?? null;
+      form.aromaScore = review.aromaScore ?? null;
+      form.pairingsScore = review.pairingsScore ?? null;
       form.smokingDate = review.smokingDate ? new Date(review.smokingDate) : null;
+      form.smokingDurationMinutes = review.smokingDurationMinutes ?? null;
       form.images = review.images.map((img) => {
         const b64 = img.imageBytes?.trim() ?? '';
         return {
@@ -786,7 +910,11 @@
         burnQuality: form.burnQuality || null,
         draw: form.draw || null,
         venue: form.venue || null,
+        bodyStrengthScore: form.bodyStrengthScore,
+        aromaScore: form.aromaScore,
+        pairingsScore: form.pairingsScore,
         smokingDate: form.smokingDate ? form.smokingDate.toISOString() : null,
+        smokingDurationMinutes: form.smokingDurationMinutes,
       };
 
       if (isEditing.value && route.name === 'ReviewEdit' && route.params.id) {

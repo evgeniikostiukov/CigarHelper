@@ -52,6 +52,8 @@
     { name: 'AdminUsers' as const, label: 'Пользователи', icon: 'pi pi-users', adminOnly: true },
     { name: 'AdminImages' as const, label: 'Изображения', icon: 'pi pi-images', adminOnly: true },
     { name: 'AdminCigarComments' as const, label: 'Комментарии', icon: 'pi pi-comments', adminOnly: false },
+    { name: 'AdminReviewComments' as const, label: 'Комм. к обзорам', icon: 'pi pi-comment', adminOnly: false },
+    { name: 'AdminDeletedReviews' as const, label: 'Удалённые обзоры', icon: 'pi pi-history', adminOnly: false },
   ];
 
   const navLinks = computed(() => {

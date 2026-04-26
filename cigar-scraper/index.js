@@ -13,6 +13,80 @@ const cigarData = {
   brands: [],
 };
 
+/** E-mail и пароль аккаунта cigarday.ru (не коммитьте в репозиторий). */
+const CIGARDAY_EMAIL = process.env.CIGARDAY_EMAIL;
+const CIGARDAY_PASSWORD = process.env.CIGARDAY_PASSWORD;
+
+/**
+ * Подтверждение 18+ (модальное окно #checkage), если показано.
+ */
+async function dismissAgeGateIfPresent(page) {
+  try {
+    const btn = await page.$(
+      "form#checkage input.modal__button[type='button'], #checkage input[type='button'].modal__button"
+    );
+    if (btn) {
+      await btn.click();
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  } catch {
+    console.log("Age gate not found or already dismissed");
+  }
+}
+
+/**
+ * Вход через модальное окно #login (POST /udata/users/login_do.json).
+ * Без CIGARDAY_EMAIL / CIGARDAY_PASSWORD шаг пропускается.
+ */
+async function loginToCigardayIfConfigured(page) {
+  if (!CIGARDAY_EMAIL || !CIGARDAY_PASSWORD) {
+    console.log(
+      "Переменные CIGARDAY_EMAIL и CIGARDAY_PASSWORD не заданы — вход пропущен"
+    );
+    return;
+  }
+
+  try {
+    await page.waitForSelector('a[data-open="login"]', { timeout: 8000 });
+    await page.locator('a[data-open="login"]').first().click();
+    await page.waitForSelector("form#login", { visible: true, timeout: 8000 });
+    await page.locator('form#login input[name="login"]').fill(CIGARDAY_EMAIL);
+    await page
+      .locator('form#login input[name="password"]')
+      .fill(CIGARDAY_PASSWORD);
+
+    const responsePromise = page.waitForResponse(
+      (res) =>
+        res.url().includes("login_do") && res.request().method() === "POST",
+      { timeout: 25000 }
+    );
+
+    await page.locator('form#login input[type="submit"]').click();
+    const res = await responsePromise;
+    let payload = null;
+    try {
+      payload = await res.json();
+    } catch {
+      /* не JSON */
+    }
+
+    if (!res.ok()) {
+      console.warn("Вход: HTTP", res.status(), payload);
+      return;
+    }
+
+    if (payload && (payload.error || payload.errors)) {
+      console.warn("Вход отклонён сервером:", payload.error || payload.errors);
+      return;
+    }
+
+    console.log("Вход на cigarday.ru выполнен");
+    await new Promise((r) => setTimeout(r, 800));
+  } catch (err) {
+    console.warn("Не удалось выполнить вход:", err.message);
+  }
+}
+
 /**
  * Main function to start the scraping process
  */
@@ -50,8 +124,8 @@ async function scrapeCigarData() {
     '--no-zygote',
     '--window-size=1280,720','--enable-third-party-cookies'],
     });
-    const context = await browser.createBrowserContext();
-    const page = await context.newPage();
+    // Одна default-контекст: cookies после входа видны на всех browser.newPage().
+    const page = await browser.newPage();
 
     // Set user agent to avoid being blocked
     await page.setUserAgent(
@@ -63,22 +137,8 @@ async function scrapeCigarData() {
     await page.goto(CIGARS_URL, { waitUntil: "networkidle2" });
     await page.setViewport({ width: 1180, height: 1524 });
 
-    // Accept age verification if present
-    try {
-      const regButton = page
-        .locator("a")
-        .filter((x) => x.textContent === "Зарегистрируйтесь");
-      if (regButton) {
-        await regButton.click();
-        const changeRegTypeButton = page
-          .locator("a")
-          .filter((x) => x.textContent === "Вход на сайт");
-        await changeRegTypeButton.click();
-        await page.waitForNavigation({ waitUntil: "networkidle2" });
-      }
-    } catch (error) {
-      console.log("No age verification popup or unable to click it");
-    }
+    await dismissAgeGateIfPresent(page);
+    await loginToCigardayIfConfigured(page);
 
     // Get the page content
     const content = await page.content();

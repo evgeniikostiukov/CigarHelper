@@ -124,7 +124,7 @@ public class ReviewsController : ControllerBase
     }
     
     /// <summary>
-    /// Удаляет обзор
+    /// Мягкое удаление обзора автором (строка остаётся в БД, публично не отображается; восстановление — staff через <c>/api/admin/reviews/.../restore</c>).
     /// </summary>
     /// <param name="id">ID обзора</param>
     /// <returns>Результат операции</returns>

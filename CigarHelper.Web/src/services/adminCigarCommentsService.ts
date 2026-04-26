@@ -5,6 +5,7 @@ export interface AdminCigarCommentRow {
   body: string;
   createdAt: string;
   authorUsername: string;
+  isAuthorProfilePublic?: boolean;
   cigarBaseId?: number | null;
   userCigarId?: number | null;
   targetSummary: string;

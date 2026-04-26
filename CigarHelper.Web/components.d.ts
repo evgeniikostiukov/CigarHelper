@@ -11,7 +11,6 @@ export {};
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Avatar: typeof import('primevue/avatar')['default']
     Badge: typeof import('primevue/badge')['default']
     Button: typeof import('primevue/button')['default']
     Carousel: typeof import('primevue/carousel')['default']
@@ -32,7 +31,9 @@ declare module 'vue' {
     Message: typeof import('primevue/message')['default']
     Paginator: typeof import('primevue/paginator')['default']
     Password: typeof import('primevue/password')['default']
+    PublicProfileAuthorBlock: typeof import('./src/components/PublicProfileAuthorBlock.vue')['default']
     Rating: typeof import('primevue/rating')['default']
+    ReviewCommentsPanel: typeof import('./src/components/ReviewCommentsPanel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('primevue/select')['default']

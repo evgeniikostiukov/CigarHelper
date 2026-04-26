@@ -9,6 +9,7 @@ export interface CigarCommentDto {
   createdAt: string;
   authorUserId: number;
   authorUsername: string;
+  isAuthorProfilePublic?: boolean;
   cigarBaseId?: number | null;
   userCigarId?: number | null;
   moderationStatus: CigarCommentModerationStatus;

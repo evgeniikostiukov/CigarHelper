@@ -611,7 +611,7 @@
                 class="w-full min-h-[6rem]"
                 :rows="4"
                 :auto-resize="true"
-                maxlength="500"
+                maxlength="3000"
                 placeholder="Необязательно" />
             </div>
           </div>
@@ -694,9 +694,12 @@
   import {
     lengthUnitSelectOptions,
     lengthMmFromInput,
+    lengthInputFromMm,
     convertLengthInputOnUnitChange,
     type CigarLengthUnit,
   } from '@/utils/cigarLengthUnit';
+  import { type CatalogSimilarDraftSnapshot, CATALOG_SIMILAR_DRAFT_STORAGE_KEY } from '@/utils/catalogSimilarDraft';
+  import { maybeCompressImageFileForUpload } from '@/utils/imageClientCompress';
 
   interface CollectionFormFields {
     price: number | null;
@@ -879,6 +882,21 @@
     dialogErrors.value = {};
   }
 
+  function applyCatalogSimilarDraftToNewDialog(snap: CatalogSimilarDraftSnapshot): void {
+    draftName.value = snap.name ?? '';
+    draftBrandId.value = snap.brandId ?? null;
+    draftCountry.value = snap.country?.trim() ?? '';
+    draftStrength.value = snap.strength?.trim() ? snap.strength : null;
+    draftLengthInput.value = lengthInputFromMm(snap.lengthMm ?? null, draftLengthUnit.value);
+    draftDiameter.value = snap.diameter ?? null;
+    draftWrapper.value = snap.wrapper?.trim() ?? '';
+    draftBinder.value = snap.binder?.trim() ?? '';
+    draftFiller.value = snap.filler?.trim() ?? '';
+    draftDescription.value = snap.description?.trim() ?? '';
+    draftBaseImages.value = [];
+    dialogErrors.value = {};
+  }
+
   function validateNewCigarDialog(): boolean {
     dialogErrors.value = {};
     if (!draftName.value?.trim()) {
@@ -890,7 +908,7 @@
     return Object.keys(dialogErrors.value).length === 0;
   }
 
-  function buildDraftCigarBaseFormData(): FormData {
+  async function buildDraftCigarBaseFormData(): Promise<FormData> {
     const fd = new FormData();
     fd.append('Name', draftName.value.trim());
     fd.append('BrandId', String(draftBrandId.value!));
@@ -917,7 +935,8 @@
     let urlIndex = 0;
     for (const img of active) {
       if (img.file) {
-        fd.append(`NewImages[${fileIndex}].File`, img.file);
+        const file = await maybeCompressImageFileForUpload(img.file);
+        fd.append(`NewImages[${fileIndex}].File`, file);
         fd.append(`NewImages[${fileIndex}].IsMain`, String(img.isMain ?? false));
         fileIndex++;
         continue;
@@ -937,7 +956,7 @@
     if (!validateNewCigarDialog()) return;
     newCigarSaving.value = true;
     try {
-      const created = await cigarService.createCigarBase(buildDraftCigarBaseFormData());
+      const created = await cigarService.createCigarBase(await buildDraftCigarBaseFormData());
       selectedBase.value = created;
       newCigarDialogVisible.value = false;
       searchCache.value = new Map();
@@ -1184,6 +1203,32 @@
 
   onMounted(() => {
     void loadHumidors();
+
+    const similarOpen = route.query.openNewCatalogFromSimilar === '1';
+    if (similarOpen) {
+      const raw = sessionStorage.getItem(CATALOG_SIMILAR_DRAFT_STORAGE_KEY);
+      sessionStorage.removeItem(CATALOG_SIMILAR_DRAFT_STORAGE_KEY);
+      if (raw) {
+        try {
+          const snap = JSON.parse(raw) as CatalogSimilarDraftSnapshot;
+          applyCatalogSimilarDraftToNewDialog(snap);
+          newCigarDialogVisible.value = true;
+          void ensureBrandsLoaded();
+        } catch {
+          toast.add({
+            severity: 'warn',
+            summary: 'Справочник',
+            detail: 'Не удалось восстановить черновик похожей сигары.',
+            life: 4000,
+          });
+        }
+      }
+      const nextQuery = { ...route.query } as Record<string, string | string[] | undefined>;
+      delete nextQuery.openNewCatalogFromSimilar;
+      void router.replace({ query: nextQuery });
+      return;
+    }
+
     const q = route.query.cigarBaseId as string | undefined;
     if (q) {
       const id = parseInt(q, 10);

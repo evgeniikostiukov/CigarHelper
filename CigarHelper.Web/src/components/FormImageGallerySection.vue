@@ -405,7 +405,7 @@
   }
 
   function showStarButton(image: FormGalleryImageItem): boolean {
-    return props.showMainImageStar && Boolean(image.isExisting || image.id);
+    return props.showMainImageStar && Boolean(image.isExisting || image.id || image.imageUrl);
   }
 
   defineExpose({ openPicker });

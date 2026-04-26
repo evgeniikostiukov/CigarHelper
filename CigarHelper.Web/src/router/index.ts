@@ -132,6 +132,16 @@ const routes = [
         name: 'AdminCigarComments',
         component: () => import('../views/AdminCigarComments.vue'),
       },
+      {
+        path: 'review-comments',
+        name: 'AdminReviewComments',
+        component: () => import('../views/AdminReviewComments.vue'),
+      },
+      {
+        path: 'reviews-deleted',
+        name: 'AdminDeletedReviews',
+        component: () => import('../views/AdminDeletedReviews.vue'),
+      },
     ],
   },
   // Маршруты для обзоров
