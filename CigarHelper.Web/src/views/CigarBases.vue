@@ -127,6 +127,10 @@
                     option-label="label"
                     option-value="value"
                     placeholder="Все бренды"
+                    filter
+                    filter-placeholder="Поиск по брендам…"
+                    filter-match-mode="contains"
+                    reset-filter-on-hide
                     class="w-full min-h-12 sm:min-h-11"
                     label-id="cigar-bases-filter-brand-input"
                     :show-clear="true"
