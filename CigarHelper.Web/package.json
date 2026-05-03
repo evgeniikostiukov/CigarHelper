@@ -54,7 +54,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.0",
     "@vitejs/plugin-vue": "^6.0.6",
-    "@vue/test-utils": "^2.4.8",
+    "@vue/test-utils": "^2.4.10",
     "@vue/tsconfig": "^0.9.1",
     "autoprefixer": "^10.4.27",
     "eslint": "^10.1.0",
